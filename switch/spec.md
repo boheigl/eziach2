@@ -265,9 +265,16 @@ guide tubes.
   end (turned along y, 0.3 mm clearance) and a 2 × 16 mm **FFC slot** below
   each, along y, straight down through the floor. [chosen] **Board 0's slot
   is closed** [given]: its FFC is to leave through a channel to the front
-  instead; `ffc_slot` in `housing.scad`. Its FFC is to run in an open trough
-  to the back of the housing (`cabling/`, in progress). An earlier channel to
-  the front wall (x −131.7) was withdrawn.
+  instead; `ffc_slot` in `housing.scad`. **Board 0's FFC trough** [given]:
+  the cable is folded 8.6 mm below its connector and runs on edge, parallel to
+  the floor, in an open 15.8 × 0.8 mm trough to the back face (y = 61.9,
+  x −97.6), between the guides, pockets and tab walls of boards 0–3 (≥ 0.6 mm
+  wall). The trough is open upwards: **lay the cable in before the boards go
+  on.** Its plane lies about 5.6 mm below the floor, so a **fin** under the
+  housing (0.6 mm wall round the trough) reaches down to z −24.6 and the
+  underside is no longer flat. Computed by the cable model (`cabling/`, route
+  `back_channel`; `channel.js` writes `ffc_channel.scad`). An earlier channel
+  to the front wall was withdrawn.
 - **Size:** 263.2 × 74.2 mm, z −22.9 … +14.1.
 
 **Thinnest walls:** about 0.7 mm, between each connector pocket and the guide

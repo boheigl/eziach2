@@ -151,9 +151,37 @@ generated and cut, then withdrawn: the slot sits where the housing has 1.4 mm
 to spare, the cable twists 14 °/mm, and a twisted closed tunnel is hard to
 thread. Lessons kept: half-space obstacles, the push-out mode, and
 self-contact (a 40 mm path to a later end point looped back within 0.8 mm of
-itself, which no wall could separate). Board 0's FFC is now to run with a
-kink after the connector, on edge in a floor-parallel plane, in an open
-trough to the back of the housing (in progress).
+itself, which no wall could separate). Board 0's FFC now runs with a
+kink after the connector, on edge in an open trough to the back (below).
+
+**Kink and planar motion.** `"kink": {lead, crease, side}` folds the cable
+`lead` mm below the connector face along a crease at `crease` degrees to its
+length (45°: it turns 90°, along ±w): a rotation by 180° about the crease,
+the folded part one film thickness on top. `"planar": true` holds the twist
+at zero, so after the fold the cable only bends about its width and stays in
+one plane. Drawn and cut as two overlapping pieces (the strip down past the
+crease, the band from before it), which together cover the fold.
+`"waypoints"` (plan x, y) give a planar route its starting path
+(`FFC.planarGuess`: lifted onto the plane, a smooth curve through them, its
+heading changes as κ); `"length": "guide"` takes the free length from it.
+
+**Housing trough to the back** (route `back_channel`) [given: kink after the
+connector, flat in a plane, to the back face, open from the top, fin under
+the housing]. Board 0's FFC leaves its connector straight down and is folded
+8.6 mm below it with a 51.6° crease, so the band stands on edge in a plane
+parallel to the floor (13.2°, the floor's slope) and keeps its height above
+the floor. It runs to the back face (y = 61.9, x −97.6), between the guides
+of holes 1–2 of every row, the connector pockets and floor slots of boards
+1–3, the cover screw pilots and the cover walls round the tabs, with ≥ 0.6 mm
+wall to all of them: free length 80.1 mm, cable 98.2 mm end to end, tightest
+bend 3.57 mm, no twist, ≥ 4.7 mm from itself. The trough (15.8 × 0.8 mm) is
+open upwards along the cable's width (`open_top`), so the cable is laid in
+from above before the boards go on. Heights: a single plane cannot dip under
+board 0's connector, so the whole plane sits 5.6 mm lower than the floor
+would allow; the band's top then clears the connector by 0.2 mm and the
+board undersides everywhere, and its bottom runs up to 5.7 mm below the
+floor. A fin under the housing (the trough's 0.6 mm wall where it is below
+the floor, `wall`) carries it, down to z −24.6.
 
 Reported per route: free and total length, length from the connector to the
 outlet centre, smallest bend radius (the film's curvature across its rulings,
@@ -185,7 +213,7 @@ tilt η = τ/κ (tan of the angle between the rulings and w).
 |---|---|
 | `ffc.js` | the model: poses, solver, shortest length, mesh, STL writer |
 | `routes.json` | routes: start, outlet, length (mm or `"auto"` + `slack`), cable overrides, obstacles |
-| `channel.js` | `node channel.js routes.json <name> [--force]`: solves a route with a `channel` {width, thick, out} and writes the slot along its cable as an OpenSCAD polyhedron module; refuses a path outside the limits |
+| `channel.js` | `node channel.js routes.json <name> [--force]`: solves a route with a `channel` {width, thick, out, open_top?, wall?} and writes module `<name>()` (the slot, open upwards to `open_top`) and `<name>_wall()` (slot + wall, to the outlet) as OpenSCAD polyhedra; refuses a path outside the limits. Route `back_channel` → `switch/ffc_channel.scad`, used by `housing.scad` |
 | `route.js` | `node route.js [routes.json] [name …]`: solves, prints a report, writes `<name>.stl` |
 | `viewer.html` | 3D: drag start and outlet (move/turn handles) or type poses; length slider, *Shortest + slack*, STL download, route JSON for `routes.json`; `#preset=n` picks a preset |
 | `<name>.stl`, `<name>_optk.stl`, `<name>_obstacles.stl` | generated cable solids per route and option, and the obstacles (not in git) |

@@ -936,6 +936,46 @@
     return out;
   }
 
+  // Starting shape for a planar route from waypoints in plan (x, y): each is
+  // lifted onto the cable's plane (through P0, normal w0), a smooth curve
+  // (Catmull-Rom) is laid through them from P0 along t0 to P1 along the
+  // target's t, and its change of heading per segment gives kappa (towards
+  // +n positive). Returns {x, L}: unknowns for pr.N segments and the curve's
+  // length (use it as the free length, or rescale).
+  function planarGuess(pr, plan) {
+    var P0 = pr.P0.p, t0 = col(pr.P0.R, 0), n0 = col(pr.P0.R, 2), w0 = col(pr.P0.R, 1);
+    function lift(xy) {   // the point of the plane above or below (x, y), in plane coordinates
+      var z = P0[2] - ((xy[0] - P0[0]) * w0[0] + (xy[1] - P0[1]) * w0[1]) / w0[2], d = sub([xy[0], xy[1], z], P0);
+      return [dot(d, t0), dot(d, n0)];
+    }
+    var W = [[0, 0]].concat(plan.map(lift)), e = sub(pr.P1.p, P0);
+    W.push([dot(e, t0), dot(e, n0)]);
+    var t1 = col(pr.P1.R, 0), T1 = [dot(t1, t0), dot(t1, n0)], pts = [], i, k;
+    for (i = 0; i + 1 < W.length; i++) {
+      var a = W[i], b = W[i + 1], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      var ta = i === 0 ? [d, 0] : [(W[i + 1][0] - W[i - 1][0]) / 2, (W[i + 1][1] - W[i - 1][1]) / 2];
+      var tb = i + 2 === W.length ? [T1[0] * d, T1[1] * d] : [(W[i + 2][0] - W[i][0]) / 2, (W[i + 2][1] - W[i][1]) / 2];
+      for (k = 0; k < 40; k++) {
+        var u = k / 40, h00 = 2 * u * u * u - 3 * u * u + 1, h10 = u * u * u - 2 * u * u + u, h01 = -2 * u * u * u + 3 * u * u, h11 = u * u * u - u * u;
+        pts.push([h00 * a[0] + h10 * ta[0] + h01 * b[0] + h11 * tb[0], h00 * a[1] + h10 * ta[1] + h01 * b[1] + h11 * tb[1]]);
+      }
+    }
+    pts.push(W[W.length - 1]);
+    var S = [0], H = [];
+    for (i = 1; i < pts.length; i++) S.push(S[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    for (i = 0; i + 1 < pts.length; i++) H.push(Math.atan2(pts[i + 1][1] - pts[i][1], pts[i + 1][0] - pts[i][0]));
+    var L = S[S.length - 1], N = pr.N, h = L / N, x = new Float64Array(2 * N);
+    function headAt(s) { var j = 0; while (j + 1 < H.length && S[j + 1] < s) j++; return H[Math.min(j, H.length - 1)]; }
+    var prev = 0;   // heading 0 = along t0
+    for (i = 0; i < N; i++) {
+      var hh = headAt((i + 1) * h), dh = hh - prev;
+      while (dh > Math.PI) dh -= 2 * Math.PI;
+      while (dh < -Math.PI) dh += 2 * Math.PI;
+      x[i] = dh / h; prev = hh;
+    }
+    return { x: x, L: L };
+  }
+
   // ------------------------------------------------------------- geometry
 
   // samples along the whole cable, connector end to tail: centre p, frame R,
@@ -1025,7 +1065,7 @@
     pose: pose, fromSpec: fromSpec, toSpec: toSpec,
     problem: problem, setLength: setLength, gap: gap,
     solve: solve, shortest: shortest, resample: resample,
-    compileObstacle: compileObstacle, obstacleMesh: obstacleMesh,
+    compileObstacle: compileObstacle, obstacleMesh: obstacleMesh, planarGuess: planarGuess,
     samples: samples, mesh: mesh, stl: stl,
     vec: { add: add, sub: sub, scl: scl, dot: dot, cross: cross, len: len, unit: unit, col: col, mul: mul, mulv: mulv, expSO3: expSO3, logSO3: logSO3 }
   };

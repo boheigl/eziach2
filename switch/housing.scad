@@ -19,8 +19,8 @@
 // boards and each board can be laid in from above. The connector of each board
 // sits in a pocket at the board's -x end (turned, its long side along y), with
 // a slot below it through the floor for the FFC, which leaves the vertical
-// connector downwards. Board 0's slot is closed (ffc_slot): its FFC is to run
-// in an open trough to the back of the housing instead (cabling/, in progress).
+// connector downwards. Board 0's slot is closed (ffc_slot): its FFC runs in an
+// open trough to the back of the housing instead (see below).
 //
 // The connectors sit at the -x ends of the boards, where no higher board and
 // no guide lies above them, so every guide is closed all round. The thinnest
@@ -41,7 +41,21 @@
 //
 // Coordinates as everywhere: board 0's frame, origin at its centre, z up.
 //
+// BOARD 0'S FFC. It leaves its connector straight down, is folded 8.6 mm
+// below it (crease 51.6 deg) so that it stands on edge in a plane parallel to
+// the floor, and runs in an open trough to the back face (y = 61.9, x -97.6),
+// between the guides, connector pockets and tab walls of boards 0-3. The
+// trough (15.8 x 0.8 mm) is open upwards along the cable's width, so the
+// cable is laid in from above before the boards go on. Its plane lies about
+// 5.6 mm below the floor plane, so a fin under the housing (the trough's
+// 0.6 mm wall, where it runs below the floor) carries it. Both come from the
+// cable model: cabling/routes.json route "back_channel",
+//   node cabling/channel.js cabling/routes.json back_channel
+// writes ffc_channel.scad (back_channel(), back_channel_wall()).
+//
 // Render with  openscad -o housing.stl housing.scad
+
+use <ffc_channel.scad>
 
 
 /* [Boards — as in pcb.scad / array.scad, do not edit here] */
@@ -68,7 +82,7 @@ con_yc  = 4.5;    // and y
 ffc_w   = 16;     // slot for the FFC through the floor, along x
 ffc_t   = 2;      // and across
 ffc_slot = [false, true, true, true];   // board k has the slot; board 0's is closed: its
-                                        //   FFC is to run in a trough to the back (cabling/)
+                                        //   FFC runs in back_channel() to the back
 
 /* [Guides — as the guide tube of button.scad] */
 guide_d   = 9.4;    // washers d9, 0.2 clearance
@@ -198,9 +212,16 @@ module screw_pilots(k) {
 
 difference() {
     union() {
-        for (k = [0 : n_boards - 1]) { column(k); end_pads(k); }
-        for (k = [0 : n_boards - 2]) bridge(k);
+        difference() {
+            union() {
+                for (k = [0 : n_boards - 1]) { column(k); end_pads(k); }
+                for (k = [0 : n_boards - 2]) bridge(k);
+            }
+            below_floor();
+        }
+        // fin: the wall round board 0's FFC trough where it runs below the floor
+        intersection() { back_channel_wall(); below_floor(); }
     }
-    below_floor();
     for (k = [0 : n_boards - 1]) { guides(k); connector_pocket(k); screw_pilots(k); }
+    back_channel();   // board 0's FFC, open upwards
 }

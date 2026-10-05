@@ -4,7 +4,9 @@
 // topological option when there are obstacles) and <name>_obstacles.stl.
 //   node route.js [routes.json] [name ...]
 // Obstacles: cfg.obstacles apply to every route, route.obstacles to one;
-// route.budget_s limits the search for topological options (seconds).
+// route.budget_s limits the search for topological options (seconds);
+// route.waypoints (plan x, y) give a planar route its starting path, and
+// "length": "guide" takes the free length from that path.
 'use strict';
 var fs = require('fs'), path = require('path'), FFC = require('./ffc.js');
 
@@ -39,6 +41,13 @@ cfg.routes.forEach(function (rt) {
       r.shortest = o.L; r.shortestR = o.rMin; r.sides = o.sides; r.pr = p;
       return r;
     });
+  } else if (rt.waypoints) {
+    // planar route from a plan-view starting path
+    pr = FFC.problem(Object.assign({}, spec, { length: typeof rt.length === 'number' ? rt.length : 1 }));
+    var g = FFC.planarGuess(pr, rt.waypoints);
+    if (typeof rt.length !== 'number') FFC.setLength(pr, g.L);
+    var rg = FFC.solve(pr, g.x, { maxIt: 200 });
+    rg.sides = []; rg.pr = pr; options = [rg];
   } else {
     pr = FFC.problem(Object.assign({}, spec, { length: rt.length }));
     var sol = FFC.solve(pr, null, Object.assign({ enumerate: rt.enumerate }, rt.budget_s ? { budget: rt.budget_s * 1000 } : {}));
@@ -66,7 +75,7 @@ cfg.routes.forEach(function (rt) {
   }
   console.log('  free length   ' + f1(res.L) + ' mm' + (res.shortest ? '  (shortest keeping R' + c.rMin + ': ' + f1(res.shortest) + ' with R' + f2(res.shortestR) + ', + slack ' + (rt.slack || 0) + ')' : '') +
               '; straight gap ' + f1(res.gap));
-  console.log('  cable length  ' + f1(res.total) + ' mm end to end (insert ' + c.insert + ' + lead ' + c.lead +
+  console.log('  cable length  ' + f1(res.total) + ' mm end to end (insert ' + c.insert + ' + lead ' + (rt.kink ? rt.kink.lead + ', kink' : c.lead) +
               ' + free + outlet ' + c.slotDepth + ' + tail ' + c.tail + '); connector to outlet centre ' + f1(res.toOutlet));
   console.log('  bend radius   min ' + f2(res.rMin) + ' mm at ' + f1(res.rMinAt) + ' mm into the free length' +
               (c.rMin > 0 ? ' (limit R' + c.rMin + (res.rMin < c.rMin * 1.01 ? ', reached' : '') + ')' : '') +
