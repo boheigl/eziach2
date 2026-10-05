@@ -899,7 +899,7 @@
       }
     }
     var l = 4 * (S.length - 1);
-    F.push([0, 2, 1], [0, 3, 2], [l, l + 1, l + 2], [l, l + 2, l + 3]);
+    F.push([0, 1, 2], [0, 2, 3], [l, l + 2, l + 1], [l, l + 3, l + 2]);   // end caps, wound like the sides
     return { V: V, F: F, samples: S };
   }
 

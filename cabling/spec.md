@@ -142,6 +142,18 @@ sliding gets stuck, e.g. when the cable is too short for that way round.
 Example `grid_3x3`: nine ⌀6 × 300 mm cylinders on a 14 mm grid, 110 mm free
 length; 16 options in the first 4 minutes, more exist (search stopped).
 
+**Housing channel** (route `housing_channel`). Board 0's FFC leaves the
+housing through a 15.8 × 0.8 mm channel from its connector pocket to a slot in
+the front wall (y = −5.6), centred at x −131.7, z −12, tilted −20° in the x/z
+plane [given: slot between hole 1 and the end wall, −20°; position chosen].
+The housing is given as obstacles: floor and −x end wall as half-spaces, hole
+1's bore and spring pocket and the cover screw pilot as cylinders, each kept
+1.0 mm from the film's centre plane (half slot 0.4 + wall 0.6). Only the
+natural side of every obstacle is used (`"enumerate": false`). Result: free
+20 mm, R min 2.00, twist up to 14.3 °/mm, 0.6 mm wall to floor, end wall,
+bore and pocket. At x −120 (in front of the bore) no path fitted for tilts of
+±10° or −20°; at x −131.7 the slot has 1.4 mm to spare in x.
+
 Reported per route: free and total length, length from the connector to the
 outlet centre, smallest bend radius (the film's curvature across its rulings,
 (κ² + τ²)/|κ|) and where it is, largest twist (°/mm), and the largest ruling
@@ -172,6 +184,7 @@ tilt η = τ/κ (tan of the angle between the rulings and w).
 |---|---|
 | `ffc.js` | the model: poses, solver, shortest length, mesh, STL writer |
 | `routes.json` | routes: start, outlet, length (mm or `"auto"` + `slack`), cable overrides, obstacles |
+| `channel.js` | `node channel.js routes.json <name>`: solves a route with a `channel` {width, thick, out} and writes the slot along its cable as an OpenSCAD polyhedron module (route `housing_channel` → `switch/ffc_channel.scad`, cut into `housing.scad`) |
 | `route.js` | `node route.js [routes.json] [name …]`: solves, prints a report, writes `<name>.stl` |
 | `viewer.html` | 3D: drag start and outlet (move/turn handles) or type poses; length slider, *Shortest + slack*, STL download, route JSON for `routes.json`; `#preset=n` picks a preset |
 | `<name>.stl`, `<name>_optk.stl`, `<name>_obstacles.stl` | generated cable solids per route and option, and the obstacles (not in git) |
