@@ -1,5 +1,5 @@
 {
-  "_comment": "Poses in the switch board frame (switch/spec.md section 1). t: along the cable, start -> outlet; w: towards contact 1. start = face of board 0's connector (GCT FFC3A20-14-G at (-133.15, 4.5), 5.5 below the bottom copper), cable leaving in -z, contact 1 at +y. length: free length between lead and outlet in mm, or \"auto\" = shortest that keeps rMin, plus slack. cable.rMin: maximum bending as the smallest bend radius in mm; the solver keeps the cable at or above it (0 = no limit).",
+  "_comment": "Poses in the switch board frame (switch/spec.md section 1). t: along the cable, start -> outlet; w: towards contact 1. start = face of board 0's connector (GCT FFC3A20-14-G at (-133.15, 4.5), 5.5 below the bottom copper), cable leaving in -z, contact 1 at +y. length: free length between lead and outlet in mm, or \"auto\" = shortest that keeps rMin, plus slack. cable.rMin: maximum bending as the smallest bend radius in mm; the solver keeps the cable at or above it (0 = no limit). obstacles (top level or per route): {type: cylinder, p, axis, r, h} | {type: box, p, size, x?, y?} | {type: sphere, p, r}; cable.clearance: film surface to obstacle, mm.",
   "cable": { "rMin": 2.0 },
   "routes": [
     {
@@ -25,6 +25,21 @@
       "start":  { "p": [-133.15, 4.5, -6.335], "t": [0, 0, -1], "w": [0, 1, 0] },
       "target": { "p": [-95, -30, -42], "t": [0.6, -0.6, -0.5], "w": [0.3, 0.5, -0.2] },
       "length": "auto", "slack": 5
+    },
+    {
+      "name": "cylinder",
+      "start":  { "p": [-133.15, 4.5, -6.335], "t": [0, 0, -1], "w": [0, 1, 0] },
+      "target": { "p": [-185, 4.5, -45], "t": [-1, 0, 0], "w": [0, 1, 0] },
+      "obstacles": [ { "type": "cylinder", "p": [-143, 4.5, -35], "axis": [0.25, 1, 0.15], "r": 6, "h": 40 } ],
+      "length": 80
+    },
+    {
+      "name": "two_cylinders",
+      "start":  { "p": [-133.15, 4.5, -6.335], "t": [0, 0, -1], "w": [0, 1, 0] },
+      "target": { "p": [-185, 4.5, -45], "t": [-1, 0, 0], "w": [0, 1, 0] },
+      "obstacles": [ { "type": "cylinder", "p": [-143, 4.5, -35], "axis": [0.25, 1, 0.15], "r": 6, "h": 40 },
+                     { "type": "cylinder", "p": [-163, 4.5, -46], "axis": [0, 1, 0], "r": 4, "h": 40 } ],
+      "length": 90
     }
   ]
 }

@@ -23,6 +23,11 @@
 // penalty that is stiffened until it holds (to 0.5 %), so where the free shape
 // would bend tighter the cable lies on the limit radius instead, like a cable
 // laid over a former.
+// Obstacles: signed distance functions (cylinder, box, sphere, or any
+// function of a point). At every node, five points across the width must keep
+// half the film thickness plus a clearance from every obstacle, again as a
+// penalty stiffened until it holds. Each obstacle can lie on either side of
+// the cable; solve() works out every combination (topological option).
 
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -43,6 +48,7 @@
     lead: 2.0,       // straight (stiffened) beyond the connector face [chosen]
     slotDepth: 2.0,  // outlet wall thickness: held straight through it [chosen]
     tail: 10.0,      // cable drawn beyond the outlet                  [chosen]
+    clearance: 0.5,  // film surface to any obstacle, mm               [chosen]
     segs: 48         // segments of the free length
   };
 
@@ -138,6 +144,79 @@
     return { R: mul(R, expSO3(f)), p: add(p, mulv(R, d)) };
   }
 
+  // ----------------------------------------------------------- obstacles
+
+  // spec -> {spec, sdf(p)}: signed distance, negative inside.
+  //   {type: 'cylinder', p: centre, axis, r, h: length}   capped cylinder
+  //   {type: 'box', p: centre, size: [a, b, c], x?, y?}   x, y: its axes (default world)
+  //   {type: 'sphere', p: centre, r}
+  //   {sdf: function (p) {...}}                           anything else (JS only)
+  function obstacleFrame(o, xa, ya) {
+    var X = unit(xa), Y = unit(sub(ya, scl(X, dot(ya, X))));
+    return { X: X, Y: Y, Z: cross(X, Y) };
+  }
+  function compileObstacle(o) {
+    if (typeof o.sdf === 'function') return { spec: o, sdf: o.sdf };
+    var c = o.p;
+    if (o.type === 'sphere') return { spec: o, sdf: function (q) { return len(sub(q, c)) - o.r; } };
+    if (o.type === 'cylinder') {
+      var a = unit(o.axis || [0, 0, 1]), hh = o.h / 2;
+      return { spec: o, sdf: function (q) {
+        var d = sub(q, c), ax = dot(d, a), rad = len(sub(d, scl(a, ax)));
+        var dx = rad - o.r, dy = Math.abs(ax) - hh;
+        return Math.min(Math.max(dx, dy), 0) + Math.hypot(Math.max(dx, 0), Math.max(dy, 0));
+      } };
+    }
+    if (o.type === 'box') {
+      var F = obstacleFrame(o, o.x || [1, 0, 0], o.y || [0, 1, 0]), hs = scl(o.size, 0.5);
+      return { spec: o, sdf: function (q) {
+        var d = sub(q, c), u = [Math.abs(dot(d, F.X)) - hs[0], Math.abs(dot(d, F.Y)) - hs[1], Math.abs(dot(d, F.Z)) - hs[2]];
+        return Math.min(Math.max(u[0], u[1], u[2]), 0) +
+               Math.hypot(Math.max(u[0], 0), Math.max(u[1], 0), Math.max(u[2], 0));
+      } };
+    }
+    throw new Error('unknown obstacle type: ' + o.type);
+  }
+
+  // triangle mesh of a primitive obstacle, for drawing and STL
+  function obstacleMesh(o, seg) {
+    var V = [], F = [], i;
+    seg = seg || 48;
+    if (o.type === 'cylinder') {
+      var a = unit(o.axis || [0, 0, 1]), ref = Math.abs(a[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0];
+      var u = unit(cross(a, ref)), v = cross(a, u), hh = o.h / 2;
+      for (i = 0; i < seg; i++) {
+        var t = 2 * Math.PI * i / seg, rv = add(scl(u, o.r * Math.cos(t)), scl(v, o.r * Math.sin(t)));
+        V.push(add(add(o.p, rv), scl(a, -hh)), add(add(o.p, rv), scl(a, hh)));
+      }
+      V.push(add(o.p, scl(a, -hh)), add(o.p, scl(a, hh)));
+      var b0 = 2 * seg, b1 = b0 + 1;
+      for (i = 0; i < seg; i++) {
+        var j = (i + 1) % seg;
+        F.push([2 * i, 2 * j, 2 * j + 1], [2 * i, 2 * j + 1, 2 * i + 1], [b0, 2 * j, 2 * i], [b1, 2 * i + 1, 2 * j + 1]);
+      }
+    } else if (o.type === 'box') {
+      var Fr = obstacleFrame(o, o.x || [1, 0, 0], o.y || [0, 1, 0]), h = scl(o.size, 0.5);
+      for (i = 0; i < 8; i++)
+        V.push(add(add(add(o.p, scl(Fr.X, i & 1 ? h[0] : -h[0])), scl(Fr.Y, i & 2 ? h[1] : -h[1])), scl(Fr.Z, i & 4 ? h[2] : -h[2])));
+      [[0, 2, 3, 1], [4, 5, 7, 6], [0, 1, 5, 4], [2, 6, 7, 3], [0, 4, 6, 2], [1, 3, 7, 5]]
+        .forEach(function (q) { F.push([q[0], q[1], q[2]], [q[0], q[2], q[3]]); });
+    } else if (o.type === 'sphere') {
+      var nl = seg / 2;
+      for (var la = 0; la <= nl; la++)
+        for (var lo = 0; lo < seg; lo++) {
+          var th = Math.PI * la / nl, ph = 2 * Math.PI * lo / seg;
+          V.push(add(o.p, [o.r * Math.sin(th) * Math.cos(ph), o.r * Math.sin(th) * Math.sin(ph), o.r * Math.cos(th)]));
+        }
+      for (la = 0; la < nl; la++)
+        for (lo = 0; lo < seg; lo++) {
+          var p00 = la * seg + lo, p01 = la * seg + (lo + 1) % seg, p10 = p00 + seg, p11 = p01 + seg;
+          F.push([p00, p10, p11], [p00, p11, p01]);
+        }
+    }
+    return { V: V, F: F };
+  }
+
   // ------------------------------------------------------------- problem
 
   // spec: {start, target: pose specs; length: free length, mm; cable: overrides}
@@ -155,6 +234,10 @@
       kr: kappaR(c),
       kmax: c.rMin > 0 ? 1 / c.rMin : 0,      // maximum bending, as curvature
       mu: 0,                                  // its penalty weight, raised by solve()
+      obs: (spec.obstacles || []).map(compileObstacle),
+      dmin: c.thick / 2 + c.clearance,        // centre plane of the film to any obstacle
+      shifts: null,                           // per obstacle: moved by this while solve() slides them in
+      muO: 0,                                 // obstacle penalty weight, raised by solve()
       Ls: c.width                             // scales rotation errors to mm
     };
   }
@@ -234,18 +317,56 @@
     return { r: r, J: J, m: m };
   }
 
+  // obstacle check points: five across the width at every node 1..N
+  var ACROSS = [-1, -0.5, 0, 0.5, 1];
+  function nearest(pr, q) {
+    var d = Infinity, sh = pr.shifts;
+    for (var o = 0; o < pr.obs.length; o++) d = Math.min(d, pr.obs[o].sdf(sh ? sub(q, sh[o]) : q));
+    return d;
+  }
+  function obstaclesOn(pr) { return pr.obs.length > 0 && pr.muO > 0; }
+  // residuals of nodes i0+1 .. N into out (index (node - 1) * 5 + k)
+  function obsRes(pr, Rs, ps, i0, out) {
+    var K = ACROSS.length, wt = Math.sqrt(pr.muO * pr.h / K), hw = pr.cable.width / 2;
+    for (var nd = i0 + 1; nd <= pr.N; nd++) {
+      var w = col(Rs[nd], 1);
+      for (var k = 0; k < K; k++) {
+        var pen = pr.dmin - nearest(pr, add(ps[nd], scl(w, ACROSS[k] * hw)));
+        out[(nd - 1) * K + k] = pen > 0 ? wt * pen : 0;
+      }
+    }
+    return out;
+  }
+  function tailFrom(pr, x, i0, R, p, Rs, ps) {
+    for (var i = i0; i < pr.N; i++) {
+      var s = step(R, p, x[i], x[pr.N + i], pr.h);
+      R = s.R; p = s.p; Rs[i + 1] = R; ps[i + 1] = p;
+    }
+    return { R: R, p: p };
+  }
+
+  // end-pose error and obstacle residuals with their Jacobians (forward
+  // differences: a change in segment i moves every node after it)
   function constraints(pr, x, T) {
     var N = pr.N, n = nVars(N), F = integrate(pr, x);
     var E = { R: F.Rs[N], p: F.ps[N] }, g = poseErr(pr, E, T);
-    var Jg = new Float64Array(6 * n), eps = 1e-7;
-    for (var j = 0; j < n; j++) {
+    var Jg = new Float64Array(6 * n), eps = 1e-7, j, k;
+    var on = obstaclesOn(pr), mo = on ? N * ACROSS.length : 0;
+    var ro = new Float64Array(mo), Jo = new Float64Array(mo * n), rj = new Float64Array(mo);
+    if (on) obsRes(pr, F.Rs, F.ps, 0, ro);
+    var Rs = F.Rs.slice(), ps = F.ps.slice();
+    for (j = 0; j < n; j++) {
       var i = j % N, keep = x[j];
       x[j] = keep + eps;
-      var gj = poseErr(pr, endFrom(pr, x, i, F.Rs[i], F.ps[i]), T);
+      var gj = poseErr(pr, tailFrom(pr, x, i, F.Rs[i], F.ps[i], Rs, ps), T);
       x[j] = keep;
-      for (var k = 0; k < 6; k++) Jg[k * n + j] = (gj[k] - g[k]) / eps;
+      for (k = 0; k < 6; k++) Jg[k * n + j] = (gj[k] - g[k]) / eps;
+      if (on) {
+        obsRes(pr, Rs, ps, i, rj);
+        for (k = i * ACROSS.length; k < mo; k++) Jo[k * n + j] = (rj[k] - ro[k]) / eps;
+      }
     }
-    return { g: g, J: Jg };
+    return { g: g, J: Jg, ro: ro, Jo: Jo, mo: mo };
   }
 
   // dense solve, partial pivoting; A is overwritten
@@ -283,17 +404,22 @@
   function normInf(g) { var s = 0; for (var i = 0; i < g.length; i++) s = Math.max(s, Math.abs(g[i])); return s; }
 
   // Gauss-Newton on the KKT system: least energy with the end pose as an
-  // equality constraint, Levenberg damping, l1 merit line search.
+  // equality constraint, Levenberg damping, line search on an augmented
+  // Lagrangian (smooth, so full steps are taken near the solution; an l1
+  // merit would cut them short there).
   function solveTo(pr, x, T, opt) {
     opt = opt || {};
     var N = pr.N, n = nVars(N), K = n + 6, maxIt = opt.maxIt || 60, tol = opt.tol || 1e-7;
-    var lam = 1e-6, rho = 1, it, gInf = Infinity;
+    var lam = 1e-6, rho = 1, nu = [0, 0, 0, 0, 0, 0], it, gInf = Infinity;
     x = Float64Array.from(x);
     function merit(xx) {
       var R = residuals(pr, xx);
       if (!R.r) return { phi: Infinity, g: null };
-      var F = integrate(pr, xx), g = poseErr(pr, { R: F.Rs[N], p: F.ps[N] }, T);
-      return { phi: 0.5 * sumsq(R.r) + rho * norm1(g), g: g };
+      var F = integrate(pr, xx), g = poseErr(pr, { R: F.Rs[N], p: F.ps[N] }, T), e = sumsq(R.r);
+      if (obstaclesOn(pr)) e += sumsq(obsRes(pr, F.Rs, F.ps, 0, new Float64Array(N * ACROSS.length)));
+      var lg = 0;
+      for (var q = 0; q < 6; q++) lg += nu[q] * g[q];
+      return { phi: 0.5 * e + lg + 0.5 * rho * sumsq(g), g: g };
     }
     for (it = 0; it < maxIt; it++) {
       var Rr = residuals(pr, x);
@@ -305,11 +431,13 @@
         for (j = i; j < n; j++) {
           var s = 0;
           for (k = 0; k < Rr.m; k++) s += Rr.J[k * n + i] * Rr.J[k * n + j];
+          for (k = 0; k < C.mo; k++) s += C.Jo[k * n + i] * C.Jo[k * n + j];
           A[i * K + j] = s; A[j * K + i] = s;
         }
         A[i * K + i] += lam * (1 + A[i * K + i]);
         var gb = 0;
         for (k = 0; k < Rr.m; k++) gb += Rr.J[k * n + i] * Rr.r[k];
+        for (k = 0; k < C.mo; k++) gb += C.Jo[k * n + i] * C.ro[k];
         b[i] = -gb;
       }
       for (k = 0; k < 6; k++) {
@@ -326,7 +454,7 @@
         cap = Math.min(cap, 0.2 / (Math.abs(sol[i]) || 1e-300));
       }
       if (cap < 1) for (i = 0; i < n; i++) sol[i] *= cap;
-      for (k = 0; k < 6; k++) rho = Math.max(rho, 2 * Math.abs(sol[n + k]));
+      for (k = 0; k < 6; k++) nu[k] = sol[n + k];
       if (gInf < tol && dmax < 1e-9) break;
       var m0 = merit(x).phi, alpha = 1, accepted = false, xn;
       if (opt.trace) console.log('it', it, 'err', gInf, 'step', dmax, 'lambda', lam, 'merit', m0);
@@ -338,6 +466,7 @@
       }
       if (!accepted) {
         lam = Math.min(lam * 10, 1e6);
+        rho = Math.min(rho * 10, 1e12);
         if (gInf < tol) break;            // at a minimum within round-off
         continue;
       }
@@ -347,7 +476,7 @@
     }
     var F = integrate(pr, x);
     gInf = normInf(poseErr(pr, { R: F.Rs[N], p: F.ps[N] }, T));
-    return { x: x, ok: gInf < 1e-4, err: gInf, iters: it };
+    return { x: x, ok: gInf < (opt.okTol || 1e-4), err: gInf, iters: it };
   }
 
   // interpolate two poses: position linearly, rotation along the geodesic
@@ -356,14 +485,13 @@
     return { p: add(A.p, scl(sub(B.p, A.p), s)), R: mul(A.R, expSO3(scl(d, s))) };
   }
 
-  // a straight cable cannot move sideways or shorten to first order, so a cold
-  // start begins from a slightly wavy one, untwisted or twisted either way
-  function wavy(N, L, twist) {
-    var x = new Float64Array(2 * N), a = 2 / L;
-    for (var i = 0; i < N; i++) {
-      x[i] = a * Math.sin(2 * Math.PI * (i + 0.5) / N);
-      x[N + i] = twist * a * Math.sin(Math.PI * (i + 0.5) / N);
-    }
+  // A cold start is a single, almost straight line: an exactly straight cable
+  // cannot move sideways or shorten to first order, so it gets a very low,
+  // untwisted curvature (radius STRAIGHT_R).
+  var STRAIGHT_R = 10000;   // mm
+  function straight(N) {
+    var x = new Float64Array(2 * N);
+    for (var i = 0; i < N; i++) x[i] = 1 / STRAIGHT_R;
     return x;
   }
 
@@ -381,43 +509,181 @@
   }
 
   var MU0 = 1e3, MU_MAX = 1e9, BEND_TOL = 0.005;
+  var TRACE = typeof process !== 'undefined' && process.env && process.env.FFC_TRACE;
+  var MUO = 1e3, CLEAR_TOL = 0.02;   // obstacle penalty weight; mm allowed into the gap
+  var SLIDE = 1.0;                   // mm the obstacles slide in per step, at most
 
-  // Solve with the bending limit: start with a soft penalty and stiffen it
-  // until the smallest radius is within BEND_TOL of rMin.
+  var MAX_SIDES = 6;   // obstacles whose sides are enumerated: 2^6 = 64 options at most
+
+  // Without x0: the free shape first (obstacles off), from a single almost
+  // straight line whose end is moved to the outlet. With obstacles, every
+  // topological option is then solved: each obstacle on either side of the
+  // cable (see topologies()). The best option is returned (within the limits
+  // first, then least energy), all of them in .options. With x0 (warm) the
+  // shape follows from it, keeping its topology, as a real cable would.
   function solve(pr, x0, opt) {
     opt = opt || {};
-    pr.mu = pr.kmax > 0 ? MU0 : 0;
-    var res = solveShape(pr, x0, opt), iters = res.iters;
-    while (pr.kmax > 0 && res.ok && res.rMin < pr.cable.rMin * (1 - BEND_TOL) && pr.mu < MU_MAX) {
-      pr.mu *= 10;
-      var r2 = solveShape(pr, res.x, {});
-      iters += r2.iters;
-      if (!r2.ok) break;
-      res = r2;
+    if (x0) {
+      pr.mu = pr.kmax > 0 ? MU0 : 0;
+      pr.muO = pr.obs.length ? MUO : 0;
+      return limits(pr, warm(pr, resample(x0, pr.N), opt));
     }
-    res.iters = iters;
-    return res;
+    pr.mu = pr.kmax > 0 ? MU0 : 0;
+    pr.muO = 0;
+    var free = limits(pr, continuation(pr, straight(pr.N), opt));
+    if (!pr.obs.length || !free.ok) { free.sides = []; free.options = [free]; return free; }
+    var opts = topologies(pr, free);
+    var best = opts.reduce(function (b, r) { return better(r, b) ? r : b; }, null);
+    best.options = opts;
+    return best;
   }
 
-  // From x0 (warm): straight to the target, else by continuation. Without x0
-  // the cable has several resting shapes (equilibria); three starts are tried
-  // and the one of least energy is kept.
-  function solveShape(pr, x0, opt) {
-    if (!x0) {
-      var best = null;
-      [0, 1, -1].forEach(function (tw) {
-        var r = continuation(pr, wavy(pr.N, pr.L, tw), opt);
-        if (r.ok && (!best || !best.ok || r.energy < best.energy)) best = r;
-        else if (!best) best = r;
+  // Per obstacle, the direction across which it can pass the cable: at the
+  // cable point nearest to it (or deepest inside it), the way out of the
+  // obstacle, square to the cable.
+  function sideDirs(pr, x) {
+    var N = pr.N, F = integrate(pr, x), hw = pr.cable.width / 2, e = 1e-4;
+    return pr.obs.map(function (ob) {
+      var best = Infinity, q0 = null, t0 = null, n0 = null;
+      for (var nd = 1; nd <= N; nd++)
+        for (var k = 0; k < ACROSS.length; k++) {
+          var q = add(F.ps[nd], scl(col(F.Rs[nd], 1), ACROSS[k] * hw)), d = ob.sdf(q);
+          if (d < best) { best = d; q0 = q; t0 = col(F.Rs[nd], 0); n0 = col(F.Rs[nd], 2); }
+        }
+      var g = [0, 1, 2].map(function (a) {
+        var qp = q0.slice(), qm = q0.slice();
+        qp[a] += e; qm[a] -= e;
+        return (ob.sdf(qp) - ob.sdf(qm)) / (2 * e);
       });
-      return best;
+      g = sub(g, scl(t0, dot(g, t0)));
+      return len(g) > 1e-6 ? unit(g) : n0;
+    });
+  }
+
+  // Every combination of sides: obstacle i is moved by side_i x D_i along its
+  // direction (side +1 carries it across the cable to the far side, -1 back
+  // the way it is; D_i just enough to clear the free shape, 0 if it already is
+  // clear on that side), then all slide back together, pushing the cable ahead.
+  function topologies(pr, free) {
+    var k = Math.min(pr.obs.length, MAX_SIDES), dirs = sideDirs(pr, free.x), out = [];
+    for (var mask = 0; mask < (1 << k); mask++) {
+      var sides = pr.obs.map(function (o, i) { return i < k && (mask >> i) & 1 ? 1 : -1; });
+      var r = limits(pr, slideIn(pr, free, dirs, sides));
+      r.sides = sideLabels(pr, r.x);
+      // the same topology reached twice: keep one
+      if (!out.some(function (o) { return o.ok && r.ok && o.sides.join() === r.sides.join() && Math.abs(o.energy - r.energy) < 1e-4 * (1 + r.energy); }))
+        out.push(r);
     }
-    var x = resample(x0, pr.N);
+    return out;
+  }
+
+  // which side of the film each obstacle lies on, at the cable point nearest
+  // to it: '+n' or '-n' (n = t x w, the film normal)
+  function sideLabels(pr, x) {
+    var N = pr.N, F = integrate(pr, x), hw = pr.cable.width / 2, e = 1e-4;
+    return pr.obs.map(function (ob) {
+      var best = Infinity, q0 = null, n0 = null;
+      for (var nd = 1; nd <= N; nd++)
+        for (var k = 0; k < ACROSS.length; k++) {
+          var q = add(F.ps[nd], scl(col(F.Rs[nd], 1), ACROSS[k] * hw)), d = ob.sdf(q);
+          if (d < best) { best = d; q0 = q; n0 = col(F.Rs[nd], 2); }
+        }
+      var g = [0, 1, 2].map(function (a) {
+        var qp = q0.slice(), qm = q0.slice();
+        qp[a] += e; qm[a] -= e;
+        return (ob.sdf(qp) - ob.sdf(qm)) / (2 * e);
+      });
+      return dot(g, n0) < 0 ? '+n' : '-n';   // g points from the obstacle to the cable
+    });
+  }
+
+  // The obstacles go in one after another; the ones still waiting are out of
+  // the way. Obstacle i is first moved along side_i x dir_i until it is clear
+  // of the cable as it is by then (carried across, side +1, it has to meet the
+  // cable first), then slid back in steps, the cable pushed ahead.
+  var FAR = [1e9, 1e9, 1e9];
+  function slideIn(pr, res, dirs, sides) {
+    var nO = pr.obs.length, cur = res, iters = res.iters, hw = pr.cable.width / 2;
+    var shifts = dirs.map(function () { return FAR; });
+    function fail() { pr.shifts = null; return finish(pr, { x: cur.x, ok: false, err: Infinity, iters: iters }); }
+    // how far obstacle o, moved by v, reaches into the gap around the cable
+    function penOne(o, v) {
+      var F = integrate(pr, cur.x), d = Infinity;
+      for (var nd = 1; nd <= pr.N; nd++)
+        for (var k = 0; k < ACROSS.length; k++)
+          d = Math.min(d, pr.obs[o].sdf(sub(add(F.ps[nd], scl(col(F.Rs[nd], 1), ACROSS[k] * hw)), v)));
+      return pr.dmin - d;
+    }
+    pr.muO = MUO;
+    for (var o = 0; o < nO; o++) {
+      var dir = scl(dirs[o], sides[o]), hit = penOne(o, [0, 0, 0]) > 0;
+      if (!hit && sides[o] < 0) { shifts[o] = [0, 0, 0]; continue; }   // clear on this side already
+      var D = 0;
+      while (D < 4096) {
+        D = D < 1 ? 1 : hit ? 2 * D : D + 1;
+        if (penOne(o, scl(dir, D)) > 0) hit = true;
+        else if (hit) break;
+      }
+      if (!hit || D >= 4096) return fail();       // it never meets the cable this way
+      var at = D, step = SLIDE;
+      while (at > 0 && step > 0.05) {
+        var to = Math.max(0, at - step);
+        if (penOne(o, scl(dir, to)) <= 0) { at = to; continue; }    // not touching yet
+        shifts[o] = scl(dir, to);
+        pr.shifts = shifts.slice();
+        // intermediate positions need not be exact; the last one is
+        var r2 = finish(pr, solveTo(pr, cur.x, pr.P1, to > 0 ? { maxIt: 150, tol: 1e-5, okTol: 0.01 } : { maxIt: 150 }));
+        iters += r2.iters;
+        if (TRACE) console.log('slide', sides.join(','), 'obstacle', o + 1, 'at', to.toFixed(2), 'ok', r2.ok, 'pen', r2.pen.toFixed(3));
+        if (r2.ok && r2.pen <= 0.5) { cur = r2; at = to; step = Math.min(SLIDE, step * 1.5); }
+        else step /= 2;
+      }
+      if (at > 0) return fail();
+      shifts[o] = [0, 0, 0];
+    }
+    pr.shifts = null;
+    var out = finish(pr, solveTo(pr, cur.x, pr.P1, { maxIt: 150 }));
+    out.iters = iters + out.iters;
+    return out;
+  }
+
+  function feasible(r) { return r.ok && r.bendOk && r.clearOk; }
+  function better(r, best) {
+    if (!best) return true;
+    if (feasible(r) !== feasible(best)) return feasible(r);
+    if (r.ok !== best.ok) return r.ok;
+    return r.energy < best.energy;
+  }
+
+  // from x: straight to the target, else by continuation
+  function warm(pr, x, opt) {
     if (!opt.cold) {
       var direct = solveTo(pr, x, pr.P1, opt);
       if (direct.ok) return finish(pr, direct);
     }
     return continuation(pr, x, opt);
+  }
+
+  // stiffen the bending and obstacle penalties until both limits hold; a step
+  // that fails is retried with a smaller increase
+  function limits(pr, res) {
+    var iters = res.iters, c = pr.cable, fac = 10;
+    for (var k = 0; k < 40 && res.ok; k++) {
+      var bendBad = pr.kmax > 0 && res.rMin < c.rMin * (1 - BEND_TOL) && pr.mu < MU_MAX;
+      var obsBad = pr.muO > 0 && res.pen > CLEAR_TOL && pr.muO < MU_MAX;
+      if (!bendBad && !obsBad) break;
+      var mu = pr.mu, muO = pr.muO;
+      if (bendBad) pr.mu *= fac;
+      if (obsBad) pr.muO *= fac;
+      var r2 = warm(pr, res.x, { maxIt: 200 });
+      if (TRACE) console.log('limits mu', pr.mu, 'muO', pr.muO, 'ok', r2.ok, 'pen', r2.pen, 'rMin', r2.rMin);
+      iters += r2.iters;
+      if (r2.ok) { res = r2; fac = Math.min(10, fac * 2); continue; }
+      pr.mu = mu; pr.muO = muO;
+      if ((fac = Math.sqrt(fac)) < 1.05) break;
+    }
+    res.iters = iters;
+    return res;
   }
 
   // continuation from the end pose of x to the target, smaller steps on failure
@@ -429,6 +695,7 @@
       var s1 = Math.min(1, s + ds), T = lerpPose(E, pr.P1, s1);
       var res = solveTo(pr, x, T, opt);
       iters += res.iters;
+      if (TRACE) console.log('continuation', s1.toFixed(4), 'ok', res.ok, 'err', res.err.toExponential(1), 'its', res.iters);
       if (res.ok) { x = res.x; s = s1; last = res; ds = Math.min(ds * 1.5, 0.5); }
       else if ((ds /= 2) < 1 / 512) break;
     }
@@ -458,29 +725,54 @@
     res.twistMax = tmax * 180 / Math.PI;      // deg/mm
     res.etaMax = emax;
     res.gap = gap(pr);
+    // obstacles: deepest penetration of the required gap, and the smallest
+    // gap between film surface and obstacle, over the free length
+    res.pen = 0; res.clearance = Infinity; res.clearAt = null;
+    if (pr.obs.length) {
+      var F = integrate(pr, x), hw = c.width / 2;
+      for (var nd = 1; nd <= N; nd++) {
+        var w = col(F.Rs[nd], 1);
+        for (var k = 0; k < ACROSS.length; k++) {
+          var q = add(F.ps[nd], scl(w, ACROSS[k] * hw)), d = nearest(pr, q);
+          res.pen = Math.max(res.pen, pr.dmin - d);
+          if (d - c.thick / 2 < res.clearance) { res.clearance = d - c.thick / 2; res.clearAt = nd * pr.h; }
+        }
+      }
+    }
+    res.clearOk = res.pen <= CLEAR_TOL;
     return res;
   }
 
-  // shortest free length for which a shape within the bending limit exists;
-  // slack is added after
+  // Shortest free length for which a shape within the bending limit and clear
+  // of the obstacles exists, for each topological option (bisection, each
+  // step starting from the last shape, so the option keeps its topology).
+  // Returns the shortest; .options holds every feasible option at its own
+  // shortest length. Slack is added by the caller.
   function shortest(spec, opt) {
     opt = opt || {};
     var pr = problem(Object.assign({}, spec, { length: 1 }));
-    var lo = gap(pr) + 0.05, hi = Math.max(1.5 * lo, lo + 20), best = null, x = null;
+    var lo0 = gap(pr) + 0.05, hi = Math.max(1.5 * lo0, lo0 + 20), first = null;
     for (var tries = 0; tries < 8; tries++) {
       setLength(pr, hi);
-      var r = solve(pr, x, { cold: !x });
-      if (r.ok && r.bendOk) { best = r; x = r.x; break; }
-      lo = hi; hi *= 1.6; x = null;
+      first = solve(pr, null);
+      if (first.options.some(feasible)) break;
+      lo0 = hi; hi *= 1.6; first = null;
     }
-    if (!best) return null;
-    for (var k = 0; k < (opt.iters || 16) && hi - lo > (opt.tol || 0.05); k++) {
-      var mid = (lo + hi) / 2;
-      setLength(pr, mid);
-      var rm = solve(pr, x);
-      if (rm.ok && rm.bendOk) { hi = mid; best = rm; x = rm.x; } else lo = mid;
-    }
-    return best;
+    if (!first) return null;
+    var res = first.options.filter(feasible).map(function (o) {
+      var lo = lo0, h = hi, best = o, x = o.x;
+      for (var k = 0; k < (opt.iters || 16) && h - lo > (opt.tol || 0.05); k++) {
+        var mid = (lo + h) / 2;
+        setLength(pr, mid);
+        var rm = solve(pr, x);
+        if (feasible(rm)) { h = mid; best = rm; x = rm.x; } else lo = mid;
+      }
+      best.sides = o.sides;
+      return best;
+    });
+    var out = res.reduce(function (b, r) { return !b || r.L < b.L ? r : b; }, null);
+    out.options = res;
+    return out;
   }
 
   // ------------------------------------------------------------- geometry
@@ -551,6 +843,7 @@
     pose: pose, fromSpec: fromSpec, toSpec: toSpec,
     problem: problem, setLength: setLength, gap: gap,
     solve: solve, shortest: shortest, resample: resample,
+    compileObstacle: compileObstacle, obstacleMesh: obstacleMesh,
     samples: samples, mesh: mesh, stl: stl,
     vec: { add: add, sub: sub, scl: scl, dot: dot, cross: cross, len: len, unit: unit, col: col, mul: mul, mulv: mulv, expSO3: expSO3, logSO3: logSO3 }
   };

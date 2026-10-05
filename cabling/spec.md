@@ -75,15 +75,16 @@ gravity neglected). Discretised as N segments (default 48) with κ and τ
 constant on each; every segment is integrated exactly (screw motion), so a
 circular arc comes out exact (test: R 20 arc, κ = 0.050000 on every segment).
 The six end-pose equations are solved together with the energy minimum
-(Gauss–Newton on the KKT system, Levenberg damping, line search). A solve
-starts from a slightly wavy cable and moves the end gradually from where that
-cable ends to the outlet (continuation).
+(Gauss–Newton on the KKT system, Levenberg damping, line search on an
+augmented Lagrangian, which keeps full steps and fast convergence near the
+solution). A fresh solve starts from a single, almost straight line (radius
+10 m, so it can move sideways from the first step) and moves its end
+gradually from where that line ends to the outlet (continuation).
 
-**Several resting shapes.** A given length and pair of poses often allows more
-than one equilibrium (e.g. a flat U-turn and a twisted one). A fresh solve
-tries three starts (untwisted, twisted either way) and keeps the one of least
-energy. While you drag in the viewer, the shape follows from the previous one,
-like a real cable; *Re-solve from scratch* looks for the lowest one again.
+**Several resting shapes.** A given length and pair of poses can allow more
+than one equilibrium. Without obstacles the solve keeps the one its
+continuation reaches. While you drag in the viewer, the shape follows from the
+previous one, like a real cable; *Re-solve from scratch* starts over.
 
 **Maximum bending.** `rMin` is a limit the solver enforces, not only a
 check: the film's curvature across its rulings may not exceed 1/`rMin`. It is
@@ -99,6 +100,39 @@ length for which a shape within the bending limit exists, then adds `slack`
 (default 3 mm). At the shortest length the cable reaches `rMin`; with the
 slack it usually relaxes away from it.
 
+**Obstacles.** Any number of obstacles, each a signed distance function
+(negative inside): `cylinder` {p, axis, r, h}, `box` {p, size, x?, y?},
+`sphere` {p, r}, or in JS any `sdf(point)` function. At every node, five
+points across the cable's width (edges, quarters, centre) must stay half the
+film thickness plus `clearance` (0.5 mm [chosen]) away from every obstacle.
+This is a penalty like the bending limit, stiffened until no point is more
+than 0.02 mm inside the gap.
+
+**Topological options.** Each obstacle can lie on either side of the cable,
+so k obstacles give 2^k ways through (enumerated for up to 6 obstacles, 64
+options). The solver finds them all:
+
+1. The free shape, with the obstacles off.
+2. Per obstacle, a direction across the cable: at the cable point nearest to
+   it (or deepest inside it), the way out of the obstacle, square to the
+   cable.
+3. For each combination of sides, the obstacles go in one after another:
+   each is moved along its direction until it is clear of the cable (to the
+   far side if it has to cross it, not at all if it is already clear on its
+   side), then slid back in steps of at most 1 mm, pushing the cable ahead.
+   Waiting obstacles are out of the way.
+4. Each option is solved to the end and labelled by the side of the film each
+   obstacle ends up on, `+n` or `−n` (n = t × w, the film normal). The best
+   option (within the limits first, then least energy) is the default; all
+   are kept in `.options`.
+
+`route.js` lists every option and writes one STL per option it found
+(`<name>_optk.stl`, best first) plus `<name>_obstacles.stl`. With
+`"length": "auto"`, every option gets its own shortest length. Example
+`two_cylinders` (90 mm): all four options found, energies 0.099 / 0.177 /
+0.359 / 0.556, each 0.50 mm clear. An option may come out "not found" if
+sliding gets stuck, e.g. when the cable is too short for that way round.
+
 Reported per route: free and total length, length from the connector to the
 outlet centre, smallest bend radius (the film's curvature across its rulings,
 (κ² + τ²)/|κ|) and where it is, largest twist (°/mm), and the largest ruling
@@ -113,10 +147,14 @@ tilt η = τ/κ (tan of the angle between the rulings and w).
    film in bends of a few mm that is a simplification (Wunderlich's width
    correction would stiffen the twisted parts). The curvature sign may jump
    where the film twists (κ passes ±τ), as in a real paper strip.
-3. **No contact.** Nothing stops the cable passing through itself, the
-   connector, the outlet wall or other parts. Gravity and friction are
-   neglected.
-4. **No folds.** Creased folds (e.g. a 45° fold that turns the cable 90° in
+3. **Contact only with the obstacles listed.** Nothing stops the cable
+   passing through itself, the connector or the outlet wall; obstacles are
+   checked at the nodes only (1–2 mm apart), and only the free length is
+   checked. Gravity and friction are neglected.
+4. **Sides, not every route.** The options are the 2^k combinations of sides.
+   Wrapping round an obstacle more than once, or threading between obstacles
+   in an order the slide-in does not reach, is not enumerated.
+5. **No folds.** Creased folds (e.g. a 45° fold that turns the cable 90° in
    its plane) are not modelled yet.
 
 ## 4. Files
@@ -124,10 +162,10 @@ tilt η = τ/κ (tan of the angle between the rulings and w).
 | File | Content |
 |---|---|
 | `ffc.js` | the model: poses, solver, shortest length, mesh, STL writer |
-| `routes.json` | routes: start, outlet, length (mm or `"auto"` + `slack`), cable overrides |
+| `routes.json` | routes: start, outlet, length (mm or `"auto"` + `slack`), cable overrides, obstacles |
 | `route.js` | `node route.js [routes.json] [name …]`: solves, prints a report, writes `<name>.stl` |
 | `viewer.html` | 3D: drag start and outlet (move/turn handles) or type poses; length slider, *Shortest + slack*, STL download, route JSON for `routes.json`; `#preset=n` picks a preset |
-| `<name>.stl` | generated cable solids (not in git) |
+| `<name>.stl`, `<name>_optk.stl`, `<name>_obstacles.stl` | generated cable solids per route and option, and the obstacles (not in git) |
 
 Sources: GCT FFC3A20 drawing (<https://gct.co/files/drawings/ffc3a20.pdf>);
 M. Sadowsky (1930) and W. Wunderlich (1962) on the developable (paper) strip,
