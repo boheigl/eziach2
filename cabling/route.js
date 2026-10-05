@@ -15,7 +15,7 @@ var dir = path.dirname(file), failed = 0;
 
 function f1(v) { return v.toFixed(1); }
 function f2(v) { return v.toFixed(2); }
-function feasible(r) { return r.ok && r.bendOk && r.clearOk; }
+function feasible(r) { return r.ok && r.bendOk && r.clearOk && r.selfOk; }
 function write(name, data) {
   var out = path.join(dir, name);
   fs.writeFileSync(out, Buffer.from(data));
@@ -72,7 +72,8 @@ cfg.routes.forEach(function (rt) {
               (res.bendOk ? '' : '  ** below the limit **'));
   if (obstacles.length)
     console.log('  obstacles     ' + obstacles.length + ', smallest gap ' + f2(res.clearance) + ' mm at ' + f1(res.clearAt) +
-                ' mm into the free length (asked ' + c.clearance + ')' + (res.clearOk ? '' : '  ** INSIDE AN OBSTACLE **'));
+                ' mm into the free length (asked ' + c.clearance + ')' + (res.clearOk ? '' : '  ** INSIDE AN OBSTACLE **') +
+                '; passes itself at ' + (isFinite(res.selfDist) ? f2(res.selfDist) + ' mm' : '-') + (res.selfOk ? '' : '  ** TOO CLOSE TO ITSELF **'));
   console.log('  twist         max ' + f2(res.twistMax) + ' deg/mm, ruling tilt max ' + f2(res.etaMax));
   console.log('  solver        ' + (Date.now() - t0) + ' ms');
   if (!feasible(res)) failed++;

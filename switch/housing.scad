@@ -19,8 +19,8 @@
 // boards and each board can be laid in from above. The connector of each board
 // sits in a pocket at the board's -x end (turned, its long side along y), with
 // a slot below it through the floor for the FFC, which leaves the vertical
-// connector downwards. Board 0's slot is closed (ffc_slot): its FFC leaves
-// through a channel to the front wall instead (see below).
+// connector downwards. Board 0's slot is closed (ffc_slot): its FFC is to run
+// in an open trough to the back of the housing instead (cabling/, in progress).
 //
 // The connectors sit at the -x ends of the boards, where no higher board and
 // no guide lies above them, so every guide is closed all round. The thinnest
@@ -41,16 +41,8 @@
 //
 // Coordinates as everywhere: board 0's frame, origin at its centre, z up.
 //
-// Board 0's FFC leaves through a channel instead of its slot: a 15.8 x 0.8 mm
-// slot from the connector pocket to the front wall (y = -5.6, centre x -131.7,
-// z -12, tilted -20 deg), twisting the cable 90 deg on the way. It is computed
-// by the cable model: cabling/routes.json route "housing_channel",
-//   node cabling/channel.js cabling/routes.json housing_channel
-// writes ffc_channel.scad.
-//
 // Render with  openscad -o housing.stl housing.scad
 
-use <ffc_channel.scad>
 
 /* [Boards — as in pcb.scad / array.scad, do not edit here] */
 pcb_t   = 1.6;
@@ -76,7 +68,7 @@ con_yc  = 4.5;    // and y
 ffc_w   = 16;     // slot for the FFC through the floor, along x
 ffc_t   = 2;      // and across
 ffc_slot = [false, true, true, true];   // board k has the slot; board 0's is closed: its
-                                        //   FFC leaves through housing_channel() instead
+                                        //   FFC is to run in a trough to the back (cabling/)
 
 /* [Guides — as the guide tube of button.scad] */
 guide_d   = 9.4;    // washers d9, 0.2 clearance
@@ -211,5 +203,4 @@ difference() {
     }
     below_floor();
     for (k = [0 : n_boards - 1]) { guides(k); connector_pocket(k); screw_pilots(k); }
-    housing_channel();   // board 0's FFC
 }

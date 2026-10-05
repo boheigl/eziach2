@@ -49,6 +49,8 @@
     slotDepth: 2.0,  // outlet wall thickness: held straight through it [chosen]
     tail: 10.0,      // cable drawn beyond the outlet                  [chosen]
     clearance: 0.5,  // film surface to any obstacle, mm               [chosen]
+    selfGap: null,   // film centre to film centre where the cable passes itself, mm;
+                     //   null: thick + clearance                       [chosen]
     segs: 48         // segments of the free length
   };
 
@@ -245,6 +247,7 @@
       mu: 0,                                  // its penalty weight, raised by solve()
       obs: (spec.obstacles || []).map(compileObstacle),
       dmin: c.thick / 2 + c.clearance,        // centre plane of the film to any obstacle
+      selfGap: c.selfGap != null ? c.selfGap : c.thick + c.clearance,
       shifts: null,                           // per obstacle: moved by this while solve() slides them in
       muO: 0,                                 // obstacle penalty weight, raised by solve()
       Ls: c.width                             // scales rotation errors to mm
@@ -366,6 +369,53 @@
     });
     return out;
   }
+  // Self-contact: three points across the width (edges, centre) at every
+  // check station, against every other more than SELF_S along the cable,
+  // must stay selfGap apart. Pairs are listed once per segment length.
+  var SELF_ACROSS = [0, 2, 4], SELF_S = 5.0;
+  function selfPairs(pr) {
+    if (pr._pairs && pr._pairsH === pr.h) return pr._pairs;
+    var M = subN(pr), st = [], pairs = [];
+    for (var i = 0; i < pr.N; i++) for (var m = 1; m <= M; m++) st.push(pr.h * (i + m / M));
+    var P = st.length * SELF_ACROSS.length;
+    for (var a = 0; a < P; a++)
+      for (var b = a + 1; b < P; b++)
+        if (st[Math.floor(b / 3)] - st[Math.floor(a / 3)] >= SELF_S) pairs.push(a, b);
+    pr._pairs = pairs; pr._pairsH = pr.h;
+    return pairs;
+  }
+  function selfPoints(pr, x, Rs, ps) {
+    var K = ACROSS.length, pts = [];
+    eachCheck(pr, x, Rs, ps, 0, function (j, q) {
+      var k = j % K;
+      if (k === 0 || k === 2 || k === 4) pts.push(q);
+    });
+    return pts;
+  }
+  function nSelf(pr) { return pr.selfGap > 0 ? selfPairs(pr).length / 2 : 0; }
+  function selfRes(pr, x, Rs, ps, out, off) {
+    var pairs = selfPairs(pr), pts = selfPoints(pr, x, Rs, ps), wt = Math.sqrt(pr.muO * pr.h / 3);
+    for (var k = 0; k < pairs.length; k += 2) {
+      var a = pts[pairs[k]], b = pts[pairs[k + 1]];
+      var dx = a[0] - b[0], dy = a[1] - b[1], dz = a[2] - b[2], pen = pr.selfGap - Math.sqrt(dx * dx + dy * dy + dz * dz);
+      out[off + k / 2] = pen > 0 ? wt * pen : 0;
+    }
+    return out;
+  }
+  // smallest distance between two parts of the cable more than SELF_S apart
+  function selfDistance(pr, x) {
+    var F = integrate(pr, x), pairs = selfPairs(pr), pts = selfPoints(pr, x, F.Rs, F.ps), m = Infinity;
+    for (var k = 0; k < pairs.length; k += 2) m = Math.min(m, len(sub(pts[pairs[k]], pts[pairs[k + 1]])));
+    return m;
+  }
+  // obstacle and self-contact residuals, all of them
+  function allObsRes(pr, x, Rs, ps, i0, out) {
+    obsRes(pr, x, Rs, ps, i0, out);
+    if (pr.selfGap > 0) selfRes(pr, x, Rs, ps, out, nChecks(pr));
+    return out;
+  }
+  function nObsRes(pr) { return nChecks(pr) + nSelf(pr); }
+
   function tailFrom(pr, x, i0, R, p, Rs, ps) {
     for (var i = i0; i < pr.N; i++) {
       var s = step(R, p, x[i], x[pr.N + i], pr.h);
@@ -380,9 +430,9 @@
     var N = pr.N, n = nVars(N), F = integrate(pr, x);
     var E = { R: F.Rs[N], p: F.ps[N] }, g = poseErr(pr, E, T);
     var Jg = new Float64Array(6 * n), eps = 1e-7, j, k;
-    var on = obstaclesOn(pr), mo = on ? nChecks(pr) : 0, per = subN(pr) * ACROSS.length;
+    var on = obstaclesOn(pr), mo = on ? nObsRes(pr) : 0, mc = on ? nChecks(pr) : 0, per = subN(pr) * ACROSS.length;
     var ro = new Float64Array(mo), Jo = new Float64Array(mo * n), rj = new Float64Array(mo);
-    if (on) obsRes(pr, x, F.Rs, F.ps, 0, ro);
+    if (on) allObsRes(pr, x, F.Rs, F.ps, 0, ro);
     var Rs = F.Rs.slice(), ps = F.ps.slice();
     for (j = 0; j < n; j++) {
       var i = j % N, keep = x[j];
@@ -392,12 +442,19 @@
       for (k = 0; k < 6; k++) Jg[k * n + j] = (gj[k] - g[k]) / eps;
       if (on) {
         x[j] = keep + eps;
-        obsRes(pr, x, Rs, ps, i, rj);
+        allObsRes(pr, x, Rs, ps, i, rj);
         x[j] = keep;
-        for (k = i * per; k < mo; k++) Jo[k * n + j] = (rj[k] - ro[k]) / eps;
+        for (k = i * per; k < mc; k++) Jo[k * n + j] = (rj[k] - ro[k]) / eps;
+        for (k = mc; k < mo; k++) Jo[k * n + j] = (rj[k] - ro[k]) / eps;
       }
     }
-    return { g: g, J: Jg, ro: ro, Jo: Jo, mo: mo };
+    // rows that matter: touching, or about to (most pairs and checks are far)
+    var act = [];
+    for (k = 0; k < mo; k++) {
+      if (ro[k] !== 0) { act.push(k); continue; }
+      for (j = 0; j < n; j++) if (Jo[k * n + j] !== 0) { act.push(k); break; }
+    }
+    return { g: g, J: Jg, ro: ro, Jo: Jo, mo: mo, act: act };
   }
 
   // dense solve, partial pivoting; A is overwritten
@@ -447,7 +504,7 @@
       var R = residuals(pr, xx);
       if (!R.r) return { phi: Infinity, g: null };
       var F = integrate(pr, xx), g = poseErr(pr, { R: F.Rs[N], p: F.ps[N] }, T), e = sumsq(R.r);
-      if (obstaclesOn(pr)) e += sumsq(obsRes(pr, xx, F.Rs, F.ps, 0, new Float64Array(nChecks(pr))));
+      if (obstaclesOn(pr)) e += sumsq(allObsRes(pr, xx, F.Rs, F.ps, 0, new Float64Array(nObsRes(pr))));
       var lg = 0;
       for (var q = 0; q < 6; q++) lg += nu[q] * g[q];
       return { phi: 0.5 * e + lg + 0.5 * rho * sumsq(g), g: g };
@@ -462,13 +519,13 @@
         for (j = i; j < n; j++) {
           var s = 0;
           for (k = 0; k < Rr.m; k++) s += Rr.J[k * n + i] * Rr.J[k * n + j];
-          for (k = 0; k < C.mo; k++) s += C.Jo[k * n + i] * C.Jo[k * n + j];
+          for (var a2 = 0; a2 < C.act.length; a2++) { k = C.act[a2]; s += C.Jo[k * n + i] * C.Jo[k * n + j]; }
           A[i * K + j] = s; A[j * K + i] = s;
         }
         A[i * K + i] += lam * (1 + A[i * K + i]);
         var gb = 0;
         for (k = 0; k < Rr.m; k++) gb += Rr.J[k * n + i] * Rr.r[k];
-        for (k = 0; k < C.mo; k++) gb += C.Jo[k * n + i] * C.ro[k];
+        for (var a3 = 0; a3 < C.act.length; a3++) { k = C.act[a3]; gb += C.Jo[k * n + i] * C.ro[k]; }
         b[i] = -gb;
       }
       for (k = 0; k < 6; k++) {
@@ -732,7 +789,7 @@
     return done(at <= 0);
   }
 
-  function feasible(r) { return r.ok && r.bendOk && r.clearOk; }
+  function feasible(r) { return r.ok && r.bendOk && r.clearOk && r.selfOk; }
   function better(r, best) {
     if (!best) return true;
     if (feasible(r) !== feasible(best)) return feasible(r);
@@ -755,7 +812,7 @@
     var iters = res.iters, c = pr.cable, fac = 10;
     for (var k = 0; k < 40 && res.ok; k++) {
       var bendBad = pr.kmax > 0 && res.rMin < c.rMin * (1 - BEND_TOL) && pr.mu < MU_MAX;
-      var obsBad = pr.muO > 0 && res.pen > CLEAR_TOL && pr.muO < MU_MAX;
+      var obsBad = pr.muO > 0 && (res.pen > CLEAR_TOL || !res.selfOk) && pr.muO < MU_MAX;
       if (!bendBad && !obsBad) break;
       var mu = pr.mu, muO = pr.muO;
       if (bendBad) pr.mu *= fac;
@@ -820,6 +877,9 @@
         if (d - c.thick / 2 < res.clearance) { res.clearance = d - c.thick / 2; res.clearAt = cp.s; }
       });
     }
+    // self-contact, checked where there are obstacles (where the solver keeps it)
+    res.selfDist = pr.obs.length && pr.selfGap > 0 ? selfDistance(pr, x) : Infinity;
+    res.selfOk = !(pr.obs.length && pr.selfGap > 0) || res.selfDist >= pr.selfGap - CLEAR_TOL;
     res.clearOk = res.pen <= CLEAR_TOL;
     return res;
   }

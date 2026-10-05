@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // channel.js: solve a route and write the slot that carries its cable as an
 // OpenSCAD polyhedron, to be cut out of a housing.
-//   node channel.js [routes.json] name
+//   node channel.js [routes.json] name [--force]
 // The route's "channel": {width, thick, out}: slot cross-section (mm) swept
 // along the cable from inside the connector to the end of its tail, and the
 // .scad file to write (relative to routes.json). The file defines
@@ -18,11 +18,14 @@ var spec = { start: rt.start, target: rt.target, cable: cable, length: rt.length
              obstacles: (cfg.obstacles || []).concat(rt.obstacles || []) };
 var pr = FFC.problem(spec), t0 = Date.now();
 var res = FFC.solve(pr, null, { enumerate: rt.enumerate });
-var ok = res.ok && res.bendOk && res.clearOk;
+var ok = res.ok && res.bendOk && res.clearOk && res.selfOk;
 console.log(name + (ok ? '' : '  ** NOT WITHIN THE LIMITS **') + ': free ' + res.L.toFixed(1) + ' mm, cable ' + res.total.toFixed(1) +
             ' mm end to end, R min ' + res.rMin.toFixed(2) + ', twist max ' + res.twistMax.toFixed(1) + ' deg/mm, smallest gap (film) ' +
-            res.clearance.toFixed(2) + ' mm, energy ' + res.energy.toFixed(3) + ', ' + (Date.now() - t0) + ' ms');
-if (!ok) process.exitCode = 1;
+            res.clearance.toFixed(2) + ' mm, passes itself at ' + res.selfDist.toFixed(2) + ' mm, energy ' + res.energy.toFixed(3) + ', ' + (Date.now() - t0) + ' ms');
+if (!ok && process.argv.indexOf('--force') < 0) {
+  console.log('not written: outside the limits (--force writes it anyway)');
+  process.exit(1);
+}
 
 // the slot: the cable's path with the slot's width and thickness
 var ch = rt.channel, prs = FFC.problem(Object.assign({}, spec, { cable: Object.assign({}, cable, { width: ch.width, thick: ch.thick }) }));
