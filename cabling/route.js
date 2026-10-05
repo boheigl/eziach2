@@ -26,7 +26,8 @@ cfg.routes.forEach(function (rt) {
   if (only.length && only.indexOf(rt.name) < 0) return;
   var cable = Object.assign({}, cfg.cable || {}, rt.cable || {});
   var obstacles = (cfg.obstacles || []).concat(rt.obstacles || []);
-  var spec = { start: rt.start, target: rt.target, cable: cable, obstacles: obstacles, length: 1 };
+  var spec = { start: rt.start, target: rt.target, cable: cable, obstacles: obstacles, length: 1,
+               kink: rt.kink, planar: rt.planar };
   var t0 = Date.now(), pr, options;
   if (rt.length === 'auto') {
     // every option at its own shortest length, plus slack
@@ -40,7 +41,7 @@ cfg.routes.forEach(function (rt) {
     });
   } else {
     pr = FFC.problem(Object.assign({}, spec, { length: rt.length }));
-    var sol = FFC.solve(pr, null, rt.budget_s ? { budget: rt.budget_s * 1000 } : {});
+    var sol = FFC.solve(pr, null, Object.assign({ enumerate: rt.enumerate }, rt.budget_s ? { budget: rt.budget_s * 1000 } : {}));
     options = sol.options.map(function (r) { r.pr = pr; return r; });
     if (sol.options.truncated) console.log('  (search stopped after budget_s = ' + rt.budget_s + ' s: options may be missing)');
   }

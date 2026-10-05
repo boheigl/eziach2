@@ -24,10 +24,14 @@
 // would bend tighter the cable lies on the limit radius instead, like a cable
 // laid over a former.
 // Obstacles: signed distance functions (cylinder, box, sphere, or any
-// function of a point). At every node, five points across the width must keep
-// half the film thickness plus a clearance from every obstacle, again as a
-// penalty stiffened until it holds. Each obstacle can lie on either side of
-// the cable; solve() works out every combination (topological option).
+// function of a point). Along the cable every 1 mm, five points across the
+// width must keep half the film thickness plus a clearance from every
+// obstacle, and the cable keeps selfGap from itself, again as penalties
+// stiffened until they hold. Each obstacle can lie on either side of the
+// cable; solve() works out every combination (topological option).
+// Kink: a crease fold right after the connector (spec.kink), and planar
+// motion after it (spec.planar: no twist, the cable only bends about its
+// width, so it stays in one plane).
 
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -233,14 +237,28 @@
   // spec: {start, target: pose specs; length: free length, mm; cable: overrides}
   // start: the connector face, t pointing out of it.
   // target: the middle of the outlet, t pointing through it.
+  // A crease fold: straight down `lead` from the connector face to the middle
+  // of the crease, which runs across the film at `crease` degrees to t (45:
+  // the cable turns 90 deg, along +-w), towards the side +-w (`side`). The
+  // folded part is turned by 180 deg about the crease and lies one film
+  // thickness on top. Returns the pose where the free part starts.
+  function kinkPose(S, k, thick) {
+    var a = k.crease * Math.PI / 180, sd = k.side < 0 ? -1 : 1;
+    var K = advance(S, k.lead), cb = [Math.cos(a), sd * Math.sin(a), 0];
+    // rotation by pi about cb (body frame): 2 cb cb^T - I
+    var Rf = [2 * cb[0] * cb[0] - 1, 2 * cb[0] * cb[1], 0, 2 * cb[1] * cb[0], 2 * cb[1] * cb[1] - 1, 0, 0, 0, -1];
+    return { p: add(K.p, scl(col(S.R, 2), thick)), R: mul(S.R, Rf) };
+  }
+
   function problem(spec) {
     var c = cableParams(spec.cable);
     var S = fromSpec(spec.start), T = fromSpec(spec.target);
-    var N = c.segs;
+    var N = c.segs, kink = spec.kink || null;
     return {
       cable: c, N: N, L: spec.length, h: spec.length / N,
-      start: S, target: T,
-      P0: advance(S, c.lead),                 // free part starts after the lead
+      start: S, target: T, kink: kink, planar: !!spec.planar,
+      // free part starts after the lead, or after the fold
+      P0: kink ? kinkPose(S, kink, c.thick) : advance(S, c.lead),
       P1: advance(T, -c.slotDepth / 2),       // and ends where the outlet wall begins
       kr: kappaR(c),
       kmax: c.rMin > 0 ? 1 / c.rMin : 0,      // maximum bending, as curvature
@@ -523,6 +541,7 @@
           A[i * K + j] = s; A[j * K + i] = s;
         }
         A[i * K + i] += lam * (1 + A[i * K + i]);
+        if (pr.planar && i >= N) A[i * K + i] += 1e12;     // planar: no twist
         var gb = 0;
         for (k = 0; k < Rr.m; k++) gb += Rr.J[k * n + i] * Rr.r[k];
         for (var a3 = 0; a3 < C.act.length; a3++) { k = C.act[a3]; gb += C.Jo[k * n + i] * C.ro[k]; }
@@ -858,8 +877,9 @@
       emax = Math.max(emax, Math.abs(etaOf(x[i], x[N + i], pr.kr)));
     }
     res.L = pr.L;
-    res.total = c.insert + c.lead + pr.L + c.slotDepth + c.tail;
-    res.toOutlet = c.insert + c.lead + pr.L + c.slotDepth / 2;
+    var lead = pr.kink ? pr.kink.lead : c.lead;
+    res.total = c.insert + lead + pr.L + c.slotDepth + c.tail;
+    res.toOutlet = c.insert + lead + pr.L + c.slotDepth / 2;
     res.energy = energy;
     res.rMin = kmax > 0 ? 1 / kmax : Infinity;
     res.rMinAt = (iAt + 0.5) * pr.h;
@@ -922,14 +942,26 @@
   // arc length s. The film is drawn as a ribbon, its edges at +-width/2 along
   // w; where it bends and twists at once, the real film forms cones and its
   // edges lie off these by up to the ruling tilt.
+  // With a kink the samples come in two pieces (sample.piece 0 and 1): the
+  // strip down to the crease, run on past its middle by hw cot(crease) so it
+  // reaches the crease's far corner, and the folded band, begun as far before
+  // the crease's middle. Drawn as two overlapping ribbons they cover the fold.
   function samples(pr, x, per) {
     per = per || 4;
-    var c = pr.cable, N = pr.N, out = [], i, k;
-    function put(P, s) { out.push({ p: P.p, R: P.R, g: col(P.R, 1), s: s }); }
+    var c = pr.cable, N = pr.N, out = [], i, k, piece = 0;
+    function put(P, s) { out.push({ p: P.p, R: P.R, g: col(P.R, 1), s: s, piece: piece }); }
     put(advance(pr.start, -c.insert), 0);
     put(pr.start, c.insert);
-    put(pr.P0, c.insert + c.lead);
-    var R = pr.P0.R, p = pr.P0.p, s0 = c.insert + c.lead;
+    var s0;
+    if (pr.kink) {
+      var over = (c.width / 2) / Math.tan(pr.kink.crease * Math.PI / 180);
+      s0 = c.insert + pr.kink.lead;
+      put(advance(pr.start, pr.kink.lead + over), s0 + over);
+      piece = 1;
+      put(advance(pr.P0, -over), s0 - over);
+    } else s0 = c.insert + c.lead;
+    put(pr.P0, s0);
+    var R = pr.P0.R, p = pr.P0.p;
     for (i = 0; i < N; i++) {
       for (k = 1; k <= per; k++)
         put(step(R, p, x[i], x[N + i], pr.h * k / per), s0 + pr.h * (i + k / per));
@@ -943,24 +975,33 @@
   }
 
   // closed rectangular tube of the film: 4 vertices per sample
+  // closed rectangular tube of the film, one per piece (with a kink: two):
+  // 4 vertices per sample. m.shells lists each tube's face range.
   function mesh(pr, x, per) {
     var S = samples(pr, x, per), c = pr.cable, hw = c.width / 2, ht = c.thick / 2;
-    var V = [], F = [];
+    var V = [], F = [], shells = [];
     S.forEach(function (q) {
       var n = col(q.R, 2), e = scl(q.g, hw);
       V.push(add(add(q.p, e), scl(n, ht)), add(sub(q.p, e), scl(n, ht)),
              add(sub(q.p, e), scl(n, -ht)), add(add(q.p, e), scl(n, -ht)));
     });
-    for (var i = 0; i + 1 < S.length; i++) {
-      var a = 4 * i, b = a + 4;
-      for (var k = 0; k < 4; k++) {
-        var k2 = (k + 1) % 4;
-        F.push([a + k, b + k, b + k2], [a + k, b + k2, a + k2]);
+    var first = 0;
+    for (var i = 0; i < S.length; i++) {
+      var last = i + 1 === S.length || S[i + 1].piece !== S[i].piece;
+      if (!last) {
+        var a = 4 * i, b = a + 4;
+        for (var k = 0; k < 4; k++) {
+          var k2 = (k + 1) % 4;
+          F.push([a + k, b + k, b + k2], [a + k, b + k2, a + k2]);
+        }
+        continue;
       }
+      var f0 = 4 * first, l = 4 * i;
+      F.push([f0, f0 + 1, f0 + 2], [f0, f0 + 2, f0 + 3], [l, l + 2, l + 1], [l, l + 3, l + 2]);   // end caps, wound like the sides
+      shells.push(F.length);
+      first = i + 1;
     }
-    var l = 4 * (S.length - 1);
-    F.push([0, 1, 2], [0, 2, 3], [l, l + 2, l + 1], [l, l + 3, l + 2]);   // end caps, wound like the sides
-    return { V: V, F: F, samples: S };
+    return { V: V, F: F, samples: S, shells: shells };
   }
 
   // binary STL as a Uint8Array

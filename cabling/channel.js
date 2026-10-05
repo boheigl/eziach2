@@ -14,7 +14,7 @@ var cfg = JSON.parse(fs.readFileSync(file, 'utf8'));
 var rt = cfg.routes.filter(function (r) { return r.name === name; })[0];
 if (!rt || !rt.channel) { console.error('no route "' + name + '" with a channel in ' + file); process.exit(1); }
 var cable = Object.assign({}, cfg.cable || {}, rt.cable || {});
-var spec = { start: rt.start, target: rt.target, cable: cable, length: rt.length,
+var spec = { start: rt.start, target: rt.target, cable: cable, length: rt.length, kink: rt.kink, planar: rt.planar,
              obstacles: (cfg.obstacles || []).concat(rt.obstacles || []) };
 var pr = FFC.problem(spec), t0 = Date.now();
 var res = FFC.solve(pr, null, { enumerate: rt.enumerate });
