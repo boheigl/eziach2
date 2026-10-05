@@ -1,0 +1,8 @@
+# Scratch renders, logs and browser profiles
+.shots/
+
+# Generated from the .scad sources (OpenSCAD exports)
+*.stl
+*.dxf
+switch/cover.js
+switch/housing.js

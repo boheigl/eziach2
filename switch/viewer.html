@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Switch Board</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#eef1ef; --surface:#fbfcfb; --surface-2:#f2f4f2;
+    --border:#c3ccc6; --ink:#1b2422; --ink-soft:#56635d;
+    --accent:#c1551f; --accent-soft:rgba(193,85,31,.12);
+    --view-1:#e4e9e6; --view-2:#c8d2cd;
+    --board:#2f7a4f; --core:#d8cfa8; --edge:#14301f; --copper:#c87a4c;
+    color-scheme:light dark;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0e1413; --surface:#141c1a; --surface-2:#182120;
+      --border:#2d3a35; --ink:#e7ece9; --ink-soft:#9fb0a8;
+      --accent:#ff9158; --accent-soft:rgba(255,145,88,.16);
+      --view-1:#1b2522; --view-2:#0c1211;
+      --board:#2c7049; --core:#b9b08b; --edge:#050908; --copper:#d08654;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0e1413; --surface:#141c1a; --surface-2:#182120;
+    --border:#2d3a35; --ink:#e7ece9; --ink-soft:#9fb0a8;
+    --accent:#ff9158; --accent-soft:rgba(255,145,88,.16);
+    --view-1:#1b2522; --view-2:#0c1211;
+    --board:#2c7049; --core:#b9b08b; --edge:#050908; --copper:#d08654;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    padding-inline:16px; padding-block:36px 48px;
+    display:flex; justify-content:center;
+  }
+  main{width:100%; max-width:1100px;}
+
+  header{margin-bottom:24px;}
+  .eyebrow{
+    font:600 11px/1 "IBM Plex Mono", monospace; letter-spacing:.11em;
+    text-transform:uppercase; color:var(--accent); margin:0 0 10px;
+  }
+  h1{font-size:clamp(25px,3.6vw,32px); font-weight:700; letter-spacing:-.01em; margin:0 0 10px; text-wrap:balance;}
+  header p{color:var(--ink-soft); max-width:64ch; line-height:1.55; margin:0; font-size:15px;}
+
+  .layout{display:grid; gap:18px;}
+  .below{display:grid; grid-template-columns:minmax(260px,1fr) minmax(0,1.6fr); gap:18px; align-items:start;}
+  @media (max-width:800px){ .below{grid-template-columns:1fr;} }
+
+  .panel{background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden;}
+  .panel-bar{
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+    padding:11px 15px; border-bottom:1px solid var(--border); background:var(--surface-2);
+    font:600 11.5px/1 "IBM Plex Mono", monospace; letter-spacing:.08em; text-transform:uppercase;
+  }
+  .panel-bar .sub{font-weight:500; color:var(--ink-soft); letter-spacing:.05em;}
+
+  #view{
+    position:relative; width:100%; aspect-ratio:16/7; min-height:260px; max-width:100%;
+    background:radial-gradient(120% 110% at 32% 22%, var(--view-1), var(--view-2));
+    touch-action:none; cursor:grab;
+  }
+  #view.dragging{cursor:grabbing;}
+  #view canvas{display:block; width:100%; height:100%;}
+  .hint{
+    position:absolute; left:14px; bottom:12px; pointer-events:none;
+    font:500 10.5px/1 "IBM Plex Mono", monospace; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-soft); opacity:.75;
+  }
+
+  .controls{
+    display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px;
+    padding:13px 15px; border-top:1px solid var(--border);
+  }
+  .views{display:flex; gap:6px; flex-wrap:wrap;}
+  button{
+    font:600 11px/1 "IBM Plex Mono", monospace; letter-spacing:.06em; text-transform:uppercase;
+    background:var(--surface-2); color:var(--ink); border:1px solid var(--border);
+    border-radius:6px; padding:8px 11px; cursor:pointer;
+  }
+  button:hover{border-color:var(--accent); color:var(--accent);}
+  .toggles{display:flex; gap:16px; flex-wrap:wrap; margin-left:auto;}
+  .toggles label{display:flex; align-items:center; gap:7px; font-size:13px; color:var(--ink-soft);}
+  input[type=checkbox]{accent-color:var(--accent); width:15px; height:15px;}
+  .section{
+    display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px;
+    padding:11px 15px; border-top:1px solid var(--border);
+  }
+  .section label{display:flex; align-items:center; gap:7px; font-size:13px; color:var(--ink-soft);}
+  .section input[type=range]{flex:1 1 220px; min-width:160px; accent-color:var(--accent);}
+  .section input[type=range]:disabled{opacity:.45;}
+  .section output{font:600 12px/1 "IBM Plex Mono", monospace; font-variant-numeric:tabular-nums; min-width:9ch; text-align:right;}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  td{padding:8px 15px; border-bottom:1px solid var(--border);}
+  tr:last-child td{border-bottom:none;}
+  td:first-child{color:var(--ink-soft); font:500 11px/1.3 "IBM Plex Mono", monospace; letter-spacing:.04em; text-transform:uppercase;}
+  td:last-child{text-align:right; font:600 12.5px/1.3 "IBM Plex Mono", monospace; font-variant-numeric:tabular-nums;}
+  .derived td:last-child{color:var(--accent);}
+
+  .notes{padding:14px 15px;}
+  .notes ul{margin:0; padding:0; list-style:none; display:grid; gap:9px;}
+  .notes li{position:relative; padding-left:16px; font-size:13.5px; line-height:1.55; overflow-wrap:anywhere;}
+  .notes li::before{content:""; position:absolute; left:0; top:8px; width:6px; height:6px; border-radius:50%; background:var(--accent);}
+  code{font-family:"IBM Plex Mono", monospace; font-size:12.5px; background:var(--accent-soft); padding:1px 5px; border-radius:4px;}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">From pcb.scad</p>
+    <h1>Switch board</h1>
+    <p>A 1.6 mm board carrying a single row of thirteen 10 mm holes on a 20 mm pitch, each ringed on the underside by two exposed copper half-rings, with a 14-way FPC connector on a tab at its middle and a button in the middle hole. Drag to orbit, scroll to zoom.</p>
+  </header>
+
+  <div class="layout">
+    <section class="panel">
+      <div class="panel-bar"><span>3D view</span><span class="sub">pcb.scad</span></div>
+      <figure style="margin:0">
+        <div id="view">
+          <div class="hint">Drag to orbit · scroll to zoom</div>
+        </div>
+      </figure>
+      <div class="controls">
+        <div class="views">
+          <button type="button" data-view="iso">Iso</button>
+          <button type="button" data-view="top">Top</button>
+          <button type="button" data-view="bottom">Bottom</button>
+          <button type="button" data-view="front">Front</button>
+          <button type="button" data-view="side">Side</button>
+          <button type="button" data-view="detail">Detail</button>
+          <button type="button" data-view="connector">Connector</button>
+          <button type="button" data-view="end">−X end</button>
+        </div>
+        <div class="toggles">
+          <label><input type="checkbox" id="ortho"> Orthographic</label>
+          <label><input type="checkbox" id="spin" checked> Auto-rotate</label>
+          <label><input type="checkbox" id="edges" checked> Edges</label>
+          <label><input type="checkbox" id="showcopper" checked> Copper</label>
+          <label><input type="checkbox" id="showtracks" checked> Tracks</label>
+          <label><input type="checkbox" id="showcon" checked> Connector</label>
+          <label><input type="checkbox" id="showbutton" checked> Button</label>
+          <label><input type="checkbox" id="showwasher" checked> Washers</label>
+          <label><input type="checkbox" id="showsleeve" checked> Sleeve</label>
+          <label><input type="checkbox" id="showscrew" checked> Screw</label>
+          <label><input type="checkbox" id="showguide" checked> Guide</label>
+          <label><input type="checkbox" id="showspring" checked> Spring</label>
+          <label><input type="checkbox" id="showaxes" checked> Axes</label>
+        </div>
+      </div>
+      <div class="section">
+        <label for="travel">Travel</label>
+        <input type="range" id="travel" min="0" max="3.965" step="0.005" value="0" aria-label="Button travel from the upper stop">
+        <output id="travelval" for="travel">0.000 mm</output>
+        <button type="button" id="press">Press</button>
+      </div>
+      <div class="section">
+        <label><input type="checkbox" id="cut"> Section X/Z</label>
+        <input type="range" id="cuty" min="-11" max="17" step="0.05" value="0" aria-label="Section plane position in Y" disabled>
+        <output id="cutval" for="cuty">y = 0.00</output>
+        <label><input type="checkbox" id="cutflip" disabled> Keep −Y side</label>
+        <button type="button" id="cutcentre" disabled title="Back to y = 0">Reset</button>
+      </div>
+    </section>
+
+    <div class="below">
+      <section class="panel">
+        <div class="panel-bar"><span>Dimensions</span><span class="sub">mm</span></div>
+        <table>
+          <tbody>
+            <tr><td>Board</td><td id="d-board">—</td></tr>
+            <tr><td>Thickness</td><td id="d-t">—</td></tr>
+            <tr><td>Holes</td><td id="d-n">—</td></tr>
+            <tr><td>Hole ⌀</td><td id="d-d">—</td></tr>
+            <tr><td>Pitch</td><td id="d-p">—</td></tr>
+            <tr><td>Hole centres</td><td id="d-x">—</td></tr>
+            <tr><td>Copper ring</td><td id="d-ring">—</td></tr>
+            <tr><td>Track width</td><td id="d-w">—</td></tr>
+            <tr><td>Gap between halves</td><td id="d-gap">—</td></tr>
+            <tr><td>Connector</td><td>GCT FFC3A20-14-G</td></tr>
+            <tr><td>Contacts</td><td id="d-con">—</td></tr>
+            <tr><td>Connector position</td><td id="d-tab">—</td></tr>
+            <tr><td>Signal pads</td><td id="d-pad">—</td></tr>
+            <tr><td>Housing</td><td id="d-hd">—</td></tr>
+            <tr><td>Tracks</td><td id="d-tr">—</td></tr>
+            <tr><td>Common bus</td><td>pin 1 → all −Y halves</td></tr>
+            <tr><td>Pins 2 … 14</td><td>+Y half of holes 1 … 13</td></tr>
+            <tr><td>Button stem</td><td id="d-stem">—</td></tr>
+            <tr><td>Button cap</td><td id="d-cap">—</td></tr>
+            <tr><td>Washer</td><td id="d-wash">—</td></tr>
+            <tr><td>Spacer sleeve</td><td id="d-sleeve">—</td></tr>
+            <tr><td>Screw</td><td id="d-screw">—</td></tr>
+            <tr><td>Pilot hole</td><td id="d-pilot">—</td></tr>
+            <tr><td>Guide tube</td><td id="d-guide">—</td></tr>
+            <tr><td>Spring</td><td id="d-spring">—</td></tr>
+            <tr class="derived"><td>Spring length</td><td id="d-slen">—</td></tr>
+            <tr class="derived"><td>Spring force</td><td id="d-sforce">—</td></tr>
+            <tr class="derived"><td>Stroke</td><td id="d-stroke">—</td></tr>
+            <tr class="derived"><td>Button height</td><td id="d-bh">—</td></tr>
+            <tr class="derived"><td>Web between holes</td><td id="d-web">—</td></tr>
+            <tr class="derived"><td>Hole to edge</td><td id="d-edge">—</td></tr>
+            <tr class="derived"><td>Ring to ring</td><td id="d-rr">—</td></tr>
+            <tr class="derived"><td>Ring to edge</td><td id="d-re">—</td></tr>
+            <tr class="derived"><td>Board lengthened</td><td id="d-rp">—</td></tr>
+            <tr class="derived"><td>Volume</td><td id="d-v">—</td></tr>
+            <tr class="derived"><td>Mass, FR4</td><td id="d-m">—</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <div class="panel-bar"><span>Notes</span></div>
+        <div class="notes">
+          <ul>
+            <li><b>The parameters are the ones in <code>pcb.scad</code></b>: thickness, edge margin, number of holes, pitch and diameter. Change them there and here at the top of the script to keep the two in step.</li>
+            <li><b>The board is sized from the holes.</b> It is 15.9 mm wide, with the row of holes well off centre towards −Y: 5.3 mm from the −Y edge and 10.6 mm from the +Y edge. In front of the holes there is only the copper ring and 0.3 mm to the edge. Behind them run all thirteen tracks. The board runs 12.3 mm past the last hole centre at +X. At −X it is lengthened to x = −139.8 for the connector and the end screw, which makes 272.1 × 15.9 mm. <b>Ten ⌀2.2 screw holes lie on the row line</b>: −137.5 (−x end), −50, 50, 30, 10, −10 (middle screws of the four staircase boards) and 130, 110, 90, 70 (the +x end screw of the 13-, 12-, 11- and 10-hole board). A small tab (x = −139.8 … −129.9, out to y = 16) carries the connector's +Y end. Between neighbouring holes 12 mm of board remains.</li>
+            <li><b>Two copper half-rings around every ⌀8 hole</b>, on the bottom face only and left bare of solder mask. Each is 1.0 mm wide and starts right at the bore, inner ⌀8 and outer ⌀10, so there is no gap between copper and hole and it reaches 0.5 mm past the ⌀9 washer all round. The halves sit on the +Y and −Y sides and are parted by a 0.5 mm gap along the row axis. The gap has parallel sides, so it is 0.5 mm at the bore and at the outside alike. Rings stand 10 mm apart. They end 0.3 mm from the −Y edge and 5.6 mm from the +Y edge. Copper is 35 µm; the viewer draws it to scale.</li>
+            <li><b>FFC connector GCT FFC3A20-14-G</b>: 14 contacts on a 1.0 mm pitch, vertical SMT, ZIF slide lock, single-sided contact, for 0.30 mm FFC. It sits on the bottom face at the <b>−X end, turned so that its long side runs along Y</b>. Its X position follows from the tracks: it sits just left of where the last of them turns down beside hole 1, centred at x = −133.15. Its −Y end, at y = −6.0, stays 0.4 mm clear of the board below in the staircase. That end overhangs this board's −Y edge by 0.7 mm; all pads lie on the board. Its +Y end reaches y = 15, on the tab. Being vertical, it takes the cable at right angles to the board, so the FFC leaves downwards. The land pattern is from the GCT drawing: two columns of 14 pads, 0.6 × 2.0 mm, at x = −134.9 and −131.4. Every contact has a pad in each column, and there are no separate hold-down pads. The housing is 21 × 4.5 mm and 5.5 mm high, assumed centred on the pads. Contact 1 is at the +Y end (y = 11, on the tab), contact 14 at the −Y end (y = −2).</li>
+            <li><b>Tracks.</b> Contact 1 is the common: it joins the −Y halves of all thirteen rings. Contacts 2 … 14 each take the +Y half of one ring. <b>All thirteen signal tracks run on the bottom, in the band behind the holes</b>. Each turns down beside hole 1, left of its ring, and runs left into the inner pad column from its end: hole h → contact 15 − h, so hole 1 takes contact 14 at the bottom. <b>The common runs on the top copper</b>: a via in the middle of every −Y half, a straight bus at y = −4.5 to the connector, up between its two pad columns to a via at contact 1 on the tab, and a short bottom track into its pad. The board is two-layer. Vias have a ⌀0.3 drill and ⌀0.6 pads and are tented, and the top bus lies under solder mask.</li>
+            <li><b>The band.</b> Tracks are 0.2 mm wide on a 0.4 mm pitch, so 0.2 mm apart, at y = 5.4 … 10.2. The farther the hole, the higher its track. All of them turn down beside hole 1, the lowest furthest right, between x = −125.3 and −130.1. That way no two tracks cross, and every turn clears hole 1's ring by at least 0.2 mm. Checked on the exported copper of both layers: every contact is on the intended ring halves, the 10-hole sawn-off board too, with at least 0.2 mm between any two nets. The rings and pads are bare copper, and <code>pcb_mask.dxf</code> gives the openings.</li>
+            <li><b>The button sits in the middle hole.</b> Its stem is ⌀7.6, which leaves 0.2 mm all round in the ⌀8 hole. It is 6.835 mm long, 1.235 mm longer than before, because the cap now lands on the 1.2 mm cover instead of on the board. In the staircase the cover's ⌀8 openings guide the stem a second time, just above the board. A cap ⌀15 × 2 mm sits centred on top of the stem, with its upper edge rounded R0.5. The button is one piece. In the staircase it is pushed through cover and board from above, and fastened from below. File: <code>button.scad</code> / <code>button.stl</code>.</li>
+            <li><b>Washer, spacer sleeve, washer under the stem.</b> Both washers are M3 washers to ISO 7093 / DIN 9021: ⌀9 outside, ⌀3.2 inside, 0.8 mm thick. The upper one sits against the stem at z = −1.6 … −0.8. It reaches 0.7 mm past the stem over the copper half-rings (r = 4 … 5) of the middle hole and, being metal, bridges the two halves at the upper stop. Below it is a standard metal M3 spacer sleeve, now ⌀6 / ⌀3.2 × 5 mm, and below that the lower washer at z = −7.4 … −6.6. Both washers run in the guide, so the sleeve holds the lower guide point 5 mm below the upper one. Files: <code>washer.stl</code> (both washers, in place), <code>sleeve.stl</code>.</li>
+            <li><b>Guiding.</b> The button is held above, by the board hole and in the staircase also the cover opening, both ⌀8 with 0.2 mm play, and below by the washers in the guide bore (⌀9.4). From the top of the cover to the lower washer that is about 9.5 mm. The button can tilt at most about 2.5°, and jamming would need a press well outside the ⌀15 cap (friction taken as 0.3–0.4). The cover guide reaches 1.2 mm higher than the board alone did, so the sleeve could be 1 mm shorter (5 instead of 6 mm) for the same span.</li>
+            <li><b>An M3 × 12 self-tapping screw for plastics</b> clamps washer, sleeve and washer to the stem from below. It has a pan head as ISO 7045 (⌀5.6 × 2.4) with a cross recess, bearing on the lower washer at z = −7.4, and its point reaches z = 4.6, 5.4 mm into the stem. The thread is drawn plain at 3 mm, with a pointed tip. The stem has a blind pilot hole for it, ⌀2.5 (the usual core hole for M3 in thermoplastic), opening at its lower face and 6.4 mm deep. That is 1 mm past the point, as room for the chips. Around the hole the ⌀7.6 stem keeps 2.55 mm of wall. Switch the button off to see the screw in its hole. File: <code>screw.stl</code>.</li>
+            <li><b>The board is lengthened only at the connector</b>, by 8 mm at the −X end, plus the small tab for the connector's +Y end. The connector body is drawn simplified, with the brown ZIF slider on its face.</li>
+            <li><b>The button moves.</b> Button, washers, sleeve and screw move together along Z between two stops. At the upper stop (travel 0) the upper washer bears on the copper half-rings, pushed up by the spring. At the lower stop the cap's underside lands on the cover. The stroke is 3.965 mm. Drag <b>Travel</b> to set a position, or <b>Press</b> to run a full stroke down and back.</li>
+            <li><b>A 3D-printed guide tube</b> can sit under a single board, around the middle hole. It is ⌀13.4 outside and ⌀9.4 inside, so the washers run in it with 0.2 mm all round. Its top face sits on the board's underside at z = −0.835. It runs down to z = −18.08 and is closed there by a 1.5 mm floor, whose top is at z = −16.58, so the tube is 17.25 mm long. The spring sets where the floor goes (see below). On the floor stands a 1.5 mm centring collar, ⌀8.6 inside, that keeps the spring in the middle. In the staircase the housing (<code>array.html</code>) replaces it. File: <code>guide.stl</code>.</li>
+            <li><b>A compression spring</b> stands on the floor inside the collar and pushes the lower washer up, so the button rests at the upper stop and returns there when released. It is 0.4 mm wire, ⌀8 outside (⌀7.2 inside), 25 mm free length, with <b>8 active coils</b>. Closed, ground ends with one dead coil each are assumed, so 10 coils in all and a solid length of about 4 mm. It is soft and goes in heavily preloaded, so the force barely rises over the stroke. It surrounds the ⌀5.6 screw head with 0.8 mm to spare all round and bears on the washer outside it. The tube is made just long enough for the spring to push with <b>120 g (1.18 N) at the upper stop</b>. With an estimated rate of about 0.074 N/mm (spring steel), that needs 15.9 mm of preload, so the spring is 9.15 mm long at the upper stop and 5.18 mm at the lower stop. There it pushes with 1.47 N (150 g), only 25 % more than at rest. At the lower stop the coils are 1.2 mm clear of solid in all, about 0.15 mm per gap. That is less than the minimum gap DIN EN 13906-1 recommends (minimum length about 6.25 mm), but enough that they do not touch. Because the rate is a calculated estimate, the real initial force depends on the actual spring: each 0.1 N off moves the floor about 1.35 mm. The narrower, softer spring cut the tube from 38 mm to about 18 mm. File: <code>spring.stl</code>.</li>
+            <li><b>Section X/Z</b> cuts everything with a plane parallel to X and Z, and the slider moves it along Y from −11 to +17 mm. By default the +Y side is kept, so the cut face looks towards −Y, and <b>Keep −Y side</b> turns it round. At y = 0 the plane runs through the axis of the button, washer and screw and through the middle of every hole. Cut faces are shown filled, in a darker shade of each part's colour. The board shows its laminate there. The axes are never cut.</li>
+            <li><b>The triad</b> is the board's own frame: origin at the centre of the middle hole in all three axes, X along the row, Y across it, Z out of the top face. The laminate therefore runs z = −0.8 … +0.8, with the copper just below it.</li>
+            <li><b>Bottom</b> looks straight up at the copper side. <b>Detail</b> moves in close on the first holes from below, where the 1.6 mm board thickness and the bore walls can be seen. <b>Connector</b> shows the connector at the −X end from below, <b>−X end</b> the end of the board. <b>Orthographic</b> gives true elevations for checking the spacing.</li>
+            <li>Files: <code>pcb.scad</code>; <code>pcb.stl</code> (board and copper), <code>pcb_board.stl</code>, <code>pcb_copper.stl</code>, <code>pcb_connector.stl</code> (simplified body); <code>pcb.dxf</code> (outline) and <code>pcb_copper.dxf</code> (bottom copper), <code>pcb_copper_top.dxf</code> (top copper), <code>pcb_drill.dxf</code> (via holes) and <code>pcb_mask.dxf</code> (solder mask openings); <code>button.scad</code>, <code>button.stl</code>, <code>washer.stl</code>, <code>sleeve.stl</code>, <code>screw.stl</code> and <code>guide.stl</code> and <code>spring.stl</code> (moving parts and spring at the upper stop). The four-board arrangement is in <code>array.html</code>.</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  // --- parameters, as in pcb.scad ---
+  var PCB_T = 1.6, MARGIN = 12.3, N = 13, PITCH = 20, HOLE_D = 8;
+  var MARGIN_N = 5.3, MARGIN_P = 10.6;  // row of holes to the -y / +y edge: off centre, all tracks behind the holes
+  var RING_W = 1.0, RING_GAP = 0.5, CU_T = 0.035;   // ring reaches 0.5 past the d9 washer
+  // GCT FFC3A20-14-G, vertical SMT, from the drawing: two pad rows, housing centred on them
+  var CON_N = 14, CON_PITCH = 1.0, PAD_W = 0.6, PAD_L = 2.0, PAD_SPAN = 5.5;
+  var BODY_W = 21.0, BODY_D = 4.5, BODY_H = 5.5;
+  // placement
+  var TR_W = 0.2, TR_PITCH = 0.4, TR_RING = 0.4;
+  var VIA_DRILL = 0.3, VIA_D = 0.6;   // vias of the common bus on the top copper
+  // middle screw holes, as in pcb.scad: board k uses x = -MID_C and MID_C - 2 k * 10;
+  // every board has all of them
+  var MID_C = 50, MID_Y = 0, MID_D = 2.2, MID_XS = [-50, 50, 30, 10, -10];
+  // end screws through the board on the row line: -x just left of the connector
+  // pads, +x half a pitch past the last hole of each sawn version; board ends 2.3 beyond
+  var SCR_CU = 0.5, END_D = MID_D / 2 + 1.2, END_XS = [130, 110, 90, 70];
+  // button, in the middle hole
+  var COVER_T = 1.2;   // cover plate: the cap lands on it
+  var GAP = 0.2, STEM_H = 5.6 + 0.035 + COVER_T, CAP_D = 15, CAP_H = 2, CAP_R = 0.5;
+  var WASHER_OD = 9, WASHER_ID = 3.2, WASHER_T = 0.8;   // M3 to ISO 7093 / DIN 9021
+  var SLEEVE_OD = 6, SLEEVE_ID = 3.2, SLEEVE_L = 5;       // standard metal M3 spacer, between the washers
+  // M3 tapping screw, pan head as ISO 7045; pilot hole in the stem
+  var SCREW_D = 3, SCREW_L = 12, TIP_L = 1, TIP_D = 1.2, HEAD_D = 5.6, HEAD_K = 2.4, HEAD_R = 1.2;
+  var SLOT_W = 0.6, SLOT_L = 3, PILOT_D = 2.5, CHIP_ROOM = 1;
+  // guide tube, 3D printed, fixed under the board
+  var GUIDE_GAP = 0.2, GUIDE_WALL = 2, FLOOR_T = 1.5, COLLAR_H = 1.5, COLLAR_GAP = 0.3;
+  // compression spring between the floor and the lower washer
+  // d8 x 0.4 x 25, 8 active coils (+ one dead coil each end, assumed)
+  var SPRING_WD = 0.4, SPRING_OD = 8, SPRING_N = 10, SPRING_L0 = 25, SPRING_F0 = 0.12 * 9.81, SPRING_G = 81500;   // 120 g at the upper stop
+  // connector at the -x end, turned along y: housing to hole 1's ring, its -y end, where the +y
+  // band turns, the left channel, board beyond it, tab beyond the pads and the housing
+  var BODY_Y_MIN = -6.0, JOG_X0 = 5.3, TAB_SIDE = 0.5, TAB_FRONT = 1.0;
+
+  var SPAN = (N - 1) * PITCH, LEN_X = SPAN + 2 * MARGIN, LEN_Y = MARGIN_N + MARGIN_P;
+  var R_IN = HOLE_D / 2, R_OUT = R_IN + RING_W;
+  var CON_A = (CON_N - 1) * CON_PITCH;
+  var CON_YC = BODY_Y_MIN + BODY_W / 2;                        // connector centre y (turned)
+  var ROW_Y = PAD_SPAN / 2 - PAD_L / 2;                        // pad columns at x = CON_XC +- ROW_Y
+  var TR_LO = R_OUT + TR_RING, RING_IN = R_IN + RING_W / 2;
+  function holeX(k) { return -SPAN / 2 + (k - 1) * PITCH; }               // hole k, 1-based
+  function pinY(c) { return CON_YC + CON_A / 2 - (c - 1) * CON_PITCH; }  // contact c: 1 at +y
+  function conOf(h) { return CON_N + 1 - h; }                              // hole 1 -> 14 (lowest)
+  function levUp(h) { return TR_LO + (h - 1) * TR_PITCH; }
+  // every track runs in the +y band and turns beside hole 1: up-turners first,
+  // highest furthest right, then down-turners, lowest furthest right
+  var JOG_ORDER = [];
+  for (var jh = N; jh >= 1; jh--) if (pinY(conOf(jh)) > levUp(jh)) JOG_ORDER.push(jh);
+  for (jh = 1; jh <= N; jh++) if (pinY(conOf(jh)) <= levUp(jh)) JOG_ORDER.push(jh);
+  function xJog(h) { return holeX(1) - JOG_X0 - JOG_ORDER.indexOf(h) * TR_PITCH; }
+  var XJOG_MIN = holeX(1) - JOG_X0 - (N - 1) * TR_PITCH;
+  // the connector follows from the turns: inner pad column just left of the last
+  var X_IN = XJOG_MIN - TR_W / 2 - (TR_PITCH - TR_W) - PAD_L / 2;
+  var CON_XC = X_IN - ROW_Y, X_OUT = CON_XC - ROW_Y;
+  var X_SCR_L = X_OUT - PAD_L / 2 - SCR_CU - MID_D / 2;
+  var X_START = X_SCR_L - END_D, X_END = SPAN / 2 + MARGIN;
+  var TAB_X1 = X_IN + PAD_L / 2 + TAB_SIDE, TAB_Y = CON_YC + BODY_W / 2 + TAB_FRONT;
+  var VIA_C = [CON_XC, pinY(1)];
+  var VIAS = [];
+  for (var vk = 1; vk <= N; vk++) VIAS.push([holeX(vk), -RING_IN]);
+  VIAS.push(VIA_C);
+  var view = document.getElementById('view');
+  var css = function (n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
+  var set = function (id, t) { document.getElementById(id).textContent = t; };
+  var f = function (v) { return (+v.toFixed(2)).toString(); };
+
+  var area = (X_END - X_START) * LEN_Y + (TAB_X1 - X_START) * (TAB_Y - MARGIN_P) - N * Math.PI * HOLE_D * HOLE_D / 4;
+  var vol = area * PCB_T;
+  set('d-board', f(X_END - X_START) + ' × ' + f(LEN_Y) + ' + tab');
+  set('d-con', CON_N + ' × ' + f(CON_PITCH) + ' pitch');
+  set('d-tab', 'turned, x = ' + f(CON_XC));
+  set('d-pad', '2 × ' + CON_N + ' × ' + f(PAD_W) + ' × ' + f(PAD_L));
+  set('d-hd', f(BODY_W) + ' × ' + f(BODY_D) + ' × ' + f(BODY_H));
+  set('d-rp', f(-SPAN / 2 - MARGIN - X_START) + ' at −x');
+  var STEM_D = HOLE_D - 2 * GAP, BZ0 = -PCB_T / 2, BZ_CAP = BZ0 + STEM_H, BZ_TOP = BZ_CAP + CAP_H;
+  set('d-stem', '⌀' + f(STEM_D) + ' × ' + f(STEM_H));
+  set('d-cap', '⌀' + f(CAP_D) + ' × ' + f(CAP_H) + ', R' + f(CAP_R));
+  set('d-bh', f(BZ_TOP - BZ0));
+  var Z_SLV = BZ0 - WASHER_T, Z_BEAR = Z_SLV - SLEEVE_L - WASHER_T, Z_TIP = Z_BEAR + SCREW_L, Z_HOLE = Z_TIP + CHIP_ROOM;
+  set('d-screw', 'M3 × ' + f(SCREW_L) + ', pan head');
+  set('d-pilot', '⌀' + f(PILOT_D) + ' × ' + f(Z_HOLE - BZ0) + ' deep');
+  var Z_CU = -PCB_T / 2 - CU_T, STROKE = BZ_CAP - CU_T - (PCB_T / 2 + CU_T + COVER_T);   // cap lands on the cover
+  var GUIDE_ID = WASHER_OD + 2 * GUIDE_GAP, GUIDE_OD = GUIDE_ID + 2 * GUIDE_WALL;
+  var SPRING_DM = SPRING_OD - SPRING_WD, SPRING_NA = SPRING_N - 2;
+  var SPRING_K = SPRING_G * Math.pow(SPRING_WD, 4) / (8 * Math.pow(SPRING_DM, 3) * SPRING_NA);
+  var SPRING_PRE = SPRING_F0 / SPRING_K;   // preload for the wanted initial force
+  var GUIDE_Z1 = Z_CU, FLOOR_Z = Z_BEAR - CU_T - (SPRING_L0 - SPRING_PRE), GUIDE_Z0 = FLOOR_Z - FLOOR_T;
+  var L_UP = (Z_BEAR - CU_T) - FLOOR_Z, L_DOWN = L_UP - STROKE;
+  set('d-spring', '⌀' + f(SPRING_WD) + ' wire, ⌀' + f(SPRING_OD) + ', ' + SPRING_N + ' coils (8 active), L0 ' + f(SPRING_L0));
+  set('d-slen', f(L_UP) + ' … ' + f(L_DOWN));
+  set('d-sforce', '≈ ' + (SPRING_K * (SPRING_L0 - L_UP)).toFixed(2) + ' … ' + (SPRING_K * (SPRING_L0 - L_DOWN)).toFixed(2) + ' N (' + Math.round(SPRING_K * (SPRING_L0 - L_UP) / 9.81 * 1000) + ' … ' + Math.round(SPRING_K * (SPRING_L0 - L_DOWN) / 9.81 * 1000) + ' g)');
+  set('d-stroke', f(STROKE));
+  set('d-guide', '⌀' + f(GUIDE_OD) + ' / ⌀' + f(GUIDE_ID) + ' × ' + f(GUIDE_Z1 - GUIDE_Z0));
+  set('d-sleeve', '⌀' + f(SLEEVE_OD) + ' / ⌀' + f(SLEEVE_ID) + ' × ' + f(SLEEVE_L));
+  set('d-wash', '2 × ⌀' + f(WASHER_OD) + ' / ⌀' + f(WASHER_ID) + ' × ' + f(WASHER_T));
+  set('d-tr', f(TR_W) + ' / ' + f(TR_PITCH - TR_W) + ' gap');
+  set('d-t', PCB_T.toFixed(2));
+  set('d-n', N + ' in a row');
+  set('d-d', f(HOLE_D));
+  set('d-p', f(PITCH));
+  set('d-x', '±' + f(SPAN / 2));
+  set('d-web', f(PITCH - HOLE_D));
+  set('d-edge', f(MARGIN_N - HOLE_D / 2) + ' / ' + f(MARGIN_P - HOLE_D / 2));
+  set('d-ring', '⌀' + f(2 * R_IN) + ' … ⌀' + f(2 * R_OUT));
+  set('d-w', f(RING_W));
+  set('d-gap', f(RING_GAP));
+  set('d-rr', f(PITCH - 2 * R_OUT));
+  set('d-re', f(MARGIN_N - R_OUT) + ' / ' + f(MARGIN_P - R_OUT));
+  set('d-v', (vol / 1000).toFixed(2) + ' cm³');
+  set('d-m', (vol / 1000 * 1.85).toFixed(1) + ' g');
+
+  var scene = new THREE.Scene();
+  var FOV = 30, aspect = 16 / 7;
+  var pcam = new THREE.PerspectiveCamera(FOV, aspect, 2, 4000);
+  var ocam = new THREE.OrthographicCamera(-1, 1, 1, -1, -3000, 3000);
+  var camera = pcam;
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  view.appendChild(renderer.domElement);
+
+  var key = new THREE.DirectionalLight(0xffffff, 1.0); key.position.set(-4, 6, 5);
+  var fill = new THREE.DirectionalLight(0xffffff, 0.42); fill.position.set(5, 2, -4);
+  var rim = new THREE.DirectionalLight(0xffffff, 0.3); rim.position.set(2, -4, 3);
+  var hemi = new THREE.HemisphereLight(0xffffff, 0x404848, 0.55);
+  var under = new THREE.DirectionalLight(0xffffff, 0.8); under.position.set(-3, -6, 4);  // the copper side
+  scene.add(key, fill, rim, hemi, under);
+
+  // solder mask on the faces, bare laminate on the cut edges and bores
+  var maskMat = new THREE.MeshStandardMaterial({ color: 0x2f7a4f, metalness: 0.05, roughness: 0.45 });
+  var coreMat = new THREE.MeshStandardMaterial({ color: 0xd8cfa8, metalness: 0.0, roughness: 0.8 });
+  var edgeMat = new THREE.LineBasicMaterial({ color: 0x14301f });
+
+  // profile (x, y) maps to world (x, z, -y), so the board lies flat with Y up
+  var shape = new THREE.Shape();
+  // board, lengthened at the -x end, with a tab for the connector's +y end
+  shape.moveTo(X_START, -MARGIN_N);
+  shape.lineTo(X_END, -MARGIN_N);
+  shape.lineTo(X_END, MARGIN_P);
+  shape.lineTo(TAB_X1, MARGIN_P);
+  shape.lineTo(TAB_X1, TAB_Y);
+  shape.lineTo(X_START, TAB_Y);
+  shape.closePath();
+  for (var i = 0; i < N; i++) {
+    var h = new THREE.Path();
+    h.absarc(-SPAN / 2 + i * PITCH, 0, HOLE_D / 2, 0, Math.PI * 2, true);
+    shape.holes.push(h);
+  }
+  VIAS.forEach(function (v) {   // via holes
+    var vh = new THREE.Path();
+    vh.absarc(v[0], v[1], VIA_DRILL / 2, 0, Math.PI * 2, true);
+    shape.holes.push(vh);
+  });
+  [X_SCR_L].concat(MID_XS, END_XS).forEach(function (x) {   // screw holes (cover, board, housing)
+    var mh = new THREE.Path();
+    mh.absarc(x, MID_Y, MID_D / 2, 0, Math.PI * 2, true);
+    shape.holes.push(mh);
+  });
+  var geo = new THREE.ExtrudeGeometry(shape, { depth: PCB_T, bevelEnabled: false, steps: 1, curveSegments: 48 });
+  geo.translate(0, 0, -PCB_T / 2);
+  geo.rotateX(-Math.PI / 2);
+  var mesh = new THREE.Mesh(geo, [maskMat, coreMat]);   // groups: 0 = faces, 1 = sides
+  var lines = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), edgeMat);
+  scene.add(mesh, lines);
+
+  // --- copper: two half-rings per hole on the bottom face, apart by a straight gap ---
+  // The gap is a strip of width RING_GAP along the row, so each end of a half
+  // is a straight cut at y = +-RING_GAP/2 and meets the two arcs at different angles.
+  var cuMat = new THREE.MeshStandardMaterial({ color: 0xc87a4c, metalness: 0.4, roughness: 0.35 });
+  var cuEdgeMat = new THREE.LineBasicMaterial({ color: 0x6b3a1c });
+  var copper = new THREE.Group();
+  var ao = Math.asin(RING_GAP / 2 / R_OUT), ai = Math.asin(RING_GAP / 2 / R_IN);
+  [1, -1].forEach(function (side) {
+    for (var i = 0; i < N; i++) {
+      var cx = -SPAN / 2 + i * PITCH;
+      var hs = new THREE.Shape();
+      hs.absarc(cx, 0, R_OUT, side * ao, side * (Math.PI - ao), side < 0);
+      hs.absarc(cx, 0, R_IN, side * (Math.PI - ai), side * ai, side > 0);
+      hs.closePath();
+      var g = new THREE.ExtrudeGeometry(hs, { depth: CU_T, bevelEnabled: false, steps: 1, curveSegments: 48 });
+      g.translate(0, 0, -PCB_T / 2 - CU_T);
+      g.rotateX(-Math.PI / 2);
+      copper.add(new THREE.Mesh(g, cuMat));
+      copper.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 25), cuEdgeMat));
+    }
+  });
+
+  // connector land pattern: 14 signal pads and two hold-down pads
+  function cuRect(x0, y0, w, l) {
+    var g = new THREE.BoxGeometry(w, CU_T, l);
+    g.translate(x0 + w / 2, -PCB_T / 2 - CU_T / 2, -(y0 + l / 2));
+    copper.add(new THREE.Mesh(g, cuMat));
+    copper.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), cuEdgeMat));
+  }
+  for (var j = 0; j < CON_N; j++) {   // inner and outer pad row, same contact
+    cuRect(X_IN - PAD_L / 2, pinY(j + 1) - PAD_W / 2, PAD_L, PAD_W);
+    cuRect(X_OUT - PAD_L / 2, pinY(j + 1) - PAD_W / 2, PAD_L, PAD_W);
+  }
+  scene.add(copper);
+
+  // --- tracks: the same polylines as pcb.scad, square-ended so corners close ---
+  var trMat = new THREE.MeshStandardMaterial({ color: 0xa5764e, metalness: 0.3, roughness: 0.55 });
+  var tracks = new THREE.Group();
+  function track(pts, top) {   // top: on the top copper instead of the bottom
+    var zc = top ? PCB_T / 2 + CU_T / 2 : -PCB_T / 2 - CU_T / 2;
+    for (var i = 0; i < pts.length - 1; i++) {
+      var a = pts[i], b = pts[i + 1], hw = TR_W / 2;
+      var x0 = Math.min(a[0], b[0]) - hw, x1 = Math.max(a[0], b[0]) + hw;
+      var y0 = Math.min(a[1], b[1]) - hw, y1 = Math.max(a[1], b[1]) + hw;
+      var g = new THREE.BoxGeometry(x1 - x0, CU_T, y1 - y0);
+      g.translate((x0 + x1) / 2, zc, -(y0 + y1) / 2);
+      tracks.add(new THREE.Mesh(g, trMat));
+    }
+  }
+  // signal tracks on the bottom, all in the +y band behind the holes, turning
+  // beside hole 1 into the inner pad column
+  for (var hk = 1; hk <= N; hk++) {
+    var py = pinY(conOf(hk));
+    track([[holeX(hk), RING_IN], [holeX(hk), levUp(hk)], [xJog(hk), levUp(hk)], [xJog(hk), py], [X_IN, py]]);
+  }
+  // the common on the top copper: a via in every -y half, the bus over them to
+  // the connector, up between its pad columns to a via at contact 1
+  track([[holeX(N), -RING_IN], [CON_XC, -RING_IN], VIA_C], true);
+  track([VIA_C, [X_IN, pinY(1)]]);
+  VIAS.forEach(function (v) {   // via: pads on both faces and the plated barrel
+    var g = new THREE.CylinderGeometry(VIA_D / 2, VIA_D / 2, PCB_T + 2 * CU_T, 24);
+    g.translate(v[0], 0, -v[1]);
+    tracks.add(new THREE.Mesh(g, trMat));
+  });
+  scene.add(tracks);
+
+  // --- button: stem through the middle hole, cap with a rounded upper edge ---
+  // lathe profile in (r, part z); the lathe axis is world Y, which is part z
+  var prof = [new THREE.Vector2(0, Z_HOLE), new THREE.Vector2(PILOT_D / 2, Z_HOLE),
+              new THREE.Vector2(PILOT_D / 2, BZ0), new THREE.Vector2(STEM_D / 2, BZ0),
+              new THREE.Vector2(STEM_D / 2, BZ_CAP), new THREE.Vector2(CAP_D / 2, BZ_CAP),
+              new THREE.Vector2(CAP_D / 2, BZ_TOP - CAP_R)];
+  for (var q = 1; q < 12; q++) {
+    var aq = q / 12 * Math.PI / 2;
+    prof.push(new THREE.Vector2(CAP_D / 2 - CAP_R + CAP_R * Math.cos(aq), BZ_TOP - CAP_R + CAP_R * Math.sin(aq)));
+  }
+  prof.push(new THREE.Vector2(CAP_D / 2 - CAP_R, BZ_TOP), new THREE.Vector2(0, BZ_TOP));
+  var btnMat = new THREE.MeshStandardMaterial({ color: 0x4a6fa5, metalness: 0.05, roughness: 0.5 });
+  var btnGeo = new THREE.LatheGeometry(prof, 96);
+  var button = new THREE.Group();
+  button.add(new THREE.Mesh(btnGeo, btnMat));
+  button.add(new THREE.LineSegments(new THREE.EdgesGeometry(btnGeo, 30), new THREE.LineBasicMaterial({ color: 0x22344f })));
+  // washer against the stem's lower face
+  var wGeo = new THREE.LatheGeometry([
+    new THREE.Vector2(WASHER_ID / 2, BZ0 - WASHER_T), new THREE.Vector2(WASHER_OD / 2, BZ0 - WASHER_T),
+    new THREE.Vector2(WASHER_OD / 2, BZ0), new THREE.Vector2(WASHER_ID / 2, BZ0),
+    new THREE.Vector2(WASHER_ID / 2, BZ0 - WASHER_T)], 96);
+  var washer = new THREE.Group();
+  var wMat = new THREE.MeshStandardMaterial({ color: 0xc4c8cc, metalness: 0.7, roughness: 0.3 });
+  var wEdge = new THREE.LineBasicMaterial({ color: 0x4a4f55 });
+  [0, -(WASHER_T + SLEEVE_L)].forEach(function (dy) {   // upper washer, and the lower one under the sleeve
+    var wm = new THREE.Mesh(wGeo, wMat), wl = new THREE.LineSegments(new THREE.EdgesGeometry(wGeo, 30), wEdge);
+    wm.position.y = wl.position.y = dy;
+    washer.add(wm, wl);
+  });
+  // spacer sleeve between the washers
+  var slGeo = new THREE.LatheGeometry([
+    new THREE.Vector2(SLEEVE_ID / 2, Z_SLV - SLEEVE_L), new THREE.Vector2(SLEEVE_OD / 2, Z_SLV - SLEEVE_L),
+    new THREE.Vector2(SLEEVE_OD / 2, Z_SLV), new THREE.Vector2(SLEEVE_ID / 2, Z_SLV),
+    new THREE.Vector2(SLEEVE_ID / 2, Z_SLV - SLEEVE_L)], 64);
+  var sleeve = new THREE.Group();
+  sleeve.add(new THREE.Mesh(slGeo, new THREE.MeshStandardMaterial({ color: 0xc9b37a, metalness: 0.75, roughness: 0.3 })));
+  sleeve.add(new THREE.LineSegments(new THREE.EdgesGeometry(slGeo, 30), new THREE.LineBasicMaterial({ color: 0x6b5a2e })));
+
+  // screw: lathe from the head's underside up to the point; thread drawn plain
+  var sp = [new THREE.Vector2(0, Z_BEAR - HEAD_K), new THREE.Vector2(HEAD_D / 2 - HEAD_R, Z_BEAR - HEAD_K)];
+  for (var u = 1; u < 12; u++) {
+    var au = -Math.PI / 2 + u / 12 * Math.PI / 2;
+    sp.push(new THREE.Vector2(HEAD_D / 2 - HEAD_R + HEAD_R * Math.cos(au), Z_BEAR - HEAD_K + HEAD_R + HEAD_R * Math.sin(au)));
+  }
+  sp.push(new THREE.Vector2(HEAD_D / 2, Z_BEAR - HEAD_K + HEAD_R), new THREE.Vector2(HEAD_D / 2, Z_BEAR),
+          new THREE.Vector2(SCREW_D / 2, Z_BEAR), new THREE.Vector2(SCREW_D / 2, Z_TIP - TIP_L),
+          new THREE.Vector2(TIP_D / 2, Z_TIP), new THREE.Vector2(0, Z_TIP));
+  var sGeo = new THREE.LatheGeometry(sp, 64);
+  var screw = new THREE.Group();
+  screw.add(new THREE.Mesh(sGeo, new THREE.MeshStandardMaterial({ color: 0x5d6166, metalness: 0.75, roughness: 0.35 })));
+  screw.add(new THREE.LineSegments(new THREE.EdgesGeometry(sGeo, 30), new THREE.LineBasicMaterial({ color: 0x2a2d30 })));
+  // cross recess, drawn as two dark bars on the head's underside
+  var slotMat = new THREE.MeshBasicMaterial({ color: 0x111315 });
+  [0, Math.PI / 2].forEach(function (a) {
+    var g = new THREE.BoxGeometry(SLOT_L, 0.02, SLOT_W);
+    g.rotateY(a);
+    g.translate(0, Z_BEAR - HEAD_K - 0.012, 0);
+    screw.add(new THREE.Mesh(g, slotMat));
+  });
+  // the moving assembly; modelled with the stem flush with the laminate, then
+  // shifted down by CU_T + travel so the washer bears on the copper at travel 0
+  var moving = new THREE.Group();
+  moving.add(button, washer, sleeve, screw);
+  scene.add(moving);
+
+  // guide tube, fixed: washers run in its bore
+  var gGeo = new THREE.LatheGeometry([
+    new THREE.Vector2(0, GUIDE_Z0), new THREE.Vector2(GUIDE_OD / 2, GUIDE_Z0),
+    new THREE.Vector2(GUIDE_OD / 2, GUIDE_Z1), new THREE.Vector2(GUIDE_ID / 2, GUIDE_Z1),
+    new THREE.Vector2(GUIDE_ID / 2, FLOOR_Z + COLLAR_H),                       // centring collar
+    new THREE.Vector2(SPRING_OD / 2 + COLLAR_GAP, FLOOR_Z + COLLAR_H),
+    new THREE.Vector2(SPRING_OD / 2 + COLLAR_GAP, FLOOR_Z), new THREE.Vector2(0, FLOOR_Z)], 96);
+  var guide = new THREE.Group();
+  guide.add(new THREE.Mesh(gGeo, new THREE.MeshStandardMaterial({ color: 0xd9a441, metalness: 0.0, roughness: 0.75 })));
+  guide.add(new THREE.LineSegments(new THREE.EdgesGeometry(gGeo, 30), new THREE.LineBasicMaterial({ color: 0x7a5a1c })));
+  scene.add(guide);
+
+  // spring: centre line climbs one wire diameter per dead end coil and shares
+  // the rest among the active coils, as in button.scad; rebuilt as it compresses
+  function springZ(t, len) {
+    var dead = SPRING_WD, pa = (len - SPRING_WD - 2 * dead) / SPRING_NA;
+    return SPRING_WD / 2 + (t <= 1 ? t * dead
+         : t <= SPRING_N - 1 ? dead + (t - 1) * pa
+         : dead + SPRING_NA * pa + (t - SPRING_N + 1) * dead);
+  }
+  function springGeo(len) {
+    var curve = new THREE.Curve();
+    curve.getPoint = function (u) {
+      var t = u * SPRING_N, a = 2 * Math.PI * t;
+      return new THREE.Vector3(SPRING_DM / 2 * Math.cos(a), FLOOR_Z + springZ(t, len), -SPRING_DM / 2 * Math.sin(a));
+    };
+    return new THREE.TubeGeometry(curve, SPRING_N * 64, SPRING_WD / 2, 10, false);
+  }
+  var springMesh = new THREE.Mesh(springGeo(L_UP), new THREE.MeshStandardMaterial({ color: 0x9aa3ab, metalness: 0.8, roughness: 0.3 }));
+  var spring = new THREE.Group();
+  spring.add(springMesh);
+  scene.add(spring);
+  function updateSpring(len) {
+    var g = springGeo(len), old = springMesh.geometry;
+    springMesh.geometry = g;
+    springMesh.children.forEach(function (c) { c.geometry = g; });   // the section cap
+    old.dispose();
+  }
+
+  var travel = 0, pressAnim = null;
+  function setTravel(t) {
+    travel = Math.max(0, Math.min(STROKE, t));
+    moving.position.y = -CU_T - travel;
+    updateSpring(L_UP - travel);
+    document.getElementById('travel').value = travel;
+    document.getElementById('travelval').textContent = travel.toFixed(3) + ' mm';
+  }
+  document.getElementById('travel').max = STROKE;
+  document.getElementById('travel').addEventListener('input', function (e) { pressAnim = null; setTravel(+e.target.value); });
+  document.getElementById('press').addEventListener('click', function () { pressAnim = 0; });
+  setTravel(0);
+
+  // --- connector body, simplified and locked, hanging below the bottom copper ---
+  // part box (x0, x1, y0, y1, depth below the copper from d0 to d1) -> world
+  var connector = new THREE.Group();
+  var Z_CU = -PCB_T / 2 - CU_T;
+  function conBox(x0, x1, y0, y1, d0, d1, mat) {
+    var g = new THREE.BoxGeometry(x1 - x0, d1 - d0, y1 - y0);
+    g.translate((x0 + x1) / 2, Z_CU - (d0 + d1) / 2, -(y0 + y1) / 2);
+    connector.add(new THREE.Mesh(g, mat));
+    connector.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), conEdgeMat));
+  }
+  var housingMat = new THREE.MeshStandardMaterial({ color: 0xe9e0c8, metalness: 0.0, roughness: 0.7 });
+  var sliderMat = new THREE.MeshStandardMaterial({ color: 0x7a4a2a, metalness: 0.0, roughness: 0.6 });
+  var tinMat = new THREE.MeshStandardMaterial({ color: 0xc9cdd0, metalness: 0.7, roughness: 0.35 });
+  var conEdgeMat = new THREE.LineBasicMaterial({ color: 0x3a3a36 });
+  // turned: long side along y
+  var XL = CON_XC - BODY_D / 2, XR = CON_XC + BODY_D / 2, Y0 = CON_YC - BODY_W / 2, Y1 = CON_YC + BODY_W / 2;
+  conBox(XL, XR, Y0, Y1, 0, BODY_H - 1.2, housingMat);                                     // housing
+  conBox(XL + 0.6, XR - 0.6, Y0 + 1.6, Y1 - 1.6, BODY_H - 1.2, BODY_H, sliderMat);        // ZIF slider, FFC slot on its face
+  conBox(XL, XR, Y0, Y0 + 1.6, BODY_H - 1.2, BODY_H, housingMat);                          // housing ends
+  conBox(XL, XR, Y1 - 1.6, Y1, BODY_H - 1.2, BODY_H, housingMat);
+  for (var k = 1; k <= CON_N; k++) {                                                       // solder tails, both columns
+    var cyk = pinY(k);
+    conBox(XR, X_IN + PAD_L / 2 - 0.3, cyk - 0.125, cyk + 0.125, 0, 0.15, tinMat);
+    conBox(X_OUT - PAD_L / 2 + 0.3, XL, cyk - 0.125, cyk + 0.125, 0, 0.15, tinMat);
+  }
+  scene.add(connector);
+
+  // --- datum triad in the board's own frame ---
+  function labelTexture(txt, colour) {
+    var S = 64;
+    var c = document.createElement('canvas');
+    c.width = c.height = S;
+    var g = c.getContext('2d');
+    g.font = 'bold 42px ui-monospace, SFMono-Regular, monospace';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#' + ('000000' + colour.toString(16)).slice(-6);
+    g.fillText(txt, S / 2, S / 2);
+    return new THREE.CanvasTexture(c);
+  }
+  var axes = new THREE.Group();
+  var AXIS_LEN = 30;
+  [[new THREE.Vector3(1, 0, 0), 0xd1463c, 'X'],
+   [new THREE.Vector3(0, 0, -1), 0x4b9e4b, 'Y'],
+   [new THREE.Vector3(0, 1, 0), 0x3f7fd0, 'Z']
+  ].forEach(function (a) {
+    var arrow = new THREE.ArrowHelper(a[0], new THREE.Vector3(), AXIS_LEN, a[1], 4.5, 2.4);
+    arrow.line.material.depthTest = false;
+    arrow.cone.material.depthTest = false;
+    arrow.line.renderOrder = 10;
+    arrow.cone.renderOrder = 10;
+    axes.add(arrow);
+    var label = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: labelTexture(a[2], a[1]), depthTest: false, transparent: true
+    }));
+    label.position.copy(a[0]).multiplyScalar(AXIS_LEN + 4);
+    label.scale.set(5, 5, 1);
+    label.renderOrder = 11;
+    axes.add(label);
+  });
+  scene.add(axes);
+
+  // camera orbits a target, so Detail can look at the end of the board
+  // --- section plane parallel to X/Z, moved along part Y (world -Z) ---
+  // Every solid gets a back-face twin in a flat colour: through the cut one
+  // looks into the closed solid and sees its far inside walls, which reads as
+  // a filled cut face. The axes are left unclipped.
+  var cutPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+  var cutPlanes = [cutPlane];
+  var caps = [];
+  var solids = [];
+  [mesh, lines, copper, tracks, connector, button, washer, sleeve, screw, guide, spring].forEach(function (o) {
+    o.traverse(function (c) {
+      if (c.isMesh || c.isLineSegments) solids.push(c);
+    });
+  });
+  solids.forEach(function (c) {
+    (Array.isArray(c.material) ? c.material : [c.material]).forEach(function (m) {
+      m.clippingPlanes = cutPlanes;
+    });
+    if (!c.isMesh) return;
+    var src = Array.isArray(c.material) ? c.material[c.material.length - 1] : c.material;
+    var capMat = new THREE.MeshBasicMaterial({
+      color: src.color.clone().multiplyScalar(0.78), side: THREE.BackSide, clippingPlanes: cutPlanes
+    });
+    var cap = new THREE.Mesh(c.geometry, capMat);
+    cap.visible = false;
+    c.add(cap);   // children follow the parent's transform and visibility
+    caps.push(cap);
+  });
+  var cutY = 0, cutFlip = false;
+  function applyCut() {
+    var on = document.getElementById('cut').checked;
+    renderer.localClippingEnabled = on;
+    caps.forEach(function (c) { c.visible = on; });
+    // keep part y >= cutY (world z <= -cutY), or the other side when flipped
+    if (cutFlip) cutPlane.set(new THREE.Vector3(0, 0, 1), cutY);
+    else cutPlane.set(new THREE.Vector3(0, 0, -1), -cutY);
+    document.getElementById('cutval').textContent = 'y = ' + cutY.toFixed(2);
+    ['cuty', 'cutflip', 'cutcentre'].forEach(function (id) { document.getElementById(id).disabled = !on; });
+  }
+  document.getElementById('cut').addEventListener('change', applyCut);
+  document.getElementById('cuty').addEventListener('input', function (e) { cutY = +e.target.value; applyCut(); });
+  document.getElementById('cutflip').addEventListener('change', function (e) { cutFlip = e.target.checked; applyCut(); });
+  document.getElementById('cutcentre').addEventListener('click', function () {
+    cutY = 0; document.getElementById('cuty').value = 0; applyCut();
+  });
+  applyCut();
+
+  var target = new THREE.Vector3();
+  var azim = -0.45, elev = 0.62, dist = 420;
+  function place() {
+    camera.position.set(
+      target.x + dist * Math.cos(elev) * Math.sin(azim),
+      target.y + dist * Math.sin(elev),
+      target.z + dist * Math.cos(elev) * Math.cos(azim)
+    );
+    camera.lookAt(target);
+    if (camera === ocam) {
+      var hh = 2 * dist * Math.tan(FOV * Math.PI / 360);
+      var ww = hh * aspect;
+      ocam.left = -ww / 2; ocam.right = ww / 2;
+      ocam.top = hh / 2; ocam.bottom = -hh / 2;
+      ocam.updateProjectionMatrix();
+    }
+  }
+
+  var drag = null;
+  view.addEventListener('pointerdown', function (e) {
+    drag = { x: e.clientX, y: e.clientY }; view.classList.add('dragging');
+    view.setPointerCapture(e.pointerId);
+    document.getElementById('spin').checked = false;
+  });
+  view.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    azim -= (e.clientX - drag.x) * 0.008;
+    elev += (e.clientY - drag.y) * 0.008;
+    elev = Math.max(-1.52, Math.min(1.52, elev));
+    drag = { x: e.clientX, y: e.clientY };
+    place();
+  });
+  function endDrag() { drag = null; view.classList.remove('dragging'); }
+  view.addEventListener('pointerup', endDrag);
+  view.addEventListener('pointercancel', endDrag);
+  view.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    dist = Math.max(15, Math.min(1200, dist * (1 + Math.sign(e.deltaY) * 0.09)));
+    place();
+  }, { passive: false });
+
+  var PRESETS = {
+    iso:    [-0.45, 0.62, 420, 0],
+    top:    [0, 1.52, 360, 0],
+    bottom: [0, -1.52, 360, 0],
+    front:  [0, 0.02, 360, 0],
+    side:   [1.5708, 0.02, 120, 0],
+    connector: [Math.PI - 0.6, -0.7, 60, CON_XC, -CON_YC],
+    end:       [-1.2, -0.9, 80, X_START + 20, 0],
+    detail: [-0.7, -0.75, 55, -SPAN / 2 + PITCH / 2]
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function (b) {
+    b.addEventListener('click', function () {
+      var p = PRESETS[b.dataset.view];
+      azim = p[0]; elev = p[1]; dist = p[2]; target.set(p[3], 0, p[4] || 0);
+      document.getElementById('spin').checked = false;
+      place();
+    });
+  });
+  document.getElementById('edges').addEventListener('change', function (e) { lines.visible = e.target.checked; });
+  document.getElementById('showcopper').addEventListener('change', function (e) { copper.visible = e.target.checked; });
+  document.getElementById('showtracks').addEventListener('change', function (e) { tracks.visible = e.target.checked; });
+  document.getElementById('showspring').addEventListener('change', function (e) { spring.visible = e.target.checked; });
+  document.getElementById('showguide').addEventListener('change', function (e) { guide.visible = e.target.checked; });
+  document.getElementById('showsleeve').addEventListener('change', function (e) { sleeve.visible = e.target.checked; });
+  document.getElementById('showscrew').addEventListener('change', function (e) { screw.visible = e.target.checked; });
+  document.getElementById('showwasher').addEventListener('change', function (e) { washer.visible = e.target.checked; });
+  document.getElementById('showbutton').addEventListener('change', function (e) { button.visible = e.target.checked; });
+  document.getElementById('showcon').addEventListener('change', function (e) { connector.visible = e.target.checked; });
+  document.getElementById('showaxes').addEventListener('change', function (e) { axes.visible = e.target.checked; });
+  document.getElementById('ortho').addEventListener('change', function (e) {
+    camera = e.target.checked ? ocam : pcam;
+    place();
+  });
+
+  function resize() {
+    var r = view.getBoundingClientRect();
+    renderer.setSize(r.width, r.height, false);
+    aspect = r.width / Math.max(r.height, 1);
+    pcam.aspect = aspect;
+    pcam.updateProjectionMatrix();
+    place();
+  }
+  window.addEventListener('resize', resize);
+
+  function theme() {
+    maskMat.color.set(css('--board') || '#2f7a4f');
+    coreMat.color.set(css('--core') || '#d8cfa8');
+    edgeMat.color.set(css('--edge') || '#14301f');
+    cuMat.color.set(css('--copper') || '#c87a4c');
+  }
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(theme);
+  }
+  new MutationObserver(theme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.getElementById('spin').checked = false;
+  }
+
+  var last = performance.now();
+  function loop(now) {
+    var dt = (now - last) / 1000; last = now;
+    if (document.getElementById('spin').checked && !drag) { azim -= dt * 0.2; place(); }
+    if (pressAnim !== null) {   // down and back up, 1.2 s
+      pressAnim += dt / 1.2;
+      setTravel(STROKE * Math.sin(Math.PI * Math.min(pressAnim, 1)));
+      if (pressAnim >= 1) { pressAnim = null; setTravel(0); }
+    }
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+  theme(); resize(); place(); requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
