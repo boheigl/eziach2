@@ -19,7 +19,8 @@
 // boards and each board can be laid in from above. The connector of each board
 // sits in a pocket at the board's -x end (turned, its long side along y), with
 // a slot below it through the floor for the FFC, which leaves the vertical
-// connector downwards.
+// connector downwards. Board 0's slot is closed (ffc_slot): its FFC is to leave
+// through a channel to the front wall instead (cabling/, in progress).
 //
 // The connectors sit at the -x ends of the boards, where no higher board and
 // no guide lies above them, so every guide is closed all round. The thinnest
@@ -65,6 +66,8 @@ con_xc  = -133.15;// housing centre, x (at the -x end, turned along y)
 con_yc  = 4.5;    // and y
 ffc_w   = 16;     // slot for the FFC through the floor, along x
 ffc_t   = 2;      // and across
+ffc_slot = [false, true, true, true];   // board k has the slot; board 0's is closed: its
+                                        //   FFC is to leave through a channel (cabling/)
 
 /* [Guides — as the guide tube of button.scad] */
 guide_d   = 9.4;    // washers d9, 0.2 clearance
@@ -155,7 +158,8 @@ module connector_pocket(k)
         translate([con_xc - con_d / 2 - fit, con_yc - con_w / 2 - fit, z_bot - con_h - fit])
             cube([con_d + 2 * fit, con_w + 2 * fit, con_h + fit + 1]);
         // FFC slot, straight down through the floor, along y
-        translate([con_xc - ffc_t / 2, con_yc - ffc_w / 2, -80]) cube([ffc_t, ffc_w, 80 + z_bot]);
+        if (ffc_slot[k])
+            translate([con_xc - ffc_t / 2, con_yc - ffc_w / 2, -80]) cube([ffc_t, ffc_w, 80 + z_bot]);
     }
 
 z_topcu = pcb_t / 2 + cu_t;                 // top of a board, own frame

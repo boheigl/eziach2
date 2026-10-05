@@ -263,7 +263,9 @@ guide tubes.
   [chosen] z = 0.235·y − 19.09.
 - **Connector pockets** around each vertical FFC connector at the board's −x
   end (turned along y, 0.3 mm clearance) and a 2 × 16 mm **FFC slot** below
-  each, along y, straight down through the floor. [chosen]
+  each, along y, straight down through the floor. [chosen] **Board 0's slot
+  is closed** [given]: its FFC is to leave through a channel to the front
+  wall instead (`cabling/`, in progress); `ffc_slot` in `housing.scad`.
 - **Size:** 263.2 × 74.2 mm, z −22.9 … +14.1.
 
 **Thinnest walls:** about 0.7 mm, between each connector pocket and the guide
