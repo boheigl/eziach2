@@ -1,6 +1,6 @@
 {
-  "_comment": "Poses in the switch board frame (switch/spec.md section 1). t: along the cable, start -> outlet; w: towards contact 1. start = face of board 0's connector (GCT FFC3A20-14-G at (-133.15, 4.5), 5.5 below the bottom copper), cable leaving in -z, contact 1 at +y. length: free length between lead and outlet in mm, or \"auto\" = shortest that keeps rMin, plus slack.",
-  "cable": {},
+  "_comment": "Poses in the switch board frame (switch/spec.md section 1). t: along the cable, start -> outlet; w: towards contact 1. start = face of board 0's connector (GCT FFC3A20-14-G at (-133.15, 4.5), 5.5 below the bottom copper), cable leaving in -z, contact 1 at +y. length: free length between lead and outlet in mm, or \"auto\" = shortest that keeps rMin, plus slack. cable.rMin: maximum bending as the smallest bend radius in mm; the solver keeps the cable at or above it (0 = no limit).",
+  "cable": { "rMin": 2.0 },
   "routes": [
     {
       "name": "bend",

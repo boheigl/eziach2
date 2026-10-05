@@ -18,6 +18,11 @@
 // has to stretch the edges; kappa_r stands for that stretching energy.
 // The cable takes the shape of least energy that joins the two clamped ends
 // with the given length; kappa and tau are constant on each of N segments.
+// Maximum bending: the film's curvature across its rulings,
+// k1 = (kappa^2 + tau^2) / |kappa|, may not exceed 1 / rMin. The limit is a
+// penalty that is stiffened until it holds (to 0.5 %), so where the free shape
+// would bend tighter the cable lies on the limit radius instead, like a cable
+// laid over a former.
 
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -32,7 +37,8 @@
     pitch: 1.0,      // mm                                             [given]
     width: 15.0,     // (pins + 1) x pitch, GCT FFC3A20 drawing        [datasheet]
     thick: 0.15,     // film away from the stiffened ends              [unverified]
-    rMin: 2.0,       // smallest allowed bend radius, mm               [chosen]
+    rMin: 2.0,       // maximum bending, as the smallest bend radius (mm);
+                     // the solver keeps the cable at or above it, 0 = no limit [given]
     insert: 3.5,     // cable end inside the connector, below its face [estimated]
     lead: 2.0,       // straight (stiffened) beyond the connector face [chosen]
     slotDepth: 2.0,  // outlet wall thickness: held straight through it [chosen]
@@ -147,6 +153,8 @@
       P0: advance(S, c.lead),                 // free part starts after the lead
       P1: advance(T, -c.slotDepth / 2),       // and ends where the outlet wall begins
       kr: kappaR(c),
+      kmax: c.rMin > 0 ? 1 / c.rMin : 0,      // maximum bending, as curvature
+      mu: 0,                                  // its penalty weight, raised by solve()
       Ls: c.width                             // scales rotation errors to mm
     };
   }
@@ -195,7 +203,7 @@
   // Jacobian; three per segment keep the Gauss-Newton Hessian regular at zero
   // curvature
   function residuals(pr, x) {
-    var N = pr.N, h = pr.h, n = 2 * N, m = 3 * N + 2 * (N - 1), kr2 = pr.kr * pr.kr;
+    var N = pr.N, h = pr.h, n = 2 * N, m = 4 * N + 2 * (N - 1), kr2 = pr.kr * pr.kr;
     var r = new Float64Array(m), J = new Float64Array(m * n), sh = Math.sqrt(h), s2 = Math.sqrt(2 * h);
     for (var i = 0; i < N; i++) {
       var kap = x[i], tau = x[N + i], S = Math.sqrt(kap * kap + kr2);
@@ -213,6 +221,16 @@
         J[row * n + a + 1] = ws;
         J[row * n + a] = -ws;
       }
+    // maximum bending: penalty on k1 beyond kmax
+    var wp = Math.sqrt(pr.mu * h);
+    for (var q = 0; q < N && pr.kmax > 0; q++, row++) {
+      var kq = x[q], tq = x[N + q], Sq = Math.sqrt(kq * kq + kr2), Aq = kq * kq + tq * tq;
+      var over = Aq / Sq - pr.kmax;
+      if (over <= 0) continue;
+      r[row] = wp * over;
+      J[row * n + q] = wp * (2 * kq / Sq - Aq * kq / (Sq * Sq * Sq));
+      J[row * n + N + q] = wp * 2 * tq / Sq;
+    }
     return { r: r, J: J, m: m };
   }
 
@@ -362,11 +380,29 @@
     return y;
   }
 
+  var MU0 = 1e3, MU_MAX = 1e9, BEND_TOL = 0.005;
+
+  // Solve with the bending limit: start with a soft penalty and stiffen it
+  // until the smallest radius is within BEND_TOL of rMin.
+  function solve(pr, x0, opt) {
+    opt = opt || {};
+    pr.mu = pr.kmax > 0 ? MU0 : 0;
+    var res = solveShape(pr, x0, opt), iters = res.iters;
+    while (pr.kmax > 0 && res.ok && res.rMin < pr.cable.rMin * (1 - BEND_TOL) && pr.mu < MU_MAX) {
+      pr.mu *= 10;
+      var r2 = solveShape(pr, res.x, {});
+      iters += r2.iters;
+      if (!r2.ok) break;
+      res = r2;
+    }
+    res.iters = iters;
+    return res;
+  }
+
   // From x0 (warm): straight to the target, else by continuation. Without x0
   // the cable has several resting shapes (equilibria); three starts are tried
   // and the one of least energy is kept.
-  function solve(pr, x0, opt) {
-    opt = opt || {};
+  function solveShape(pr, x0, opt) {
     if (!x0) {
       var best = null;
       [0, 1, -1].forEach(function (tw) {
@@ -418,14 +454,15 @@
     res.energy = energy;
     res.rMin = kmax > 0 ? 1 / kmax : Infinity;
     res.rMinAt = (iAt + 0.5) * pr.h;
-    res.bendOk = res.rMin >= c.rMin;
+    res.bendOk = res.rMin >= c.rMin * (1 - BEND_TOL);
     res.twistMax = tmax * 180 / Math.PI;      // deg/mm
     res.etaMax = emax;
     res.gap = gap(pr);
     return res;
   }
 
-  // shortest free length whose resting shape keeps rMin; slack is added after
+  // shortest free length for which a shape within the bending limit exists;
+  // slack is added after
   function shortest(spec, opt) {
     opt = opt || {};
     var pr = problem(Object.assign({}, spec, { length: 1 }));

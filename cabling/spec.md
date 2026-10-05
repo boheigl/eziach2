@@ -22,7 +22,7 @@ out for now [given]: nothing checks the cable against other parts yet.
 | Thickness at the contacts | 0.30 ± 0.03 mm (stiffened end) | [datasheet] |
 | Film thickness elsewhere | 0.15 mm, only used for drawing and the twist stiffness (§3) | [unverified] |
 | Exposed contact length | ≥ 3.0 mm, stiffener ≥ 4.0 mm | [datasheet] |
-| Smallest bend radius allowed | 2.0 mm (`rMin`) | [chosen], to be checked against the cable maker's data |
+| Maximum bending, as smallest bend radius | 2.0 mm (`rMin`, set in `routes.json` → `cable`) | [given]; to be checked against the cable maker's data |
 
 ## 2. Poses and frames
 
@@ -85,8 +85,19 @@ tries three starts (untwisted, twisted either way) and keeps the one of least
 energy. While you drag in the viewer, the shape follows from the previous one,
 like a real cable; *Re-solve from scratch* looks for the lowest one again.
 
+**Maximum bending.** `rMin` is a limit the solver enforces, not only a
+check: the film's curvature across its rulings may not exceed 1/`rMin`. It is
+a penalty that is stiffened (×10 at a time) until the smallest radius is within
+0.5 % of `rMin`. Where the free shape would bend tighter, the cable lies on the
+limit radius instead, like a cable laid over a former. `rMin = 0` switches the
+limit off. Test: an S-bend (6 mm offset, parallel ends) with R 2 has the
+shortest free length 14.377 mm by hand (two 2 mm arcs and a straight); the
+solver finds 14.378 mm with the smallest radius at 1.993 mm.
+
 **Shortest length.** `"length": "auto"` finds by bisection the shortest free
-length whose resting shape keeps `rMin`, then adds `slack` (default 3 mm).
+length for which a shape within the bending limit exists, then adds `slack`
+(default 3 mm). At the shortest length the cable reaches `rMin`; with the
+slack it usually relaxes away from it.
 
 Reported per route: free and total length, length from the connector to the
 outlet centre, smallest bend radius (the film's curvature across its rulings,

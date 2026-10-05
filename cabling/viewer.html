@@ -157,7 +157,7 @@
       <div class="row" style="margin-top:8px">
         <label>free length<input type="number" id="len-num" step="0.5"></label>
         <label>slack for shortest<input type="number" id="slack" step="0.5" value="3"></label>
-        <label>min bend R<input type="number" id="rmin" step="0.5"></label>
+        <label>max bending, R<input type="number" id="rmin" step="0.5" min="0"></label>
       </div>
       <div class="row">
         <label>film thickness<input type="number" id="thick" step="0.01"></label>
@@ -178,7 +178,7 @@
     <section class="panel card">
       <h2>Result</h2>
       <table id="result"></table>
-      <p class="note">Bend radius: of the film's tightest curvature, across its rulings. Twist and the
+      <p class="note">Max bending: the solver never bends the film tighter than this radius (0 = no limit). Bend radius: of the film's tightest curvature, across its rulings. Twist and the
         ruling tilt (tan of the angle between the rulings and the cable's width) show where the film turns
         about its own axis. A shape that is not converged keeps the last good one on screen.</p>
     </section>

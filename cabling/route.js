@@ -38,7 +38,8 @@ cfg.routes.forEach(function (rt) {
   console.log('  cable length  ' + f1(res.total) + ' mm end to end (insert ' + c.insert + ' + lead ' + c.lead +
               ' + free + outlet ' + c.slotDepth + ' + tail ' + c.tail + '); connector to outlet centre ' + f1(res.toOutlet));
   console.log('  bend radius   min ' + f2(res.rMin) + ' mm at ' + f1(res.rMinAt) + ' mm into the free length' +
-              (res.bendOk ? '' : '  ** below rMin ' + c.rMin + ' **'));
+              (c.rMin > 0 ? ' (limit R' + c.rMin + (res.rMin < c.rMin * 1.01 ? ', reached' : '') + ')' : '') +
+              (res.bendOk ? '' : '  ** below the limit **'));
   console.log('  twist         max ' + f2(res.twistMax) + ' deg/mm, ruling tilt max ' + f2(res.etaMax));
   console.log('  solver        ' + res.iters + ' iterations, ' + (Date.now() - t0) + ' ms');
   if (!res.ok || !res.bendOk) failed++;
