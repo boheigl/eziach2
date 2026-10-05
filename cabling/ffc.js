@@ -488,7 +488,7 @@
       }
       if (!accepted) {
         lam = Math.min(lam * 10, 1e6);
-        rho = Math.min(rho * 10, 1e12);
+        rho = Math.min(rho * 2, 1e6);
         if (gInf < tol) break;            // at a minimum within round-off
         continue;
       }
