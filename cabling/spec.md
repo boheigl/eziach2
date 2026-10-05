@@ -102,25 +102,32 @@ slack it usually relaxes away from it.
 
 **Obstacles.** Any number of obstacles, each a signed distance function
 (negative inside): `cylinder` {p, axis, r, h}, `box` {p, size, x?, y?},
-`sphere` {p, r}, or in JS any `sdf(point)` function. At every node, five
-points across the cable's width (edges, quarters, centre) must stay half the
-film thickness plus `clearance` (0.5 mm [chosen]) away from every obstacle.
+`sphere` {p, r}, or in JS any `sdf(point)` function. Along the cable at
+points at most 1 mm apart, five points across its width (edges, quarters,
+centre) must stay half the film thickness plus `clearance` (0.5 mm [chosen])
+away from every obstacle. (Checking at the nodes alone, 3.4 mm apart with 32
+segments, let the gap shrink to 0.15 mm between nodes round ⌀6 cylinders.)
 This is a penalty like the bending limit, stiffened until no point is more
 than 0.02 mm inside the gap.
 
 **Topological options.** Each obstacle can lie on either side of the cable,
-so k obstacles give 2^k ways through (enumerated for up to 6 obstacles, 64
-options). The solver finds them all:
+so k obstacles give 2^k ways through (enumerated for up to 12 obstacles;
+any beyond stay on the side they come to). The solver searches them as a
+tree:
 
 1. The free shape, with the obstacles off.
 2. Per obstacle, a direction across the cable: at the cable point nearest to
    it (or deepest inside it), the way out of the obstacle, square to the
    cable.
-3. For each combination of sides, the obstacles go in one after another:
-   each is moved along its direction until it is clear of the cable (to the
-   far side if it has to cross it, not at all if it is already clear on its
-   side), then slid back in steps of at most 1 mm, pushing the cable ahead.
-   Waiting obstacles are out of the way.
+3. The obstacles go in one after another, in the order the free cable passes
+   them, and each splits the search in two (its two sides). An obstacle is
+   moved along its direction until it is clear of the cable (to the far side
+   if it has to cross it, not at all if it is already clear on its side),
+   then slid back in steps of at most 1 mm, pushing the cable ahead; waiting
+   obstacles are out of the way. Combinations sharing their first choices
+   share that work. A branch that gets stuck is dropped with everything below
+   it, and so is one that reaches an arrangement already explored.
+   `budget_s` (per route) stops the search after that many seconds.
 4. Each option is solved to the end and labelled by the side of the film each
    obstacle ends up on, `+n` or `−n` (n = t × w, the film normal). The best
    option (within the limits first, then least energy) is the default; all
@@ -132,6 +139,8 @@ options). The solver finds them all:
 `two_cylinders` (90 mm): all four options found, energies 0.099 / 0.177 /
 0.359 / 0.556, each 0.50 mm clear. An option may come out "not found" if
 sliding gets stuck, e.g. when the cable is too short for that way round.
+Example `grid_3x3`: nine ⌀6 × 300 mm cylinders on a 14 mm grid, 110 mm free
+length; 16 options in the first 4 minutes, more exist (search stopped).
 
 Reported per route: free and total length, length from the connector to the
 outlet centre, smallest bend radius (the film's curvature across its rulings,

@@ -3,7 +3,8 @@
 // STLs next to it: <name>.stl (the best option), <name>_opt<k>.stl (every
 // topological option when there are obstacles) and <name>_obstacles.stl.
 //   node route.js [routes.json] [name ...]
-// Obstacles: cfg.obstacles apply to every route, route.obstacles to one.
+// Obstacles: cfg.obstacles apply to every route, route.obstacles to one;
+// route.budget_s limits the search for topological options (seconds).
 'use strict';
 var fs = require('fs'), path = require('path'), FFC = require('./ffc.js');
 
@@ -39,7 +40,9 @@ cfg.routes.forEach(function (rt) {
     });
   } else {
     pr = FFC.problem(Object.assign({}, spec, { length: rt.length }));
-    options = FFC.solve(pr, null).options.map(function (r) { r.pr = pr; return r; });
+    var sol = FFC.solve(pr, null, rt.budget_s ? { budget: rt.budget_s * 1000 } : {});
+    options = sol.options.map(function (r) { r.pr = pr; return r; });
+    if (sol.options.truncated) console.log('  (search stopped after budget_s = ' + rt.budget_s + ' s: options may be missing)');
   }
   // best: within the limits first, then (auto) shortest or (fixed) least energy
   var order = options.map(function (r, i) { return i; }).sort(function (a, b) {

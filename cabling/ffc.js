@@ -317,24 +317,44 @@
     return { r: r, J: J, m: m };
   }
 
-  // obstacle check points: five across the width at every node 1..N
-  var ACROSS = [-1, -0.5, 0, 0.5, 1];
+  // Obstacle check points: along the cable at most CHECK_STEP apart (every
+  // segment split into sub(pr) stations, the last at its far node), and at
+  // each station five across the width. Checking at the nodes alone let a
+  // cable pass through a thin obstacle between two nodes.
+  var ACROSS = [-1, -0.5, 0, 0.5, 1], CHECK_STEP = 1.0;
+  function subN(pr) { return Math.max(1, Math.ceil(pr.h / CHECK_STEP)); }
+  function nChecks(pr) { return pr.N * subN(pr) * ACROSS.length; }
+  // calls fn(index, point, frame R, arc length) for segments i0 .. N-1,
+  // index ((i * sub + m) * 5 + k)
+  function eachCheck(pr, x, Rs, ps, i0, fn) {
+    var M = subN(pr), K = ACROSS.length, hw = pr.cable.width / 2;
+    for (var i = i0; i < pr.N; i++)
+      for (var m = 1; m <= M; m++) {
+        var st = m === M ? { R: Rs[i + 1], p: ps[i + 1] } : step(Rs[i], ps[i], x[i], x[pr.N + i], pr.h * m / M);
+        var w = col(st.R, 1);
+        for (var k = 0; k < K; k++)
+          fn(((i * M + m - 1) * K) + k, add(st.p, scl(w, ACROSS[k] * hw)), st.R, pr.h * (i + m / M));
+      }
+  }
+  // every check point of the cable x, as {q, R, s}
+  function checkPoints(pr, x) {
+    var F = integrate(pr, x), out = [];
+    eachCheck(pr, x, F.Rs, F.ps, 0, function (j, q, R, s) { out.push({ q: q, R: R, s: s }); });
+    return out;
+  }
   function nearest(pr, q) {
     var d = Infinity, sh = pr.shifts;
     for (var o = 0; o < pr.obs.length; o++) d = Math.min(d, pr.obs[o].sdf(sh ? sub(q, sh[o]) : q));
     return d;
   }
   function obstaclesOn(pr) { return pr.obs.length > 0 && pr.muO > 0; }
-  // residuals of nodes i0+1 .. N into out (index (node - 1) * 5 + k)
-  function obsRes(pr, Rs, ps, i0, out) {
-    var K = ACROSS.length, wt = Math.sqrt(pr.muO * pr.h / K), hw = pr.cable.width / 2;
-    for (var nd = i0 + 1; nd <= pr.N; nd++) {
-      var w = col(Rs[nd], 1);
-      for (var k = 0; k < K; k++) {
-        var pen = pr.dmin - nearest(pr, add(ps[nd], scl(w, ACROSS[k] * hw)));
-        out[(nd - 1) * K + k] = pen > 0 ? wt * pen : 0;
-      }
-    }
+  // obstacle residuals of segments i0 .. N-1 into out
+  function obsRes(pr, x, Rs, ps, i0, out) {
+    var wt = Math.sqrt(pr.muO * pr.h / (subN(pr) * ACROSS.length));
+    eachCheck(pr, x, Rs, ps, i0, function (j, q) {
+      var pen = pr.dmin - nearest(pr, q);
+      out[j] = pen > 0 ? wt * pen : 0;
+    });
     return out;
   }
   function tailFrom(pr, x, i0, R, p, Rs, ps) {
@@ -351,9 +371,9 @@
     var N = pr.N, n = nVars(N), F = integrate(pr, x);
     var E = { R: F.Rs[N], p: F.ps[N] }, g = poseErr(pr, E, T);
     var Jg = new Float64Array(6 * n), eps = 1e-7, j, k;
-    var on = obstaclesOn(pr), mo = on ? N * ACROSS.length : 0;
+    var on = obstaclesOn(pr), mo = on ? nChecks(pr) : 0, per = subN(pr) * ACROSS.length;
     var ro = new Float64Array(mo), Jo = new Float64Array(mo * n), rj = new Float64Array(mo);
-    if (on) obsRes(pr, F.Rs, F.ps, 0, ro);
+    if (on) obsRes(pr, x, F.Rs, F.ps, 0, ro);
     var Rs = F.Rs.slice(), ps = F.ps.slice();
     for (j = 0; j < n; j++) {
       var i = j % N, keep = x[j];
@@ -362,8 +382,10 @@
       x[j] = keep;
       for (k = 0; k < 6; k++) Jg[k * n + j] = (gj[k] - g[k]) / eps;
       if (on) {
-        obsRes(pr, Rs, ps, i, rj);
-        for (k = i * ACROSS.length; k < mo; k++) Jo[k * n + j] = (rj[k] - ro[k]) / eps;
+        x[j] = keep + eps;
+        obsRes(pr, x, Rs, ps, i, rj);
+        x[j] = keep;
+        for (k = i * per; k < mo; k++) Jo[k * n + j] = (rj[k] - ro[k]) / eps;
       }
     }
     return { g: g, J: Jg, ro: ro, Jo: Jo, mo: mo };
@@ -416,7 +438,7 @@
       var R = residuals(pr, xx);
       if (!R.r) return { phi: Infinity, g: null };
       var F = integrate(pr, xx), g = poseErr(pr, { R: F.Rs[N], p: F.ps[N] }, T), e = sumsq(R.r);
-      if (obstaclesOn(pr)) e += sumsq(obsRes(pr, F.Rs, F.ps, 0, new Float64Array(N * ACROSS.length)));
+      if (obstaclesOn(pr)) e += sumsq(obsRes(pr, xx, F.Rs, F.ps, 0, new Float64Array(nChecks(pr))));
       var lg = 0;
       for (var q = 0; q < 6; q++) lg += nu[q] * g[q];
       return { phi: 0.5 * e + lg + 0.5 * rho * sumsq(g), g: g };
@@ -513,7 +535,7 @@
   var MUO = 1e3, CLEAR_TOL = 0.02;   // obstacle penalty weight; mm allowed into the gap
   var SLIDE = 1.0;                   // mm the obstacles slide in per step, at most
 
-  var MAX_SIDES = 6;   // obstacles whose sides are enumerated: 2^6 = 64 options at most
+  var MAX_SIDES = 12;  // obstacles whose sides are enumerated; any beyond stay on the side they come to
 
   // Without x0: the free shape first (obstacles off), from a single almost
   // straight line whose end is moved to the outlet. With obstacles, every
@@ -532,62 +554,90 @@
     pr.muO = 0;
     var free = limits(pr, continuation(pr, straight(pr.N), opt));
     if (!pr.obs.length || !free.ok) { free.sides = []; free.options = [free]; return free; }
-    var opts = topologies(pr, free);
+    var opts = topologies(pr, free, opt);
     var best = opts.reduce(function (b, r) { return better(r, b) ? r : b; }, null);
     best.options = opts;
     return best;
   }
 
-  // Per obstacle, the direction across which it can pass the cable: at the
-  // cable point nearest to it (or deepest inside it), the way out of the
-  // obstacle, square to the cable.
-  function sideDirs(pr, x) {
-    var N = pr.N, F = integrate(pr, x), hw = pr.cable.width / 2, e = 1e-4;
-    return pr.obs.map(function (ob) {
-      var best = Infinity, q0 = null, t0 = null, n0 = null;
-      for (var nd = 1; nd <= N; nd++)
-        for (var k = 0; k < ACROSS.length; k++) {
-          var q = add(F.ps[nd], scl(col(F.Rs[nd], 1), ACROSS[k] * hw)), d = ob.sdf(q);
-          if (d < best) { best = d; q0 = q; t0 = col(F.Rs[nd], 0); n0 = col(F.Rs[nd], 2); }
-        }
-      var g = [0, 1, 2].map(function (a) {
-        var qp = q0.slice(), qm = q0.slice();
-        qp[a] += e; qm[a] -= e;
-        return (ob.sdf(qp) - ob.sdf(qm)) / (2 * e);
-      });
-      g = sub(g, scl(t0, dot(g, t0)));
-      return len(g) > 1e-6 ? unit(g) : n0;
+  // The direction across which obstacle o can pass the cable x: at the cable
+  // point nearest to it (or deepest inside it), the way out of the obstacle,
+  // square to the cable.
+  function sideDir(pr, x, o) {
+    var e = 1e-4, ob = pr.obs[o], best = Infinity, q0 = null, t0 = null, n0 = null;
+    checkPoints(pr, x).forEach(function (c) {
+      var d = ob.sdf(c.q);
+      if (d < best) { best = d; q0 = c.q; t0 = col(c.R, 0); n0 = col(c.R, 2); }
     });
+    var g = [0, 1, 2].map(function (a) {
+      var qp = q0.slice(), qm = q0.slice();
+      qp[a] += e; qm[a] -= e;
+      return (ob.sdf(qp) - ob.sdf(qm)) / (2 * e);
+    });
+    g = sub(g, scl(t0, dot(g, t0)));
+    return len(g) > 1e-6 ? unit(g) : n0;
   }
 
-  // Every combination of sides: obstacle i is moved by side_i x D_i along its
-  // direction (side +1 carries it across the cable to the far side, -1 back
-  // the way it is; D_i just enough to clear the free shape, 0 if it already is
-  // clear on that side), then all slide back together, pushing the cable ahead.
-  function topologies(pr, free) {
-    var k = Math.min(pr.obs.length, MAX_SIDES), dirs = sideDirs(pr, free.x), out = [];
-    for (var mask = 0; mask < (1 << k); mask++) {
-      var sides = pr.obs.map(function (o, i) { return i < k && (mask >> i) & 1 ? 1 : -1; });
-      var r = limits(pr, slideIn(pr, free, dirs, sides));
-      r.sides = sideLabels(pr, r.x);
-      // the same topology reached twice: keep one
-      if (!out.some(function (o) { return o.ok && r.ok && o.sides.join() === r.sides.join() && Math.abs(o.energy - r.energy) < 1e-4 * (1 + r.energy); }))
-        out.push(r);
+  // Every combination of sides, as a tree: the obstacles go in one after
+  // another, in the order the free cable passes them, and each splits the
+  // search in two (its side -1 or +1, see slideOne()). Combinations sharing
+  // their first choices share that work; a branch that gets stuck is dropped
+  // with everything below it, and so is one that reaches an arrangement
+  // (placed obstacles, each on its side) already explored. opt.budget (ms)
+  // stops the search early (.truncated on the result list); opt.onOption(r)
+  // is called for each option as it is found.
+  function topologies(pr, free, opt) {
+    var nO = pr.obs.length, k = Math.min(nO, MAX_SIDES), out = [], t0 = Date.now();
+    var budget = (opt && opt.budget) || Infinity;
+    // order: where along the free cable each obstacle comes nearest
+    var pts = checkPoints(pr, free.x);
+    var order = pr.obs.map(function (ob, o) {
+      var best = Infinity, at = 0;
+      pts.forEach(function (c) { var d = ob.sdf(c.q); if (d < best) { best = d; at = c.s; } });
+      return { o: o, at: at };
+    }).sort(function (a, b) { return a.at - b.at; }).map(function (q) { return q.o; });
+    var placed = pr.obs.map(function () { return false; });
+    var truncated = false, slides = 0, seen = {};
+    function leaf(r) {
+      var res = limits(pr, finish(pr, r));
+      res.sides = sideLabels(pr, res.x);
+      if (!out.some(function (q) { return q.sides.join() === res.sides.join() && Math.abs(q.energy - res.energy) < 1e-4 * (1 + res.energy); })) {
+        out.push(res);
+        if (opt && opt.onOption) opt.onOption(res);
+      }
     }
+    function dfs(i, cur) {
+      if (i === nO) { leaf(cur); return; }
+      if (Date.now() - t0 > budget) { truncated = true; return; }
+      var o = order[i];
+      (i < k ? [-1, 1] : [-1]).forEach(function (side) {
+        if (truncated) return;
+        var r = slideOne(pr, cur, o, side, placed);
+        slides++;
+        if (TRACE) console.log('tree', order.slice(0, i + 1).map(function (q) { return q + 1; }).join(' '), 'side', side, 'ok', r.ok);
+        if (!r.ok) return;
+        placed[o] = true;
+        var lab = sideLabels(pr, r.x), key = i + ':' + order.slice(0, i + 1).map(function (q) { return lab[q]; }).join('');
+        if (!seen[key]) { seen[key] = true; dfs(i + 1, r); }
+        else if (TRACE) console.log('tree', 'same arrangement as before:', key);
+        placed[o] = false;
+      });
+    }
+    pr.muO = MUO;
+    dfs(0, free);
+    pr.shifts = null;
+    out.truncated = truncated;
+    out.slides = slides;
     return out;
   }
 
   // which side of the film each obstacle lies on, at the cable point nearest
   // to it: '+n' or '-n' (n = t x w, the film normal)
   function sideLabels(pr, x) {
-    var N = pr.N, F = integrate(pr, x), hw = pr.cable.width / 2, e = 1e-4;
+    var e = 1e-4, pts = checkPoints(pr, x);
     return pr.obs.map(function (ob) {
       var best = Infinity, q0 = null, n0 = null;
-      for (var nd = 1; nd <= N; nd++)
-        for (var k = 0; k < ACROSS.length; k++) {
-          var q = add(F.ps[nd], scl(col(F.Rs[nd], 1), ACROSS[k] * hw)), d = ob.sdf(q);
-          if (d < best) { best = d; q0 = q; n0 = col(F.Rs[nd], 2); }
-        }
+      pts.forEach(function (c) { var d = ob.sdf(c.q); if (d < best) { best = d; q0 = c.q; n0 = col(c.R, 2); } });
       var g = [0, 1, 2].map(function (a) {
         var qp = q0.slice(), qm = q0.slice();
         qp[a] += e; qm[a] -= e;
@@ -597,54 +647,50 @@
     });
   }
 
-  // The obstacles go in one after another; the ones still waiting are out of
-  // the way. Obstacle i is first moved along side_i x dir_i until it is clear
-  // of the cable as it is by then (carried across, side +1, it has to meet the
-  // cable first), then slid back in steps, the cable pushed ahead.
-  var FAR = [1e9, 1e9, 1e9];
-  function slideIn(pr, res, dirs, sides) {
-    var nO = pr.obs.length, cur = res, iters = res.iters, hw = pr.cable.width / 2;
-    var shifts = dirs.map(function () { return FAR; });
-    function fail() { pr.shifts = null; return finish(pr, { x: cur.x, ok: false, err: Infinity, iters: iters }); }
+  // Bring obstacle o in from the given side, with the obstacles in `placed`
+  // in place and the rest out of the way: first move it along side x its
+  // direction until it is clear of the cable (carried across, side +1, it
+  // has to meet the cable first; side -1 and already clear: nothing to do),
+  // then slide it back in steps, the cable pushed ahead.
+  var FAR = [1e9, 1e9, 1e9], MAX_FAILS = 8;
+  function slideOne(pr, res, o, side, placed) {
+    var cur = res, iters = res.iters, hw = pr.cable.width / 2;
+    var shifts = pr.obs.map(function (ob, i) { return placed[i] ? [0, 0, 0] : FAR; });
+    function done(ok) {
+      shifts[o] = [0, 0, 0];
+      pr.shifts = shifts.slice();
+      var out = ok ? finish(pr, cur) : finish(pr, { x: cur.x, ok: false, err: Infinity, iters: iters });
+      out.iters = iters;
+      return out;
+    }
     // how far obstacle o, moved by v, reaches into the gap around the cable
-    function penOne(o, v) {
-      var F = integrate(pr, cur.x), d = Infinity;
-      for (var nd = 1; nd <= pr.N; nd++)
-        for (var k = 0; k < ACROSS.length; k++)
-          d = Math.min(d, pr.obs[o].sdf(sub(add(F.ps[nd], scl(col(F.Rs[nd], 1), ACROSS[k] * hw)), v)));
+    function penOne(v) {
+      var d = Infinity;
+      checkPoints(pr, cur.x).forEach(function (c) { d = Math.min(d, pr.obs[o].sdf(sub(c.q, v))); });
       return pr.dmin - d;
     }
-    pr.muO = MUO;
-    for (var o = 0; o < nO; o++) {
-      var dir = scl(dirs[o], sides[o]), hit = penOne(o, [0, 0, 0]) > 0;
-      if (!hit && sides[o] < 0) { shifts[o] = [0, 0, 0]; continue; }   // clear on this side already
-      var D = 0;
-      while (D < 4096) {
-        D = D < 1 ? 1 : hit ? 2 * D : D + 1;
-        if (penOne(o, scl(dir, D)) > 0) hit = true;
-        else if (hit) break;
-      }
-      if (!hit || D >= 4096) return fail();       // it never meets the cable this way
-      var at = D, step = SLIDE;
-      while (at > 0 && step > 0.05) {
-        var to = Math.max(0, at - step);
-        if (penOne(o, scl(dir, to)) <= 0) { at = to; continue; }    // not touching yet
-        shifts[o] = scl(dir, to);
-        pr.shifts = shifts.slice();
-        // intermediate positions need not be exact; the last one is
-        var r2 = finish(pr, solveTo(pr, cur.x, pr.P1, to > 0 ? { maxIt: 150, tol: 1e-5, okTol: 0.01 } : { maxIt: 150 }));
-        iters += r2.iters;
-        if (TRACE) console.log('slide', sides.join(','), 'obstacle', o + 1, 'at', to.toFixed(2), 'ok', r2.ok, 'pen', r2.pen.toFixed(3));
-        if (r2.ok && r2.pen <= 0.5) { cur = r2; at = to; step = Math.min(SLIDE, step * 1.5); }
-        else step /= 2;
-      }
-      if (at > 0) return fail();
-      shifts[o] = [0, 0, 0];
+    var dir = scl(sideDir(pr, cur.x, o), side), hit = penOne([0, 0, 0]) > 0;
+    if (!hit && side < 0) return done(true);        // clear on this side already
+    var D = 0;
+    while (D < 4096) {
+      D = D < 1 ? 1 : hit ? 2 * D : D + 1;
+      if (penOne(scl(dir, D)) > 0) hit = true;
+      else if (hit) break;
     }
-    pr.shifts = null;
-    var out = finish(pr, solveTo(pr, cur.x, pr.P1, { maxIt: 150 }));
-    out.iters = iters + out.iters;
-    return out;
+    if (!hit || D >= 4096) return done(false);       // it never meets the cable this way
+    var at = D, step = SLIDE, fails = 0;
+    while (at > 0 && step > 0.05 && fails < MAX_FAILS) {
+      var to = Math.max(0, at - step);
+      if (penOne(scl(dir, to)) <= 0) { at = to; continue; }    // not touching yet
+      shifts[o] = scl(dir, to);
+      pr.shifts = shifts.slice();
+      // intermediate positions need not be exact; the last one is
+      var r2 = finish(pr, solveTo(pr, cur.x, pr.P1, to > 0 ? { maxIt: 150, tol: 1e-5, okTol: 0.01 } : { maxIt: 150 }));
+      iters += r2.iters;
+      if (r2.ok && r2.pen <= 0.5) { cur = r2; at = to; fails = 0; step = Math.min(SLIDE, step * 1.5); }
+      else { step /= 2; fails++; }
+    }
+    return done(at <= 0);
   }
 
   function feasible(r) { return r.ok && r.bendOk && r.clearOk; }
@@ -729,15 +775,11 @@
     // gap between film surface and obstacle, over the free length
     res.pen = 0; res.clearance = Infinity; res.clearAt = null;
     if (pr.obs.length) {
-      var F = integrate(pr, x), hw = c.width / 2;
-      for (var nd = 1; nd <= N; nd++) {
-        var w = col(F.Rs[nd], 1);
-        for (var k = 0; k < ACROSS.length; k++) {
-          var q = add(F.ps[nd], scl(w, ACROSS[k] * hw)), d = nearest(pr, q);
-          res.pen = Math.max(res.pen, pr.dmin - d);
-          if (d - c.thick / 2 < res.clearance) { res.clearance = d - c.thick / 2; res.clearAt = nd * pr.h; }
-        }
-      }
+      checkPoints(pr, x).forEach(function (cp) {
+        var d = nearest(pr, cp.q);
+        res.pen = Math.max(res.pen, pr.dmin - d);
+        if (d - c.thick / 2 < res.clearance) { res.clearance = d - c.thick / 2; res.clearAt = cp.s; }
+      });
     }
     res.clearOk = res.pen <= CLEAR_TOL;
     return res;
