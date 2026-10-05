@@ -150,6 +150,7 @@
   //   {type: 'cylinder', p: centre, axis, r, h: length}   capped cylinder
   //   {type: 'box', p: centre, size: [a, b, c], x?, y?}   x, y: its axes (default world)
   //   {type: 'sphere', p: centre, r}
+  //   {type: 'halfspace', p: point on the plane, normal}  solid behind the plane (against normal)
   //   {sdf: function (p) {...}}                           anything else (JS only)
   function obstacleFrame(o, xa, ya) {
     var X = unit(xa), Y = unit(sub(ya, scl(X, dot(ya, X))));
@@ -159,6 +160,10 @@
     if (typeof o.sdf === 'function') return { spec: o, sdf: o.sdf };
     var c = o.p;
     if (o.type === 'sphere') return { spec: o, sdf: function (q) { return len(sub(q, c)) - o.r; } };
+    if (o.type === 'halfspace') {
+      var nn = unit(o.normal);
+      return { spec: o, sdf: function (q) { return dot(sub(q, c), nn); } };
+    }
     if (o.type === 'cylinder') {
       var a = unit(o.axis || [0, 0, 1]), hh = o.h / 2;
       return { spec: o, sdf: function (q) {
@@ -201,6 +206,10 @@
         V.push(add(add(add(o.p, scl(Fr.X, i & 1 ? h[0] : -h[0])), scl(Fr.Y, i & 2 ? h[1] : -h[1])), scl(Fr.Z, i & 4 ? h[2] : -h[2])));
       [[0, 2, 3, 1], [4, 5, 7, 6], [0, 1, 5, 4], [2, 6, 7, 3], [0, 4, 6, 2], [1, 3, 7, 5]]
         .forEach(function (q) { F.push([q[0], q[1], q[2]], [q[0], q[2], q[3]]); });
+    } else if (o.type === 'halfspace') {
+      // drawn as a 60 x 60 x 1 plate on the plane, behind it
+      var nh = unit(o.normal), a1 = unit(cross(nh, Math.abs(nh[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0])), a2 = cross(nh, a1);
+      return obstacleMesh({ type: 'box', p: sub(o.p, scl(nh, 0.5)), size: [60, 60, 1], x: a1, y: a2 }, seg);
     } else if (o.type === 'sphere') {
       var nl = seg / 2;
       for (var la = 0; la <= nl; la++)
@@ -554,10 +563,38 @@
     pr.muO = 0;
     var free = limits(pr, continuation(pr, straight(pr.N), opt));
     if (!pr.obs.length || !free.ok) { free.sides = []; free.options = [free]; return free; }
-    var opts = topologies(pr, free, opt);
+    var opts = opt.enumerate === false ? [pushOut(pr, free)] : topologies(pr, free, opt);
     var best = opts.reduce(function (b, r) { return better(r, b) ? r : b; }, null);
+    if (!best) {                                   // every branch got stuck
+      best = finish(pr, { x: free.x, ok: false, err: Infinity, iters: free.iters });
+      best.sides = [];
+    }
     best.options = opts;
     return best;
+  }
+
+  // One option only (opt.enumerate === false): every obstacle stays on the
+  // side the free cable passes it. The required gap starts at the deepest
+  // point the free cable reaches into the obstacles (so it is met) and grows
+  // in steps to the full gap; the cable is pushed out evenly from all of them.
+  function pushOut(pr, free) {
+    var full = pr.dmin, cur = free, iters = free.iters, d = full - free.pen, step = 1.0;
+    pr.muO = MUO;
+    while (d < full && step > 0.02) {
+      var to = Math.min(full, d + step);
+      pr.dmin = to;
+      var r2 = solveTo(pr, cur.x, pr.P1, { maxIt: 200 });
+      pr.dmin = full;
+      r2 = finish(pr, r2);
+      iters += r2.iters;
+      if (TRACE) console.log('push gap', (to - pr.cable.thick / 2).toFixed(2), 'ok', r2.ok);
+      if (r2.ok) { cur = r2; d = to; step = Math.min(1.0, step * 1.5); }
+      else step /= 2;
+    }
+    var out = limits(pr, finish(pr, d >= full ? cur : { x: cur.x, ok: false, err: Infinity, iters: 0 }));
+    out.iters = iters;
+    out.sides = sideLabels(pr, out.x);
+    return out;
   }
 
   // The direction across which obstacle o can pass the cable x: at the cable
@@ -587,7 +624,9 @@
   // stops the search early (.truncated on the result list); opt.onOption(r)
   // is called for each option as it is found.
   function topologies(pr, free, opt) {
-    var nO = pr.obs.length, k = Math.min(nO, MAX_SIDES), out = [], t0 = Date.now();
+    // opt.enumerate === false: every obstacle stays on the side the free cable
+    // passes it (one option)
+    var nO = pr.obs.length, k = opt && opt.enumerate === false ? 0 : Math.min(nO, MAX_SIDES), out = [], t0 = Date.now();
     var budget = (opt && opt.budget) || Infinity;
     // order: where along the free cable each obstacle comes nearest
     var pts = checkPoints(pr, free.x);
