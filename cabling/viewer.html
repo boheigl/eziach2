@@ -200,7 +200,8 @@
     { name: 'bend', start: START, target: { p: [-155, 4.5, -30], t: [-1, 0, 0], w: [0, 1, 0] }, length: 'auto' },
     { name: 'bend_twist', start: START, target: { p: [-160, 30, -40], t: [-1, 0, 0], w: [0, 0, 1] }, length: 'auto' },
     { name: 'u_turn', start: START, target: { p: [-113, 4.5, 5], t: [0, 0, 1], w: [0, 1, 0] }, length: 60 },
-    { name: 'sideways', start: START, target: { p: [-133.15, 45, -30], t: [0, 0, -1], w: [0, 1, 0] }, length: 'auto' }
+    { name: 'sideways', start: START, target: { p: [-133.15, 45, -30], t: [0, 0, -1], w: [0, 1, 0] }, length: 'auto' },
+    { name: 'example', start: START, target: { p: [-95, -30, -42], t: [0.6, -0.6, -0.5], w: [0.3, 0.5, -0.2] }, length: 'auto', slack: 5 }
   ];
 
   var cable = FFC.cableParams({ segs: 32 });
@@ -488,6 +489,7 @@
     readObjects(); syncInputs();
     coldNext = true;
     setView('iso');
+    if (p.slack !== undefined) { state.slack = p.slack; document.getElementById('slack').value = p.slack; }
     if (p.length === 'auto') runShortest();
     else setLength(p.length);
   }
