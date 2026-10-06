@@ -23,12 +23,10 @@ var rt = cfg.routes.filter(function (r) { return r.name === name; })[0];
 if (!rt || !rt.channel) { console.error('no route "' + name + '" with a channel in ' + file); process.exit(1); }
 var cable = Object.assign({}, cfg.cable || {}, rt.cable || {});
 var spec = { start: rt.start, target: rt.target, cable: cable, length: typeof rt.length === 'number' ? rt.length : 1,
-             kink: rt.kink, planar: rt.planar, obstacles: (cfg.obstacles || []).concat(rt.obstacles || []) };
+             kink: rt.kink, planar: rt.planar, vertical: rt.vertical, obstacles: (cfg.obstacles || []).concat(rt.obstacles || []) };
 var pr = FFC.problem(spec), t0 = Date.now(), res;
 if (rt.waypoints) {
-  var g = FFC.planarGuess(pr, rt.waypoints);
-  if (typeof rt.length !== 'number') FFC.setLength(pr, g.L);
-  res = FFC.solve(pr, g.x, { maxIt: 200 });
+  res = FFC.solve(pr, FFC.guide(pr, rt.waypoints, rt.length), { maxIt: 200 });
 } else res = FFC.solve(pr, null, { enumerate: rt.enumerate });
 var ok = res.ok && res.bendOk && res.clearOk && res.selfOk;
 console.log(name + (ok ? '' : '  ** NOT WITHIN THE LIMITS **') + ': free ' + res.L.toFixed(1) + ' mm, cable ' + res.total.toFixed(1) +

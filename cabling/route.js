@@ -29,7 +29,7 @@ cfg.routes.forEach(function (rt) {
   var cable = Object.assign({}, cfg.cable || {}, rt.cable || {});
   var obstacles = (cfg.obstacles || []).concat(rt.obstacles || []);
   var spec = { start: rt.start, target: rt.target, cable: cable, obstacles: obstacles, length: 1,
-               kink: rt.kink, planar: rt.planar };
+               kink: rt.kink, planar: rt.planar, vertical: rt.vertical };
   var t0 = Date.now(), pr, options;
   if (rt.length === 'auto') {
     // every option at its own shortest length, plus slack
@@ -44,9 +44,7 @@ cfg.routes.forEach(function (rt) {
   } else if (rt.waypoints) {
     // planar route from a plan-view starting path
     pr = FFC.problem(Object.assign({}, spec, { length: typeof rt.length === 'number' ? rt.length : 1 }));
-    var g = FFC.planarGuess(pr, rt.waypoints);
-    if (typeof rt.length !== 'number') FFC.setLength(pr, g.L);
-    var rg = FFC.solve(pr, g.x, { maxIt: 200 });
+    var rg = FFC.solve(pr, FFC.guide(pr, rt.waypoints, rt.length), { maxIt: 200 });
     rg.sides = []; rg.pr = pr; options = [rg];
   } else {
     pr = FFC.problem(Object.assign({}, spec, { length: rt.length }));

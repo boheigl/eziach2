@@ -31,7 +31,10 @@
 // cable; solve() works out every combination (topological option).
 // Kink: a crease fold right after the connector (spec.kink), and planar
 // motion after it (spec.planar: no twist, the cable only bends about its
-// width, so it stays in one plane).
+// width, so it stays in one plane), or vertical (spec.vertical: the film's
+// normal stays horizontal, its faces vertical; the cable lies on a vertical
+// wall that curves freely in plan and rises at the constant angle it has at
+// the start, which takes twist = kappa tan(angle)).
 
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -256,7 +259,7 @@
     var N = c.segs, kink = spec.kink || null;
     return {
       cable: c, N: N, L: spec.length, h: spec.length / N,
-      start: S, target: T, kink: kink, planar: !!spec.planar,
+      start: S, target: T, kink: kink, planar: !!spec.planar, vertical: !!spec.vertical,
       // free part starts after the lead, or after the fold
       P0: kink ? kinkPose(S, kink, c.thick) : advance(S, c.lead),
       P1: advance(T, -c.slotDepth / 2),       // and ends where the outlet wall begins
@@ -316,7 +319,7 @@
   // Jacobian; three per segment keep the Gauss-Newton Hessian regular at zero
   // curvature
   function residuals(pr, x) {
-    var N = pr.N, h = pr.h, n = 2 * N, m = 4 * N + 2 * (N - 1), kr2 = pr.kr * pr.kr;
+    var N = pr.N, h = pr.h, n = 2 * N, m = 4 * N + 2 * (N - 1) + (pr.vertical ? N : 0), kr2 = pr.kr * pr.kr;
     var r = new Float64Array(m), J = new Float64Array(m * n), sh = Math.sqrt(h), s2 = Math.sqrt(2 * h);
     for (var i = 0; i < N; i++) {
       var kap = x[i], tau = x[N + i], S = Math.sqrt(kap * kap + kr2);
@@ -344,7 +347,24 @@
       J[row * n + q] = wp * (2 * kq / Sq - Aq * kq / (Sq * Sq * Sq));
       J[row * n + N + q] = wp * 2 * tq / Sq;
     }
+    // vertical: tau = kappa tan(a), a the start's rise; with the start's normal
+    // horizontal this keeps it horizontal (a geodesic on a vertical cylinder)
+    if (pr.vertical) {
+      var ta = verticalTan(pr), wv = Math.sqrt(h) * 1e4;
+      for (var v2 = 0; v2 < N; v2++, row++) {
+        r[row] = wv * (x[N + v2] - ta * x[v2]);
+        J[row * n + N + v2] = wv;
+        J[row * n + v2] = -wv * ta;
+      }
+    }
     return { r: r, J: J, m: m };
+  }
+  // tan of the rise for vertical mode, with the sign that keeps n horizontal:
+  // dn/ds = -kappa t - tau w, so d(n_z)/ds = 0 needs tau = -kappa t_z / w_z
+  // (t_z and w_z stay constant on a vertical cylinder)
+  function verticalTan(pr) {
+    var t0 = col(pr.P0.R, 0), w0 = col(pr.P0.R, 1);
+    return -t0[2] / w0[2];
   }
 
   // Obstacle check points: along the cable at most CHECK_STEP apart (every
@@ -976,6 +996,61 @@
     return { x: x, L: L };
   }
 
+  // Starting shape for a vertical route: the plan curve through waypoints
+  // (x, y), from the start's plan direction to the target's, at the start's
+  // constant rise. Returns {x, L}: kappa from the change of plan heading,
+  // tau = kappa tan(rise), and the cable length (plan length / cos(rise)).
+  function verticalGuess(pr, plan) {
+    var P0 = pr.P0.p, t0 = col(pr.P0.R, 0), n0 = col(pr.P0.R, 2), ca = Math.hypot(t0[0], t0[1]);
+    var W = [[P0[0], P0[1]]].concat(plan, [[pr.P1.p[0], pr.P1.p[1]]]), t1 = col(pr.P1.R, 0), i, k;
+    var T0 = [t0[0] / ca, t0[1] / ca], T1n = Math.hypot(t1[0], t1[1]), T1 = [t1[0] / T1n, t1[1] / T1n], pts = [];
+    for (i = 0; i + 1 < W.length; i++) {
+      var a = W[i], b = W[i + 1], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      var ta = i === 0 ? [T0[0] * d, T0[1] * d] : [(W[i + 1][0] - W[i - 1][0]) / 2, (W[i + 1][1] - W[i - 1][1]) / 2];
+      var tb = i + 2 === W.length ? [T1[0] * d, T1[1] * d] : [(W[i + 2][0] - W[i][0]) / 2, (W[i + 2][1] - W[i][1]) / 2];
+      for (k = 0; k < 40; k++) {
+        var u = k / 40, h00 = 2 * u * u * u - 3 * u * u + 1, h10 = u * u * u - 2 * u * u + u, h01 = -2 * u * u * u + 3 * u * u, h11 = u * u * u - u * u;
+        pts.push([h00 * a[0] + h10 * ta[0] + h01 * b[0] + h11 * tb[0], h00 * a[1] + h10 * ta[1] + h01 * b[1] + h11 * tb[1]]);
+      }
+    }
+    pts.push(W[W.length - 1]);
+    var S = [0], H = [];
+    for (i = 1; i < pts.length; i++) S.push(S[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    for (i = 0; i + 1 < pts.length; i++) H.push(Math.atan2(pts[i + 1][1] - pts[i][1], pts[i + 1][0] - pts[i][0]));
+    var Lp = S[S.length - 1], L = Lp / ca, N = pr.N, hp = Lp / N, h = L / N, x = new Float64Array(2 * N);
+    function headAt(s) { var j = 0; while (j + 1 < H.length && S[j + 1] < s) j++; return H[Math.min(j, H.length - 1)]; }
+    // a turn to the left in plan turns t towards n if n points to the left of t's plan direction
+    var left = [-T0[1], T0[0]], sg = n0[0] * left[0] + n0[1] * left[1] > 0 ? 1 : -1, tn = verticalTan(pr);
+    var prev = Math.atan2(T0[1], T0[0]);
+    for (i = 0; i < N; i++) {
+      var hh = headAt((i + 1) * hp), dh = hh - prev;
+      while (dh > Math.PI) dh -= 2 * Math.PI;
+      while (dh < -Math.PI) dh += 2 * Math.PI;
+      // plan heading turns at kappa_n / cos(rise) per cable length... per cable length d(heading)/ds = dh / h;
+      // on the cylinder kappa = d(heading)/ds * cos(rise)
+      x[i] = sg * dh / h * ca;
+      x[N + i] = tn * x[i];
+      prev = hh;
+    }
+    return { x: x, L: L };
+  }
+
+  // Starting shape from plan waypoints for a planar or vertical route.
+  // length: a number, or anything else to take it from the waypoint path. In
+  // vertical mode the end's height follows from the length (the cable rises
+  // at the start's angle all the way), so pr.P1 and pr.target are raised or
+  // lowered to it. Returns the unknowns.
+  function guide(pr, waypoints, length) {
+    var g = pr.vertical ? verticalGuess(pr, waypoints) : planarGuess(pr, waypoints);
+    setLength(pr, typeof length === 'number' ? length : g.L);
+    if (pr.vertical) {
+      var z1 = pr.P0.p[2] + pr.L * col(pr.P0.R, 0)[2], dz = z1 - pr.P1.p[2];
+      pr.P1 = { p: [pr.P1.p[0], pr.P1.p[1], z1], R: pr.P1.R };
+      pr.target = { p: [pr.target.p[0], pr.target.p[1], pr.target.p[2] + dz], R: pr.target.R };
+    }
+    return g.x;
+  }
+
   // ------------------------------------------------------------- geometry
 
   // samples along the whole cable, connector end to tail: centre p, frame R,
@@ -1065,7 +1140,7 @@
     pose: pose, fromSpec: fromSpec, toSpec: toSpec,
     problem: problem, setLength: setLength, gap: gap,
     solve: solve, shortest: shortest, resample: resample,
-    compileObstacle: compileObstacle, obstacleMesh: obstacleMesh, planarGuess: planarGuess,
+    compileObstacle: compileObstacle, obstacleMesh: obstacleMesh, planarGuess: planarGuess, verticalGuess: verticalGuess, guide: guide,
     samples: samples, mesh: mesh, stl: stl,
     vec: { add: add, sub: sub, scl: scl, dot: dot, cross: cross, len: len, unit: unit, col: col, mul: mul, mulv: mulv, expSO3: expSO3, logSO3: logSO3 }
   };

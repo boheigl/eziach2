@@ -19,9 +19,9 @@
 //   above the board hole. The caps land on it at the lower stop;
 //   front wall: wall_t thick, full length, in front of the board, between its
 //   own caps and the caps of the board below; down onto the top of the step
-//   below (for the bottom step, down to the floor);
-//   end walls at both ends, end_pad beyond the board ends, from the top down onto the
-//   step below where it reaches under this one, else the floor;
+//   below (for the bottom step, down to the bottom);
+//   end walls at both ends, end_pad beyond the board ends, from the top down to the
+//   level of the step below (step 0: to the bottom);
 //   ribs that locate the board, rib_gap from its edges, over the board's
 //   thickness only, so they stay clear of the housing step under it: a front
 //   rib along the -y edge, a back wall along the +y edge and round the tab,
@@ -47,15 +47,17 @@ pitch    = 20;
 margin   = 12.3;    // last hole centre to the +x end
 margin_n = 5.3;     // row to the -y / +y edge
 margin_p = 10.6;
-x_start  = -139.8;
-tab_x1   = -129.9;
-tab_y    = 16;
+x_start  = -145.691;
+tab_x1   = -145.691;   // no tab at this connector angle: flush with the +y edge
+tab_y    = 10.6;
+x_scr_l  = -142;    // -x end screw (pcb.scad)
 n_boards = 4;
 step     = [10, 17, 4];
 end_pad  = 1.2;     // board end to the end walls' inner face: room for the -x end rib
 fit      = 0.3;     // housing clearance around the boards
-seat_z   = -16.583; // floor plane as in housing.scad
+seat_z   = -16.583; // bottom plane as in housing.scad
 floor_min = 1.5;
+rec_h    = 0;      // FFC recess depth, as in housing.scad
 collar_d = 8.6;
 
 /* [Buttons] */
@@ -83,12 +85,12 @@ $fa = 4; $fs = 0.4;
 span    = (n - 1) * pitch;
 z_top   = pcb_t / 2 + cu_t;          // board top, own frame
 z_bot   = -pcb_t / 2 - cu_t;         // board underside
-slope   = step[2] / step[1];
-floor_c = -(seat_z - floor_min) + slope * collar_d / 2;
+slope   = step[2] / step[1];         // the housing's bottom plane, parallel to the steps
+floor_c = -(seat_z - floor_min) + slope * collar_d / 2 + rec_h;
 function x_end(k) = span / 2 - k * pitch + margin;   // +x end or saw cut of board k
 function holes(k) = [for (i = [0 : n - 1 - k]) -span / 2 + i * pitch];
 end_d    = 2.3;     // end screws through the board, end_d inside each board end
-function screws(k) = [[x_start + end_d, 0], [x_end(k) - end_d, 0],
+function screws(k) = [[x_scr_l, 0], [x_end(k) - end_d, 0],
                       [-mid_c, mid_y], [mid_c - 2 * k * step[0], mid_y]];
 // the middle screw heads sit between two caps
 assert(norm([pitch / 2, mid_y]) - cap_d / 2 - csk_d / 2 >= 0.5, "middle screw head too close to a cap");
@@ -131,8 +133,9 @@ module inner2d(k) union() {
 }
 // the board-locating walls (back, round the tab) reach only down to the board's
 // underside: below it lies the housing step
+// (grown past the outline: shrunk, it left a skin of the outer face down to the bottom)
 module rib_band2d(k) difference() {
-    offset(delta = -0.001) outer2d(k);
+    offset(delta = 0.5) outer2d(k);
     inner2d(k);
     translate([-1000, y_out - 1]) square([2000, y_in - y_out + 1]);              // front wall
     translate([-1000, -500]) square([x_start - end_pad + 1000, 1000]);             // -x end wall
@@ -181,15 +184,50 @@ assert(norm([step[0], step[1]]) - dent_r - wall_t - cap_d / 2 >= cap_gap, "dent 
 echo(str("dents: r", dent_r, " round the caps of the board below (", cap_clear, " clear), ring wall ", wall_t,
          "; ring to the front rib above ", -margin_n - rib_gap - rib_t - (-step[1] + dent_r + wall_t)));
 
+// step k's walls end at the top of step k-1, also where no lower box lies
+// under them (the end walls beyond the staircase): only step 0 reaches the bottom
+module below_stair(k)
+    translate([-200, -100, (k - 1) * step[2] + z_top + cover_t - 100]) cube([400, 300, 100]);
+
+// CHAMFERED STAIRCASE. Seen from above, the steps' outer corners at both ends
+// lie on a straight line (step[0] in x per step[1] in y), so each notch between
+// step k and step k+1 is closed by one slanted face from corner k to corner
+// k+1; its top edge rises from step k's top to step k+1's. The notch is the
+// triangle corner k, corner k+1 and the inner corner, where step k+1's end
+// wall meets step k's tab (at -x) or back (at +x). The housing fills it up to
+// step k's top, the cover's wedge from there up to the slanted top.
+function step_top(k) = pcb_t / 2 + cu_t + cover_t + k * step[2];
+// the notch triangle between steps k and k+1 at the -x (s = 0) or +x (s = 1) end
+function notch(k, s) =
+    let(c0 = s == 0 ? [x_start - end_pad - wall_t, tab_y + tab_wall]
+                    : [x_end(k) + end_pad + wall_t, margin_p + tab_wall],
+        a = [c0[0] + k * step[0], c0[1] + k * step[1]],
+        b = [a[0] + (s == 0 ? 1 : -1) * step[0], a[1] + step[1]])
+    [a, b, [b[0], a[1]]];
+// the cover's wall round the tab, as tab_wall in housing.scad
+tab_wall = rib_gap + rib_t;
+// (0.05 onto step k's top, so the two share a face, not just an edge, and
+// starting 0.02 inside step k's corner, which it would otherwise touch in a point)
+module notch_wedge(k, s)
+    let(n = notch(k, s), t = [n[0] + [s == 0 ? 0.02 : -0.02, -0.05], n[1], n[2] - [0, 0.05]])
+    hull() polyhedron(points = [[t[0][0], t[0][1], step_top(k)], [t[1][0], t[1][1], step_top(k)],
+                                [t[2][0], t[2][1], step_top(k)], [t[1][0], t[1][1], step_top(k + 1)],
+                                [t[2][0], t[2][1], step_top(k + 1)]],
+                      faces = [[0, 1, 2, 3, 4]]);
+
 module below_floor()
     multmatrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, slope, 1, -floor_c], [0, 0, 0, 1]])
         translate([-200, -100, -100]) cube([400, 300, 100]);
 
 difference() {
-    union() for (k = [0 : n_boards - 1])
-        difference() {
-            shell(k);
-            if (k > 0) for (j = [0 : k - 1]) solid_step(j);
-        }
+    union() {
+        for (k = [0 : n_boards - 1])
+            difference() {
+                shell(k);
+                if (k > 0) for (j = [0 : k - 1]) solid_step(j);
+                if (k > 0) below_stair(k);
+            }
+        for (k = [0 : n_boards - 2]) { notch_wedge(k, 0); notch_wedge(k, 1); }
+    }
     below_floor();
 }

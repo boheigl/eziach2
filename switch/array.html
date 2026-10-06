@@ -151,6 +151,7 @@
           <label><input type="checkbox" id="showguide"> Guide tubes</label>
           <label><input type="checkbox" id="showhousing" checked> Housing</label>
           <label><input type="checkbox" id="showcover" checked> Cover</label>
+          <label><input type="checkbox" id="showcable" checked> Cable</label>
           <label><input type="checkbox" id="showspring" checked> Spring</label>
           <label><input type="checkbox" id="showaxes" checked> Axes</label>
           <label hidden><input type="checkbox" id="showarray" checked> Array ×4</label>
@@ -220,7 +221,7 @@
         <div class="panel-bar"><span>Notes</span></div>
         <div class="notes">
           <ul>
-            <li><b>Four boards as a staircase.</b> Board k (k = 0 … 3) is the board of <code>viewer.html</code> moved by k × (10, 17, 4) mm. That is half the hole pitch along the row, 17 mm across it and 4 mm up, so each board rises towards +Y. The boards stay parallel. <b>Board k has 13 − k holes (13, 12, 11, 10).</b> It is the same board with k holes sawn off at the +X end, cut 12.3 mm past the last hole kept, 2.3 mm beyond its +x end screw hole and 2.7 mm clear of the first ring removed. With the 10 mm shift, both ends of the staircase step in by 10 mm per board. The saw cuts through the common bus on top, which still reaches every remaining −Y half, and through the band tracks of the removed holes, which stay behind as dead stubs on contacts 2, 3 and 4. Deburr the cut edge, since the tracks there are only 0.2 mm apart. Each one carries its FFC connector (GCT FFC3A20-14-G, vertical, cable leaving downwards) at its −X end, turned along Y. That end is lengthened for the connector and the −x end screw, to x = −139.8, with a small tab for the connector's +Y end. It is never sawn off, and no higher board lies above it. Buttons, washers, sleeve, screw and spring are left out here. They are in <code>viewer.html</code>.</li>
+            <li><b>Four boards as a staircase.</b> Board k (k = 0 … 3) is the board of <code>viewer.html</code> moved by k × (10, 17, 4) mm. That is half the hole pitch along the row, 17 mm across it and 4 mm up, so each board rises towards +Y. The boards stay parallel. <b>Board k has 13 − k holes (13, 12, 11, 10).</b> It is the same board with k holes sawn off at the +X end, cut 12.3 mm past the last hole kept, 2.3 mm beyond its +x end screw hole and 2.7 mm clear of the first ring removed. With the 10 mm shift, both ends of the staircase step in by 10 mm per board. The saw cuts through the common bus on top, which still reaches every remaining −Y half, and through the band tracks of the removed holes, which stay behind as dead stubs on contacts 2, 3 and 4. Deburr the cut edge, since the tracks there are only 0.2 mm apart. Each one carries its FFC connector (GCT FFC3A20-14-G, vertical, cable leaving downwards) at its −X end, turned from Y towards −X by 59.5°, so that its long side lies along the normal of the housing's slanted −X face. That end is lengthened for the connector to x = −145.7. It is never sawn off, and no higher board lies above it. Buttons, washers, sleeve, screw and spring are left out here. They are in <code>viewer.html</code>.</li>
             <li><b>No clashes.</b> The boards are 15.9 mm wide, with the row of holes off centre towards −Y because all tracks run behind it. With the 17 mm step neighbouring boards are 1.1 mm apart in plan. The connectors sit at the −X ends, under no higher board. Grid sampling at 0.1 mm finds no overlap between neighbouring boards with their buttons, washers, sleeves, screws and springs. Only the old single guide tube (⌀13.4), which the housing replaces here, would touch the board below by 0.3 mm.</li>
             <li><b>Assembly.</b> Boards, buttons and cover go on as one unit. (1) Lay each board into the upside-down <b>cover</b> (<code>cover.scad</code>). Ribs locate it on all sides with 0.1 mm play: a front rib along its −Y edge, a back wall along its +Y edge and around the tab, and an end rib at −X as the stop. The ribs cover only the board's thickness. (2) Push the buttons through cover and board from the cover side, and fit washers, sleeve and screw from below. (3) Plug in the FFCs. (4) Set the unit onto the housing, feeding each FFC down through its slot. (5) Screw the cover down with sixteen M2 countersunk self-tapping screws (ISO 7046 / DIN 965 heads, flush with the cover top): four per board, all through the board on the row line (y = 0) into the housing: one near each end and two between them. The middle ones lie on two lines that meet in +Y beyond the last board, so every board carries all five middle holes (x = −50, 50, 30, 10, −10) and uses two. The springs then press each board up against the cover through the upper washer. The housing steps sit 0.1 mm below the boards and carry them when a button is pressed.</li>
             <li><b>One button</b> sits in board 0's middle hole (hole 7, x = 0), with washers, sleeve, screw and spring, at the upper stop. Drag <b>Travel</b> or click <b>Press</b> to move it. At the lower stop its cap lands on the cover. A section at y = 0 cuts through it and shows the stem in the cover opening and in the board hole.</li>
@@ -238,6 +239,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="housing.js"></script>
 <script src="cover.js"></script>
+<script src="back_cable.js"></script>
 <script>
 (function () {
   // --- parameters, as in pcb.scad ---
@@ -269,34 +271,45 @@
   // compression spring between the floor and the lower washer
   // d8 x 0.4 x 25, 8 active coils (+ one dead coil each end, assumed)
   var SPRING_WD = 0.4, SPRING_OD = 8, SPRING_N = 10, SPRING_L0 = 25, SPRING_F0 = 0.12 * 9.81, SPRING_G = 81500;   // 120 g at the upper stop
-  // connector at the -x end, turned along y: housing to hole 1's ring, its -y end, where the +y
-  // band turns, the left channel, board beyond it, tab beyond the pads and the housing
-  var BODY_Y_MIN = -6.0, JOG_X0 = 5.3, TAB_SIDE = 0.5, TAB_FRONT = 1.0;
+  // connector at the -x end, turned from y towards -x so that its long side lies along the
+  // normal of the housing's slanted face (atan(17 / 10) = 59.5 deg): its lowest corner 0.4
+  // clear of the board below, its centre as close to hole 1 as the guide allows; -x end
+  // screw beside it; a tab only if the body reached past the +y edge (not at this angle)
+  var BODY_Y_MIN = -6.0, CON_XC = -135.5, CON_ROT = Math.atan2(17, 10), X_SCR_L = -142;
+  var TAB_SIDE = 0.5, TAB_FRONT = 1.0;
 
   var SPAN = (N - 1) * PITCH, LEN_X = SPAN + 2 * MARGIN, LEN_Y = MARGIN_N + MARGIN_P;
   var R_IN = HOLE_D / 2, R_OUT = R_IN + RING_W;
   var CON_A = (CON_N - 1) * CON_PITCH;
-  var CON_YC = BODY_Y_MIN + BODY_W / 2;                        // connector centre y (turned)
-  var ROW_Y = PAD_SPAN / 2 - PAD_L / 2;                        // pad columns at x = CON_XC +- ROW_Y
+  // the connector's frame: x' across (towards the inner column), y' along (towards contact 1)
+  var CU = [-Math.sin(CON_ROT), Math.cos(CON_ROT)], CV = [Math.cos(CON_ROT), Math.sin(CON_ROT)];
+  var CON_YC = BODY_Y_MIN + BODY_W / 2 * Math.abs(CU[1]) + BODY_D / 2 * Math.abs(CV[1]);   // centre y
+  function conPt(xp, yp) { return [CON_XC + xp * CV[0] + yp * CU[0], CON_YC + xp * CV[1] + yp * CU[1]]; }
+  var ROW_Y = PAD_SPAN / 2 - PAD_L / 2;                        // pad columns at x' = +-ROW_Y
   var TR_LO = R_OUT + TR_RING, RING_IN = R_IN + RING_W / 2;
   function holeX(k) { return -SPAN / 2 + (k - 1) * PITCH; }               // hole k, 1-based
-  function pinY(c) { return CON_YC + CON_A / 2 - (c - 1) * CON_PITCH; }  // contact c: 1 at +y
-  function conOf(h) { return CON_N + 1 - h; }                              // hole 1 -> 14 (lowest)
+  function pinY(c) { return CON_A / 2 - (c - 1) * CON_PITCH; }  // contact c along y': 1 at +y'
+  function conOf(h) { return CON_N + 1 - h; }                     // hole 1 -> 14
   function levUp(h) { return TR_LO + (h - 1) * TR_PITCH; }
-  // every track runs in the +y band and turns beside hole 1: up-turners first,
-  // highest furthest right, then down-turners, lowest furthest right
-  var JOG_ORDER = [];
-  for (var jh = N; jh >= 1; jh--) if (pinY(conOf(jh)) > levUp(jh)) JOG_ORDER.push(jh);
-  for (jh = 1; jh <= N; jh++) if (pinY(conOf(jh)) <= levUp(jh)) JOG_ORDER.push(jh);
-  function xJog(h) { return holeX(1) - JOG_X0 - JOG_ORDER.indexOf(h) * TR_PITCH; }
-  var XJOG_MIN = holeX(1) - JOG_X0 - (N - 1) * TR_PITCH;
-  // the connector follows from the turns: inner pad column just left of the last
-  var X_IN = XJOG_MIN - TR_W / 2 - (TR_PITCH - TR_W) - PAD_L / 2;
-  var CON_XC = X_IN - ROW_Y, X_OUT = CON_XC - ROW_Y;
-  var X_SCR_L = X_OUT - PAD_L / 2 - SCR_CU - MID_D / 2;
-  var X_START = X_SCR_L - END_D, X_END = SPAN / 2 + MARGIN;
-  var TAB_X1 = X_IN + PAD_L / 2 + TAB_SIDE, TAB_Y = CON_YC + BODY_W / 2 + TAB_FRONT;
-  var VIA_C = [CON_XC, pinY(1)];
+  // every track runs in the +y band, turns where its contact's line meets
+  // its level and runs down that line into the outer end of its inner pad
+  function padEnd(c) { return conPt(ROW_Y + PAD_L / 2, pinY(c)); }
+  function turn(h) { var e = padEnd(conOf(h)), t = (levUp(h) - e[1]) / CV[1]; return [e[0] + t * CV[0], levUp(h)]; }
+  var BODY_XY = [[-1, -1], [-1, 1], [1, 1], [1, -1]].map(function (s) { return conPt(s[0] * BODY_D / 2, s[1] * BODY_W / 2); });
+  // the board reaches -x to the body's corner (pads and screw lie further in)
+  var X_START = Math.min(X_SCR_L - END_D, Math.min.apply(null, BODY_XY.map(function (q) { return q[0]; })));
+  var X_END = SPAN / 2 + MARGIN;
+  // tab: from the -x end to where the body crosses the +y edge, out beyond its highest corner
+  var TAB_X1 = -Infinity, TAB_Y = TAB_FRONT + Math.max.apply(null, BODY_XY.map(function (q) { return q[1]; }));
+  for (var bi = 0; bi < 4; bi++) {
+    var ba = BODY_XY[bi], bb = BODY_XY[(bi + 1) % 4];
+    if ((ba[1] - MARGIN_P) * (bb[1] - MARGIN_P) < 0)
+      TAB_X1 = Math.max(TAB_X1, ba[0] + (bb[0] - ba[0]) * (MARGIN_P - ba[1]) / (bb[1] - ba[1]));
+  }
+  if (TAB_X1 > -Infinity) TAB_X1 += TAB_SIDE;
+  else { TAB_X1 = X_START; TAB_Y = MARGIN_P; }   // no tab
+  var VIA_C = conPt(0, pinY(1));                                  // common: via at contact 1
+  var BUS_TURN = [CON_XC + (-RING_IN - CON_YC) / CU[1] * CU[0], -RING_IN];   // bus meets the centre line
   var VIAS = [];
   for (var vk = 1; vk <= N; vk++) VIAS.push([holeX(vk), -RING_IN]);
   VIAS.push(VIA_C);
@@ -307,9 +320,9 @@
 
   var area = (X_END - X_START) * LEN_Y + (TAB_X1 - X_START) * (TAB_Y - MARGIN_P) - N * Math.PI * HOLE_D * HOLE_D / 4;
   var vol = area * PCB_T;
-  set('d-board', f(X_END - X_START) + ' × ' + f(LEN_Y) + ' + tab');
+  set('d-board', f(X_END - X_START) + ' × ' + f(LEN_Y) + (TAB_Y > MARGIN_P ? ' + tab' : ''));
   set('d-con', CON_N + ' × ' + f(CON_PITCH) + ' pitch');
-  set('d-tab', 'turned, x = ' + f(CON_XC));
+  set('d-tab', 'turned ' + f(CON_ROT * 180 / Math.PI) + '°, centre x = ' + f(CON_XC));
   set('d-pad', '2 × ' + CON_N + ' × ' + f(PAD_W) + ' × ' + f(PAD_L));
   set('d-hd', f(BODY_W) + ' × ' + f(BODY_D) + ' × ' + f(BODY_H));
   set('d-rp', f(-SPAN / 2 - MARGIN - X_START) + ' at −x');
@@ -373,13 +386,15 @@
 
   // profile (x, y) maps to world (x, z, -y), so the board lies flat with Y up
   var shape = new THREE.Shape();
-  // board, lengthened at the -x end, with a tab for the connector's +y end
+  // board, lengthened at the -x end, with a tab for the connector's corner beyond the +y edge
   shape.moveTo(X_START, -MARGIN_N);
   shape.lineTo(X_END, -MARGIN_N);
   shape.lineTo(X_END, MARGIN_P);
-  shape.lineTo(TAB_X1, MARGIN_P);
-  shape.lineTo(TAB_X1, TAB_Y);
-  shape.lineTo(X_START, TAB_Y);
+  if (TAB_Y > MARGIN_P) {
+    shape.lineTo(TAB_X1, MARGIN_P);
+    shape.lineTo(TAB_X1, TAB_Y);
+    shape.lineTo(X_START, TAB_Y);
+  } else shape.lineTo(X_START, MARGIN_P);
   shape.closePath();
   for (var i = 0; i < N; i++) {
     var h = new THREE.Path();
@@ -432,19 +447,41 @@
     copper.add(new THREE.Mesh(g, cuMat));
     copper.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), cuEdgeMat));
   }
-  for (var j = 0; j < CON_N; j++) {   // inner and outer pad row, same contact
-    cuRect(X_IN - PAD_L / 2, pinY(j + 1) - PAD_W / 2, PAD_L, PAD_W);
-    cuRect(X_OUT - PAD_L / 2, pinY(j + 1) - PAD_W / 2, PAD_L, PAD_W);
+  function cuRectCon(xp, yp, w, l) {   // centred at (x', y') in the connector's frame
+    var g = new THREE.BoxGeometry(w, CU_T, l);
+    g.translate(xp, -PCB_T / 2 - CU_T / 2, -yp);
+    g.rotateY(CON_ROT);
+    g.translate(CON_XC, 0, -CON_YC);
+    copper.add(new THREE.Mesh(g, cuMat));
+    copper.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), cuEdgeMat));
+  }
+  for (var j = 0; j < CON_N; j++) {   // inner and outer pad column, same contact
+    cuRectCon(ROW_Y, pinY(j + 1), PAD_L, PAD_W);
+    cuRectCon(-ROW_Y, pinY(j + 1), PAD_L, PAD_W);
   }
   scene.add(copper);
 
-  // --- tracks: the same polylines as pcb.scad, square-ended so corners close ---
+  // --- tracks: the same polylines as pcb.scad; straight runs square-ended so corners
+  // close, slanted runs with round ends ---
   var trMat = new THREE.MeshStandardMaterial({ color: 0xa5764e, metalness: 0.3, roughness: 0.55 });
   var tracks = new THREE.Group();
   function track(pts, top) {   // top: on the top copper instead of the bottom
     var zc = top ? PCB_T / 2 + CU_T / 2 : -PCB_T / 2 - CU_T / 2;
     for (var i = 0; i < pts.length - 1; i++) {
       var a = pts[i], b = pts[i + 1], hw = TR_W / 2;
+      if (Math.abs(a[0] - b[0]) > 1e-9 && Math.abs(a[1] - b[1]) > 1e-9) {   // slanted
+        var len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        var sg = new THREE.BoxGeometry(len, CU_T, TR_W);
+        sg.rotateY(Math.atan2(b[1] - a[1], b[0] - a[0]));
+        sg.translate((a[0] + b[0]) / 2, zc, -(a[1] + b[1]) / 2);
+        tracks.add(new THREE.Mesh(sg, trMat));
+        [a, b].forEach(function (q) {
+          var cg = new THREE.CylinderGeometry(hw, hw, CU_T, 16);
+          cg.translate(q[0], zc, -q[1]);
+          tracks.add(new THREE.Mesh(cg, trMat));
+        });
+        continue;
+      }
       var x0 = Math.min(a[0], b[0]) - hw, x1 = Math.max(a[0], b[0]) + hw;
       var y0 = Math.min(a[1], b[1]) - hw, y1 = Math.max(a[1], b[1]) + hw;
       var g = new THREE.BoxGeometry(x1 - x0, CU_T, y1 - y0);
@@ -453,15 +490,13 @@
     }
   }
   // signal tracks on the bottom, all in the +y band behind the holes, turning
-  // beside hole 1 into the inner pad column
-  for (var hk = 1; hk <= N; hk++) {
-    var py = pinY(conOf(hk));
-    track([[holeX(hk), RING_IN], [holeX(hk), levUp(hk)], [xJog(hk), levUp(hk)], [xJog(hk), py], [X_IN, py]]);
-  }
+  // down their contacts' lines into the inner pad column
+  for (var hk = 1; hk <= N; hk++)
+    track([[holeX(hk), RING_IN], [holeX(hk), levUp(hk)], turn(hk), padEnd(conOf(hk))]);
   // the common on the top copper: a via in every -y half, the bus over them to
-  // the connector, up between its pad columns to a via at contact 1
-  track([[holeX(N), -RING_IN], [CON_XC, -RING_IN], VIA_C], true);
-  track([VIA_C, [X_IN, pinY(1)]]);
+  // the connector's centre line, along it between the pad columns to a via at contact 1
+  track([[holeX(N), -RING_IN], BUS_TURN, VIA_C], true);
+  track([VIA_C, conPt(ROW_Y, pinY(1))]);
   VIAS.forEach(function (v) {   // via: pads on both faces and the plated barrel
     var g = new THREE.CylinderGeometry(VIA_D / 2, VIA_D / 2, PCB_T + 2 * CU_T, 24);
     g.translate(v[0], 0, -v[1]);
@@ -590,9 +625,11 @@
   // part box (x0, x1, y0, y1, depth below the copper from d0 to d1) -> world
   var connector = new THREE.Group();
   var Z_CU = -PCB_T / 2 - CU_T;
-  function conBox(x0, x1, y0, y1, d0, d1, mat) {
+  function conBox(x0, x1, y0, y1, d0, d1, mat) {   // x', y' in the connector's frame
     var g = new THREE.BoxGeometry(x1 - x0, d1 - d0, y1 - y0);
     g.translate((x0 + x1) / 2, Z_CU - (d0 + d1) / 2, -(y0 + y1) / 2);
+    g.rotateY(CON_ROT);
+    g.translate(CON_XC, 0, -CON_YC);
     connector.add(new THREE.Mesh(g, mat));
     connector.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), conEdgeMat));
   }
@@ -600,16 +637,16 @@
   var sliderMat = new THREE.MeshStandardMaterial({ color: 0x7a4a2a, metalness: 0.0, roughness: 0.6 });
   var tinMat = new THREE.MeshStandardMaterial({ color: 0xc9cdd0, metalness: 0.7, roughness: 0.35 });
   var conEdgeMat = new THREE.LineBasicMaterial({ color: 0x3a3a36 });
-  // turned: long side along y
-  var XL = CON_XC - BODY_D / 2, XR = CON_XC + BODY_D / 2, Y0 = CON_YC - BODY_W / 2, Y1 = CON_YC + BODY_W / 2;
+  // in its own frame: long side along y'
+  var XL = -BODY_D / 2, XR = BODY_D / 2, Y0 = -BODY_W / 2, Y1 = BODY_W / 2;
   conBox(XL, XR, Y0, Y1, 0, BODY_H - 1.2, housingMat);                                     // housing
   conBox(XL + 0.6, XR - 0.6, Y0 + 1.6, Y1 - 1.6, BODY_H - 1.2, BODY_H, sliderMat);        // ZIF slider, FFC slot on its face
   conBox(XL, XR, Y0, Y0 + 1.6, BODY_H - 1.2, BODY_H, housingMat);                          // housing ends
   conBox(XL, XR, Y1 - 1.6, Y1, BODY_H - 1.2, BODY_H, housingMat);
   for (var k = 1; k <= CON_N; k++) {                                                       // solder tails, both columns
     var cyk = pinY(k);
-    conBox(XR, X_IN + PAD_L / 2 - 0.3, cyk - 0.125, cyk + 0.125, 0, 0.15, tinMat);
-    conBox(X_OUT - PAD_L / 2 + 0.3, XL, cyk - 0.125, cyk + 0.125, 0, 0.15, tinMat);
+    conBox(XR, ROW_Y + PAD_L / 2 - 0.3, cyk - 0.125, cyk + 0.125, 0, 0.15, tinMat);
+    conBox(-ROW_Y - PAD_L / 2 + 0.3, XL, cyk - 0.125, cyk + 0.125, 0, 0.15, tinMat);
   }
   scene.add(connector);
 
@@ -740,8 +777,8 @@
       });
     });
   }
-  // --- printed parts loaded as flat triangle lists (housing.js, cover.js),
-  // in board 0's frame ---
+  // --- printed parts and board 0's FFC loaded as flat triangle lists
+  // (housing.js, cover.js, back_cable.js), in board 0's frame ---
   function loadPart(b64, colour, cap, edge) {
     var g = new THREE.Group();
     if (!b64) return g;
@@ -763,6 +800,8 @@
   scene.add(housing);
   var cover = loadPart(window.COVER_TRIS, 0x5b6f86, 0x3f4f62, 0x2a3644);
   scene.add(cover);
+  var cable = loadPart(window.CABLE_TRIS, 0xd8c08a, 0x9c8656, 0x6b5a33);   // the four FFCs to the back outlet
+  scene.add(cable);
   // M2 countersunk heads (d3.8, 90 deg), flush with the cover top: two at the
   // ends and two in between per step; the middle ones form two lines that meet
   // in +y beyond the boards
@@ -771,7 +810,7 @@
   var recessMat = new THREE.MeshBasicMaterial({ color: 0x111315, clippingPlanes: cutPlanes });
   for (var sk = 0; sk < ARRAY_N; sk++) {
     var xe = SPAN / 2 - sk * PITCH + MARGIN;
-    [[X_START + END_D, 0], [xe - END_D, 0], [-MID_C, MID_Y], [MID_C - 2 * sk * ARRAY_DX, MID_Y]].forEach(function (q) {
+    [[X_SCR_L, 0], [xe - END_D, 0], [-MID_C, MID_Y], [MID_C - 2 * sk * ARRAY_DX, MID_Y]].forEach(function (q) {
       var hx = q[0] + sk * ARRAY_DX, hz = -(q[1] + sk * ARRAY_DY);   // part (x, y, z) -> world (x, z, -y)
       var top = PCB_T / 2 + CU_T + COVER_T + sk * ARRAY_DZ;
       var hm = new THREE.Mesh(headGeo, headMat);
@@ -785,6 +824,7 @@
     });
   }
   document.getElementById('showcover').addEventListener('change', function (e) { cover.visible = e.target.checked; });
+  document.getElementById('showcable').addEventListener('change', function (e) { cable.visible = e.target.checked; });
   // the single guide tubes are replaced by the housing; shown only on request
   guide.visible = false;
   document.getElementById('showhousing').addEventListener('change', function (e) { housing.visible = e.target.checked; });

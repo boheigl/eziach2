@@ -60,7 +60,7 @@
     },
     {
       "name": "back_channel",
-      "_comment": "Board 0's FFC: kink 8.6 mm below its connector (low enough that the folded band clears the connector body) (crease 51.6 deg, so the folded band runs parallel to the floor), then on edge in that plane (planar) to the housing's back face y = 61.9 at x -97.6 (between board 3's tab wall and its hole 1 guide). Obstacles in plan view, full height: guides of holes 1-2 of every row, the cover screw pilots at the -x ends, the connector pockets and FFC slots of boards 1-3, the cover walls round the tabs of boards 0-2 (below board level only the 0.7 mm gaps behind and beside each tab, y 10.9-17 beside), and the space outside the stepped -x end. Floor, board undersides and board 0's connector are measured afterwards, not obstacles: the band runs about 5.6 mm below the floor plane, carried by a fin under the housing. clearance 0.925: half slot 0.4 + wall 0.6; selfGap 1.4. waypoints: plan-view starting path through the gaps (FFC.planarGuess); length \"guide\": the free length of that path.",
+      "_comment": "Board 0's FFC: kink 8.6 mm below its connector (low enough that the folded band clears the connector body) (crease 51.6 deg, so the folded band runs parallel to the floor), then on edge with its faces vertical (vertical: the film's normal stays horizontal, the cable rises at 13.2 deg along its length) to the housing's back face y = 61.9 at x -97.6 (between board 3's tab wall and its hole 1 guide). Obstacles in plan view, full height: guides of holes 1-2 of every row, the cover screw pilots at the -x ends, the connector pockets and FFC slots of boards 1-3, the cover walls round the tabs of boards 0-2 (below board level only the 0.7 mm gaps behind and beside each tab, y 10.9-17 beside), and the space outside the stepped -x end. Floor, board undersides and board 0's connector are measured afterwards, not obstacles: the band runs about 5.6 mm below the floor plane, carried by a fin under the housing. clearance 0.925: half slot 0.4 + wall 0.6; selfGap 1.4. waypoints: plan-view starting path through the gaps (FFC.planarGuess); length \"guide\": the free length of that path.",
       "start": {
         "p": [
           -133.15,
@@ -83,7 +83,7 @@
         "crease": 51.6,
         "side": 1
       },
-      "planar": true,
+      "vertical": true,
       "target": {
         "p": [
           -97.6,
