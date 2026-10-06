@@ -272,7 +272,7 @@ module cover_fill(k)
             if (k > 0) linear_extrude(60 + pcb_t / 2 + cu_t + cover_t - step[2])
                 intersection() { cover_outer2d(k); end_strips2d(k); }
         }
-        for (j = [0 : k - 1]) if (j < k) at_board(j) translate([0, 0, -100]) linear_extrude(200) cover_outer2d(j);
+        for (j = [0 : 1 : k - 1]) at_board(j) translate([0, 0, -100]) linear_extrude(200) cover_outer2d(j);
     }
 
 // CHAMFERED STAIRCASE. Seen from above, the steps' outer corners at both ends
