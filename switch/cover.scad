@@ -37,7 +37,7 @@
 //
 // Coordinates: board 0's frame (origin at its middle hole, z up).
 //
-// Render with  openscad -o cover.stl cover.scad
+// make builds   openscad -o ../build/switch/cover.stl cover.scad
 
 /* [Boards — as in pcb.scad / housing.scad, do not edit here] */
 pcb_t    = 1.6;

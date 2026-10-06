@@ -165,3 +165,10 @@ deviation below 0.001 mm, both meshes watertight.
 - Gauge polarity, by test.
 - Material choice and an FEA or strain survey to replace the beam estimate.
 - Lead wires appear in `viewer.html` only, as straight runs for clearance — they are not a manufactured part and have no `.scad`.
+
+## 11. Files
+
+The `.scad` files are the sources. `make` in `strain_gauge/` builds
+`strain_gauge_plate.stl`, `inner_holder.stl` and `outer_holder.stl` into
+`build/strain_gauge/` at the top of the repository (not in git), rebuilding
+only what changed. `make` at the top builds this project and `switch/`.

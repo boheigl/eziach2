@@ -68,16 +68,16 @@
 // the top copper above it. The row runs
 // along x. The copper DXF is seen from the top, like every other layer.
 //
-// Render with  openscad -o pcb.stl pcb.scad                            (board + copper)
-//              openscad -o pcb_12.stl -D cut_holes=1 pcb.scad         (sawn off: 12 holes; 11, 10 alike)
-//              openscad -o pcb_board.stl  -D 'part="board"'  pcb.scad
-//              openscad -o pcb_copper.stl -D 'part="copper"' pcb.scad
-//              openscad -o pcb_connector.stl -D 'part="connector"' pcb.scad (body, for fit checks)
-//          or  openscad -o pcb.dxf        -D 'flat=true' -D 'part="board"'  pcb.scad  (outline)
-//              openscad -o pcb_copper.dxf -D 'flat=true' -D 'part="copper"' pcb.scad  (bottom copper)
-//              openscad -o pcb_copper_top.dxf -D 'flat=true' -D 'part="copper_top"' pcb.scad
-//              openscad -o pcb_drill.dxf  -D 'flat=true' -D 'part="drill"'  pcb.scad  (via holes)
-//              openscad -o pcb_mask.dxf   -D 'flat=true' -D 'part="mask"'   pcb.scad  (mask openings)
+// make builds   openscad -o ../build/switch/pcb.stl pcb.scad                            (board + copper)
+//              openscad -o ../build/switch/pcb_12.stl -D cut_holes=1 pcb.scad         (sawn off: 12 holes; 11, 10 alike)
+//              openscad -o ../build/switch/pcb_board.stl  -D 'part="board"'  pcb.scad
+//              openscad -o ../build/switch/pcb_copper.stl -D 'part="copper"' pcb.scad
+//              openscad -o ../build/switch/pcb_connector.stl -D 'part="connector"' pcb.scad (body, for fit checks)
+//          or  openscad -o ../build/switch/pcb.dxf        -D 'flat=true' -D 'part="board"'  pcb.scad  (outline)
+//              openscad -o ../build/switch/pcb_copper.dxf -D 'flat=true' -D 'part="copper"' pcb.scad  (bottom copper)
+//              openscad -o ../build/switch/pcb_copper_top.dxf -D 'flat=true' -D 'part="copper_top"' pcb.scad
+//              openscad -o ../build/switch/pcb_drill.dxf  -D 'flat=true' -D 'part="drill"'  pcb.scad  (via holes)
+//              openscad -o ../build/switch/pcb_mask.dxf   -D 'flat=true' -D 'part="mask"'   pcb.scad  (mask openings)
 
 /* [Board] */
 pcb_t   = 1.6;   // board thickness, FR4 standard

@@ -334,8 +334,8 @@ of the board's hole 1. Between the guides of board k+1 and the step of board k
 there are now about 3.6 mm. Every guide is closed all round.
 
 The viewer `array.html` shows the housing (toggle *Housing*; the single guide
-tubes are off by default). It loads the geometry from `housing.js`, which is
-generated from `housing.stl`.
+tubes are off by default). It loads the geometry from `build/switch/housing.js`, which is
+generated from `build/switch/housing.stl`.
 
 ## 11. Mounting the boards [given: cover clamping from above, niche at the next step]
 
@@ -407,6 +407,12 @@ cover on, screws in.
 
 ## 13. Files
 
+Sources (`.scad`, `.html`, `Makefile`, `stl2js.py`) lie in `switch/`. Everything
+generated from them (`.stl`, `.dxf`, the `.js` geometry for `array.html`) goes to
+`build/switch/` at the top of the repository (one folder per project under
+`build/`), which is not under version control: run `make` (or `make -j`) in
+`switch/` to build or update it; it rebuilds only what changed.
+
 | File | Content |
 |---|---|
 | `pcb.scad` | board, copper (rings, pads, tracks), connector body |
@@ -421,6 +427,7 @@ cover on, screws in.
 | `housing.scad`, `housing.stl`, `housing.js` | printed body with 46 guides, a bottom parallel to the steps, the hole behind the slanted −x face and the back outlet; `housing.js` is the geometry for `array.html` |
 | `back_cable.scad`, `back_cable.stl`, `back_cable.js` | the four boards' FFCs to the back outlet, stacked, and the outlet slot (`back_outlet()`) |
 | `array.html` | 3D viewer of the four boards with connectors, housing and cover, no buttons; X/Z section plane |
+| `Makefile`, `stl2js.py` | `make` builds every STL, DXF and `.js` file above into `build/switch/`; `stl2js.py` turns an STL into the `.js` geometry for `array.html` |
 | `Screw.png` | photo of the screw in hand |
 
 Sources: GCT FFC3A20 drawing (<https://gct.co/files/drawings/ffc3a20.pdf>) and

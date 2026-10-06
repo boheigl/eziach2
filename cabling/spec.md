@@ -136,8 +136,8 @@ tree:
    option (within the limits first, then least energy) is the default; all
    are kept in `.options`.
 
-`route.js` lists every option and writes one STL per option it found
-(`<name>_optk.stl`, best first) plus `<name>_obstacles.stl`. With
+`route.js` lists every option and writes one STL per option it found to
+`build/cabling/` (`<name>_optk.stl`, best first) plus `<name>_obstacles.stl`. With
 `"length": "auto"`, every option gets its own shortest length. Example
 `two_cylinders` (90 mm): all four options found, energies 0.099 / 0.177 /
 0.359 / 0.556, each 0.50 mm clear. An option may come out "not found" if
@@ -214,9 +214,10 @@ tilt η = τ/κ (tan of the angle between the rulings and w).
 | `ffc.js` | the model: poses, solver, shortest length, mesh, STL writer |
 | `routes.json` | routes: start, outlet, length (mm or `"auto"` + `slack`), cable overrides, obstacles |
 | `channel.js` | `node channel.js routes.json <name> [--force]`: solves a route with a `channel` {width, thick, out, open_top?, wall?} and writes module `<name>()` (the slot, open upwards to `open_top`) and `<name>_wall()` (slot + wall, to the outlet) as OpenSCAD polyhedra; refuses a path outside the limits. Route `back_channel` → `switch/ffc_channel.scad`, used by `housing.scad` |
-| `route.js` | `node route.js [routes.json] [name …]`: solves, prints a report, writes `<name>.stl` |
+| `route.js` | `node route.js [--out <dir>] [routes.json] [name …]`: solves, prints a report, writes `<name>.stl` to `build/cabling/` (or `<dir>`) |
+| `Makefile` | `make` solves every route into `build/cabling/`, `make <name>` one; the report goes to `<name>.log` there. A route is solved again when `routes.json`, `ffc.js` or `route.js` change; solving takes minutes per route |
 | `viewer.html` | 3D: drag start and outlet (move/turn handles) or type poses; length slider, *Shortest + slack*, STL download, route JSON for `routes.json`; `#preset=n` picks a preset |
-| `<name>.stl`, `<name>_optk.stl`, `<name>_obstacles.stl` | generated cable solids per route and option, and the obstacles (not in git) |
+| `build/cabling/<name>.stl`, `<name>_optk.stl`, `<name>_obstacles.stl` | generated cable solids per route and option, and the obstacles (not in git) |
 
 Sources: GCT FFC3A20 drawing (<https://gct.co/files/drawings/ffc3a20.pdf>);
 M. Sadowsky (1930) and W. Wunderlich (1962) on the developable (paper) strip,

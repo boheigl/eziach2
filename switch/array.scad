@@ -22,13 +22,14 @@
 //   board k+1's guide tube
 // Boards two or more apart do not touch.
 //
-// Render with  openscad -o array.stl array.scad   (slow; array.stl is also
-// written directly from the part STLs, see spec.md)
+// Built by make as ../build/switch/array.stl, from the part STLs there (see Makefile).
 
 n_boards = 4;
 pitch_x  = 10;    // half the hole pitch
 pitch_y  = 17;
 pitch_z  = 4;
+
+stl_dir = "../build/switch/";   // the part STLs, made by make
 
 boards = ["pcb.stl", "pcb_12.stl", "pcb_11.stl", "pcb_10.stl"];   // 13 - k holes
 parts  = ["pcb_connector.stl", "button.stl", "washer.stl",
@@ -36,6 +37,6 @@ parts  = ["pcb_connector.stl", "button.stl", "washer.stl",
 
 for (k = [0 : n_boards - 1])
     translate(k * [pitch_x, pitch_y, pitch_z]) {
-        import(boards[k]);
-        for (p = parts) import(p);
+        import(str(stl_dir, boards[k]));
+        for (p = parts) import(str(stl_dir, p));
     }

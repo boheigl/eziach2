@@ -28,7 +28,7 @@
 //
 // Coordinates: board 0's frame, as everywhere.
 //
-// Render with  openscad -o back_cable.stl back_cable.scad   (the cable)
+// make builds   openscad -o ../build/switch/back_cable.stl back_cable.scad   (the cable)
 // housing.scad uses back_outlet() for the hole in the back wall.
 // Figures in the description above are for board 0's cable before the stack;
 // it now runs (n_cables - 1) * stack_pitch lower, the top one there.

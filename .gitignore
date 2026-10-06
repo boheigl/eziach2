@@ -1,8 +1,8 @@
 # Scratch renders, logs and browser profiles
 .shots/
 
-# Generated from the .scad sources (OpenSCAD exports)
+# Generated from the sources: build/<project>/ (make, see Makefile)
+/build/
+# stray exports made by hand
 *.stl
 *.dxf
-switch/cover.js
-switch/housing.js

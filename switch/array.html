@@ -237,9 +237,9 @@
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="housing.js"></script>
-<script src="cover.js"></script>
-<script src="back_cable.js"></script>
+<script src="../build/switch/housing.js"></script>
+<script src="../build/switch/cover.js"></script>
+<script src="../build/switch/back_cable.js"></script>
 <script>
 (function () {
   // --- parameters, as in pcb.scad ---
@@ -778,7 +778,7 @@
     });
   }
   // --- printed parts and board 0's FFC loaded as flat triangle lists
-  // (housing.js, cover.js, back_cable.js), in board 0's frame ---
+  // (../build/switch/housing.js, cover.js, back_cable.js: make), in board 0's frame ---
   function loadPart(b64, colour, cap, edge) {
     var g = new THREE.Group();
     if (!b64) return g;

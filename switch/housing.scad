@@ -57,7 +57,7 @@
 // and runs straight along the hole behind the slanted face to an outlet in the
 // back wall behind board 3 (back_cable.scad: back_outlet()).
 //
-// Render with  openscad -o housing.stl housing.scad
+// make builds   openscad -o ../build/switch/housing.stl housing.scad
 
 use <back_cable.scad>
 

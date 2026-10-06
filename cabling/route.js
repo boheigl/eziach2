@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // route.js: solve the cable routes in a JSON file, print a report and write
-// STLs next to it: <name>.stl (the best option), <name>_opt<k>.stl (every
-// topological option when there are obstacles) and <name>_obstacles.stl.
-//   node route.js [routes.json] [name ...]
+// STLs to build/cabling/ at the top of the repository (or --out <dir>):
+// <name>.stl (the best option), <name>_opt<k>.stl (every topological option
+// when there are obstacles) and <name>_obstacles.stl.
+//   node route.js [--out <dir>] [routes.json] [name ...]
 // Obstacles: cfg.obstacles apply to every route, route.obstacles to one;
 // route.budget_s limits the search for topological options (seconds);
 // route.waypoints (plan x, y) give a planar route its starting path, and
@@ -10,10 +11,14 @@
 'use strict';
 var fs = require('fs'), path = require('path'), FFC = require('./ffc.js');
 
-var file = process.argv[2] || path.join(__dirname, 'routes.json');
-var only = process.argv.slice(3);
+var args = process.argv.slice(2), dir = path.join(__dirname, '..', 'build', 'cabling');
+var o = args.indexOf('--out');
+if (o >= 0) { dir = args[o + 1]; args.splice(o, 2); }
+var file = args[0] || path.join(__dirname, 'routes.json');
+var only = args.slice(1);
 var cfg = JSON.parse(fs.readFileSync(file, 'utf8'));
-var dir = path.dirname(file), failed = 0;
+var failed = 0;
+fs.mkdirSync(dir, { recursive: true });
 
 function f1(v) { return v.toFixed(1); }
 function f2(v) { return v.toFixed(2); }

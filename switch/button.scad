@@ -61,12 +61,12 @@
 // z = -pcb_t/2 to +pcb_t/2. The middle hole is at x = 0, so the button's axis
 // is the z axis.
 //
-// Render with  openscad -o button.stl -D 'part="button"' button.scad
-//              openscad -o washer.stl -D 'part="washer"' button.scad   (both, in place)
-//              openscad -o sleeve.stl -D 'part="sleeve"' button.scad
-//              openscad -o screw.stl  -D 'part="screw"'  button.scad
-//              openscad -o guide.stl  -D 'part="guide"'  button.scad
-//              openscad -o spring.stl -D 'part="spring"' button.scad
+// make builds   openscad -o ../build/switch/button.stl -D 'part="button"' button.scad
+//              openscad -o ../build/switch/washer.stl -D 'part="washer"' button.scad   (both, in place)
+//              openscad -o ../build/switch/sleeve.stl -D 'part="sleeve"' button.scad
+//              openscad -o ../build/switch/screw.stl  -D 'part="screw"'  button.scad
+//              openscad -o ../build/switch/guide.stl  -D 'part="guide"'  button.scad
+//              openscad -o ../build/switch/spring.stl -D 'part="spring"' button.scad
 // (moving parts at the upper stop unless travel is set)
 
 /* [Board — as in pcb.scad, do not edit here] */
