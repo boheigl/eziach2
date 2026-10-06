@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Writes an STL's triangles as a JS file for array.html: one base64 string of
 # little-endian float32 x,y,z, three vertices per triangle, in board 0's frame.
-#   python3 stl2js.py ../build/switch/housing.stl ../build/switch/housing.js HOUSING_TRIS
+#   python3 stl2js.py ../build/discant/housing.stl ../build/discant/housing.js HOUSING_TRIS
 import base64, os, re, struct, sys
 
 stl, js, var = sys.argv[1:4]

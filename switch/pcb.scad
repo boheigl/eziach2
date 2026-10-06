@@ -108,7 +108,7 @@ mid_d   = 2.2;   // M2 clearance, every screw hole
 scr_cu  = 0.5;   // -x end screw hole to the connector pads
 scr_body = 1.0;  // -x end screw hole to the connector body: housing wall round the pilot
 end_web = 1.2;   // screw hole edge to the board end, both ends
-stair_dx = 10;   // staircase step along the row (array.scad)
+stair_dx = 10;   // staircase step along the row (discant/array.scad)
 n_boards = 4;
 
 /* [Copper] */
@@ -136,7 +136,7 @@ via_drill = 0.3;   // vias of the common bus
 via_d     = 0.6;   // pad diameter, both sides
 
 /* [Connector placement] */
-stair_dy  = 17;    // step of the staircase in y (array.scad): the board below has its
+stair_dy  = 17;    // step of the staircase in y (discant/array.scad): the board below has its
                    // +y edge at margin_p - stair_dy in this frame
 con_rot   = atan2(stair_dy, stair_dx);   // turned from y towards -x: long side along the
                    //   slanted face's normal (-stair_dy, stair_dx)

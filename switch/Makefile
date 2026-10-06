@@ -1,29 +1,25 @@
-# Builds every file generated from the sources into ../build/switch/: the part
-# STLs, the PCB DXFs and the .js geometry for array.html. Only what changed is
-# rebuilt.
+# Builds every file generated from the key's sources into ../build/switch/: the
+# board STLs and DXFs and the button parts. Only what changed is rebuilt.
 # ../build/ (one folder per project) is not under version control; delete it
 # at any time.
 #   make                             everything
-#   make ../build/switch/housing.js  one file (and what it needs)
+#   make ../build/switch/pcb.stl     one file (and what it needs)
 #   make -j                          in parallel
 #   make clean                       deletes ../build/switch/
 #
 # OpenSCAD writes the files each output reads (use <...>, import()) to
 # ../build/switch/.deps/, so those dependencies are tracked without listing
-# them here.
+# them here. ../discant/ uses these parts.
 
 OPENSCAD ?= openscad
-PYTHON   ?= python3
 B        := ../build/switch
 
 PCB_STL    := $(addprefix $(B)/,pcb.stl pcb_12.stl pcb_11.stl pcb_10.stl \
                                 pcb_board.stl pcb_copper.stl pcb_connector.stl)
 PCB_DXF    := $(addprefix $(B)/,pcb.dxf pcb_copper.dxf pcb_copper_top.dxf pcb_drill.dxf pcb_mask.dxf)
 BUTTON_STL := $(addprefix $(B)/,button.stl washer.stl sleeve.stl screw.stl guide.stl spring.stl)
-BODY_STL   := $(addprefix $(B)/,back_cable.stl housing.stl cover.stl)
-JS         := $(addprefix $(B)/,housing.js cover.js back_cable.js)
 
-all: $(PCB_STL) $(PCB_DXF) $(BUTTON_STL) $(BODY_STL) $(B)/array.stl $(JS)
+all: $(PCB_STL) $(PCB_DXF) $(BUTTON_STL)
 
 # $(call scad,source,extra options)
 scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
@@ -48,23 +44,6 @@ $(B)/pcb_copper.dxf $(B)/pcb_copper_top.dxf $(B)/pcb_drill.dxf $(B)/pcb_mask.dxf
 # --- button.scad: moving parts at the upper stop
 $(BUTTON_STL): $(B)/%.stl: button.scad
 	$(call scad,$<,-D 'part="$*"')
-
-# --- one part per file
-$(BODY_STL): $(B)/%.stl: %.scad
-	$(call scad,$<)
-
-# array.scad imports the part STLs from ../build/switch/, so they must exist
-# before its first build
-$(B)/array.stl: array.scad $(filter-out $(B)/pcb_board.stl $(B)/pcb_copper.stl,$(PCB_STL)) $(BUTTON_STL)
-	$(call scad,$<)
-
-# --- geometry for array.html
-$(B)/housing.js:    VAR = HOUSING_TRIS
-$(B)/cover.js:      VAR = COVER_TRIS
-$(B)/back_cable.js: VAR = CABLE_TRIS
-$(JS): $(B)/%.js: $(B)/%.stl stl2js.py
-	@echo "  STL2JS   $@"
-	@$(PYTHON) stl2js.py $< $@ $(VAR)
 
 clean:
 	rm -rf $(B)

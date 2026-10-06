@@ -76,7 +76,7 @@ cu_t    = 0.035; // copper below the laminate
 
 /* [Stem] */
 gap     = 0.2;   // radial clearance to the hole
-cover_t = 1.2;   // cover plate (cover.scad): the cap now lands on it
+cover_t = 1.2;   // cover plate (discant/cover.scad): the cap now lands on it
 stem_h  = 5.6 + cu_t + cover_t;  // from the underside of the laminate: keeps the stroke
                  // at 3.965 with the cap landing on the cover instead of the board
 

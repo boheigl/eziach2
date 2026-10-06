@@ -22,14 +22,15 @@
 //   board k+1's guide tube
 // Boards two or more apart do not touch.
 //
-// Built by make as ../build/switch/array.stl, from the part STLs there (see Makefile).
+// Built by make as ../build/discant/array.stl, from the key's part STLs in
+// ../build/switch/ (see Makefile; ../switch/ makes them).
 
 n_boards = 4;
 pitch_x  = 10;    // half the hole pitch
 pitch_y  = 17;
 pitch_z  = 4;
 
-stl_dir = "../build/switch/";   // the part STLs, made by make
+stl_dir = "../build/switch/";   // the key's part STLs, made by make in ../switch/
 
 boards = ["pcb.stl", "pcb_12.stl", "pcb_11.stl", "pcb_10.stl"];   // 13 - k holes
 parts  = ["pcb_connector.stl", "button.stl", "washer.stl",
