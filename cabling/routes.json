@@ -477,7 +477,7 @@
         "thick": 0.8,
         "wall": 0.6,
         "open_top": 20,
-        "out": "../switch/ffc_channel.scad"
+        "out": "../build/cabling/back_channel.scad"
       },
       "waypoints": [
         [

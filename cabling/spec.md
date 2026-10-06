@@ -213,7 +213,7 @@ tilt η = τ/κ (tan of the angle between the rulings and w).
 |---|---|
 | `ffc.js` | the model: poses, solver, shortest length, mesh, STL writer |
 | `routes.json` | routes: start, outlet, length (mm or `"auto"` + `slack`), cable overrides, obstacles |
-| `channel.js` | `node channel.js routes.json <name> [--force]`: solves a route with a `channel` {width, thick, out, open_top?, wall?} and writes module `<name>()` (the slot, open upwards to `open_top`) and `<name>_wall()` (slot + wall, to the outlet) as OpenSCAD polyhedra; refuses a path outside the limits. Route `back_channel` → `switch/ffc_channel.scad`, used by `housing.scad` |
+| `channel.js` | `node channel.js routes.json <name> [--force]`: solves a route with a `channel` {width, thick, out, open_top?, wall?} and writes module `<name>()` (the slot, open upwards to `open_top`) and `<name>_wall()` (slot + wall, to the outlet) as OpenSCAD polyhedra; refuses a path outside the limits. Route `back_channel` → `build/cabling/back_channel.scad` (no longer used by the housing) |
 | `route.js` | `node route.js [--out <dir>] [routes.json] [name …]`: solves, prints a report, writes `<name>.stl` to `build/cabling/` (or `<dir>`) |
 | `Makefile` | `make` solves every route into `build/cabling/`, `make <name>` one; the report goes to `<name>.log` there. A route is solved again when `routes.json`, `ffc.js` or `route.js` change; solving takes minutes per route |
 | `viewer.html` | 3D: drag start and outlet (move/turn handles) or type poses; length slider, *Shortest + slack*, STL download, route JSON for `routes.json`; `#preset=n` picks a preset |

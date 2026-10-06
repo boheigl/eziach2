@@ -11,8 +11,6 @@
 # OpenSCAD writes the files each output reads (use <...>, import()) to
 # ../build/switch/.deps/, so those dependencies are tracked without listing
 # them here.
-# ffc_channel.scad (cabling/channel.js, route back_channel) is not rebuilt: no
-# part uses it at present.
 
 OPENSCAD ?= openscad
 PYTHON   ?= python3

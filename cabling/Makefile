@@ -7,7 +7,8 @@
 #   make -j               routes in parallel
 #   make clean            deletes ../build/cabling/
 #
-# channel.js (route back_channel -> ../switch/ffc_channel.scad) is run by hand.
+# channel.js (route back_channel -> ../build/cabling/back_channel.scad) is run
+# by hand.
 
 NODE   ?= node
 B      := ../build/cabling

@@ -272,7 +272,7 @@ guide tubes.
   plus the crease. The fold turns each FFC face down, so the far end needs the
   matching contact side. Laid in from below once the unit is on the housing,
   held with tape or a bottom plate. [unverified: retention] Replaces board 0's
-  trough and fin (route `back_channel`, `ffc_channel.scad`, no longer used).
+  trough and fin (route `back_channel`, no longer used).
 - **Filled under the cover** [given]: below the cover's walls the housing
   reaches out to the cover's outline, so the outside is flush. Under the end
   walls of steps 1–3 that is up to their lower edge, at the top of the step
