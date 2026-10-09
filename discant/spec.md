@@ -212,3 +212,4 @@ the key's parts that `array.scad` imports from `build/switch/`.
 | `back_cable.scad`, `back_cable.stl`, `back_cable.js` | the four boards' FFCs to the back outlet, stacked, and the outlet slot (`back_outlet()`) |
 | `array.html` | 3D viewer of the four boards with connectors, housing, cover and cables; X/Z section plane. Loads the `.js` geometry |
 | `Makefile`, `stl2js.py` | `make` builds the files above into `build/discant/`; `stl2js.py` turns an STL into the `.js` geometry for `array.html` |
+| `phone.html`, `embed_parts.py` | phone view of the assembly: boards, connectors, housing, cover, cables and one button, with Press, a section and gestures (Interact). `make` writes `build/discant/phone.html` with every part embedded by `embed_parts.py`, one file that loads nothing else, so it also works in the claude.ai viewer on a phone |

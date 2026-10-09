@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Phone view of the discant assembly. make builds ../build/discant/phone.html from this
+     page with every part embedded as an inactive data block (embed_parts.py): the page
+     loads no files, which the claude.ai viewer refuses on phones (403). STROKE, FLOOR_Z
+     and L_UP are as in ../switch/button.scad. -->
+<title>Discant Assembly</title>
+<style>
+  /* Layout: the 3D view first and as large as the phone allows, controls in wrapping rows under it */
+  :root {
+    --bg: #eef1f0; --panel: #f8faf9; --fg: #1c2421; --muted: #5d6964; --line: #c9d2ce; --accent: #2f6c8c; --bad: #a3321f;
+    --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #141917; --panel: #1b2220; --fg: #e1e8e5; --muted: #95a29c; --line: #2d3834; --accent: #7db5d2; --bad: #ee8a75; color-scheme: dark } }
+  :root[data-theme="dark"] {
+    --bg: #141917; --panel: #1b2220; --fg: #e1e8e5; --muted: #95a29c; --line: #2d3834; --accent: #7db5d2; --bad: #ee8a75; color-scheme: dark }
+  body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans); padding-inline: 16px; padding-block: 16px 28px; }
+  main { max-width: 1100px; margin: 0 auto; display: grid; gap: 12px; }
+  .eyebrow { margin: 0; font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  h1 { margin: 4px 0 0; font-size: clamp(22px, 5vw, 30px); line-height: 1.1; text-wrap: balance; }
+  #view { position: relative; width: 100%; max-width: 100%; aspect-ratio: 4 / 3; max-height: 72vh; border: 1px solid var(--line);
+          border-radius: 6px; overflow: hidden; background: var(--panel); }
+  #view canvas { display: block; width: 100%; height: 100%; }
+  #view.live { touch-action: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  #hint { position: absolute; right: 10px; top: 8px; margin: 0; font: 12px/1.3 var(--mono); color: var(--muted); }
+  #status { position: absolute; left: 10px; bottom: 8px; margin: 0; font: 12px/1.3 var(--mono); color: var(--muted); }
+  #status.bad { color: var(--bad); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+  button { font: 600 14px var(--sans); padding: 9px 14px; border: 1px solid var(--accent); border-radius: 6px; background: transparent; color: var(--accent); }
+  button:disabled { opacity: .45; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  label { display: inline-flex; align-items: center; gap: 6px; color: var(--fg); }
+  input[type=range] { flex: 1 1 160px; min-width: 0; accent-color: var(--accent); }
+  .val { font: 600 13px var(--mono); font-variant-numeric: tabular-nums; min-width: 8ch; color: var(--muted); }
+  button[aria-pressed="true"] { background: var(--accent); color: var(--panel); }
+  p.note { margin: 0; color: var(--muted); max-width: 65ch; }
+</style>
+
+<main>
+  <header>
+    <p class="eyebrow">discant · four boards as a staircase</p>
+    <h1>Discant assembly</h1>
+  </header>
+  <div id="view"><p id="hint" hidden>1 finger: turn · 2 fingers: zoom and move</p><p id="status">Tap “Load assembly” to start.</p></div>
+  <div class="row"><button type="button" id="load">Load assembly</button></div>
+  <div class="row">
+    <button type="button" id="press">Press</button>
+    <button type="button" id="hold" aria-pressed="false">Hold down</button>
+    <span class="val" id="travelval">0.000 mm</span>
+  </div>
+  <div class="row">
+    <button type="button" id="cut" aria-pressed="false">Section X/Z</button>
+    <button type="button" id="cutback" aria-label="Move the section towards −y" disabled>−y</button>
+    <button type="button" id="cutfwd" aria-label="Move the section towards +y" disabled>+y</button>
+    <span class="val" id="cutval">y = 0</span>
+  </div>
+  <div class="row">
+    <button type="button" class="tog" id="showpcb" aria-pressed="true">PCBs</button>
+    <button type="button" class="tog" id="showhousing" aria-pressed="true">Housing</button>
+    <button type="button" class="tog" id="showcover" aria-pressed="true">Cover</button>
+    <button type="button" class="tog" id="showcable" aria-pressed="true">Cable</button>
+    <button type="button" class="tog" id="showbutton" aria-pressed="true">Button</button>
+  </div>
+  <div class="row" aria-label="View">
+    <button type="button" id="left" aria-label="Turn left">◀</button>
+    <button type="button" id="right" aria-label="Turn right">▶</button>
+    <button type="button" id="up" aria-label="Look from higher">▲</button>
+    <button type="button" id="down" aria-label="Look from lower">▼</button>
+    <button type="button" id="zin" aria-label="Zoom in">＋</button>
+    <button type="button" id="zout" aria-label="Zoom out">－</button>
+    <button type="button" id="interact" aria-pressed="false">Interact</button>
+    <button type="button" id="reset">Reset view</button>
+  </div>
+  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. The button sits in board 0's middle hole; Press moves it 2.965 mm
+    until its felt ring lands on the cover and back; Hold down keeps it there. All parts come from the OpenSCAD build (switch/ and discant/).</p>
+</main>
+
+<!-- parts: filled in by embed_parts.py -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  var statusEl = document.getElementById('status');
+  function status(t, bad) { statusEl.textContent = t; statusEl.className = bad ? 'bad' : ''; }
+  window.addEventListener('error', function (e) { status('Error: ' + e.message, true); });
+
+  var STROKE = 2.965, FLOOR_Z = -16.5834, L_UP = 9.14839;   // button.scad
+  var STEP = [10, 17, 4];                                      // board k is moved by k * STEP
+
+  var view = document.getElementById('view');
+  var renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'low-power' });
+  renderer.setPixelRatio(1);
+  view.insertBefore(renderer.domElement, statusEl);
+  renderer.domElement.addEventListener('webglcontextlost', function (e) { e.preventDefault(); status('Graphics memory ran out', true); });
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xdfe5e2);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x58625e, 0.75));
+  var key = new THREE.DirectionalLight(0xffffff, 0.75); key.position.set(-3, 6, 5); scene.add(key);
+  var under = new THREE.DirectionalLight(0xffffff, 0.35); under.position.set(2, -5, 3); scene.add(under);
+  var camera = new THREE.PerspectiveCamera(30, 4 / 3, 2, 4000);
+
+  var cutPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0), planes = [cutPlane], solids = [], clipped = false;
+  // part (x, y, z) -> world (x, z, -y)
+  function mesh(name, colour, offset) {
+    var raw = atob(document.getElementById('d-' + name).textContent), bytes = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    var p = new Float32Array(bytes.buffer), o = offset || [0, 0, 0];
+    for (var v = 0; v < p.length; v += 3) {
+      var x = p[v] + o[0], y = p[v + 1] + o[1], z = p[v + 2] + o[2];
+      p[v] = x; p[v + 1] = z; p[v + 2] = -y;
+    }
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+    g.computeVertexNormals();
+    var grp = new THREE.Group();
+    var m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: colour, roughness: 0.7, metalness: 0.05 }));
+    grp.add(m); solids.push({ mesh: m, grp: grp, colour: colour, cap: null });
+    return grp;
+  }
+
+  var parts = {}, moving = new THREE.Group(), springGrp = new THREE.Group();
+  var buttonGrp = new THREE.Group(); buttonGrp.add(moving, springGrp);
+  var LOAD = [
+    ['pcb.js', function () { parts.pcb.add(mesh('PCB13_TRIS', 0x2f7a4f)); }],
+    ['pcb_12.js', function () { parts.pcb.add(mesh('PCB12_TRIS', 0x2f7a4f, [10, 17, 4])); }],
+    ['pcb_11.js', function () { parts.pcb.add(mesh('PCB11_TRIS', 0x2f7a4f, [20, 34, 8])); }],
+    ['pcb_10.js', function () { parts.pcb.add(mesh('PCB10_TRIS', 0x2f7a4f, [30, 51, 12])); }],
+    ['pcb_connector.js', function () { for (var k = 0; k < 4; k++) parts.pcb.add(mesh('CONN_TRIS', 0x2b2f33, [10 * k, 17 * k, 4 * k])); }],
+    ['housing.js', function () { parts.housing = mesh('HOUSING_TRIS', 0xd9a441); scene.add(parts.housing); }],
+    ['cover.js', function () { parts.cover = mesh('COVER_TRIS', 0x5b6f86); scene.add(parts.cover); }],
+    ['back_cable.js', function () { parts.cable = mesh('CABLE_TRIS', 0xd8c08a); scene.add(parts.cable); }],
+    ['button.js', function () { moving.add(mesh('BUTTON_TRIS', 0x4a6fa5)); }],
+    ['felt.js', function () { moving.add(mesh('FELT_TRIS', 0x8c3b3b)); }],
+    ['washer.js', function () { moving.add(mesh('WASHER_TRIS', 0xc4c8cc)); }],
+    ['sleeve.js', function () { moving.add(mesh('SLEEVE_TRIS', 0xc9b37a)); }],
+    ['screw.js', function () { moving.add(mesh('SCREW_TRIS', 0x5d6166)); }],
+    ['spring.js', function () { springGrp.add(mesh('SPRING_TRIS', 0x9aa3ab)); }]
+  ];
+  scene.add(buttonGrp);
+  parts.pcb = new THREE.Group(); scene.add(parts.pcb);   // the four boards and their connectors
+
+  // camera orbits a target
+  var target = new THREE.Vector3(-5, 0, -26), azim = -0.55, elev = 0.62, dist = 400;
+  function place() {
+    camera.position.set(target.x + dist * Math.cos(elev) * Math.sin(azim), target.y + dist * Math.sin(elev),
+                        target.z + dist * Math.cos(elev) * Math.cos(azim));
+    camera.lookAt(target);
+  }
+  function size() {
+    var r = view.getBoundingClientRect();
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / Math.max(r.height, 1); camera.updateProjectionMatrix();
+  }
+  var dirty = true;
+  function draw() { dirty = true; }
+  window.addEventListener('resize', function () { size(); draw(); });
+
+  // orbit and zoom with buttons (no touch handlers on the view)
+  function orbit(da, de, dz) {
+    azim += da; elev = Math.max(-1.5, Math.min(1.5, elev + de));
+    dist = Math.max(20, Math.min(1500, dist * dz)); place(); draw();
+  }
+  [['left', 0.25, 0, 1], ['right', -0.25, 0, 1], ['up', 0, 0.15, 1], ['down', 0, -0.15, 1],
+   ['zin', 0, 0, 1 / 1.25], ['zout', 0, 0, 1.25]].forEach(function (b) {
+    document.getElementById(b[0]).addEventListener('click', function () { orbit(b[1], b[2], b[3]); });
+  });
+  // gestures in the view, while Interact is on: one pointer turns (mouse: left
+  // button; right button or Shift pans), two pointers pinch to zoom and move
+  // together to pan; the wheel zooms
+  var live = false, pts = {}, prevMid = null, prevDist = 0;
+  function setLive(on) {
+    live = on; pts = {}; prevMid = null; prevDist = 0;
+    view.classList.toggle('live', on);
+    document.getElementById('hint').hidden = !on;
+    document.getElementById('interact').setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  document.getElementById('interact').addEventListener('click', function () { setLive(!live); });
+  function pan(dx, dy) {   // move the target in the view plane by screen pixels
+    var h = view.getBoundingClientRect().height || 1;
+    var k = 2 * dist * Math.tan(camera.fov * Math.PI / 360) / h;
+    var right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+    var up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+    target.addScaledVector(right, -dx * k).addScaledVector(up, dy * k);
+  }
+  function midDist() {
+    var a = Object.keys(pts).map(function (id) { return pts[id]; });
+    return [[(a[0][0] + a[1][0]) / 2, (a[0][1] + a[1][1]) / 2], Math.hypot(a[0][0] - a[1][0], a[0][1] - a[1][1])];
+  }
+  view.addEventListener('pointerdown', function (e) {
+    if (!live) return;
+    e.preventDefault();
+    try { view.setPointerCapture(e.pointerId); } catch (err) {}
+    pts[e.pointerId] = [e.clientX, e.clientY, e.button === 2 || e.shiftKey];
+    if (Object.keys(pts).length === 2) { var md = midDist(); prevMid = md[0]; prevDist = md[1]; }
+  });
+  view.addEventListener('pointermove', function (e) {
+    if (!live || !pts[e.pointerId]) return;
+    var n = Object.keys(pts).length, q = pts[e.pointerId];
+    var dx = e.clientX - q[0], dy = e.clientY - q[1];
+    pts[e.pointerId] = [e.clientX, e.clientY, q[2]];
+    if (n === 1) {
+      if (q[2]) pan(dx, dy);
+      else { azim -= dx * 0.008; elev = Math.max(-1.5, Math.min(1.5, elev + dy * 0.008)); }
+    } else if (n === 2) {
+      var md = midDist();
+      if (prevMid) pan(md[0][0] - prevMid[0], md[0][1] - prevMid[1]);
+      if (prevDist > 0 && md[1] > 0) dist = Math.max(20, Math.min(1500, dist * prevDist / md[1]));
+      prevMid = md[0]; prevDist = md[1];
+    }
+    place(); draw();
+  });
+  function lift(e) {
+    delete pts[e.pointerId]; prevMid = null; prevDist = 0;
+    if (Object.keys(pts).length === 2) { var md = midDist(); prevMid = md[0]; prevDist = md[1]; }
+  }
+  view.addEventListener('pointerup', lift);
+  view.addEventListener('pointercancel', lift);
+  view.addEventListener('contextmenu', function (e) { if (live) e.preventDefault(); });
+  view.addEventListener('wheel', function (e) {
+    if (!live) return;
+    e.preventDefault();
+    dist = Math.max(20, Math.min(1500, dist * (1 + Math.sign(e.deltaY) * 0.09))); place(); draw();
+  }, { passive: false });
+  document.getElementById('reset').addEventListener('click', function () { target.set(-5, 0, -26); azim = -0.55; elev = 0.62; dist = 400; place(); draw(); });
+
+  // travel: the moving parts go down, the spring is squeezed towards its floor
+  var travel = 0, anim = null;
+  function setTravel(t) {
+    travel = Math.max(0, Math.min(STROKE, t));
+    moving.position.y = -travel;
+    var s = (L_UP - travel) / L_UP;
+    springGrp.scale.y = s; springGrp.position.y = FLOOR_Z * (1 - s);
+    document.getElementById('travelval').textContent = travel.toFixed(3) + ' mm';
+    draw();
+  }
+  document.getElementById('hold').addEventListener('click', function () {   // stay at the lower stop, or come back up
+    var b = this, down = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', down ? 'true' : 'false'); anim = null; setTravel(down ? STROKE : 0);
+  });
+  document.getElementById('press').addEventListener('click', function () { anim = 0; });
+
+  // section plane parallel to X/Z: keeps part y >= the slider value
+  function applyCut() {
+    var on = document.getElementById('cut').getAttribute('aria-pressed') === 'true', y = cutY;
+    if (on !== clipped) {   // clipping only while the section is on: materials and caps change then
+      solids.forEach(function (o) {
+        o.mesh.material.clippingPlanes = on ? planes : null;
+        o.mesh.material.needsUpdate = true;
+        if (on && !o.cap) {
+          o.cap = new THREE.Mesh(o.mesh.geometry, new THREE.MeshBasicMaterial({ color: new THREE.Color(o.colour).multiplyScalar(0.75), side: THREE.BackSide, clippingPlanes: planes }));
+          o.grp.add(o.cap);
+        }
+        if (o.cap) o.cap.visible = on;
+      });
+      renderer.localClippingEnabled = on;
+      clipped = on;
+    }
+    cutPlane.set(new THREE.Vector3(0, 0, -1), -y);
+    document.getElementById('cutback').disabled = document.getElementById('cutfwd').disabled = !on;
+    document.getElementById('cutval').textContent = 'y = ' + y.toFixed(0);
+    draw();
+  }
+  var cutY = 0;
+  document.getElementById('cut').addEventListener('click', function () {
+    this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); applyCut();
+  });
+  document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-10, cutY - 4); applyCut(); });
+  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(66, cutY + 4); applyCut(); });
+  [['showpcb', 'pcb'], ['showhousing', 'housing'], ['showcover', 'cover'], ['showcable', 'cable']].forEach(function (t) {
+    document.getElementById(t[0]).addEventListener('click', function () {
+      var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (parts[t[1]]) parts[t[1]].visible = on; draw();
+    });
+  });
+  document.getElementById('showbutton').addEventListener('click', function () {
+    var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on ? 'true' : 'false');
+    buttonGrp.visible = on; draw();
+  });
+
+  var last = performance.now();
+  function loop(now) {
+    var dt = (now - last) / 1000; last = now;
+    if (anim !== null) {   // down and back up, 1.4 s
+      anim += dt / 1.4;
+      setTravel(STROKE * Math.sin(Math.PI * Math.min(anim, 1)));
+      if (anim >= 1) { anim = null; setTravel(0); }
+    }
+    if (dirty) { renderer.render(scene, camera); dirty = false; }
+    requestAnimationFrame(loop);
+  }
+
+  // load the parts one after the other, so the page stays responsive
+  var i = 0;
+  // the parts are stored in the page as inactive data blocks (no file loads);
+  // one part per step, so the page stays responsive
+  function next() {
+    if (i >= LOAD.length) { status(''); applyCut(); setTravel(0); return; }
+    var item = LOAD[i];
+    status('Building ' + item[0].replace('.js', '') + ' (' + (i + 1) + ' / ' + LOAD.length + ')');
+    setTimeout(function () {
+      try { item[1](); } catch (e) { status(item[0] + ': ' + e.message, true); return; }
+      i++; draw(); setTimeout(next, 30);
+    }, 30);
+  }
+  size(); place(); requestAnimationFrame(loop);
+  document.getElementById('load').addEventListener('click', function () { this.disabled = true; next(); });
+})();
+</script>
