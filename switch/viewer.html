@@ -152,12 +152,13 @@
           <label><input type="checkbox" id="showscrew" checked> Screw</label>
           <label><input type="checkbox" id="showguide" checked> Guide</label>
           <label><input type="checkbox" id="showspring" checked> Spring</label>
+          <label><input type="checkbox" id="showcover" checked> Cover</label>
           <label><input type="checkbox" id="showaxes" checked> Axes</label>
         </div>
       </div>
       <div class="section">
         <label for="travel">Travel</label>
-        <input type="range" id="travel" min="0" max="3.965" step="0.005" value="0" aria-label="Button travel from the upper stop">
+        <input type="range" id="travel" min="0" max="2.965" step="0.005" value="0" aria-label="Button travel from the upper stop">
         <output id="travelval" for="travel">0.000 mm</output>
         <button type="button" id="press">Press</button>
       </div>
@@ -226,13 +227,13 @@
             <li><b>Tracks.</b> Contact 1 is the common: it joins the −Y halves of all thirteen rings. Contacts 2 … 14 each take the +Y half of one ring. <b>All thirteen signal tracks run on the bottom, in the band behind the holes</b>. Each turns where its contact's line meets it and runs straight down that line into the outer end of its inner pad: hole h → contact 15 − h, so hole 1 takes contact 14, the one nearest it. <b>The common runs on the top copper</b>: a via in the middle of every −Y half, a straight bus at y = −4.5 to the connector's centre line, along it between the two pad columns to a via at contact 1, and a short bottom track into its pad. The board is two-layer. Vias have a ⌀0.3 drill and ⌀0.6 pads and are tented, and the top bus lies under solder mask.</li>
             <li><b>The band.</b> Tracks are 0.2 mm wide on a 0.4 mm pitch, so 0.2 mm apart, at y = 5.4 … 10.2. The farther the hole, the higher its track. They turn between x = −125.5 (hole 1's, the lowest) and −136.6, the lower the further right, and their slanted runs lie 1.0 mm apart. That way no two tracks cross, and every slanted run clears hole 1's ring by at least 2.4 mm. Checked on the exported copper of both layers: every contact is on the intended ring halves, the 10-hole sawn-off board too, with at least 0.2 mm between any two nets. The rings and pads are bare copper, and <code>pcb_mask.dxf</code> gives the openings.</li>
             <li><b>The button sits in the middle hole.</b> Its stem is ⌀7.6, which leaves 0.2 mm all round in the ⌀8 hole. It is 6.835 mm long, 1.235 mm longer than before, because the cap now lands on the 1.2 mm cover instead of on the board. In the staircase the cover's ⌀8 openings guide the stem a second time, just above the board. A cap ⌀15 × 2 mm sits centred on top of the stem, with its upper edge rounded R0.5. The button is one piece. In the staircase it is pushed through cover and board from above, and fastened from below. File: <code>button.scad</code> / <code>button.stl</code>.</li>
-            <li><b>Washer, spacer sleeve, washer under the stem.</b> Both washers are M3 washers to ISO 7093 / DIN 9021: ⌀9 outside, ⌀3.2 inside, 0.8 mm thick. The upper one sits against the stem at z = −1.6 … −0.8. It reaches 0.7 mm past the stem over the copper half-rings (r = 4 … 5) of the middle hole and, being metal, bridges the two halves at the upper stop. Below it is a standard metal M3 spacer sleeve, now ⌀6 / ⌀3.2 × 5 mm, and below that the lower washer at z = −7.4 … −6.6. Both washers run in the guide, so the sleeve holds the lower guide point 5 mm below the upper one. Files: <code>washer.stl</code> (both washers, in place), <code>sleeve.stl</code>.</li>
+            <li><b>Washer, spacer sleeve, washer under the stem.</b> Both washers are M3 washers to ISO 7093 / DIN 9021: ⌀9 outside, ⌀3.2 inside, 0.8 mm thick. The upper one sits against the stem at z = −1.6 … −0.8. It reaches 0.7 mm past the stem over the copper half-rings (r = 4 … 5) of the middle hole and, being metal, bridges the two halves at the upper stop. Below it is a plastic spacer sleeve, ⌀7 / ⌀4.2 × 5 mm (polyamide: tighten the screw moderately, it creeps), and below that the lower washer at z = −7.4 … −6.6. Both washers run in the guide, so the sleeve holds the lower guide point 5 mm below the upper one. Files: <code>washer.stl</code> (both washers, in place), <code>sleeve.stl</code>.</li>
             <li><b>Guiding.</b> The button is held above, by the board hole and in the staircase also the cover opening, both ⌀8 with 0.2 mm play, and below by the washers in the guide bore (⌀9.4). From the top of the cover to the lower washer that is about 9.5 mm. The button can tilt at most about 2.5°, and jamming would need a press well outside the ⌀15 cap (friction taken as 0.3–0.4). The cover guide reaches 1.2 mm higher than the board alone did, so the sleeve could be 1 mm shorter (5 instead of 6 mm) for the same span.</li>
             <li><b>An M3 × 12 self-tapping screw for plastics</b> clamps washer, sleeve and washer to the stem from below. It has a pan head as ISO 7045 (⌀5.6 × 2.4) with a cross recess, bearing on the lower washer at z = −7.4, and its point reaches z = 4.6, 5.4 mm into the stem. The thread is drawn plain at 3 mm, with a pointed tip. The stem has a blind pilot hole for it, ⌀2.5 (the usual core hole for M3 in thermoplastic), opening at its lower face and 6.4 mm deep. That is 1 mm past the point, as room for the chips. Around the hole the ⌀7.6 stem keeps 2.55 mm of wall. Switch the button off to see the screw in its hole. File: <code>screw.stl</code>.</li>
             <li><b>The board is lengthened only at the connector</b>, by 13.4 mm at the −X end. The connector body is drawn simplified, with the brown ZIF slider on its face.</li>
-            <li><b>The button moves.</b> Button, washers, sleeve and screw move together along Z between two stops. At the upper stop (travel 0) the upper washer bears on the copper half-rings, pushed up by the spring. At the lower stop the cap's underside lands on the cover. The stroke is 3.965 mm. Drag <b>Travel</b> to set a position, or <b>Press</b> to run a full stroke down and back.</li>
+            <li><b>The button moves.</b> Button, washers, sleeve and screw move together along Z between two stops. At the upper stop (travel 0) the upper washer bears on the copper half-rings, pushed up by the spring. At the lower stop a 1 mm <b>felt ring</b> (⌀15, as wide as the cap, pushed onto the stem from below, against the cap) lands on the cover (a piece of it is shown round the middle hole; toggle <b>Cover</b>) and damps the stop. The stroke to first felt contact is 2.965 mm; the felt then gives a little. Drag <b>Travel</b> to set a position, or <b>Press</b> to run a full stroke down and back.</li>
             <li><b>A 3D-printed guide tube</b> can sit under a single board, around the middle hole. It is ⌀13.4 outside and ⌀9.4 inside, so the washers run in it with 0.2 mm all round. Its top face sits on the board's underside at z = −0.835. It runs down to z = −18.08 and is closed there by a 1.5 mm floor, whose top is at z = −16.58, so the tube is 17.25 mm long. The spring sets where the floor goes (see below). On the floor stands a 1.5 mm centring collar, ⌀8.6 inside, that keeps the spring in the middle. In the staircase the housing (<code>discant/array.html</code>) replaces it. File: <code>guide.stl</code>.</li>
-            <li><b>A compression spring</b> stands on the floor inside the collar and pushes the lower washer up, so the button rests at the upper stop and returns there when released. It is 0.4 mm wire, ⌀8 outside (⌀7.2 inside), 25 mm free length, with <b>8 active coils</b>. Closed, ground ends with one dead coil each are assumed, so 10 coils in all and a solid length of about 4 mm. It is soft and goes in heavily preloaded, so the force barely rises over the stroke. It surrounds the ⌀5.6 screw head with 0.8 mm to spare all round and bears on the washer outside it. The tube is made just long enough for the spring to push with <b>120 g (1.18 N) at the upper stop</b>. With an estimated rate of about 0.074 N/mm (spring steel), that needs 15.9 mm of preload, so the spring is 9.15 mm long at the upper stop and 5.18 mm at the lower stop. There it pushes with 1.47 N (150 g), only 25 % more than at rest. At the lower stop the coils are 1.2 mm clear of solid in all, about 0.15 mm per gap. That is less than the minimum gap DIN EN 13906-1 recommends (minimum length about 6.25 mm), but enough that they do not touch. Because the rate is a calculated estimate, the real initial force depends on the actual spring: each 0.1 N off moves the floor about 1.35 mm. The narrower, softer spring cut the tube from 38 mm to about 18 mm. File: <code>spring.stl</code>.</li>
+            <li><b>A compression spring</b> stands on the floor inside the collar and pushes the lower washer up, so the button rests at the upper stop and returns there when released. It is 0.4 mm wire, ⌀8 outside (⌀7.2 inside), 25 mm free length, with <b>8 active coils</b>. Closed, ground ends with one dead coil each are assumed, so 10 coils in all and a solid length of about 4 mm. It is soft and goes in heavily preloaded, so the force barely rises over the stroke. It surrounds the ⌀5.6 screw head with 0.8 mm to spare all round and bears on the washer outside it. The tube is made just long enough for the spring to push with <b>120 g (1.18 N) at the upper stop</b>. With an estimated rate of about 0.074 N/mm (spring steel), that needs 15.9 mm of preload, so the spring is 9.15 mm long at the upper stop and 6.18 mm at the lower stop. There it pushes with 1.40 N (142 g), only 19 % more than at rest. At the lower stop the coils are 2.18 mm clear of solid in all, about 0.27 mm per gap, 0.07 mm short of the minimum length DIN EN 13906-1 recommends (about 6.25 mm); they do not touch. Because the rate is a calculated estimate, the real initial force depends on the actual spring: each 0.1 N off moves the floor about 1.35 mm. The narrower, softer spring cut the tube from 38 mm to about 18 mm. File: <code>spring.stl</code>.</li>
             <li><b>Section X/Z</b> cuts everything with a plane parallel to X and Z, and the slider moves it along Y from −11 to +17 mm. By default the +Y side is kept, so the cut face looks towards −Y, and <b>Keep −Y side</b> turns it round. At y = 0 the plane runs through the axis of the button, washer and screw and through the middle of every hole. Cut faces are shown filled, in a darker shade of each part's colour. The board shows its laminate there. The axes are never cut.</li>
             <li><b>The triad</b> is the board's own frame: origin at the centre of the middle hole in all three axes, X along the row, Y across it, Z out of the top face. The laminate therefore runs z = −0.8 … +0.8, with the copper just below it.</li>
             <li><b>Bottom</b> looks straight up at the copper side. <b>Detail</b> moves in close on the first holes from below, where the 1.6 mm board thickness and the bore walls can be seen. <b>Connector</b> shows the connector at the −X end from below, <b>−X end</b> the end of the board. <b>Orthographic</b> gives true elevations for checking the spacing.</li>
@@ -264,10 +265,11 @@
   // pads, +x half a pitch past the last hole of each sawn version; board ends 2.3 beyond
   var SCR_CU = 0.5, END_D = MID_D / 2 + 1.2, END_XS = [130, 110, 90, 70];
   // button, in the middle hole
-  var COVER_T = 1.2;   // cover plate: the cap lands on it
+  var COVER_T = 1.2;   // cover plate: the felt ring lands on it
+  var FELT_T = 1, FELT_OD = 15;   // felt ring on the stem, under the cap, as wide as it (button.scad)
   var GAP = 0.2, STEM_H = 5.6 + 0.035 + COVER_T, CAP_D = 15, CAP_H = 2, CAP_R = 0.5;
   var WASHER_OD = 9, WASHER_ID = 3.2, WASHER_T = 0.8;   // M3 to ISO 7093 / DIN 9021
-  var SLEEVE_OD = 6, SLEEVE_ID = 3.2, SLEEVE_L = 5;       // standard metal M3 spacer, between the washers
+  var SLEEVE_OD = 7, SLEEVE_ID = 4.2, SLEEVE_L = 5;       // plastic spacer, between the washers
   // M3 tapping screw, pan head as ISO 7045; pilot hole in the stem
   var SCREW_D = 3, SCREW_L = 12, TIP_L = 1, TIP_D = 1.2, HEAD_D = 5.6, HEAD_K = 2.4, HEAD_R = 1.2;
   var SLOT_W = 0.6, SLOT_L = 3, PILOT_D = 2.5, CHIP_ROOM = 1;
@@ -338,7 +340,7 @@
   var Z_SLV = BZ0 - WASHER_T, Z_BEAR = Z_SLV - SLEEVE_L - WASHER_T, Z_TIP = Z_BEAR + SCREW_L, Z_HOLE = Z_TIP + CHIP_ROOM;
   set('d-screw', 'M3 × ' + f(SCREW_L) + ', pan head');
   set('d-pilot', '⌀' + f(PILOT_D) + ' × ' + f(Z_HOLE - BZ0) + ' deep');
-  var Z_CU = -PCB_T / 2 - CU_T, STROKE = BZ_CAP - CU_T - (PCB_T / 2 + CU_T + COVER_T);   // cap lands on the cover
+  var Z_CU = -PCB_T / 2 - CU_T, STROKE = BZ_CAP - CU_T - FELT_T - (PCB_T / 2 + CU_T + COVER_T);   // felt lands on the cover
   var GUIDE_ID = WASHER_OD + 2 * GUIDE_GAP, GUIDE_OD = GUIDE_ID + 2 * GUIDE_WALL;
   var SPRING_DM = SPRING_OD - SPRING_WD, SPRING_NA = SPRING_N - 2;
   var SPRING_K = SPRING_G * Math.pow(SPRING_WD, 4) / (8 * Math.pow(SPRING_DM, 3) * SPRING_NA);
@@ -525,6 +527,13 @@
   var button = new THREE.Group();
   button.add(new THREE.Mesh(btnGeo, btnMat));
   button.add(new THREE.LineSegments(new THREE.EdgesGeometry(btnGeo, 30), new THREE.LineBasicMaterial({ color: 0x22344f })));
+  // felt ring under the cap, round the stem
+  var fGeo = new THREE.LatheGeometry([
+    new THREE.Vector2(STEM_D / 2, BZ_CAP - FELT_T), new THREE.Vector2(FELT_OD / 2, BZ_CAP - FELT_T),
+    new THREE.Vector2(FELT_OD / 2, BZ_CAP), new THREE.Vector2(STEM_D / 2, BZ_CAP),
+    new THREE.Vector2(STEM_D / 2, BZ_CAP - FELT_T)], 96);
+  button.add(new THREE.Mesh(fGeo, new THREE.MeshStandardMaterial({ color: 0x8c3b3b, metalness: 0.0, roughness: 0.95 })));
+  button.add(new THREE.LineSegments(new THREE.EdgesGeometry(fGeo, 30), new THREE.LineBasicMaterial({ color: 0x4f1f1f })));
   // washer against the stem's lower face
   var wGeo = new THREE.LatheGeometry([
     new THREE.Vector2(WASHER_ID / 2, BZ0 - WASHER_T), new THREE.Vector2(WASHER_OD / 2, BZ0 - WASHER_T),
@@ -544,8 +553,8 @@
     new THREE.Vector2(SLEEVE_OD / 2, Z_SLV), new THREE.Vector2(SLEEVE_ID / 2, Z_SLV),
     new THREE.Vector2(SLEEVE_ID / 2, Z_SLV - SLEEVE_L)], 64);
   var sleeve = new THREE.Group();
-  sleeve.add(new THREE.Mesh(slGeo, new THREE.MeshStandardMaterial({ color: 0xc9b37a, metalness: 0.75, roughness: 0.3 })));
-  sleeve.add(new THREE.LineSegments(new THREE.EdgesGeometry(slGeo, 30), new THREE.LineBasicMaterial({ color: 0x6b5a2e })));
+  sleeve.add(new THREE.Mesh(slGeo, new THREE.MeshStandardMaterial({ color: 0xe8e4d8, metalness: 0, roughness: 0.6 })));
+  sleeve.add(new THREE.LineSegments(new THREE.EdgesGeometry(slGeo, 30), new THREE.LineBasicMaterial({ color: 0x8a8578 })));
 
   // screw: lathe from the head's underside up to the point; thread drawn plain
   var sp = [new THREE.Vector2(0, Z_BEAR - HEAD_K), new THREE.Vector2(HEAD_D / 2 - HEAD_R, Z_BEAR - HEAD_K)];
@@ -585,6 +594,24 @@
   guide.add(new THREE.Mesh(gGeo, new THREE.MeshStandardMaterial({ color: 0xd9a441, metalness: 0.0, roughness: 0.75 })));
   guide.add(new THREE.LineSegments(new THREE.EdgesGeometry(gGeo, 30), new THREE.LineBasicMaterial({ color: 0x7a5a1c })));
   scene.add(guide);
+
+  // a piece of the discant's cover (discant/cover.scad) round the middle hole:
+  // its 1.2 mm plate on the board's top face, from the front wall's inner face
+  // to beyond the +y edge, with the d8 stem opening; the felt ring lands on it
+  var COV_X = 14, COV_Y0 = -(CAP_D / 2 + 0.4), COV_Y1 = MARGIN_P + 0.7, OPEN_D = 8;
+  var covShape = new THREE.Shape();
+  covShape.moveTo(-COV_X, COV_Y0); covShape.lineTo(COV_X, COV_Y0);
+  covShape.lineTo(COV_X, COV_Y1); covShape.lineTo(-COV_X, COV_Y1); covShape.lineTo(-COV_X, COV_Y0);
+  var covHole = new THREE.Path();
+  covHole.absarc(0, 0, OPEN_D / 2, 0, Math.PI * 2, true);
+  covShape.holes.push(covHole);
+  var covGeo = new THREE.ExtrudeGeometry(covShape, { depth: COVER_T, bevelEnabled: false, steps: 1, curveSegments: 64 });
+  covGeo.translate(0, 0, PCB_T / 2 + CU_T);
+  covGeo.rotateX(-Math.PI / 2);
+  var cover = new THREE.Group();
+  cover.add(new THREE.Mesh(covGeo, new THREE.MeshStandardMaterial({ color: 0xaab3bb, metalness: 0.0, roughness: 0.7 })));
+  cover.add(new THREE.LineSegments(new THREE.EdgesGeometry(covGeo, 30), new THREE.LineBasicMaterial({ color: 0x5a636b })));
+  scene.add(cover);
 
   // spring: centre line climbs one wire diameter per dead end coil and shares
   // the rest among the active coils, as in button.scad; rebuilt as it compresses
@@ -698,7 +725,7 @@
   var cutPlanes = [cutPlane];
   var caps = [];
   var solids = [];
-  [mesh, lines, copper, tracks, connector, button, washer, sleeve, screw, guide, spring].forEach(function (o) {
+  [mesh, lines, copper, tracks, connector, button, washer, sleeve, screw, guide, spring, cover].forEach(function (o) {
     o.traverse(function (c) {
       if (c.isMesh || c.isLineSegments) solids.push(c);
     });
@@ -800,6 +827,7 @@
   document.getElementById('showtracks').addEventListener('change', function (e) { tracks.visible = e.target.checked; });
   document.getElementById('showspring').addEventListener('change', function (e) { spring.visible = e.target.checked; });
   document.getElementById('showguide').addEventListener('change', function (e) { guide.visible = e.target.checked; });
+  document.getElementById('showcover').addEventListener('change', function (e) { cover.visible = e.target.checked; });
   document.getElementById('showsleeve').addEventListener('change', function (e) { sleeve.visible = e.target.checked; });
   document.getElementById('showscrew').addEventListener('change', function (e) { screw.visible = e.target.checked; });
   document.getElementById('showwasher').addEventListener('change', function (e) { washer.visible = e.target.checked; });

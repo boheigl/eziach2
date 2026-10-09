@@ -19,7 +19,7 @@ KEY      := ../build/switch
 BODY_STL := $(addprefix $(B)/,back_cable.stl housing.stl cover.stl)
 JS       := $(addprefix $(B)/,housing.js cover.js back_cable.js)
 KEY_STL  := $(addprefix $(KEY)/,pcb.stl pcb_12.stl pcb_11.stl pcb_10.stl pcb_connector.stl \
-                                button.stl washer.stl sleeve.stl screw.stl guide.stl spring.stl)
+                                button.stl felt.stl washer.stl sleeve.stl screw.stl guide.stl spring.stl)
 
 all: $(BODY_STL) $(B)/array.stl $(JS)
 

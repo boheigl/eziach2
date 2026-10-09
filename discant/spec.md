@@ -164,8 +164,9 @@ generated from `build/discant/housing.stl`.
 3. **Cover** (`cover.scad` → `cover.stl`): one printed part that closes the
    staircase so that **each step looks like a box** [given]:
    - top, 1.2 mm, on the board between the caps, over the tab and 1.2 mm
-     beyond the board ends, with ⌀15.6 openings for the ⌀15 caps (they pass through when
-     pressed);
+     beyond the board ends, with ⌀8 openings that guide the stems a second time;
+   - flat round each opening: the **felt ring** under each cap (on the button,
+     `switch/button.scad`) lands on it at the lower stop and damps it [given];
    - a full-length 1.2 mm **front wall** just in front of the board
      (y = −9.1 … −7.9), down onto the step below, for the bottom step down to
      the housing's flat bottom;

@@ -33,7 +33,7 @@ pitch_z  = 4;
 stl_dir = "../build/switch/";   // the key's part STLs, made by make in ../switch/
 
 boards = ["pcb.stl", "pcb_12.stl", "pcb_11.stl", "pcb_10.stl"];   // 13 - k holes
-parts  = ["pcb_connector.stl", "button.stl", "washer.stl",
+parts  = ["pcb_connector.stl", "button.stl", "felt.stl", "washer.stl",
           "sleeve.stl", "screw.stl", "guide.stl", "spring.stl"];
 
 for (k = [0 : n_boards - 1])

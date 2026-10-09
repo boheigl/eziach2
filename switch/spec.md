@@ -130,17 +130,18 @@ Button, washers, sleeve and screw move together along Z.
 
 | Part | Dimensions | z range at rest | Source |
 |---|---|---|---|
-| Button stem | ⌀7.6 (0.2 mm clearance in the ⌀8 hole) × 5.6 | −0.835 … 4.765 | [given] |
-| Button cap | ⌀15 × 2, upper edge R0.5 | 4.765 … 6.765 | [given] |
+| Button stem | ⌀7.6 (0.2 mm clearance in the ⌀8 hole) × 6.835 | −0.835 … 6.0 | [given] |
+| Button cap | ⌀15 × 2, upper edge R0.5 | 6.0 … 8.0 | [given] |
+| Felt ring | ⌀15 (as the cap) / ⌀7 × 1, punched felt, pushed onto the stem from below against the cap; damps the lower stop | 5.0 … 6.0 | [given] felt, ≈ 1 mm [chosen] size |
 | Upper washer | M3 to ISO 7093 / DIN 9021: ⌀9 / ⌀3.2 × 0.8, metal | −1.635 … −0.835 | [given] |
-| Spacer sleeve | ⌀6 / ⌀3.2 × 6, metal | −7.635 … −1.635 | [chosen], see §9 |
-| Lower washer | the same | −8.435 … −7.635 | [given] |
-| Screw | M3 × 12 self-tapping for plastics, head below the lower washer | head −10.835 … −8.435 | [given] type, [chosen] length |
-| Pilot hole in the stem | ⌀2.5 blind, 5.4 deep, 1 mm past the screw tip | | [chosen] |
+| Spacer sleeve | ⌀7 / ⌀4.2 × 5, plastic (M4 sleeve) | −6.635 … −1.635 | [given] ⌀7 × 5, bore assumed, see §9 |
+| Lower washer | the same | −7.435 … −6.635 | [given] |
+| Screw | M3 × 12 self-tapping for plastics, head below the lower washer | head −9.835 … −7.435 | [given] type, [chosen] length |
+| Pilot hole in the stem | ⌀2.5 blind, 6.4 deep, 1 mm past the screw tip | | [chosen] |
 
 The z ranges include the 0.035 mm the assembly sits below the drawn
-position at the upper stop (see §7). The screw engages 4.4 mm in the button,
-2.2 mm of cap remains above the pilot hole, and the ⌀7.6 stem keeps 2.55 mm
+position at the upper stop (see §7). The screw engages 5.4 mm in the button,
+2.4 mm of cap remains above the pilot hole, and the ⌀7.6 stem keeps 2.55 mm
 of wall around it.
 
 **The upper washer is the switch contact:** at rest it bears on both
@@ -151,17 +152,17 @@ half-rings of the middle hole and bridges them. It must stay metal and on top.
 the stem in the board hole and the washers in the guide tube. With the two
 washers stacked directly, those points were only about 3.2 mm apart overall.
 The button could tilt about 7°, and a press more than 4–5 mm off centre could
-jam it at the start of the stroke (friction taken as 0.3–0.4). With the 6 mm
-sleeve they are about 9 mm apart. The tilt drops to about 2.5°, and jamming
-would need a press 11–15 mm off centre, outside the cap. [estimated]
+jam it at the start of the stroke (friction taken as 0.3–0.4). With the 5 mm
+sleeve and the cover guide 1.2 mm above the board they are about 9.5 mm
+apart. The tilt drops to about 2.5°, and jamming would need a press 11–15 mm off centre, outside the cap. [estimated]
 
 ## 7. Travel
 
 | | |
 |---|---|
 | Upper stop (rest) | upper washer on the copper rings; stem face 0.035 mm below the laminate |
-| Lower stop | cap underside on the board's top face |
-| Stroke | 3.965 mm (4 mm stem projection less 0.035 mm copper) |
+| Lower stop | felt ring under the cap on the cover's top face (1.2 mm above the board); the felt damps the stop [given] |
+| Stroke | 2.965 mm to first felt contact (3 mm wanted [given]; the 1 mm felt and the unchanged stem give 2.965), then a little more as the felt gives |
 
 `button.scad` takes `travel` (0 … stroke). The viewer has a slider and a
 *Press* button.
@@ -186,8 +187,8 @@ the lower washer up. It surrounds the screw head.
 | End coils | one closed dead coil each end, 10 coils in all, solid ≈ 4 mm | [unverified] |
 | Rate | ≈ 0.074 N/mm, spring steel G = 81 500 N/mm² | [estimated] |
 | Initial force at the upper stop | 120 g = 1.18 N | [given] |
-| Preload | 15.9 mm → 9.15 mm long at rest, 5.18 mm at the lower stop | derived |
-| Force at the lower stop | 1.47 N = 150 g, +25 % over the stroke | [estimated] |
+| Preload | 15.9 mm → 9.15 mm long at rest, 6.18 mm at the lower stop | derived |
+| Force at the lower stop | 1.40 N = 142 g, +19 % over the stroke | [estimated] |
 
 The user's aim is about 120 g at the start of the press that hardly rises
 over the stroke. That calls for a soft spring, heavily preloaded. The floor,
@@ -195,9 +196,9 @@ and with it the tube length, is computed from the wanted initial force
 (`spring_f0`). Each 0.1 N of error in the rate moves the floor by about
 1.35 mm, so the tube should be re-checked once the real spring rate is known.
 
-At the lower stop the spring is 1.2 mm clear of solid in all, about 0.15 mm
-per gap. That is less than the DIN EN 13906-1 minimum length (≈ 6.25 mm), but
-the coils do not touch.
+At the lower stop the spring is 2.18 mm clear of solid in all, about 0.27 mm
+per gap. That is 0.07 mm short of the DIN EN 13906-1 minimum length
+(≈ 6.25 mm); the coils do not touch.
 
 Springs considered and rejected: ⌀10 × 1 × 20 (5 active coils, ≈ 4–15 N, far
 too stiff); ⌀10 × 0.5 × 40 (needed a 38 mm tube); ⌀8 × 0.4 × 10 (too short
@@ -208,12 +209,11 @@ none combined the fit over the screw head, 120 g and a flat force curve.
 
 ## 9. Open points
 
-1. **Spacer sleeve.** ⌀6 / ⌀3.2 × 6 is a nominal size. Found alternatives:
-   - RS PRO brass ⌀4.8 / ⌀3.2 × 6 fits directly.
-   - A plastic M4 sleeve ⌀7 × 5 (bore ≈ 4.2) also works. The guide span drops
-     to about 8 mm, and with an M3 × 12 the chip room must shrink to 0.5 mm to
-     keep 1.5 mm of cap. Polyamide creeps under the clamp load, so tighten
-     moderately and use medium thread-lock.
+1. **Spacer sleeve.** A plastic sleeve ⌀7 × 5 [given]; the bore (≈ 4.2, as
+   an M4 sleeve) is assumed. Any bore from 3.2 to about 5 works: the washers
+   centre the screw, and the sleeve only has to bear on their annulus.
+   Polyamide creeps under the clamp load, so tighten moderately and use medium
+   thread-lock.
 2. **Screw.** The real screw (`Screw.png`) has a cylinder head with hex
    socket and a coarse, sharp thread for plastics, which suits the button. It
    must be **at most 12 mm** under the head. The model still has a pan head
@@ -241,8 +241,8 @@ these parts: the boards, the connector body and the button assembly.
 | `pcb.stl`, `pcb_board.stl`, `pcb_copper.stl`, `pcb_connector.stl` | 3D, combined and by part |
 | `pcb_12.stl`, `pcb_11.stl`, `pcb_10.stl` | sawn-off boards with 12, 11, 10 holes (`cut_holes` = 1, 2, 3) |
 | `pcb.dxf`, `pcb_copper.dxf`, `pcb_copper_top.dxf`, `pcb_drill.dxf`, `pcb_mask.dxf` | outline, bottom copper, top copper, via holes, bottom solder mask openings (all seen from the top) |
-| `button.scad` | button, washers, sleeve, screw, guide tube, spring; `travel` sets the position |
-| `button.stl`, `washer.stl`, `sleeve.stl`, `screw.stl`, `guide.stl`, `spring.stl` | 3D, moving parts at the upper stop |
+| `button.scad` | button, felt ring, washers, sleeve, screw, guide tube, spring; `travel` sets the position |
+| `button.stl`, `felt.stl`, `washer.stl`, `sleeve.stl`, `screw.stl`, `guide.stl`, `spring.stl` | 3D, moving parts at the upper stop |
 | `viewer.html` | 3D viewer of one board with its button assembly: part toggles, travel slider, X/Z section plane, dimensions |
 | `Makefile` | builds the files above into `build/switch/` |
 | `Screw.png` | photo of the screw in hand |

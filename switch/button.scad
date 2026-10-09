@@ -9,7 +9,7 @@
 // the copper half-rings (r = 4 .. 5) on the board's underside, which stand
 // 0.5 beyond it all round. If it is metal,
 // it bridges the two halves of the ring.
-// Beneath it sits a standard metal spacer sleeve for M3, and beneath that a
+// Beneath it sits a plastic spacer sleeve, and beneath that a
 // second, identical washer. Both washers run in the guide tube, so the sleeve
 // spaces the two guide points apart: with the washers stacked directly, the
 // guide was 1.6 mm long and the button could tilt ~7 deg and jam when pressed
@@ -20,8 +20,8 @@
 // two stops:
 //   upper stop (travel = 0): the upper washer bears on the copper half-rings.
 //     The stem's lower face then sits cu_t (0.035) below the laminate.
-//   lower stop (travel = stroke): the cap's underside lands on the cover's
-//     top face.
+//   lower stop (travel = stroke): the felt ring under the cap lands on the
+//     cover's top face, round the stem opening; the felt damps the stop.
 // The parts are modelled with the stem flush with the laminate and then moved
 // down by cu_t + travel; set travel to show any position.
 //
@@ -64,6 +64,7 @@
 // make builds   openscad -o ../build/switch/button.stl -D 'part="button"' button.scad
 //              openscad -o ../build/switch/washer.stl -D 'part="washer"' button.scad   (both, in place)
 //              openscad -o ../build/switch/sleeve.stl -D 'part="sleeve"' button.scad
+//              openscad -o ../build/switch/felt.stl   -D 'part="felt"'   button.scad
 //              openscad -o ../build/switch/screw.stl  -D 'part="screw"'  button.scad
 //              openscad -o ../build/switch/guide.stl  -D 'part="guide"'  button.scad
 //              openscad -o ../build/switch/spring.stl -D 'part="spring"' button.scad
@@ -76,29 +77,34 @@ cu_t    = 0.035; // copper below the laminate
 
 /* [Stem] */
 gap     = 0.2;   // radial clearance to the hole
-cover_t = 1.2;   // cover plate (discant/cover.scad): the cap now lands on it
-stem_h  = 5.6 + cu_t + cover_t;  // from the underside of the laminate: keeps the stroke
-                 // at 3.965 with the cap landing on the cover instead of the board
+cover_t = 1.2;   // cover plate (discant/cover.scad): the felt ring lands on it
+stem_h  = 5.6 + cu_t + cover_t;  // from the underside of the laminate: at the upper stop
+                 // the cap stands 3.965 above the cover; the felt ring takes 1 of it
 
 /* [Cap] */
 cap_d   = 15;
 cap_h   = 2;
 cap_r   = 0.5;   // rounding of the upper edge
 
+/* [Felt ring — pushed onto the stem from below, against the cap: damps the stop] */
+felt_t  = 1;     // thickness, uncompressed [given: about 1 mm]
+felt_od = cap_d; // outside: as wide as the cap [given]
+felt_id = 7;     // punched hole, stretched over the d7.6 stem so it stays put
+
 /* [Washer] */
 washer_od = 9;    // ISO 7093 / DIN 9021, M3
 washer_id = 3.2;
 washer_t  = 0.8;
 
-/* [Spacer sleeve — standard metal part for M3, between the washers] */
-sleeve_od = 6;
-sleeve_id = 3.2;
+/* [Spacer sleeve — plastic, between the washers] */
+sleeve_od = 7;    // [given]
+sleeve_id = 4.2;  // M4 sleeve, assumed; the M3 screw is centred by the washers
 sleeve_l  = 5;    // the cover's d8 openings guide the stem as well, 1.2 above
                   // the board, so 5 mm keeps the guide span of before
 
 /* [Screw — M3 tapping screw, pan head] */
 screw_d   = 3;    // thread major diameter
-screw_l   = 12;   // length under the head: washer + sleeve + washer + 4.4 in the stem
+screw_l   = 12;   // length under the head: washer + sleeve + washer + 5.4 in the stem
 tip_l     = 1;    // pointed tip, part of screw_l
 tip_d     = 1.2;  // diameter at the point
 head_d    = 5.6;  // as ISO 7045
@@ -132,7 +138,7 @@ spring_G    = 81500; // shear modulus, N/mm^2
 travel  = 0;      // 0 = upper stop .. stroke = lower stop
 
 /* [Output] */
-part    = "all";  // "all", "button", "washer", "sleeve", "screw", "guide" or "spring"
+part    = "all";  // "all", "button", "felt", "washer", "sleeve", "screw", "guide" or "spring"
 
 $fa = 2; $fs = 0.1;
 
@@ -154,7 +160,11 @@ echo(str("washers d", washer_od, " / d", washer_id, " x ", washer_t, " at z = ",
 
 // travel
 z_cu    = -pcb_t / 2 - cu_t;              // underside of the copper
-stroke  = z_cap - cu_t - (pcb_t / 2 + cu_t + cover_t);   // washer on copper .. cap on the cover
+// washer on copper .. felt on the cover (first contact; the felt then gives a little)
+stroke  = z_cap - cu_t - felt_t - (pcb_t / 2 + cu_t + cover_t);
+assert(felt_od <= cap_d, "felt ring sticks out under the cap's edge");
+assert(felt_od >= 8 + 3, "felt ring too small to bear on the cover round its d8 opening");
+echo(str("felt ring d", felt_od, " / d", felt_id, " x ", felt_t, " under the cap, z = ", z_cap - felt_t, " .. ", z_cap));
 assert(travel >= 0 && travel <= stroke, str("travel must lie in 0 .. ", stroke));
 dz      = -cu_t - travel;                 // shift of the moving parts
 
@@ -170,7 +180,7 @@ guide_od = guide_id + 2 * guide_wall;
 guide_z1 = z_cu;                                         // top, on the copper
 floor_z  = z_bear - cu_t - (spring_l0 - spring_pre);    // top of the floor, from the spring
 guide_z0 = floor_z - floor_t;                            // bottom of the tube
-echo(str("stroke ", stroke, " mm: upper stop washer on the copper, lower stop cap on the cover"));
+echo(str("stroke ", stroke, " mm: upper stop washer on the copper, lower stop felt on the cover"));
 echo(str("guide tube d", guide_od, " / d", guide_id, ", z = ", guide_z0, " .. ", guide_z1,
          " (", guide_z1 - guide_z0, " long), floor ", floor_t, " at z = ", guide_z0,
          " .. ", floor_z, "; washers ", guide_gap, " clear"));
@@ -251,6 +261,11 @@ translate([0, 0, dz]) {
         translate([0, 0, z_slv - sleeve_l]) difference() {
             cylinder(d = sleeve_od, h = sleeve_l);
             translate([0, 0, -1]) cylinder(d = sleeve_id, h = sleeve_l + 2);
+        }
+    if (part == "all" || part == "felt")   // drawn stretched: its hole at the stem
+        translate([0, 0, z_cap - felt_t]) difference() {
+            cylinder(d = felt_od, h = felt_t);
+            translate([0, 0, -1]) cylinder(d = stem_d, h = felt_t + 2);
         }
 }
 
