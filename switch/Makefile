@@ -15,7 +15,9 @@ OPENSCAD ?= openscad
 B        := ../build/switch
 
 PCB_STL    := $(addprefix $(B)/,pcb.stl pcb_12.stl pcb_11.stl pcb_10.stl \
-                                pcb_board.stl pcb_copper.stl pcb_connector.stl)
+                                pcb_board.stl pcb_copper.stl pcb_connector.stl \
+                                pcb_board_12.stl pcb_board_11.stl pcb_board_10.stl \
+                                pcb_copper_12.stl pcb_copper_11.stl pcb_copper_10.stl)
 PCB_DXF    := $(addprefix $(B)/,pcb.dxf pcb_copper.dxf pcb_copper_top.dxf pcb_drill.dxf pcb_mask.dxf)
 BUTTON_STL := $(addprefix $(B)/,button.stl felt.stl washer.stl sleeve.stl screw.stl guide.stl spring.stl)
 
@@ -36,6 +38,12 @@ $(B)/pcb_10.stl: pcb.scad
 	$(call scad,$<,-D cut_holes=3)
 $(B)/pcb_board.stl $(B)/pcb_copper.stl $(B)/pcb_connector.stl: $(B)/pcb_%.stl: pcb.scad
 	$(call scad,$<,-D 'part="$*"')
+# laminate and copper of the sawn-off boards apart (for the discant's phone page)
+cut_of = $(if $(findstring 12,$1),1,$(if $(findstring 11,$1),2,3))
+$(B)/pcb_board_12.stl $(B)/pcb_board_11.stl $(B)/pcb_board_10.stl: $(B)/pcb_board_%.stl: pcb.scad
+	$(call scad,$<,-D cut_holes=$(call cut_of,$*) -D 'part="board"')
+$(B)/pcb_copper_12.stl $(B)/pcb_copper_11.stl $(B)/pcb_copper_10.stl: $(B)/pcb_copper_%.stl: pcb.scad
+	$(call scad,$<,-D cut_holes=$(call cut_of,$*) -D 'part="copper"')
 $(B)/pcb.dxf: pcb.scad
 	$(call scad,$<,-D flat=true -D 'part="board"')
 $(B)/pcb_copper.dxf $(B)/pcb_copper_top.dxf $(B)/pcb_drill.dxf $(B)/pcb_mask.dxf: $(B)/pcb_%.dxf: pcb.scad

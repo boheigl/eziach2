@@ -20,6 +20,8 @@ BODY_STL := $(addprefix $(B)/,back_cable.stl housing.stl cover.stl)
 JS       := $(addprefix $(B)/,housing.js cover.js back_cable.js)
 KEY_STL  := $(addprefix $(KEY)/,pcb.stl pcb_12.stl pcb_11.stl pcb_10.stl pcb_connector.stl \
                                 button.stl felt.stl washer.stl sleeve.stl screw.stl guide.stl spring.stl)
+PHONE_KEY := $(addprefix $(KEY)/,pcb_board.stl pcb_copper.stl pcb_board_12.stl pcb_copper_12.stl \
+                                 pcb_board_11.stl pcb_copper_11.stl pcb_board_10.stl pcb_copper_10.stl)
 
 all: $(BODY_STL) $(B)/array.stl $(JS) $(B)/phone.html
 
@@ -36,7 +38,7 @@ $(BODY_STL): $(B)/%.stl: %.scad
 # only if one of them changed.
 $(B)/array.stl: array.scad $(KEY_STL)
 	$(call scad,$<)
-$(KEY_STL): key ;
+$(KEY_STL) $(PHONE_KEY): key ;
 key:
 	@$(MAKE) --no-print-directory -C ../switch
 
@@ -50,12 +52,15 @@ $(JS): $(B)/%.js: $(B)/%.stl stl2js.py
 
 # --- phone page: phone.html with every part embedded (embed_parts.py), one
 # file that loads nothing else; NAME=stl as the page reads them
-PHONE_PARTS := PCB13_TRIS=$(KEY)/pcb.stl PCB12_TRIS=$(KEY)/pcb_12.stl PCB11_TRIS=$(KEY)/pcb_11.stl \
-               PCB10_TRIS=$(KEY)/pcb_10.stl CONN_TRIS=$(KEY)/pcb_connector.stl \
+PHONE_PARTS := BOARD13_TRIS=$(KEY)/pcb_board.stl COPPER13_TRIS=$(KEY)/pcb_copper.stl \
+               BOARD12_TRIS=$(KEY)/pcb_board_12.stl COPPER12_TRIS=$(KEY)/pcb_copper_12.stl \
+               BOARD11_TRIS=$(KEY)/pcb_board_11.stl COPPER11_TRIS=$(KEY)/pcb_copper_11.stl \
+               BOARD10_TRIS=$(KEY)/pcb_board_10.stl COPPER10_TRIS=$(KEY)/pcb_copper_10.stl \
+               CONN_TRIS=$(KEY)/pcb_connector.stl \
                HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl CABLE_TRIS=$(B)/back_cable.stl \
                BUTTON_TRIS=$(KEY)/button.stl FELT_TRIS=$(KEY)/felt.stl WASHER_TRIS=$(KEY)/washer.stl \
                SLEEVE_TRIS=$(KEY)/sleeve.stl SCREW_TRIS=$(KEY)/screw.stl SPRING_TRIS=$(KEY)/spring.stl
-$(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(KEY_STL)
+$(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(KEY_STL) $(PHONE_KEY)
 	@echo "  EMBED    $@"
 	@$(PYTHON) embed_parts.py $< $@ $(PHONE_PARTS)
 

@@ -240,6 +240,7 @@ these parts: the boards, the connector body and the button assembly.
 | `pcb.scad` | board, copper (rings, pads, tracks), connector body |
 | `pcb.stl`, `pcb_board.stl`, `pcb_copper.stl`, `pcb_connector.stl` | 3D, combined and by part |
 | `pcb_12.stl`, `pcb_11.stl`, `pcb_10.stl` | sawn-off boards with 12, 11, 10 holes (`cut_holes` = 1, 2, 3) |
+| `pcb_board_12.stl` … `pcb_copper_10.stl` | the same sawn-off boards, laminate and copper apart (for the discant's phone page) |
 | `pcb.dxf`, `pcb_copper.dxf`, `pcb_copper_top.dxf`, `pcb_drill.dxf`, `pcb_mask.dxf` | outline, bottom copper, top copper, via holes, bottom solder mask openings (all seen from the top) |
 | `button.scad` | button, felt ring, washers, sleeve, screw, guide tube, spring; `travel` sets the position |
 | `button.stl`, `felt.stl`, `washer.stl`, `sleeve.stl`, `screw.stl`, `guide.stl`, `spring.stl` | 3D, moving parts at the upper stop |

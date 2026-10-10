@@ -98,7 +98,7 @@
   scene.background = new THREE.Color(0xdfe5e2);
   scene.add(new THREE.HemisphereLight(0xffffff, 0x58625e, 0.75));
   var key = new THREE.DirectionalLight(0xffffff, 0.75); key.position.set(-3, 6, 5); scene.add(key);
-  var under = new THREE.DirectionalLight(0xffffff, 0.35); under.position.set(2, -5, 3); scene.add(under);
+  var under = new THREE.DirectionalLight(0xffffff, 0.7); under.position.set(2, -5, 3); scene.add(under);
   var camera = new THREE.PerspectiveCamera(30, 4 / 3, 2, 4000);
 
   var cutPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0), planes = [cutPlane], solids = [], clipped = false;
@@ -120,13 +120,20 @@
     return grp;
   }
 
+  // copper: 0.035 mm on the laminate, drawn a little in front of it so the two do not flicker
+  function copper(name, offset) {
+    var g = mesh(name, 0xc87a4c, offset), m = g.children[0].material;
+    m.metalness = 0.3; m.roughness = 0.4; m.emissive = new THREE.Color(0x4a2410);
+    m.polygonOffset = true; m.polygonOffsetFactor = -1; m.polygonOffsetUnits = -4;
+    return g;
+  }
   var parts = {}, moving = new THREE.Group(), springGrp = new THREE.Group();
   var buttonGrp = new THREE.Group(); buttonGrp.add(moving, springGrp);
   var LOAD = [
-    ['pcb.js', function () { parts.pcb.add(mesh('PCB13_TRIS', 0x2f7a4f)); }],
-    ['pcb_12.js', function () { parts.pcb.add(mesh('PCB12_TRIS', 0x2f7a4f, [10, 17, 4])); }],
-    ['pcb_11.js', function () { parts.pcb.add(mesh('PCB11_TRIS', 0x2f7a4f, [20, 34, 8])); }],
-    ['pcb_10.js', function () { parts.pcb.add(mesh('PCB10_TRIS', 0x2f7a4f, [30, 51, 12])); }],
+    ['board 13', function () { parts.pcb.add(mesh('BOARD13_TRIS', 0x2f7a4f), copper('COPPER13_TRIS')); }],
+    ['board 12', function () { parts.pcb.add(mesh('BOARD12_TRIS', 0x2f7a4f, [10, 17, 4]), copper('COPPER12_TRIS', [10, 17, 4])); }],
+    ['board 11', function () { parts.pcb.add(mesh('BOARD11_TRIS', 0x2f7a4f, [20, 34, 8]), copper('COPPER11_TRIS', [20, 34, 8])); }],
+    ['board 10', function () { parts.pcb.add(mesh('BOARD10_TRIS', 0x2f7a4f, [30, 51, 12]), copper('COPPER10_TRIS', [30, 51, 12])); }],
     ['pcb_connector.js', function () { for (var k = 0; k < 4; k++) parts.pcb.add(mesh('CONN_TRIS', 0x2b2f33, [10 * k, 17 * k, 4 * k])); }],
     ['housing.js', function () { parts.housing = mesh('HOUSING_TRIS', 0xd9a441); scene.add(parts.housing); }],
     ['cover.js', function () { parts.cover = mesh('COVER_TRIS', 0x5b6f86); scene.add(parts.cover); }],
