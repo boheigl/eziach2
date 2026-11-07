@@ -19,9 +19,10 @@ places.**
 ## 1. Four-board array [given]
 
 Four boards, parallel, as a staircase: board k (k = 0 … 3) is moved by
-k × (10, 17, 4) mm. That is half the hole pitch along the row, 17 mm across it
-and 4 mm up, so each board rises towards the connector (+Y) side. The z
-direction was chosen by the user.
+k × (10, 16, 3) mm. That is half the hole pitch along the row, 16 mm across it
+and 3 mm up, so each board rises towards the connector (+Y) side. [given: the
+key positions of the earlier DiscantCase, ../shape/OrderOnShape20260107: 46
+keys, the same rows and pitch, 16 mm and 3 mm measured in the key plane]
 
 **Board k has 13 − k holes: 13, 12, 11, 10.** [given] It is the same board
 with k holes sawn off at the +X end (`pcb.scad`, `cut_holes = k`). The cut
@@ -30,22 +31,22 @@ beyond that board's +x end screw hole and 2.7 mm clear of the first ring
 removed. [chosen] With
 the 10 mm shift, both ends of the staircase step in by 10 mm per board. The
 saw cuts through the common bus on top, which still reaches every remaining
-−Y half, and through the −Y-band tracks of the removed holes, which remain as
-dead stubs on contacts 8, 9 and 10. Checked on the 10-hole version's exported
+−Y half, and through the band tracks of the removed holes, which remain as
+dead stubs on contacts 2, 3 and 4. Checked on the 10-hole version's exported
 copper: holes 1 … 10 on their contacts, contact 1 on all ten −Y halves, no
 copper beyond the cut.
-**Deburr the cut edge:** the tracks there are only 0.2 mm apart. `array.scad` places the part STLs (boards `pcb.stl`, `pcb_12.stl`,
+**Deburr the cut edge:** the tracks there are only 0.15 mm apart. `array.scad` places the part STLs (boards `pcb.stl`, `pcb_12.stl`,
 `pcb_11.stl`, `pcb_10.stl`), and `array.stl` is the same assembly written
 directly from them. `array.html`
 shows the four boards with their connectors and guide tubes, without the
 buttons.
 
-**Clashes: none.** The boards are 16.8 mm wide, so with the 17 mm step
-neighbouring boards no longer overlap in plan: board k ends at y = 9.2 and
-board k+1 begins at y = 9.4 (board k's frame). Grid sampling at 0.1 mm finds no overlap between
-any two boards, with buttons, washers, sleeves, screws, springs and even the
-old single guide tubes included. The button caps end 1.1 mm short of the
-board above. Board k+1's connector ends 0.4 mm short of board k's edge in plan.
+**Clashes: none.** The boards are 14.7 mm wide, so with the 16 mm step
+neighbouring boards are 1.3 mm apart in plan: board k ends at y = 9.4 and
+board k+1 begins at y = 10.7 (board k's frame). Solid intersection finds no
+overlap between boards, connectors and all 46 keys, at rest and pressed. The
+button caps end 3.2 mm short of the board above. Board k+1's connector ends
+1.6 mm short of board k's edge in plan.
 
 ## 2. Housing for the staircase [given]
 
@@ -61,10 +62,10 @@ guide tubes.
   guide tube: ⌀9.4 for the ⌀9 washers, ending in a ⌀8.6 × 1.5 pocket that
   centres the spring, spring seat 17.58 mm below the board's centre plane.
 - **Bottom parallel to the step edges** [given]: one plane rising with the
-  staircase, 4 mm in z per 17 mm in y (13.2°). Every spring seat lies
+  staircase, 3 mm in z per 16 mm in y (10.6°). Every spring seat lies
   17.58 mm below its board, so the seats lie on a parallel plane, and the
   bottom stays 1.5 mm below the deepest point of every bore [given].
-  z = 0.235·y − 19.09: −20.3 at the front edge, −4.5 at the back face.
+  z = 0.1875·y − 18.89: −19.9 at the front edge, −7.8 at the back face.
 - **Connector pockets** around each vertical FFC connector at the board's −x
   end (turned with it, 0.3 mm clearance). **No FFC outlet through the floor**
   [given]: the cables hang into the hole behind the slanted face; their route
@@ -89,15 +90,18 @@ guide tubes.
   below. Under the back walls and the walls round the tabs, which only cover
   the board's thickness, it is up to the step. Inside step 0's front wall the
   housing is filled up to the step too. The gap between each step's (short)
-  connector tab and the −x end of the step above is filled up to the step as
-  well, so the hole behind the slanted face runs through it without leaving
+  connector tab and the −x end of the step above is closed by the cover and
+  filled below it up to the step as well, so the hole behind the slanted face runs through it without leaving
   walls standing. Checked: no overlap with the cover.
 - **Chamfered staircase ends** [given]: seen from above, the outer corners
-  of the steps at each end lie on one line (10 mm in x per 17 mm in y), so each
+  of the steps at each end lie on one line (10 mm in x per 16 mm in y), so each
   notch between two steps is closed by a slanted face from one corner edge to
   the next. Its top edge rises from the lower step's top to the upper one's.
   The housing fills the notch up to the lower step's top, and a wedge on the
   cover forms the sloped top above it. Checked: no overlap, both parts manifold.
+  At +x the last face ends at y = 58.1; the top step's end wall runs straight on
+  for the 1.2 mm to the back face at y = 59.3, which stays one plane because the
+  top step's back wall reaches out to the wall round its tab. [chosen]
 - **Hole behind the slanted −x face** [given]: open to the top, closed below
   by a 3 mm floor parallel to the bottom [given], in a band parallel to the face. It runs from 1.2 mm inside the outer
   faces to the line through the hole-1 guides, 29.9 mm in. The connectors and
@@ -113,35 +117,14 @@ guide tubes.
     each connector's centre line.
   These are cut from the body as it was, so they keep its clearances to the
   boards, connectors and cover.
-- **Back outlet and the boards' cables** [given: one bend towards the
-  cable's normal, then straight out of the back; rows 1–3 close to board 0's
-  cable]: each FFC leaves its connector straight down (3.5 mm inside, then a
-  straight lead) and is bent once, R 3, about its width towards its normal,
-  i.e. towards the back, parallel to the slanted face. The bend is 101.5°: 90°
-  plus the bottom's 11.5° rise along that direction, so the straight part runs
-  parallel to the hole's floor. [chosen; at exactly 90° a straight cable
-  would leave through the rising bottom under board 2] The four connectors
-  lie in one vertical plane, each moved by a staircase step, which runs
-  exactly along the straight parts, so **the four cables lie on one
-  another**: board 0's lowest, each next 0.5 mm higher square to them (0.2 mm
-  between the films). Only the lead differs: 3.53 / 3.02 / 2.51 / 2.0 mm for
-  boards 0–3. Each cable comes down onto the ones below from above, so none
-  crosses another. The stack runs 2.3 … 3.8 mm above the hole's floor (cable
-  centres), below the connectors, screw bosses and ribs of boards 1–3, and
-  0.8 mm beside the hole-1 tubes in plan. It leaves through row 3's back wall
-  at x −99.6, z 0.8 … 2.4, 30.5° off the wall's normal (a flat cable cannot
-  turn in its own plane), through a 16 × 3.5 mm slot along it. Free lengths
-  from the connector face 89.3 / 68.6 / 48.0 / 27.4 mm. Checked: no two
-  cables touch; every cable keeps ≥ 0.5 mm from the housing (0.4 mm beside it
-  in the slot), clear of the cover; the boards and connectors only where each
-  cable's end sits in its own connector. `back_cable.scad`
-  (cables and `back_outlet()`, used by the housing) → `back_cable.stl`,
-  `back_cable.js` for `array.html`.
-- **Size:** 276.9 × 73.4 mm, z −20.44 … +11.07 (cover step 0 down to the same bottom plane).
+- **No back outlet** [given: all cabling through the connector]: the
+  boards' cables end on the main PCB (§6), the back wall stays closed.
+- **Size:** 282.9 × 68.4 mm, z −20.6 … +11.04 (cover step 0 down to the same bottom plane).
 
 **Thinnest walls:** about 0.7 mm, between each connector pocket and the guide
-of the board's hole 1. Between the guides of board k+1 and the step of board k
-there are now about 3.6 mm. Every guide is closed all round.
+of the board's hole 1. Between the guides of board k+1 and the outer face of
+the cover's back wall on board k (y = 10.1 in board k's frame) stay 1.2 mm of
+housing. Every guide is closed all round by the housing alone.
 
 The viewer `array.html` shows the housing (toggle *Housing*; the single guide
 tubes are off by default). It loads the geometry from `build/discant/housing.js`, which is
@@ -167,7 +150,7 @@ generated from `build/discant/housing.stl`.
      beyond the board ends, with ⌀8 openings that guide the stems a second time;
    - flat round each opening: the **felt ring** under each cap (on the button,
      `switch/button.scad`) lands on it at the lower stop and damps it [given];
-   - a full-length 1.2 mm **front wall** just in front of the board
+   - a 1.2 mm **front wall**, broken by the dents, just in front of the board
      (y = −9.1 … −7.9), down onto the step below, for the bottom step down to
      the housing's flat bottom;
    - **end walls** at both ends and around the connector tab's bump, down to
@@ -175,11 +158,11 @@ generated from `build/discant/housing.stl`.
      the housing shows below them; only step 0's walls reach the bottom [given];
    - the back of each box is open into the housing's niche wall and the next
      step's front wall.
-   The off-centre row keeps the board's own caps 0.4 mm behind its front wall
-   and the caps of the board below 0.4 mm in front of it. Around every cap of
+   The off-centre row keeps the board's own caps 0.4 mm behind its front wall.
+   The caps of the board below stand where that wall would run. Around every cap of
    the board below, the step above is **dented in** [given: ≥ 2 mm]: a vertical
    recess r = 9.5 (cap + 2 mm), down to the lower step's top, closed by a 1.2 mm
-   ring wall (0.3 mm from the front rib above). Checked on cover.stl: every
+   ring wall, which merges with the front rib above (1.1 mm thick there). Checked on cover.stl: every
    point of the cover above a cap's own plate keeps ≥ 2.0 mm from that cap.
    Held by **sixteen M2 countersunk self-tapping screws** (ISO 7046 / DIN 965
    heads, flush; 90° countersinks ⌀4 in the cover), four per board, all
@@ -209,11 +192,11 @@ the key's parts that `array.scad` imports from `build/switch/`.
 
 | File | Content |
 |---|---|
-| `array.scad`, `array.stl` | four boards with their button assemblies as a staircase, k × (10, 17, 4) mm, from the key's STLs |
-| `housing.scad`, `housing.stl`, `housing.js` | printed body with 46 guides, a bottom parallel to the steps, the hole behind the slanted −x face and the back outlet |
+| `array.scad`, `array.stl` | four boards with their button assemblies as a staircase, k × (10, 16, 3) mm, from the key's STLs |
+| `housing.scad`, `housing.stl`, `housing.js` | printed body with 46 guides, a bottom parallel to the steps, the hole behind the slanted −x face, the main PCB's pockets and the wires' bore |
 | `cover.scad`, `cover.stl`, `cover.js` | printed cover holding the four boards down |
 | `main_pcb.scad`, `main_pcb.stl`, `pcb_cable.stl`, `.js` | main PCB with part bodies, the four FFCs to it, floor pockets, openings and pins for the housing |
-| `back_cable.scad` | superseded cables; still gives the outlet slot (`back_outlet()`), now for the bass cable |
+| `gauge_link.scad`, `gauge_link.stl`, `.js` | two strain gauges on their bracket, link plate, link board and the six wires from the main PCB (§7) |
 | `array.html` | 3D viewer of the four boards with connectors, housing, cover and cables; X/Z section plane. Loads the `.js` geometry |
 | `Makefile`, `stl2js.py` | `make` builds the files above into `build/discant/`; `stl2js.py` turns an STL into the `.js` geometry for `array.html` |
 | `phone.html`, `embed_parts.py` | phone view of the assembly: boards, connectors, housing, cover, cables and one button, with Press, a section and gestures (Interact). `make` writes `build/discant/phone.html` with every part embedded by `embed_parts.py`, one file that loads nothing else, so it also works in the claude.ai viewer on a phone |
@@ -223,31 +206,61 @@ the key's parts that `array.scad` imports from `build/switch/`.
 `main_pcb.scad`. **Not final:** all bodies but the module are assumed sizes
 [unverified] until parts are chosen.
 
-- **Board:** 54.4 × 22 × 1.6 mm, parallel to the hole's floor, underside
+- **Board:** 51.5 × 22 × 1.6 mm, parallel to the hole's floor, underside
   1.1 mm above it. [chosen]
 - **Module** under the board, in a 2.2 mm pocket (0.8 mm of floor left): it is
-  25.5 mm long and the cables drop every 20.1 mm. No radio [given], so no
+  25.5 mm long and the cables drop every 19.1 mm. No radio [given], so no
   antenna keep-out. Other underside parts in a 1.2 mm pocket.
 - **Cables:** a 20 mm wide ZIF fits on a cable's line in only three places
-  (hole-1 tubes). Cables 0–2 keep the R3 bend towards the back, lead 2.0 mm, into
+  (hole-1 tubes). Cables 0–2 keep the R3 bend towards the back, lead 1.8 mm, into
   top ZIFs. Cable 3 bends the other way past the board's end, into a ZIF on the
-  underside. Each film twists 6.8° between connector and ZIF, as the floor
+  underside. Each film twists 5.7° between connector and ZIF, as the floor
   rolls against level along its width.
 - **Assembly** [given: no access from the bottom]: plug the cables into the
   PCB, then the PCB's cables into the boards in the upside-down cover, and set
   it all onto the housing. Four pins in the floor locate the board.
   [unverified: that the board stays put; foam under the ribs proposed]
 - **Openings:** USB-C [given: firmware] and the 3.5 mm jack [given] in the
-  slanted wall; the jack on wires, ≤ 6 mm body, from outside. The back outlet
-  now carries the bass cable.
+  slanted wall; the jack on wires, ≤ 6 mm body, from outside.
 - **Scan** [chosen]: switches are closed at rest, so one Schottky diode per key.
-  74HC154: 13 discant columns, 3 bass columns; 6 rows (4 board commons, 2 bass),
-  18 bass keys [given], same closed contacts [given]. Bass cable: 9 signals plus
-  battery [given: battery in the bass part], 11 wires.
+  74HC154: 13 discant columns, 4 board commons as rows; 3 outputs spare.
 - **Audio:** UDA1334A is obsolete and, like the PCM5102A, not rated for
-  earphones; TLV320DAC3100 proposed. **Strain gauge** [given: on the −y side]:
-  half bridge, NAU7802 proposed.
+  earphones; TLV320DAC3100 proposed.
 
 Checked by solid intersection: no part touches the housing, cover or boards,
 except each film inside its connector and USB-C and jack in the wall openings.
-Three ZIF corners lie within 0.2 mm of a hole-1 tube.
+
+## 7. Gauge and link to the bass module
+
+`gauge_link.scad`. **Not final:** bodies are assumed sizes [unverified].
+
+- **Bass module** [given]: separate, 2 × 9 keys (same closed contacts), with the
+  battery, joined by a detachable connector that carries all cabling.
+- **Force path** [given]: discant → gauges → connector → bass. Two gauges side by
+  side [given], which also holds against torsion, central on the +y side [given]:
+  x = ±25 [chosen; the outline's middle is −6.7]. Plates in the x/y plane [given],
+  so they sense force along z. Outer holders on a bracket screwed to the back face.
+- **Link plate** [given: a plate for the bass side, part of the connector]:
+  76 × 10.8 × 6 mm on both inner holders, staying on the gauges, with the spring pins.
+- **Reading:** each bridge reads moment, force × arm from the gauges (7 mm as
+  designed). The sum follows the force, the difference the twist. Arm and the bass
+  module's weight therefore enter the reading. [estimated: with two gauges full
+  scale is about 2 × 1400 N·mm, so about 35 N at an 81 mm arm]
+- **Link board** [chosen]: beside the gauges, about 100 mm from the main PCB: NAU7802 for
+  both half bridges, MCP23017 for the bass keys (9 lines as 3 × 6). Six wires reach it:
+  battery +, ground, 3.3 V, SDA, SCL, interrupt. They run behind cable 3 to the
+  hole's back corner and along a ⌀2.6 bore inside the back wall (2 mm of wall each
+  side), out behind the link board.
+- **Connector** [chosen]: 12 contacts: 9 keys, battery +, ground, a spare ground
+  or sense. Spring pins on flat pads, two rows of 6. A separate lock with no play
+  in either direction carries the load, not the contacts. [unverified: current
+  rating] The wires from link board to connector cross the gauge as a soft loop.
+- **Open:** overload stop; the lock (no play either way);
+  charging; how the outer holders fix to the bracket; a shell round the link board;
+  a diode at each of the 18 bass keys: the contacts are closed at rest, so without
+  diodes the 3 × 6 matrix joins every row to every column and no key can be told
+  apart. They would sit in the bass module, with no change to the connector.
+  [unverified: not designed yet]
+
+Checked by solid intersection: wires, bracket, link plate and link board
+touch nothing but what they are fixed to.

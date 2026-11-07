@@ -17,20 +17,21 @@
 //   top: a cover_t plate on the board's top face, over the whole board, its
 //   tab and end_pad beyond both ends, with d8 openings for the d7.6 stems: a second guide
 //   above the board hole. The caps land on it at the lower stop;
-//   front wall: wall_t thick, full length, in front of the board, between its
-//   own caps and the caps of the board below; down onto the top of the step
+//   front wall: wall_t thick, in front of the board, behind its own caps, broken
+//   by the dents round the caps of the board below; down onto the top of the step
 //   below (for the bottom step, down to the bottom);
 //   end walls at both ends, end_pad beyond the board ends, from the top down to the
 //   level of the step below (step 0: to the bottom);
 //   ribs that locate the board, rib_gap from its edges, over the board's
 //   thickness only, so they stay clear of the housing step under it: a front
-//   rib along the -y edge, a back wall along the +y edge and round the tab,
+//   rib along the -y edge, a back wall along the +y edge (it ends 0.6 short of the
+//   next board's -y edge; on the top step it is as thick as to meet the tab's back) and round the tab,
 //   and an end rib at the -x end as the x stop.
 // Where a wall comes down onto a lower step, that step's whole box is cut away
 // from it; the floor plane cuts everything.
 //
-// Dents: the caps of board k stand in front of step k+1, whose front wall would
-// pass them at only cap_gap. Around every cap of board k, step k+1 is dented in
+// Dents: the caps of board k stand in front of step k+1, whose front wall runs
+// through them on the 16 mm step. Around every cap of board k, step k+1 is dented in
 // with a vertical cylinder cap_clear wider than the cap, down to step k's top,
 // and closed again by a wall_t ring wall round the dent, so that every point of
 // step k+1 stays at least cap_clear from the cap at any travel.
@@ -46,13 +47,13 @@ n        = 13;
 pitch    = 20;
 margin   = 12.3;    // last hole centre to the +x end
 margin_n = 5.3;     // row to the -y / +y edge
-margin_p = 10.6;
-x_start  = -145.691;
-tab_x1   = -145.691;   // no tab at this connector angle: flush with the +y edge
+margin_p = 9.4;
+x_start  = -145.796;
+tab_x1   = -142.038;   // the connector's tab beyond the +y edge (pcb.scad)
 tab_y    = 10.6;
 x_scr_l  = -142;    // -x end screw (pcb.scad)
 n_boards = 4;
-step     = [10, 17, 4];
+step     = [10, 16, 3];
 end_pad  = 1.2;     // board end to the end walls' inner face: room for the -x end rib
 fit      = 0.3;     // housing clearance around the boards
 seat_z   = -16.583; // bottom plane as in housing.scad
@@ -107,22 +108,27 @@ x_tout = x_tin + rib_t;
 x_rib  = x_start - rib_gap;           // -x end rib, inner face
 assert(x_rib - rib_t >= x_start - end_pad + 0.3, "-x end rib runs into the end wall");
 
-below_cap = y_out - (-step[1] + cap_d / 2);  // caps of the board below in front of the wall
-assert(below_cap >= cap_gap - 1e-6, "caps of the board below hit the front wall");
 assert(y_in <= -margin_n - rib_gap - rib_t, "front wall behind the front rib");
-assert(y_bout <= step[1] - margin_n - fit - 0.1, "back wall runs into the next step's housing");
-echo(str("front wall y = ", y_out, " .. ", y_in, " (caps ", cap_gap, " behind it, caps below ",
-         below_cap, " in front); ribs at y = ", -margin_n - rib_gap, " / ", y_bin,
+// the back wall ends short of the next board, so that board lies on the housing alone
+assert(y_bout + 0.5 <= step[1] - margin_n, "back wall reaches under the next board");
+echo(str("front wall y = ", y_out, " .. ", y_in, " (caps ", cap_gap, " behind it; the dents keep it from the caps below); ribs at y = ", -margin_n - rib_gap, " / ", y_bin,
          ", x = ", x_rib, "; openings d", open_d, " for the d", stem_d, " stems"));
 
 module at_board(k) translate(k * step) children();
 
+// the top step's back wall goes out to the tab's: the back face stays one plane
+function y_back(k) = k == n_boards - 1 ? y_tout : y_bout;
+
 // outline of step k's box (2D, own frame)
 module outer2d(k) union() {
     translate([x_start - end_pad - wall_t, y_out])
-        square([x_end(k) - x_start + 2 * (end_pad + wall_t), y_bout - y_out]);
+        square([x_end(k) - x_start + 2 * (end_pad + wall_t), y_back(k) - y_out]);
     translate([x_start - end_pad - wall_t, 0])
         square([x_tout - x_start + end_pad + wall_t, y_tout]);
+    // between the tab's wall and the next step's end wall the back wall stands
+    // further in than the tab: closed here, or the hole behind the slanted face opens to the top
+    if (k < n_boards - 1) translate([x_tout - 0.01, y_bout - 0.01])
+        square([x_start + step[0] - end_pad - wall_t - x_tout + 0.02, y_tout - y_bout + 0.01]);
 }
 // what is open below the plate: everything inside the front, end and back walls
 module inner2d(k) union() {
@@ -151,8 +157,11 @@ module shell(k)
             difference() {
                 translate([0, 0, -100]) linear_extrude(100 + z_top + cover_t)
                     difference() { outer2d(k); dents2d(k, dent_r); }
-                translate([0, 0, -101]) linear_extrude(101 + z_top)
+                translate([0, 0, -101]) linear_extrude(101 + z_top) union() {
                     difference() { inner2d(k); dents2d(k, dent_r + wall_t); }
+                    // the ring walls stop at the board: it needs its room
+                    intersection() { inner2d(k); translate([-1000, -margin_n - rib_gap]) square(2000); }
+                }
                 translate([0, 0, -101]) linear_extrude(101 + z_bot) rib_band2d(k);
             }
             // front rib along the board's -y edge, over the board thickness
@@ -178,11 +187,13 @@ dent_r = cap_d / 2 + cap_clear;
 module dents2d(k, r)
     if (k > 0) for (x = holes(k - 1)) translate([x - step[0], -step[1]])
         circle(r = r / cos(180 / 90), $fn = 90);   // polygon round the true circle
-// the ring wall stays clear of board k's front rib and of its own caps
-assert(-step[1] + dent_r + wall_t <= -margin_n - rib_gap - rib_t - 0.2, "dent wall runs into the front rib above");
+// the ring wall merges with board k's front rib, where it is cut off at the
+// board, and stays clear of its own caps
+ring_min = -margin_n - rib_gap - (-step[1] + dent_r);   // its thinnest, at the rib
+assert(ring_min >= 1, "dent wall too thin at the front rib");
 assert(norm([step[0], step[1]]) - dent_r - wall_t - cap_d / 2 >= cap_gap, "dent wall too close to the caps above");
 echo(str("dents: r", dent_r, " round the caps of the board below (", cap_clear, " clear), ring wall ", wall_t,
-         "; ring to the front rib above ", -margin_n - rib_gap - rib_t - (-step[1] + dent_r + wall_t)));
+         ", ", ring_min, " at the front rib above"));
 
 // step k's walls end at the top of step k-1, also where no lower box lies
 // under them (the end walls beyond the staircase): only step 0 reaches the bottom
@@ -215,6 +226,13 @@ module notch_wedge(k, s)
                                 [t[2][0], t[2][1], step_top(k + 1)]],
                       faces = [[0, 1, 2, 3, 4]]);
 
+// behind the plate of the step below, the housing's step reaches up to 0.1 under
+// board k: what comes down there (the ring walls) stops at the board's underside,
+// like the front rib
+module over_housing(k)
+    at_board(k) translate([x_start - end_pad, y_bout - step[1], -100])
+        cube([x_end(k) - x_start + 2 * end_pad, 100, 100 + z_bot]);
+
 module below_floor()
     multmatrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, slope, 1, -floor_c], [0, 0, 0, 1]])
         translate([-200, -100, -100]) cube([400, 300, 100]);
@@ -226,6 +244,7 @@ difference() {
                 shell(k);
                 if (k > 0) for (j = [0 : k - 1]) solid_step(j);
                 if (k > 0) below_stair(k);
+                if (k > 0) over_housing(k);
             }
         for (k = [0 : n_boards - 2]) { notch_wedge(k, 0); notch_wedge(k, 1); }
     }

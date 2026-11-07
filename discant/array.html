@@ -117,7 +117,7 @@
   <header>
     <p class="eyebrow">From pcb.scad and button.scad</p>
     <h1>Switch board array</h1>
-    <p>Four switch boards as a staircase, each moved 10 mm along the row, 17 mm across it and 4 mm up from the one before, with 13, 12, 11 and 10 holes, their FFC connectors and guide tubes. The buttons and the parts fixed to them are left out. Drag to orbit, scroll to zoom.</p>
+    <p>Four switch boards as a staircase, each moved 10 mm along the row, 16 mm across it and 3 mm up from the one before, with 13, 12, 11 and 10 holes, their FFC connectors and guide tubes. The buttons and the parts fixed to them are left out. Drag to orbit, scroll to zoom.</p>
   </header>
 
   <div class="layout">
@@ -151,7 +151,7 @@
           <label><input type="checkbox" id="showguide"> Guide tubes</label>
           <label><input type="checkbox" id="showhousing" checked> Housing</label>
           <label><input type="checkbox" id="showcover" checked> Cover</label>
-          <label><input type="checkbox" id="showcable" checked> Main PCB</label>
+          <label><input type="checkbox" id="showcable" checked> PCB + gauges</label>
           <label><input type="checkbox" id="showspring" checked> Spring</label>
           <label><input type="checkbox" id="showaxes" checked> Axes</label>
           <label hidden><input type="checkbox" id="showarray" checked> Array ×4</label>
@@ -165,7 +165,7 @@
       </div>
       <div class="section">
         <label><input type="checkbox" id="cut"> Section X/Z</label>
-        <input type="range" id="cuty" min="-11" max="68" step="0.05" value="0" aria-label="Section plane position in Y" disabled>
+        <input type="range" id="cuty" min="-11" max="103" step="0.05" value="0" aria-label="Section plane position in Y" disabled>
         <output id="cutval" for="cuty">y = 0.00</output>
         <label><input type="checkbox" id="cutflip" disabled> Keep −Y side</label>
         <button type="button" id="cutcentre" disabled title="Back to y = 0">Reset</button>
@@ -221,12 +221,12 @@
         <div class="panel-bar"><span>Notes</span></div>
         <div class="notes">
           <ul>
-            <li><b>Four boards as a staircase.</b> Board k (k = 0 … 3) is the board of <code>switch/viewer.html</code> moved by k × (10, 17, 4) mm. That is half the hole pitch along the row, 17 mm across it and 4 mm up, so each board rises towards +Y. The boards stay parallel. <b>Board k has 13 − k holes (13, 12, 11, 10).</b> It is the same board with k holes sawn off at the +X end, cut 12.3 mm past the last hole kept, 2.3 mm beyond its +x end screw hole and 2.7 mm clear of the first ring removed. With the 10 mm shift, both ends of the staircase step in by 10 mm per board. The saw cuts through the common bus on top, which still reaches every remaining −Y half, and through the band tracks of the removed holes, which stay behind as dead stubs on contacts 2, 3 and 4. Deburr the cut edge, since the tracks there are only 0.2 mm apart. Each one carries its FFC connector (GCT FFC3A20-14-G, vertical, cable leaving downwards) at its −X end, turned from Y towards −X by 59.5°, so that its long side lies along the normal of the housing's slanted −X face. That end is lengthened for the connector to x = −145.7. It is never sawn off, and no higher board lies above it. Buttons, washers, sleeve, screw and spring are left out here. They are in <code>switch/viewer.html</code>.</li>
-            <li><b>No clashes.</b> The boards are 15.9 mm wide, with the row of holes off centre towards −Y because all tracks run behind it. With the 17 mm step neighbouring boards are 1.1 mm apart in plan. The connectors sit at the −X ends, under no higher board. Grid sampling at 0.1 mm finds no overlap between neighbouring boards with their buttons, washers, sleeves, screws and springs. Only the old single guide tube (⌀13.4), which the housing replaces here, would touch the board below by 0.3 mm.</li>
+            <li><b>Four boards as a staircase.</b> Board k (k = 0 … 3) is the board of <code>switch/viewer.html</code> moved by k × (10, 16, 3) mm. That is half the hole pitch along the row, 16 mm across it and 3 mm up, so each board rises towards +Y. The boards stay parallel. <b>Board k has 13 − k holes (13, 12, 11, 10).</b> It is the same board with k holes sawn off at the +X end, cut 12.3 mm past the last hole kept, 2.3 mm beyond its +x end screw hole and 2.7 mm clear of the first ring removed. With the 10 mm shift, both ends of the staircase step in by 10 mm per board. The saw cuts through the common bus on top, which still reaches every remaining −Y half, and through the band tracks of the removed holes, which stay behind as dead stubs on contacts 2, 3 and 4. Deburr the cut edge, since the tracks there are only 0.15 mm apart. Each one carries its FFC connector (GCT FFC3A20-14-G, vertical, cable leaving downwards) at its −X end, turned from Y towards −X by 58.0°, so that its long side lies along the normal of the housing's slanted −X face. That end is lengthened for the connector to x = −145.8, with a small tab past the +Y edge for its highest corner. It is never sawn off, and no higher board lies above it. Buttons, washers, sleeve, screw and spring are left out here. They are in <code>switch/viewer.html</code>.</li>
+            <li><b>No clashes.</b> The boards are 14.7 mm wide, with the row of holes off centre towards −Y because all tracks run behind it. With the 16 mm step neighbouring boards are 1.3 mm apart in plan. The connectors sit at the −X ends, under no higher board. Grid sampling at 0.1 mm finds no overlap between neighbouring boards with their buttons, washers, sleeves, screws and springs. Only the old single guide tube (⌀13.4), which the housing replaces here, would touch the board below by 0.1 mm.</li>
             <li><b>Assembly.</b> Boards, buttons and cover go on as one unit. (1) Lay each board into the upside-down <b>cover</b> (<code>cover.scad</code>). Ribs locate it on all sides with 0.1 mm play: a front rib along its −Y edge, a back wall along its +Y edge and around the tab, and an end rib at −X as the stop. The ribs cover only the board's thickness. (2) Push the buttons through cover and board from the cover side, and fit washers, sleeve and screw from below. (3) Plug in the FFCs. (4) Set the unit onto the housing, feeding each FFC down through its slot. (5) Screw the cover down with sixteen M2 countersunk self-tapping screws (ISO 7046 / DIN 965 heads, flush with the cover top): four per board, all through the board on the row line (y = 0) into the housing: one near each end and two between them. The middle ones lie on two lines that meet in +Y beyond the last board, so every board carries all five middle holes (x = −50, 50, 30, 10, −10) and uses two. The springs then press each board up against the cover through the upper washer. The housing steps sit 0.1 mm below the boards and carry them when a button is pressed.</li>
             <li><b>One button</b> sits in board 0's middle hole (hole 7, x = 0), with washers, sleeve, screw and spring, at the upper stop. Drag <b>Travel</b> or click <b>Press</b> to move it. At the lower stop, after 2.965 mm, the felt ring under its cap lands on the cover. A section at y = 0 cuts through it and shows the stem in the cover opening and in the board hole.</li>
-            <li><b>The cover</b> closes the staircase, so that <b>each step looks like a box</b>. Each box has a 1.2 mm top over the whole board, with <b>⌀8 openings that guide the ⌀7.6 stems</b> a second time, just above the board. A full-length 1.2 mm front wall comes down onto the step below, or to the floor for the bottom step. End walls close both ends. At the lower stop each cap lands on the cover through a 1 mm felt ring on its stem, which damps the stop; the stroke to first felt contact is 2.965 mm. Each board's own caps keep 0.4 mm behind its front wall. <b>Around every cap of the board below, the step above is dented in</b>: a vertical recess ⌀19 (2 mm wider than the cap all round), down to the lower step's top and closed by a 1.2 mm curved wall, so the caps keep at least 2 mm from the step above at any travel. Checked: no cap touches the cover at rest, every pressed cap rests on it, and every stem passes its opening freely. Housing and cover are each one solid. Files: <code>housing.stl</code>, <code>cover.stl</code>.</li>
-            <li><b>Section X/Z</b> cuts all four boards with a plane parallel to X and Z, and the slider moves it along Y from −11 to +68 mm. Board k's middle hole lies at y = 17·k, so the plane at 17, 34 or 51 runs through the guide tube of board 1, 2 or 3 and shows where it passes through the board below. Cut faces are shown filled.</li>
+            <li><b>The cover</b> closes the staircase, so that <b>each step looks like a box</b>. Each box has a 1.2 mm top over the whole board, with <b>⌀8 openings that guide the ⌀7.6 stems</b> a second time, just above the board. A 1.2 mm front wall, broken by the dents round the caps below, comes down onto the step below, or to the floor for the bottom step. End walls close both ends. At the lower stop each cap lands on the cover through a 1 mm felt ring on its stem, which damps the stop; the stroke to first felt contact is 2.965 mm. Each board's own caps keep 0.4 mm behind its front wall. <b>Around every cap of the board below, the step above is dented in</b>: a vertical recess ⌀19 (2 mm wider than the cap all round), down to the lower step's top and closed by a 1.2 mm curved wall, so the caps keep at least 2 mm from the step above at any travel. Checked: no cap touches the cover at rest, every pressed cap rests on it, and every stem passes its opening freely. Housing and cover are each one solid. Files: <code>housing.stl</code>, <code>cover.stl</code>.</li>
+            <li><b>Section X/Z</b> cuts all four boards with a plane parallel to X and Z, and the slider moves it along Y from −11 to +68 mm. Board k's middle hole lies at y = 16·k, so the plane at 16, 32 or 48 runs through the guide tube of board 1, 2 or 3 and shows where it passes through the board below. Cut faces are shown filled.</li>
             <li><b>The triad</b> is board 0's own frame: origin at the centre of board 0, X along the row, Y across it, Z up.</li>
             <li>Files: <code>array.scad</code> places the part STLs for all four boards, and <code>array.stl</code> is the full assembly, buttons included. Single board: <code>switch/viewer.html</code>, <code>switch/pcb.scad</code>, <code>switch/button.scad</code>.</li>
           </ul>
@@ -241,17 +241,18 @@
 <script src="../build/discant/cover.js"></script>
 <script src="../build/discant/pcb_cable.js"></script>
 <script src="../build/discant/main_pcb.js"></script>
+<script src="../build/discant/gauge_link.js"></script>
 <script>
 (function () {
   // --- parameters, as in pcb.scad ---
   var PCB_T = 1.6, MARGIN = 12.3, N = 13, PITCH = 20, HOLE_D = 8;
-  var MARGIN_N = 5.3, MARGIN_P = 10.6;  // row of holes to the -y / +y edge: off centre, all tracks behind the holes
+  var MARGIN_N = 5.3, MARGIN_P = 9.4;  // row of holes to the -y / +y edge: off centre, all tracks behind the holes
   var RING_W = 1.0, RING_GAP = 0.5, CU_T = 0.035;   // ring reaches 0.5 past the d9 washer
   // GCT FFC3A20-14-G, vertical SMT, from the drawing: two pad rows, housing centred on them
   var CON_N = 14, CON_PITCH = 1.0, PAD_W = 0.6, PAD_L = 2.0, PAD_SPAN = 5.5;
   var BODY_W = 21.0, BODY_D = 4.5, BODY_H = 5.5;
   // placement
-  var TR_W = 0.2, TR_PITCH = 0.4, TR_RING = 0.4;
+  var TR_W = 0.15, TR_PITCH = 0.3, TR_RING = 0.4;
   var VIA_DRILL = 0.3, VIA_D = 0.6;   // vias of the common bus on the top copper
   // middle screw holes, as in pcb.scad: board k uses x = -MID_C and MID_C - 2 k * 10;
   // every board has all of them
@@ -274,11 +275,11 @@
   // d8 x 0.4 x 25, 8 active coils (+ one dead coil each end, assumed)
   var SPRING_WD = 0.4, SPRING_OD = 8, SPRING_N = 10, SPRING_L0 = 25, SPRING_F0 = 0.12 * 9.81, SPRING_G = 81500;   // 120 g at the upper stop
   // connector at the -x end, turned from y towards -x so that its long side lies along the
-  // normal of the housing's slanted face (atan(17 / 10) = 59.5 deg): its lowest corner 0.4
+  // normal of the housing's slanted face (atan(16 / 10) = 58.0 deg): its lowest corner 0.4
   // clear of the board below, its centre as close to hole 1 as the guide allows; -x end
-  // screw beside it; a tab only if the body reached past the +y edge (not at this angle)
-  var BODY_Y_MIN = -6.0, CON_XC = -135.5, CON_ROT = Math.atan2(17, 10), X_SCR_L = -142;
-  var TAB_SIDE = 0.5, TAB_FRONT = 1.0;
+  // screw beside it; a short tab carries the body's highest corner past the +y edge
+  var BODY_Y_MIN = -5.0, CON_XC = -135.7, CON_ROT = Math.atan2(16, 10), X_SCR_L = -142;
+  var TAB_SIDE = 0.5, TAB_FRONT = 0.654;
 
   var SPAN = (N - 1) * PITCH, LEN_X = SPAN + 2 * MARGIN, LEN_Y = MARGIN_N + MARGIN_P;
   var R_IN = HOLE_D / 2, R_OUT = R_IN + RING_W;
@@ -744,10 +745,10 @@
   });
   applyCut();
 
-  // --- four boards as a staircase: board k moved by k * (10, 17, 4) mm ---
+  // --- four boards as a staircase: board k moved by k * (10, 16, 3) mm ---
   // (x along the row = half the hole pitch, y across, z up). One unit holds the
   // whole board; the other three are clones that copy its state every frame.
-  var ARRAY_N = 4, ARRAY_DX = PITCH / 2, ARRAY_DY = 17, ARRAY_DZ = 4;
+  var ARRAY_N = 4, ARRAY_DX = PITCH / 2, ARRAY_DY = 16, ARRAY_DZ = 3;
   var unit = new THREE.Group();
   [mesh, lines, copper, tracks, connector, guide].forEach(function (o) { unit.add(o); });
   // one button assembly with its spring, in board 0's middle hole (hole 7, x = 0);
@@ -811,6 +812,7 @@
   scene.add(cover);
   var cable = loadPart(window.CABLE_TRIS, 0xd8c08a, 0x9c8656, 0x6b5a33);   // the four FFCs to the main PCB
   cable.add(loadPart(window.MAIN_PCB_TRIS, 0x2f7a4f, 0x1f5236, 0x143524));   // the main PCB, shown with them
+  cable.add(loadPart(window.LINK_TRIS, 0x8a8f96, 0x5f646a, 0x3f4347));   // gauge and link to the bass
   scene.add(cable);
   // M2 countersunk heads (d3.8, 90 deg), flush with the cover top: two at the
   // ends and two in between per step; the middle ones form two lines that meet

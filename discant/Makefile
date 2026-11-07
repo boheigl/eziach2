@@ -16,8 +16,8 @@ PYTHON   ?= python3
 B        := ../build/discant
 KEY      := ../build/switch
 
-BODY_STL := $(addprefix $(B)/,main_pcb.stl housing.stl cover.stl)
-JS       := $(addprefix $(B)/,housing.js cover.js pcb_cable.js main_pcb.js)
+BODY_STL := $(addprefix $(B)/,main_pcb.stl gauge_link.stl housing.stl cover.stl)
+JS       := $(addprefix $(B)/,housing.js cover.js pcb_cable.js main_pcb.js gauge_link.js)
 KEY_STL  := $(addprefix $(KEY)/,pcb.stl pcb_12.stl pcb_11.stl pcb_10.stl pcb_connector.stl \
                                 button.stl felt.stl washer.stl sleeve.stl screw.stl guide.stl spring.stl)
 PHONE_KEY := $(addprefix $(KEY)/,pcb_board.stl pcb_copper.stl pcb_board_12.stl pcb_copper_12.stl \
@@ -32,6 +32,13 @@ scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
 # --- one part per file
 $(BODY_STL): $(B)/%.stl: %.scad
 	$(call scad,$<)
+
+# gauge_link.scad imports the gauge's STLs, built in ../strain_gauge/
+GAUGE_STL := $(addprefix ../build/strain_gauge/,outer_holder.stl inner_holder.stl strain_gauge_plate.stl)
+$(B)/gauge_link.stl: $(GAUGE_STL)
+$(GAUGE_STL): gauge ;
+gauge:
+	@$(MAKE) --no-print-directory -C ../strain_gauge
 
 # the cables come from the same source as the board
 $(B)/pcb_cable.stl: main_pcb.scad
@@ -51,6 +58,7 @@ $(B)/housing.js:    VAR = HOUSING_TRIS
 $(B)/cover.js:      VAR = COVER_TRIS
 $(B)/pcb_cable.js:  VAR = CABLE_TRIS
 $(B)/main_pcb.js:   VAR = MAIN_PCB_TRIS
+$(B)/gauge_link.js: VAR = LINK_TRIS
 $(JS): $(B)/%.js: $(B)/%.stl stl2js.py
 	@echo "  STL2JS   $@"
 	@$(PYTHON) stl2js.py $< $@ $(VAR)
@@ -62,7 +70,7 @@ PHONE_PARTS := BOARD13_TRIS=$(KEY)/pcb_board.stl COPPER13_TRIS=$(KEY)/pcb_copper
                BOARD11_TRIS=$(KEY)/pcb_board_11.stl COPPER11_TRIS=$(KEY)/pcb_copper_11.stl \
                BOARD10_TRIS=$(KEY)/pcb_board_10.stl COPPER10_TRIS=$(KEY)/pcb_copper_10.stl \
                CONN_TRIS=$(KEY)/pcb_connector.stl \
-               HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl CABLE_TRIS=$(B)/pcb_cable.stl MAIN_PCB_TRIS=$(B)/main_pcb.stl \
+               HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl CABLE_TRIS=$(B)/pcb_cable.stl MAIN_PCB_TRIS=$(B)/main_pcb.stl LINK_TRIS=$(B)/gauge_link.stl \
                BUTTON_TRIS=$(KEY)/button.stl FELT_TRIS=$(KEY)/felt.stl WASHER_TRIS=$(KEY)/washer.stl \
                SLEEVE_TRIS=$(KEY)/sleeve.stl SCREW_TRIS=$(KEY)/screw.stl SPRING_TRIS=$(KEY)/spring.stl
 $(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(B)/pcb_cable.stl $(KEY_STL) $(PHONE_KEY)
@@ -72,7 +80,7 @@ $(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(B)/pcb_cable.stl $(KEY_
 clean:
 	rm -rf $(B)
 
-.PHONY: all clean key
+.PHONY: all clean key gauge
 .DELETE_ON_ERROR:
 
 -include $(wildcard $(B)/.deps/*.d)

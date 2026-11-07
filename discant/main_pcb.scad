@@ -1,9 +1,9 @@
 // Main PCB in the hole behind the slanted -x face, and the boards' FFCs to it
 //
 // One board lying parallel to the hole's floor, so to the bottom plane, under
-// the four connectors. It replaces the four long cables to the back outlet;
-// what leaves the housing now are the bass cable (back outlet), USB-C and the
-// earphone jack (slanted wall) and the strain gauge's leads.
+// the four connectors. It replaces the four long cables to the old back outlet;
+// what leaves the hole now are six wires to the link board (gauge_link.scad),
+// USB-C and the earphone jack (slanted wall).
 //
 // Every cable drops every staircase step along the band, so the 25.5 mm module
 // cannot lie between two of them: it hangs under the board, in a pocket in the
@@ -29,14 +29,14 @@
 show = "board";                  // "board" or "cables"
 
 /* [From pcb.scad / housing.scad, do not edit here] */
-step     = [10, 17, 4];          // staircase
-con_c    = [-135.5, 1.2631];     // board 0's connector centre
+step     = [10, 16, 3];          // staircase
+con_c    = [-135.7, 2.47299];     // board 0's connector centre
 face_z   = -0.835 - 5.5;         // connector face: bottom copper - body height
 slope    = step[2] / step[1];    // the housing's bottom rises with the staircase
-floor_c  = 19.0948;              // bottom plane: z = slope * y - floor_c
+floor_c  = 18.88925;              // bottom plane: z = slope * y - floor_c
 hole_floor = 3;                  // the hole's floor above the bottom plane
 
-/* [Cable: 14-way FFC, 1.0 mm pitch, as in back_cable.scad] */
+/* [Cable: 14-way FFC, 1.0 mm pitch,] */
 ffc_w    = 15;
 ffc_t    = 0.3;
 insert   = 3.5;                  // inside the board connector
@@ -45,8 +45,8 @@ bend_r   = 3;                    // at the cable's centre (rMin 2)
 /* [Board] */
 pcb_t    = 1.6;
 pcb_z    = 1.1;                  // its underside above the floor
-pcb_x    = [4.7, 59.1];          // 0.3 clear of tube 0 and 0.5 of cable 3
-pcb_y    = [-8.0, 14.0];         // inner side clear of the hole-1 tubes, outer 0.3 from the wall
+pcb_x    = [4.7, 56.2];          // 0.3 clear of tube 0 and 0.5 of cable 3
+pcb_y    = [-8.6, 13.4];         // inner side clear of the hole-1 tubes, outer 0.3 from the wall
 
 /* [Parts: bodies as boxes; [unverified] until parts are chosen] */
 zif_w    = 20;                   // across the cable
@@ -56,26 +56,26 @@ zif_in   = 3;                    // cable inside the ZIF
 zif_x    = 11.2;                 // top ZIFs: mouth beyond their own connector
 zif3_x   = -3;                   // underside ZIF: mouth before connector 3
 mod_x    = [5.5, 31];            // ESP32-S3-WROOM-1, 25.5 x 18 x 3.1, under the board
-mod_y    = [-7.5, 10.5];
+mod_y    = [-8.1, 9.9];
 mod_h    = 3.1;
-usb_x    = [22, 31];             // USB-C receptacle on top: 9 wide
-usb_y    = [7.8, 15.2];          // 7.4 deep, front inside the wall's opening
+usb_x    = [21, 30];             // USB-C receptacle on top: 9 wide
+usb_y    = [8, 15.4];          // 7.4 deep, front inside the wall's opening
 usb_h    = 3.3;
-bass_x   = [37.5, 50.5];         // bass cable connector, 12 ways: room kept for it
-bass_y   = [8, 14];
-bass_h   = 2;
-jack_x   = 47.8;                 // earphone jack, on wires, in the slanted wall
+bass_x   = [41.5, 49.5];             // six-way connector for the wires to gauge_link.scad
+bass_y   = [10.1, 13.3];
+bass_h   = 3;
+jack_x   = 45.2;                 // earphone jack, on wires, in the slanted wall
 jack_z   = 9;                    // its axis above the floor, over the cable film
-jack_d   = 6;                    // body; the gap between the ribs is 6 wide
+jack_d   = 6;                    // body; between cable 2 and the next rib
 jack_l   = 14;
-wall_y   = 17.2;                 // beyond the slanted wall's outer face, at the jack's height
+wall_y   = 16.5;                 // beyond the slanted wall's outer face, at the jack's height
 
 /* [Floor] */
 pocket_mod = 2.2;                // under the module and ZIF 3: 0.8 of floor left
 pocket_low = 1.2;                // under the rest of the board's underside: 1.8 left
-low_x    = [31.5, 58.8];
-low_y    = [-7.7, 11];
-pins     = [[7, 12.5], [34, 12.5], [55, 12.5], [38.6, 0]];   // on the band frame
+low_x    = [31.5, 55.9];
+low_y    = [-8.3, 10.4];
+pins     = [[7, 11.9], [34, 11.9], [54, 11.9], [37.2, 0]];   // on the band frame
 pin_d    = 2;                    // locating pins; holes d2.2 in the board
 pin_h    = 2.5;                  // above the board's underside
 pad_d    = 3.6;
@@ -89,6 +89,7 @@ ez = unit([0, -slope, 1]);
 ey = cross(ez, ex);
 function floor_z(y) = slope * y - floor_c + hole_floor;
 origin = [con_c[0], con_c[1], floor_z(con_c[1])];
+function from_band(p) = origin + p[0] * ex + p[1] * ey + p[2] * ez;
 function to_band(p) = [(p - origin) * ex, (p - origin) * ey, (p - origin) * ez];
 
 module band()
@@ -98,7 +99,7 @@ module band()
                 [0, 0, 0, 1]])
         children();
 
-// cables run in the vertical plane through their connector, as in back_cable.scad
+// cables run in the vertical plane through their connector
 con_rot = atan2(step[1], step[0]);
 run  = [cos(con_rot), sin(con_rot)];
 u    = [-sin(con_rot), cos(con_rot)];        // the width, at the connector: level
@@ -131,7 +132,7 @@ function cable_path(k) = k < 3 ? path(1, zc_top, zif_x + zif_in)
                                : path(-1, zc_bot, zif3_x - zif_in);
 
 // the film in 3D: level at the connector, turned into the floor's plane at the
-// ZIF. The floor rolls 6.8 deg against level along the cable's width, so the
+// ZIF. The floor rolls 5.7 deg against level along the cable's width, so the
 // film twists that much along its free length
 wide0 = [u[0], u[1], 0];
 wide1 = ey;                                  // same sense as wide0

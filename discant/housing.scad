@@ -7,8 +7,8 @@
 // centres the spring and carries it.
 //
 // The bottom is one flat plane, parallel to the step edges: it rises with the
-// staircase, 4 mm in z per 17 mm in y. Since every board sits 4 mm higher per
-// 17 mm, the spring seats all lie on such a plane too. The roof of the FFC
+// staircase, 3 mm in z per 16 mm in y. Since every board sits 3 mm higher per
+// 16 mm, the spring seats all lie on such a plane too. The roof of the FFC
 // recess (see below) is the parallel plane that stays floor_min below the
 // deepest point of every bore; the bottom lies rec_h below it.
 //
@@ -24,8 +24,9 @@
 //
 // The connectors sit at the -x ends of the boards, where no higher board and
 // no guide lies above them, so every guide is closed all round. The thinnest
-// walls are about 0.7 mm: between each connector pocket and the guide of the
-// board's hole 1, and between the guides of board k+1 and the edge of board k.
+// walls are about 0.7 mm, between each connector pocket and the guide of the
+// board's hole 1. Between the guides of board k+1 and the cover's back wall on
+// board k stay 1.2 mm of the body.
 //
 // HOLDING THE BOARDS. The boards, buttons and cover go onto the housing as one
 // unit: each board is laid into the upside-down cover (cover.scad), which
@@ -56,14 +57,13 @@
 // MAIN PCB. main_pcb.scad: floor pockets, wall openings and locating pins for
 // the board in the hole; main_pcb_cuts() and main_pcb_pads() below.
 //
-// BACK OUTLET. For the bass cable. Originally board 0's FFC: it left its connector straight down, is bent once
-// and runs straight along the hole behind the slanted face to an outlet in the
-// back wall behind board 3 (back_cable.scad: back_outlet()).
+// GAUGE LINK. gauge_link.scad: the bore in the back wall for the wires to the
+// link board, and the pilots of the gauges' bracket.
 //
 // make builds   openscad -o ../build/discant/housing.stl housing.scad
 
-use <back_cable.scad>
 use <main_pcb.scad>
+use <gauge_link.scad>
 
 /* [Boards — as in pcb.scad / array.scad, do not edit here] */
 pcb_t   = 1.6;
@@ -72,21 +72,21 @@ n       = 13;
 pitch   = 20;
 margin  = 12.3;   // last hole centre to the +x end (end screw half a pitch past it + 2.3)
 margin_n = 5.3;   // row of holes to the -y / +y edge (the row sits off centre: all
-margin_p = 10.6;  //   tracks run behind the holes)
+margin_p = 9.4;   //   tracks run behind the holes)
 hole_d  = 8;
-x_start = -145.691; // -x end, lengthened for the turned connector
-tab_x1  = -145.691; // tab carrying a connector corner beyond the +y edge: x = x_start .. tab_x1;
-tab_y   = 10.6;     //   out to this y (none at this angle: flush with the +y edge)
+x_start = -145.796; // -x end, lengthened for the turned connector
+tab_x1  = -142.038; // tab carrying a connector corner beyond the +y edge: x = x_start .. tab_x1;
+tab_y   = 10.6;     //   out to this y
 x_scr_l = -142;     // -x end screw, on the row line
 n_boards = 4;
-step    = [10, 17, 4];   // board k is moved by k * step
+step    = [10, 16, 3];   // board k is moved by k * step
 
 /* [Connector — GCT FFC3A20-14-G] */
 con_w   = 21.0;
 con_d   = 4.5;
 con_h   = 5.5;
-con_xc  = -135.5; // housing centre, x (at the -x end)
-con_yc  = 1.2631; // and y
+con_xc  = -135.7; // housing centre, x (at the -x end)
+con_yc  = 2.47299; // and y
 con_rot = atan2(step[1], step[0]);   // turned from y towards -x: long side along the
                   //   slanted face's normal
 ffc_w   = 16;     // slot for the FFC through the floor, along x
@@ -183,12 +183,17 @@ module column(k)
         if (k > 0) board_below(k);
     }
 
-// what board k's body must leave free of board k-1 below it: that board, and the
-// cover's wall round its tab, which board k's -x end overhangs
+// what board k's body must leave free of board k-1 below it: that board, the
+// cover's wall round its tab, which board k's -x end overhangs, and the cover's
+// back wall (it reaches down to the board's underside only, so the body stays
+// whole below it)
 module board_below(k)
-    at_board(k - 1) translate([0, 0, -100]) {
-        linear_extrude(200) footprint(k - 1, fit);
-        translate([x_start - 1, 0, 0]) cube([tab_x1 + tab_wall + fit - x_start + 1, tab_y + tab_wall + fit, 200]);
+    at_board(k - 1) {
+        translate([0, 0, -100]) {
+            linear_extrude(200) footprint(k - 1, fit);
+            translate([x_start - 1, 0, 0]) cube([tab_x1 + tab_wall + fit - x_start + 1, tab_y + tab_wall + fit, 200]);
+        }
+        translate([0, 0, z_bot - gap]) linear_extrude(100) cover_outer2d(k - 1);
     }
 
 // a slab parallel to the bottom plane, from z0 to z0 + h above it
@@ -242,7 +247,7 @@ module end_pads(k)
         if (k > 0) board_below(k);
     }
 
-// between neighbouring boards (1.1 mm apart), below the board level, the steps
+// between neighbouring boards (1.3 mm apart), below the board level, the steps
 // are joined so that the housing stays one piece
 module bridge(k)
     at_board(k) translate([x_start + step[0], margin_p, -60])
@@ -255,9 +260,11 @@ module bridge(k)
 // filled: under the end walls up to their lower edge, elsewhere up to the
 // steps (z_bot - gap). Step 0's front and end walls reach the bottom; there
 // only the rest is filled. What lies over a lower step stays that step's.
+function cover_back(k) = k == n_boards - 1 ? tab_y + tab_wall : margin_p + tab_wall;   // y_back() of cover.scad
 module cover_outer2d(k) union() {   // outer2d() of cover.scad
+    if (k < n_boards - 1) translate(-k * [step[0], step[1]]) tab_gap2d(k);
     translate([x_start - end_pad - wall_t, y_in - wall_t])
-        square([x_end(k) - x_start + 2 * (end_pad + wall_t), margin_p + tab_wall - y_in + wall_t]);
+        square([x_end(k) - x_start + 2 * (end_pad + wall_t), cover_back(k) - y_in + wall_t]);
     translate([x_start - end_pad - wall_t, 0])
         square([tab_x1 + tab_wall - x_start + end_pad + wall_t, tab_y + tab_wall]);
 }
@@ -294,14 +301,15 @@ function notch(k, s) =
         a = [c0[0] + k * step[0], c0[1] + k * step[1]],
         b = [a[0] + (s == 0 ? 1 : -1) * step[0], a[1] + step[1]])
     [a, b, [b[0], a[1]]];
-// between step k's tab and the -x end of step k+1 the cover leaves a gap (the
-// turned connector's tab is short): filled like a notch, up to step k's top
+// between step k's tab and the -x end of step k+1 the cover's back wall stands in
+// from the tab: the cover closes that gap down to the board's underside, and the
+// housing is filled up to there
 function tab_gap(k) = let(x0 = tab_x1 + tab_wall, x1 = x_start + step[0] - end_pad - wall_t)
     x1 > x0 && tab_y > margin_p ? [[x0 + k * step[0], margin_p + tab_wall + k * step[1]],
                [x1 + k * step[0], tab_y + tab_wall + k * step[1]]] : undef;
 module tab_gap2d(k) let(g = tab_gap(k)) if (g != undef) translate(g[0]) square(g[1] - g[0]);
 module tab_gap_fill(k)   // (0.01 into its neighbours, so that it merges with them)
-    translate([0, 0, -60]) linear_extrude(step_top(k) + 60) offset(delta = 0.01) tab_gap2d(k);
+    translate([0, 0, -60]) linear_extrude(k * step[2] + z_bot - gap + 60) offset(delta = 0.01) tab_gap2d(k);
 
 module notch_fill(k, s)
     translate([0, 0, -60]) linear_extrude(step_top(k) + 60) polygon(notch(k, s));
@@ -376,8 +384,8 @@ union() {
         face_hole();
         for (k = [0 : n_boards - 1]) { guides(k); connector_pocket(k); screw_pilots(k); }
         if (rec_h > 0) ffc_recess();
-        back_outlet();
         main_pcb_cuts();
+        gauge_housing_cuts();
     }
     main_pcb_pads();
 }

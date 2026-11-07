@@ -2,8 +2,8 @@
 //
 // Board k (k = 0 .. 3) is the complete board of pcb.scad with its button
 // assembly, guide tube and spring from button.scad, moved by
-// k * (pitch_x, pitch_y, pitch_z): half the hole pitch along the row, 17 mm
-// across it and 4 mm up, so each board rises towards the +y (connector) side.
+// k * (pitch_x, pitch_y, pitch_z): half the hole pitch along the row, 16 mm
+// across it and 3 mm up, so each board rises towards the +y (connector) side.
 // The boards stay parallel to each other.
 //
 // Board k has 13 - k holes (13, 12, 11, 10): it is the same board with k holes
@@ -27,8 +27,8 @@
 
 n_boards = 4;
 pitch_x  = 10;    // half the hole pitch
-pitch_y  = 17;
-pitch_z  = 4;
+pitch_y  = 16;
+pitch_z  = 3;
 
 stl_dir = "../build/switch/";   // the key's part STLs, made by make in ../switch/
 

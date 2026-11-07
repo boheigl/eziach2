@@ -15,13 +15,13 @@
 // face at the -x end of the board, turned by con_rot from y towards -x: its long
 // side runs exactly along the normal of the housing's slanted -x face, which
 // follows the staircase (stair_dx in x per stair_dy in y), so con_rot =
-// atan(stair_dy / stair_dx) = 59.5 deg; contact 1 is at the outer (-x, +y) end
+// atan(stair_dy / stair_dx) = 58.0 deg; contact 1 is at the outer (-x, +y) end
 // (for the cabling). Its lowest
-// corner stays 0.4 clear of the board below in the staircase (whose +y edge
+// corner stays 1.6 clear of the board below in the staircase (whose +y edge
 // lies at margin_p - stair_dy in this frame); along x it sits as close to
 // hole 1 as the guide below that hole allows (guide_clear from its centre).
-// All pads lie on the board; the board reaches -x to the body's corner. (A tab
-// would carry a corner beyond the +y edge; at this angle there is none.) Being vertical, it takes the
+// All pads lie on the board; the board reaches -x to the body's corner, and a
+// short tab carries the body's highest corner beyond the +y edge. Being vertical, it takes the
 // cable at right angles to the board, so the FFC leaves downwards (-z). At the
 // -x end there is no higher board above it, and the -x end is never sawn off.
 // Land pattern and body from the GCT FFC3A20 drawing, for 14 contacts:
@@ -61,7 +61,7 @@
 // copper included: the bus on the top is cut short but still reaches every
 // remaining -y half, and the band tracks of the removed holes are left as dead
 // stubs on their (now unused) contacts. Copper is cut through at the sawn edge;
-// deburr it, since the tracks there are only 0.2 mm apart.
+// deburr it, since the tracks there are only 0.15 mm apart.
 //
 // Coordinates: origin at the centre of the middle hole, laminate from z = -pcb_t/2
 // to +pcb_t/2, bottom copper below that, from -pcb_t/2 - cu_t to -pcb_t/2, and
@@ -83,7 +83,7 @@
 pcb_t   = 1.6;   // board thickness, FR4 standard
 // margin (last hole centre to the +x end) follows from the end screw, below
 margin_n = 5.3;  // row of holes to the -y edge: only the ring and edge_cu in front
-margin_p = 10.6; // row to the +y edge: the ring, all thirteen tracks and edge_cu
+margin_p = 9.4;  // row to the +y edge: the ring, all thirteen tracks and edge_cu
 edge_cu  = 0.3;  // copper to the board edge
 
 /* [Holes] */
@@ -128,25 +128,26 @@ body_d    = 4.5;   // housing depth
 body_h    = 5.5;   // height above the board face
 
 /* [Tracks] */
-tr_w      = 0.2;   // track width
-tr_pitch  = 0.4;   // centre to centre, leaving 0.2 clearance
+tr_w      = 0.15;  // track width
+tr_pitch  = 0.3;   // centre to centre, leaving 0.15 clearance
 tr_ring   = 0.4;   // ring outside to the nearest track's centre line
 
 via_drill = 0.3;   // vias of the common bus
 via_d     = 0.6;   // pad diameter, both sides
 
 /* [Connector placement] */
-stair_dy  = 17;    // step of the staircase in y (discant/array.scad): the board below has its
+stair_dy  = 16;    // step of the staircase in y (discant/array.scad): the board below has its
                    // +y edge at margin_p - stair_dy in this frame
 con_rot   = atan2(stair_dy, stair_dx);   // turned from y towards -x: long side along the
                    //   slanted face's normal (-stair_dy, stair_dx)
-body_y_min = -6.0; // lowest corner of the housing: 0.4 clear of the board below
-con_xc    = -135.5;  // connector centre, x: as close to hole 1 as guide_clear allows
+body_y_min = -5.0; // lowest corner of the housing: 1.6 clear of the board below
+con_xc    = -135.7;  // connector centre, x: as close to hole 1 as guide_clear allows
 guide_clear = 9.4 / 2 + 0.7 + 0.3;   // hole 1 centre to the body: housing guide d9.4,
                    // 0.7 wall, 0.3 pocket clearance
 x_scr_l   = -142;  // -x end screw, on the row line
 tab_side  = 0.5;   // tab beyond the body where it crosses the +y edge, in +x
-tab_front = 1.0;   // tab beyond the body's highest corner
+tab_front = 0.654; // tab beyond the body's highest corner: out to y = 10.6, where the
+                   //   slanted -x face of the staircase is anchored
 
 /* [Sawn-off versions] */
 cut_holes = 0;   // holes sawn off at the +x end: 0 = 13 holes, 1 = 12, 2 = 11, 3 = 10

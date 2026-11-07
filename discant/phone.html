@@ -61,7 +61,7 @@
     <button type="button" class="tog" id="showpcb" aria-pressed="true">PCBs</button>
     <button type="button" class="tog" id="showhousing" aria-pressed="true">Housing</button>
     <button type="button" class="tog" id="showcover" aria-pressed="true">Cover</button>
-    <button type="button" class="tog" id="showcable" aria-pressed="true">Main PCB</button>
+    <button type="button" class="tog" id="showcable" aria-pressed="true">PCB + gauges</button>
     <button type="button" class="tog" id="showbutton" aria-pressed="true">Button</button>
   </div>
   <div class="row" aria-label="View">
@@ -87,7 +87,7 @@
   window.addEventListener('error', function (e) { status('Error: ' + e.message, true); });
 
   var STROKE = 2.965, FLOOR_Z = -16.5834, L_UP = 9.14839;   // button.scad
-  var STEP = [10, 17, 4];                                      // board k is moved by k * STEP
+  var STEP = [10, 16, 3];                                      // board k is moved by k * STEP
 
   var view = document.getElementById('view');
   var renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'low-power' });
@@ -131,14 +131,15 @@
   var buttonGrp = new THREE.Group(); buttonGrp.add(moving, springGrp);
   var LOAD = [
     ['board 13', function () { parts.pcb.add(mesh('BOARD13_TRIS', 0x2f7a4f), copper('COPPER13_TRIS')); }],
-    ['board 12', function () { parts.pcb.add(mesh('BOARD12_TRIS', 0x2f7a4f, [10, 17, 4]), copper('COPPER12_TRIS', [10, 17, 4])); }],
-    ['board 11', function () { parts.pcb.add(mesh('BOARD11_TRIS', 0x2f7a4f, [20, 34, 8]), copper('COPPER11_TRIS', [20, 34, 8])); }],
-    ['board 10', function () { parts.pcb.add(mesh('BOARD10_TRIS', 0x2f7a4f, [30, 51, 12]), copper('COPPER10_TRIS', [30, 51, 12])); }],
-    ['pcb_connector.js', function () { for (var k = 0; k < 4; k++) parts.pcb.add(mesh('CONN_TRIS', 0x2b2f33, [10 * k, 17 * k, 4 * k])); }],
+    ['board 12', function () { parts.pcb.add(mesh('BOARD12_TRIS', 0x2f7a4f, [10, 16, 3]), copper('COPPER12_TRIS', [10, 16, 3])); }],
+    ['board 11', function () { parts.pcb.add(mesh('BOARD11_TRIS', 0x2f7a4f, [20, 32, 6]), copper('COPPER11_TRIS', [20, 32, 6])); }],
+    ['board 10', function () { parts.pcb.add(mesh('BOARD10_TRIS', 0x2f7a4f, [30, 48, 9]), copper('COPPER10_TRIS', [30, 48, 9])); }],
+    ['pcb_connector.js', function () { for (var k = 0; k < 4; k++) parts.pcb.add(mesh('CONN_TRIS', 0x2b2f33, [10 * k, 16 * k, 3 * k])); }],
     ['housing.js', function () { parts.housing = mesh('HOUSING_TRIS', 0xd9a441); scene.add(parts.housing); }],
     ['cover.js', function () { parts.cover = mesh('COVER_TRIS', 0x5b6f86); scene.add(parts.cover); }],
     ['pcb_cable.js', function () { parts.cable = mesh('CABLE_TRIS', 0xd8c08a); scene.add(parts.cable); }],
     ['main_pcb.js', function () { parts.cable.add(mesh('MAIN_PCB_TRIS', 0x2f7a4f)); }],
+    ['gauge_link.js', function () { parts.cable.add(mesh('LINK_TRIS', 0x8a8f96)); }],
     ['button.js', function () { moving.add(mesh('BUTTON_TRIS', 0x4a6fa5)); }],
     ['felt.js', function () { moving.add(mesh('FELT_TRIS', 0x8c3b3b)); }],
     ['washer.js', function () { moving.add(mesh('WASHER_TRIS', 0xc4c8cc)); }],
@@ -275,7 +276,7 @@
     this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); applyCut();
   });
   document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-10, cutY - 4); applyCut(); });
-  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(66, cutY + 4); applyCut(); });
+  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(101, cutY + 4); applyCut(); });
   [['showpcb', 'pcb'], ['showhousing', 'housing'], ['showcover', 'cover'], ['showcable', 'cable']].forEach(function (t) {
     document.getElementById(t[0]).addEventListener('click', function () {
       var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on ? 'true' : 'false');

@@ -26,21 +26,22 @@ connector sits at the −X end. Every part uses this frame.
 |---|---|---|
 | Thickness | 1.6 mm, FR4 | [given] |
 | Holes | 13 × ⌀8 in one row, 20 mm pitch, centres x = −120 … +120 | [given]; ⌀8 since the switch to ⌀9 washers |
-| Outline | 278.0 × 15.9 mm, x = −145.7 … +132.3, y = −5.3 … +10.6: the row of holes sits off centre towards −y | [chosen] |
+| Outline | 278.1 × 14.7 mm, x = −145.8 … +132.3, y = −5.3 … +9.4: the row of holes sits off centre towards −y | [chosen] |
 | Screw holes | 10 × ⌀2.2 on the row line y = 0 [given]: x = −142.0 (−x end), −50, 50, 30, 10, −10 (middle), 130, 110, 90, 70 (+x end of the 13/12/11/10-hole board); each board uses four | [chosen] |
-| Material between holes / hole to the −y, +y edge | 12 mm / 3.6, 5.2 mm | derived |
-| Connector tab | none: the turned connector stays inside the +y edge | derived |
+| Material between holes / hole to the −y, +y edge | 12 mm / 1.3, 5.4 mm | derived |
+| Connector tab | x = −145.8 … −142.0, out to y = 10.6: carries the connector's highest corner past the +y edge | [chosen] |
 
-The width is set by what lies across the board: the copper ring (to r = 5),
-0.35 mm to the first track, the seven tracks of the −y band at 0.3 mm pitch and
-0.3 mm to the edge make 7.6 mm on the −y side; the +y side has 9.2 mm. **The
-row sits 0.8 mm off centre towards −y** [given] so that in the staircase a
-1.2 mm cover wall fits in front of each board, 0.4 mm clear of its own caps and
-of the caps of the board below (discant/spec.md §3). Every screw passes through the board on
+The width is set by what lies across the board: on the +y side the copper
+ring (to r = 5), 0.4 mm to the first track's centre, the thirteen tracks at
+0.3 mm pitch and 0.3 mm to the edge make 9.4 mm; on the −y side the ring and
+0.3 mm make 5.3 mm. With the 16 mm step that leaves 1.3 mm between neighbouring
+boards. **The row sits off centre towards −y** so that in the staircase a
+1.2 mm cover wall fits in front of each board, 0.4 mm clear of its own caps;
+dents keep it from the caps of the board below (discant/spec.md §3). Every screw passes through the board on
 the row line [given]: at +x half a pitch past the last hole, the board ending
 2.3 mm beyond (12.3 mm past the last hole); at −x left of the turned
 connector, 0.5 mm clear of its pads and 1.0 mm of its body. At −x the board
-reaches to the connector body's corner, x = −145.7.
+reaches to the connector body's corner, x = −145.8.
 
 ## 3. Contacts: copper half-rings
 
@@ -80,18 +81,20 @@ Land pattern and body from the GCT FFC3A20 drawing, for 14 contacts
 
 **Placement** [given, refined]: on the underside at the **−x end**, **turned
 from y towards −x so that its long side lies exactly along the normal of the
-housing's slanted −x face** [given], (−17, 10)/19.7: atan(17/10) = 59.5°, for
+housing's slanted −x face** [given], (−16, 10)/18.9: atan(16/10) = 58.0°, for
 the cabling. The −x end lies under no higher board or guide in the staircase
 and is never sawn off.
 
-- Centre (−135.5, 1.26). Its lowest corner, at y = −6.0, stays 0.4 mm clear
-  of the board below in the staircase (its +y edge is at y = −6.4 in this
+- Centre (−135.7, 2.47). Its lowest corner, at y = −5.0, stays 1.6 mm clear
+  of the board below in the staircase (its +y edge is at y = −6.6 in this
   frame). [chosen]
 - Its body keeps 5.7 mm from hole 1's centre: the ⌀9.4 guide bore, a 0.7 mm
   housing wall and 0.3 mm pocket clearance. [chosen]
-- Body corners (−127.6, −6.0), (−125.3, −2.1), (−143.4, 8.5), (−145.7, 4.6):
-  the board ends at its −x corner; it stays inside the +y edge, so there is
-  no tab.
+- Body corners (−128.0, −5.0), (−125.6, −1.2), (−143.4, 9.9), (−145.8, 6.1):
+  the board ends at its −x corner, and a tab 3.8 × 1.2 mm carries the corner
+  at y = 9.9 past the +y edge. The tab ends at y = 10.6, so the slanted −x face
+  of the staircase, the main PCB and the cables do not depend on the board's
+  width.
 - Two pad columns, 3.5 mm apart, turned with it; contacts along the long
   side, **contact 1 at the (−x, +y) end, contact 14 at the end nearest
   hole 1**. All pads lie on the board.
@@ -99,26 +102,26 @@ and is never sawn off.
 
 ## 5. Tracks
 
-Signal tracks on the underside, **0.2 mm wide on a 0.4 mm pitch**, so 0.2 mm
+Signal tracks on the underside, **0.15 mm wide on a 0.3 mm pitch**, so 0.15 mm
 apart; the common on the top copper. [chosen] The board is **two-layer**.
 
 - **Contact 1 is the common:** it joins the −Y halves of all 13 rings. [given]
 - **Contacts 2 … 14** each take the +Y half of one ring. [given]
 
 - **All thirteen signal tracks** run in the band between the rings and the +y
-  edge (y = 5.4 … 10.2; the farther the hole, the higher). Each turns
+  edge (y = 5.4 … 9.0; the farther the hole, the higher). Each turns
   where its contact's line meets it and runs straight down that line into the
   outer end of its inner pad: **hole h → contact 15 − h**, so hole 1 takes
   contact 14, the one nearest it. The lower the track, the further right it
-  turns (x = −125.5 … −136.6), so none cross; the slanted runs lie 1.0 mm
-  apart and clear hole 1's ring by 2.4 mm. Straight runs have square ends,
+  turns (x = −126.2 … −138.1), so none cross; the slanted runs lie 1.0 mm
+  apart and clear hole 1's ring by 3.0 mm. Straight runs have square ends,
   the slanted ones round ones.
 - **Common:** a via in the middle of every −Y half (y = −4.5), a straight bus
   on the top copper along y = −4.5 to the connector's centre line, along it
   between the two pad columns to a via at contact 1, and a short bottom track
   into its pad. Vias ⌀0.3 drill / ⌀0.6 pad, tented.
 
-**Checked on the exported copper of both layers:** at least 0.2 mm between any
+**Checked on the exported copper of both layers:** at least 0.15 mm between any
 two separate copper shapes, for the full board and the 10-hole sawn-off one;
 the bottom copper falls into exactly the expected 41 shapes (13 signal nets,
 14 unused outer pads, 13 −y halves with their vias, the common's pad 1).
