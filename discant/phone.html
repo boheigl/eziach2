@@ -61,7 +61,7 @@
     <button type="button" class="tog" id="showpcb" aria-pressed="true">PCBs</button>
     <button type="button" class="tog" id="showhousing" aria-pressed="true">Housing</button>
     <button type="button" class="tog" id="showcover" aria-pressed="true">Cover</button>
-    <button type="button" class="tog" id="showcable" aria-pressed="true">Cable</button>
+    <button type="button" class="tog" id="showcable" aria-pressed="true">Main PCB</button>
     <button type="button" class="tog" id="showbutton" aria-pressed="true">Button</button>
   </div>
   <div class="row" aria-label="View">
@@ -137,7 +137,8 @@
     ['pcb_connector.js', function () { for (var k = 0; k < 4; k++) parts.pcb.add(mesh('CONN_TRIS', 0x2b2f33, [10 * k, 17 * k, 4 * k])); }],
     ['housing.js', function () { parts.housing = mesh('HOUSING_TRIS', 0xd9a441); scene.add(parts.housing); }],
     ['cover.js', function () { parts.cover = mesh('COVER_TRIS', 0x5b6f86); scene.add(parts.cover); }],
-    ['back_cable.js', function () { parts.cable = mesh('CABLE_TRIS', 0xd8c08a); scene.add(parts.cable); }],
+    ['pcb_cable.js', function () { parts.cable = mesh('CABLE_TRIS', 0xd8c08a); scene.add(parts.cable); }],
+    ['main_pcb.js', function () { parts.cable.add(mesh('MAIN_PCB_TRIS', 0x2f7a4f)); }],
     ['button.js', function () { moving.add(mesh('BUTTON_TRIS', 0x4a6fa5)); }],
     ['felt.js', function () { moving.add(mesh('FELT_TRIS', 0x8c3b3b)); }],
     ['washer.js', function () { moving.add(mesh('WASHER_TRIS', 0xc4c8cc)); }],

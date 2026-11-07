@@ -53,13 +53,17 @@
 // The FFCs are laid in from below once the unit is on the housing, and held
 // there (tape or a bottom plate).
 //
-// BACK OUTLET. Board 0's FFC leaves its connector straight down, is bent once
+// MAIN PCB. main_pcb.scad: floor pockets, wall openings and locating pins for
+// the board in the hole; main_pcb_cuts() and main_pcb_pads() below.
+//
+// BACK OUTLET. For the bass cable. Originally board 0's FFC: it left its connector straight down, is bent once
 // and runs straight along the hole behind the slanted face to an outlet in the
 // back wall behind board 3 (back_cable.scad: back_outlet()).
 //
 // make builds   openscad -o ../build/discant/housing.stl housing.scad
 
 use <back_cable.scad>
+use <main_pcb.scad>
 
 /* [Boards — as in pcb.scad / array.scad, do not edit here] */
 pcb_t   = 1.6;
@@ -362,14 +366,18 @@ module screw_pilots(k) {
         translate([q[0], q[1], z_bot - mid_depth]) cylinder(d = screw_pilot, h = mid_depth + 1);
 }
 
-difference() {
-    union() {
-        for (k = [0 : n_boards - 1]) { column(k); end_pads(k); cover_fill(k); }
-        for (k = [0 : n_boards - 2]) { bridge(k); notch_fill(k, 0); notch_fill(k, 1); tab_gap_fill(k); }
+union() {
+    difference() {
+        union() {
+            for (k = [0 : n_boards - 1]) { column(k); end_pads(k); cover_fill(k); }
+            for (k = [0 : n_boards - 2]) { bridge(k); notch_fill(k, 0); notch_fill(k, 1); tab_gap_fill(k); }
+        }
+        below_floor();
+        face_hole();
+        for (k = [0 : n_boards - 1]) { guides(k); connector_pocket(k); screw_pilots(k); }
+        if (rec_h > 0) ffc_recess();
+        back_outlet();
+        main_pcb_cuts();
     }
-    below_floor();
-    face_hole();
-    for (k = [0 : n_boards - 1]) { guides(k); connector_pocket(k); screw_pilots(k); }
-    if (rec_h > 0) ffc_recess();
-    back_outlet();
+    main_pcb_pads();
 }

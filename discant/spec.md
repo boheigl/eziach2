@@ -1,8 +1,8 @@
 # Discant — design record
 
 The discant (treble) side of the accordion: four switch boards as a staircase,
-the printed housing under them, the cover over them and the FFCs to the back
-outlet. The switch board and its button assembly (the key) are recorded in
+the printed housing under them, the cover over them and the main PCB with its
+FFCs. The switch board and its button assembly (the key) are recorded in
 `switch/spec.md`; references to its sections read "switch §n".
 
 Numbers are tagged by where they come from: **[given]** stated by the user,
@@ -189,13 +189,16 @@ generated from `build/discant/housing.stl`.
 Checked by grid sampling: no cap touches the cover, at rest or pressed, on any
 of the 46 holes. Housing and cover are each a single solid.
 
-Assembly: buttons with washers, sleeve, screw and spring into the housing
-guides; boards pushed into their niches against the −x stops, lowest first;
-cover on, screws in.
+Assembly: as `cover.scad` says, the boards and buttons go together in the
+upside-down cover and onto the housing as one unit. (This section's niche
+wording predates that and §3.1 needs revisiting.) The main PCB is plugged to
+the unit on the bench first, see §6.
 
 ## 4. Open points
 
 1. **Thin housing wall** (§2), about 0.7 mm beside each connector pocket.
+2. **Main PCB** (§6): parts unchosen, so bodies are assumed; fixing against
+   USB plug forces; strain gauge position along the −y side.
 
 ## 5. Files
 
@@ -209,7 +212,42 @@ the key's parts that `array.scad` imports from `build/switch/`.
 | `array.scad`, `array.stl` | four boards with their button assemblies as a staircase, k × (10, 17, 4) mm, from the key's STLs |
 | `housing.scad`, `housing.stl`, `housing.js` | printed body with 46 guides, a bottom parallel to the steps, the hole behind the slanted −x face and the back outlet |
 | `cover.scad`, `cover.stl`, `cover.js` | printed cover holding the four boards down |
-| `back_cable.scad`, `back_cable.stl`, `back_cable.js` | the four boards' FFCs to the back outlet, stacked, and the outlet slot (`back_outlet()`) |
+| `main_pcb.scad`, `main_pcb.stl`, `pcb_cable.stl`, `.js` | main PCB with part bodies, the four FFCs to it, floor pockets, openings and pins for the housing |
+| `back_cable.scad` | superseded cables; still gives the outlet slot (`back_outlet()`), now for the bass cable |
 | `array.html` | 3D viewer of the four boards with connectors, housing, cover and cables; X/Z section plane. Loads the `.js` geometry |
 | `Makefile`, `stl2js.py` | `make` builds the files above into `build/discant/`; `stl2js.py` turns an STL into the `.js` geometry for `array.html` |
 | `phone.html`, `embed_parts.py` | phone view of the assembly: boards, connectors, housing, cover, cables and one button, with Press, a section and gestures (Interact). `make` writes `build/discant/phone.html` with every part embedded by `embed_parts.py`, one file that loads nothing else, so it also works in the claude.ai viewer on a phone |
+
+## 6. Main PCB [given: in the hole where the cables ran; ESP32-S3-WROOM-1, DAC, 74HC154]
+
+`main_pcb.scad`. **Not final:** all bodies but the module are assumed sizes
+[unverified] until parts are chosen.
+
+- **Board:** 54.4 × 22 × 1.6 mm, parallel to the hole's floor, underside
+  1.1 mm above it. [chosen]
+- **Module** under the board, in a 2.2 mm pocket (0.8 mm of floor left): it is
+  25.5 mm long and the cables drop every 20.1 mm. No radio [given], so no
+  antenna keep-out. Other underside parts in a 1.2 mm pocket.
+- **Cables:** a 20 mm wide ZIF fits on a cable's line in only three places
+  (hole-1 tubes). Cables 0–2 keep the R3 bend towards the back, lead 2.0 mm, into
+  top ZIFs. Cable 3 bends the other way past the board's end, into a ZIF on the
+  underside. Each film twists 6.8° between connector and ZIF, as the floor
+  rolls against level along its width.
+- **Assembly** [given: no access from the bottom]: plug the cables into the
+  PCB, then the PCB's cables into the boards in the upside-down cover, and set
+  it all onto the housing. Four pins in the floor locate the board.
+  [unverified: that the board stays put; foam under the ribs proposed]
+- **Openings:** USB-C [given: firmware] and the 3.5 mm jack [given] in the
+  slanted wall; the jack on wires, ≤ 6 mm body, from outside. The back outlet
+  now carries the bass cable.
+- **Scan** [chosen]: switches are closed at rest, so one Schottky diode per key.
+  74HC154: 13 discant columns, 3 bass columns; 6 rows (4 board commons, 2 bass),
+  18 bass keys [given], same closed contacts [given]. Bass cable: 9 signals plus
+  battery [given: battery in the bass part], 11 wires.
+- **Audio:** UDA1334A is obsolete and, like the PCM5102A, not rated for
+  earphones; TLV320DAC3100 proposed. **Strain gauge** [given: on the −y side]:
+  half bridge, NAU7802 proposed.
+
+Checked by solid intersection: no part touches the housing, cover or boards,
+except each film inside its connector and USB-C and jack in the wall openings.
+Three ZIF corners lie within 0.2 mm of a hole-1 tube.

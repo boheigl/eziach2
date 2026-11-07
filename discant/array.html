@@ -151,7 +151,7 @@
           <label><input type="checkbox" id="showguide"> Guide tubes</label>
           <label><input type="checkbox" id="showhousing" checked> Housing</label>
           <label><input type="checkbox" id="showcover" checked> Cover</label>
-          <label><input type="checkbox" id="showcable" checked> Cable</label>
+          <label><input type="checkbox" id="showcable" checked> Main PCB</label>
           <label><input type="checkbox" id="showspring" checked> Spring</label>
           <label><input type="checkbox" id="showaxes" checked> Axes</label>
           <label hidden><input type="checkbox" id="showarray" checked> Array ×4</label>
@@ -239,7 +239,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../build/discant/housing.js"></script>
 <script src="../build/discant/cover.js"></script>
-<script src="../build/discant/back_cable.js"></script>
+<script src="../build/discant/pcb_cable.js"></script>
+<script src="../build/discant/main_pcb.js"></script>
 <script>
 (function () {
   // --- parameters, as in pcb.scad ---
@@ -786,7 +787,7 @@
     });
   }
   // --- printed parts and board 0's FFC loaded as flat triangle lists
-  // (../build/discant/housing.js, cover.js, back_cable.js: make), in board 0's frame ---
+  // (../build/discant/housing.js, cover.js, pcb_cable.js, main_pcb.js: make), in board 0's frame ---
   function loadPart(b64, colour, cap, edge) {
     var g = new THREE.Group();
     if (!b64) return g;
@@ -808,7 +809,8 @@
   scene.add(housing);
   var cover = loadPart(window.COVER_TRIS, 0x5b6f86, 0x3f4f62, 0x2a3644);
   scene.add(cover);
-  var cable = loadPart(window.CABLE_TRIS, 0xd8c08a, 0x9c8656, 0x6b5a33);   // the four FFCs to the back outlet
+  var cable = loadPart(window.CABLE_TRIS, 0xd8c08a, 0x9c8656, 0x6b5a33);   // the four FFCs to the main PCB
+  cable.add(loadPart(window.MAIN_PCB_TRIS, 0x2f7a4f, 0x1f5236, 0x143524));   // the main PCB, shown with them
   scene.add(cable);
   // M2 countersunk heads (d3.8, 90 deg), flush with the cover top: two at the
   // ends and two in between per step; the middle ones form two lines that meet

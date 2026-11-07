@@ -1,5 +1,8 @@
 // The boards' FFCs to the outlet in the back of the housing
 //
+// SUPERSEDED by main_pcb.scad: the cables now end on the main PCB. Only
+// back_outlet() is still used, by housing.scad, for the bass cable.
+//
 // The simplest route: each cable leaves its board's connector straight down,
 // is bent once about its width towards its normal, and runs straight from
 // there through an outlet in the housing's back face. No further bending.
