@@ -162,7 +162,7 @@
             <tr><td>Gauge recess</td><td>9 × 12.5 × 1</td></tr>
             <tr><td>Slide fit on W</td><td>0.20 / side</td></tr>
             <tr><td>Mouth corners</td><td>R2</td></tr>
-            <tr><td>Outer holder</td><td>38.4 × 26.2 × 10.8</td></tr>
+            <tr><td>Outer holder</td><td>38.4 × 27.3 × 10.8</td></tr>
             <tr><td>Outer wall</td><td>4.00</td></tr>
             <tr><td>Lead gap</td><td>4.8 between yokes</td></tr>
             <tr><td>Lead ⌀ / stickout</td><td>0.7 / 2.0</td></tr>
@@ -191,7 +191,7 @@
       <li><b>Why that station.</b> Moment in the column is <em>P</em>·(3.5 − y), so it peaks at the lower root (y = −6.5) and falls to zero level with the load at y = +3.5. Sitting at y = −3.5 keeps 70 % of the peak while staying ~3 mm clear of the slot end and its stress concentration.</li>
       <li><b>The inner holder grips the W from both faces</b>, 3 mm above and 3 mm below, and closes into a box: its two side walls pass through the open slots, and a bridge behind the plate's bottom edge joins the two plates. Switch it off to see the plate and gauges it covers. It slides onto the W on a 0.2 mm fit per side and 0.15 mm per face — set for FDM printing — keeps 0.5 mm to the fixed outer arms, and stops 2 mm short of where the slots close. The two vertical edges at the mouth corners are rounded R2. The mouth also carries a 0.6 mm lead-in flare, which is not drawn here.</li>
       <li><b>A 9 × 1 mm recess in each plate</b> clears the gauge and carries its leads out through the rear face. Its edges sit mid-slot, 1.5 mm clear of the central column and 1.5 mm clear of the webs, so the inner holder never touches the member being measured — that one stays free to bend, and clamping is left to the webs and the bottom block. 2 mm of wall remains above and below each recess.</li>
-      <li><b>The outer holder is one piece</b>: a C-jaw on each fixed arm — 4 mm of material above, below and outboard — joined by a yoke at the +y end. It slides on from −y until the arms' tips seat against the 1 mm stop at its back, which only has to take the push of assembly. Two yokes bridge across the plate instead of reaching past it, so nothing projects beyond the +y edge. They stand off the plate faces at z = ±2.4, leaving a 4.8 mm gap for the leads to pass through, and sit in y at 5.5…12.5, filling the stretch between the inner holder and the plate edge down to a 1 mm gap. Using a pair rather than one ties the jaws together symmetrically. The jaw faces at x = 12 keep 0.5 mm to the inner holder, but the order is fixed: <b>this part goes on first</b>, since the yoke cannot pass over the 8.8 mm tall holder.</li>
+      <li><b>The outer holder is one piece</b>: a C-jaw on each fixed arm — 4 mm of material above, below and outboard — joined by a yoke at the +y end. It is printed as part of the discant's housing, so the plate slides into it from −y until the plate's +y edge lands on the housing's pad, and a ⌀1.5 dowel pin across each jaw keeps it in. Two yokes bridge across the plate instead of reaching past it, so nothing projects beyond the +y edge. They stand off the plate faces at z = ±2.4, leaving a 4.8 mm gap for the leads to pass through, and sit in y at 5.5…12.5, filling the stretch between the inner holder and the plate edge down to a 1 mm gap. Using a pair rather than one ties the jaws together symmetrically. The jaw faces at x = 12 keep 0.5 mm to the inner holder, but the order is fixed: <b>this part goes on first</b>, since the yoke cannot pass over the 8.8 mm tall holder.</li>
       <li><b>The leads run forward, in +y</b>, two off each gauge. Each recess starts at y = −8, just behind its gauge, and opens at the inner holder's mouth; from there the leads lie on the plate, cross the open gap and leave through the gap between the outer holder's two yokes, standing 2 mm proud of its +y face. At ⌀0.7 they clear the recess ceiling and the yokes by about 0.45 mm. The inner holder's back wall is solid again, and it still clamps the bottom block over y = −12.7 … −8.</li>
       <li><b>Orthographic or perspective.</b> Parallel projection is the one to judge fits and alignment in — edges that should line up actually line up, and the preset views read as true elevations. Perspective is the natural-looking one. The switch keeps the apparent size, so the model does not jump.</li>
       <li><b>The triad is the part's own frame</b>, the one every dimension here is quoted in: origin at the centre of the plate in all three axes, X across the plate, Y towards the closed end, Z out of the gauged face. The plate therefore runs from z = −1.25 to +1.25, which is 1.25 mm below where the STEP file puts it; nothing else differs. Arrows are 20 mm long and drawn over the solids so they stay readable.</li>
@@ -340,16 +340,14 @@
   });
   var fxEdge = new THREE.LineBasicMaterial({ color: 0x4a4138 });
   // one piece: a jaw on each arm, joined by a yoke bridging over the plate
-  [[ 15.2,  19.2, -13.7, 12.5,  -5.4,   5.4],   // right jaw, outboard wall
-   [   12,  15.2, -13.7, 12.5,   1.4,   5.4],   // right jaw, over the arm
-   [   12,  15.2, -13.7, 12.5,  -5.4,  -1.4],   // right jaw, under the arm
-   [   12,  15.2, -13.7,-12.7,  -1.4,   1.4],   // right jaw, 1 mm stop for the arm tip
-   [-19.2, -15.2, -13.7, 12.5,  -5.4,   5.4],   // left jaw, outboard wall
-   [-15.2,   -12, -13.7, 12.5,   1.4,   5.4],   // left jaw, over the arm
-   [-15.2,   -12, -13.7, 12.5,  -5.4,  -1.4],   // left jaw, under the arm
-   [-15.2,   -12, -13.7,-12.7,  -1.4,   1.4],   // left jaw, 1 mm stop for the arm tip
-   [  -12,    12,   5.5, 12.5,   2.4,   5.4],   // yoke over the plate
-   [  -12,    12,   5.5, 12.5,  -5.4,  -2.4]    // yoke under the plate
+  [[ 15.2,  19.2, -14.8, 13.0,  -5.4,   5.4],   // right jaw, outboard wall
+   [   12,  15.2, -14.8, 13.0,   1.4,   5.4],   // right jaw, over the arm
+   [   12,  15.2, -14.8, 13.0,  -5.4,  -1.4],   // right jaw, under the arm
+   [-19.2, -15.2, -14.8, 13.0,  -5.4,   5.4],   // left jaw, outboard wall
+   [-15.2,   -12, -14.8, 13.0,   1.4,   5.4],   // left jaw, over the arm
+   [-15.2,   -12, -14.8, 13.0,  -5.4,  -1.4],   // left jaw, under the arm
+   [  -12,    12,   5.5, 13.0,   2.4,   5.4],   // yoke over the plate
+   [  -12,    12,   5.5, 13.0,  -5.4,  -2.4]    // yoke under the plate
   ].forEach(function (b) {
     var g = stepBox(b[0], b[1], b[2], b[3], b[4], b[5]);
     outerHolder.add(new THREE.Mesh(g, fxMat));

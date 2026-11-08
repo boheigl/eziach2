@@ -1,0 +1,12 @@
+route.log
+drc.json
+erc.json
+*-backups/
+*.kicad_prl
+fp-info-cache
+best.kicad_pcb
+build.log
+gen.log
+__pycache__/
+drc_try.json
+best_*.kicad_pcb

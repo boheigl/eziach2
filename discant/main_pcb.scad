@@ -26,7 +26,8 @@
 //               openscad -o ../build/discant/pcb_cable.stl -D 'show="cables"' main_pcb.scad
 // housing.scad uses main_pcb_cuts() and main_pcb_pads().
 
-show = "board";                  // "board" or "cables"
+show = "board";                  // "board" (laminate, parts, jack), "laminate", "parts", "copper" or "cables"
+kicad = "../build/discant/main_pcb/";   // the routed board, from main_pcb/export_3d.py (make)
 
 /* [From pcb.scad / housing.scad, do not edit here] */
 step     = [10, 16, 3];          // staircase
@@ -40,45 +41,49 @@ hole_floor = 3;                  // the hole's floor above the bottom plane
 ffc_w    = 15;
 ffc_t    = 0.3;
 insert   = 3.5;                  // inside the board connector
-bend_r   = 3;                    // at the cable's centre (rMin 2)
+bend_r   = 2.4;                  // at the cable's centre (rMin 2)
 
 /* [Board] */
 pcb_t    = 1.6;
 pcb_z    = 1.1;                  // its underside above the floor
-pcb_x    = [4.7, 56.2];          // 0.3 clear of tube 0 and 0.5 of cable 3
-pcb_y    = [-8.6, 13.4];         // inner side clear of the hole-1 tubes, outer 0.3 from the wall
+pcb_x    = [4.7, 56.7];          // 0.5 clear of cable 3
+pcb_y    = [-8.6, 13.9];         // inner side clear of the hole-1 tubes, outer 0.35 from the wall
+// outline as in main_pcb/design.py: tabs between the tubes carry the ZIFs' hold-downs
+outline  = [[4.7, 13.9], [56.7, 13.9], [56.7, -10.5], [49.6, -10.5], [48.6, -9.7], [48.6, -8.6], [40.2, -8.6],
+            [40.2, -10.4], [30.3, -10.4], [30.3, -8.6], [21.1, -8.6], [21.1, -10.4], [19.6, -12.6],
+            [12.6, -12.6], [11.1, -10.4], [11.1, -8.6], [4.7, -8.6]];
 
 /* [Parts: bodies as boxes; [unverified] until parts are chosen] */
-zif_w    = 20;                   // across the cable
-zif_d    = 5;                    // along it
-zif_h    = 2;                    // height on the board
+zif_w    = 21;                   // across the cable: the actuator bar at the mouth (GCT FFC3B, A)
+zif_d    = 6.75;                 // along it, mouth to the tails' tips
+zif_bar  = 1.1;                  // the bar's depth; the body behind it is zif_body wide
+zif_body = 15.6;
+zif_nail = [2.2, 5.2, 20.3];     // fitting nails: from, to behind the mouth, over both
+zif_h    = 2.5;                  // height on the board
 zif_in   = 3;                    // cable inside the ZIF
-zif_x    = 11.2;                 // top ZIFs: mouth beyond their own connector
-zif3_x   = -3;                   // underside ZIF: mouth before connector 3
-mod_x    = [5.5, 31];            // ESP32-S3-WROOM-1, 25.5 x 18 x 3.1, under the board
-mod_y    = [-8.1, 9.9];
+zif_x    = [10.57, 10.56, 10.66]; // top ZIFs: cable k's mouth beyond its connector: band X 11.2, 30.3, 49.5
+zif3_x   = -2.4;                 // underside ZIF: mouth before connector 3: band X 54.9
+mod_x    = [5.5, 31];            // ESP32-S3-WROOM-1-N16R8, 25.5 x 18 x 3.1, under the board
+mod_y    = [-7.8, 10.2];
 mod_h    = 3.1;
-usb_x    = [21, 30];             // USB-C receptacle on top: 9 wide
-usb_y    = [8, 15.4];          // 7.4 deep, front inside the wall's opening
+usb_x    = [36.2, 45.2];         // USB-C receptacle on top (GCT USB4105): 9 wide, beyond the
+usb_y    = [8.0, 15.9];          //   module, whose pads its shield legs would otherwise hit
 usb_h    = 3.3;
-bass_x   = [41.5, 49.5];             // six-way connector for the wires to gauge_link.scad
-bass_y   = [10.1, 13.3];
-bass_h   = 3;
-jack_x   = 45.2;                 // earphone jack, on wires, in the slanted wall
+jack_x   = 26.1;                 // earphone jack, on wires, in the slanted wall
 jack_z   = 9;                    // its axis above the floor, over the cable film
-jack_d   = 6;                    // body; between cable 2 and the next rib
+jack_d   = 6;                    // body; between cable 1 and the next rib
 jack_l   = 14;
 wall_y   = 16.5;                 // beyond the slanted wall's outer face, at the jack's height
 
 /* [Floor] */
 pocket_mod = 2.2;                // under the module and ZIF 3: 0.8 of floor left
 pocket_low = 1.2;                // under the rest of the board's underside: 1.8 left
-low_x    = [31.5, 55.9];
-low_y    = [-8.3, 10.4];
-pins     = [[7, 11.9], [34, 11.9], [54, 11.9], [37.2, 0]];   // on the band frame
+low_x    = [31.5, 47.3];
+low_y    = [-8.3, 13.7];
+pins     = [[7, 12.3], [54.5, 12.3], [16.6, -11.3], [37.6, -8.2]];   // on the band frame
 pin_d    = 2;                    // locating pins; holes d2.2 in the board
-pin_h    = 2.5;                  // above the board's underside
-pad_d    = 3.6;
+pin_h    = 1.5;                  // above the board's underside: 0.1 under its top, clear of the ZIFs
+pad_d    = 2.3;  
 
 $fa = 2; $fs = 0.2;
 
@@ -128,7 +133,7 @@ function path(dirn, zt, x_end) =
                 [dirn * bend_r * (1 - cos(a)), zc - bend_r * sin(a)]],
            [for (i = [1 : 6]) pe + (e - pe) * i / 6]);
 
-function cable_path(k) = k < 3 ? path(1, zc_top, zif_x + zif_in)
+function cable_path(k) = k < 3 ? path(1, zc_top, zif_x[k] + zif_in)
                                : path(-1, zc_bot, zif3_x - zif_in);
 
 // the film in 3D: level at the connector, turned into the floor's plane at the
@@ -166,27 +171,30 @@ module box(x, y, z) translate([x[0], y[0], z[0]]) cube([x[1] - x[0], y[1] - y[0]
 
 module zif(k) {
     e = end_of(k);
-    y = [e[1] - zif_w / 2, e[1] + zif_w / 2];
-    if (k < 3) box([e[0] - zif_in, e[0] - zif_in + zif_d], y, [pcb_z + pcb_t, pcb_z + pcb_t + zif_h]);
-    else       box([e[0] + zif_in - zif_d, e[0] + zif_in], y, [pcb_z - zif_h, pcb_z]);
+    s = k < 3 ? 1 : -1;                       // from the mouth towards the tails
+    m = e[0] - s * zif_in;
+    z = k < 3 ? [pcb_z + pcb_t, pcb_z + pcb_t + zif_h] : [pcb_z - zif_h, pcb_z];
+    function along(a, b) = s > 0 ? [m + a, m + b] : [m - b, m - a];
+    function across(w) = [e[1] - w / 2, e[1] + w / 2];
+    box(along(0, zif_bar), across(zif_w), z);
+    box(along(0, zif_d), across(zif_body), z);
+    box(along(zif_nail[0], zif_nail[1]), across(zif_nail[2]), z);
 }
 
 module board()
-    difference() {
-        box(pcb_x, pcb_y, [pcb_z, pcb_z + pcb_t]);
-        for (p = pins) translate([p[0], p[1], 0]) cylinder(d = pin_d + 0.2, h = 10);
+    translate([0, 0, pcb_z]) linear_extrude(pcb_t) difference() {
+        polygon(outline);
+        for (p = pins) translate([p[0], p[1]]) circle(d = pin_d + 0.2);
     }
 
 module module_body() box(mod_x, mod_y, [pcb_z - mod_h, pcb_z]);
 module usb_body()    box(usb_x, usb_y, [pcb_z + pcb_t, pcb_z + pcb_t + usb_h]);
-module bass_body()   box(bass_x, bass_y, [pcb_z + pcb_t, pcb_z + pcb_t + bass_h]);
 module jack_body()   translate([jack_x, wall_y - 0.5 - jack_l, jack_z]) rotate([-90, 0, 0])
                          cylinder(d = jack_d, h = jack_l);
 
-module main_pcb() band() {
-    board(); module_body(); usb_body(); bass_body(); jack_body();
-    for (k = [0 : 3]) zif(k);
-}
+// the routed board from KiCad (main_pcb/): laminate, copper and the parts' bodies,
+// already in the band frame. The boxes above remain the housing's cuts.
+module main_pcb() band() { import(str(kicad, "kicad_board.stl")); import(str(kicad, "kicad_parts.stl")); jack_body(); }
 
 // cut from the housing: floor pockets, USB-C and jack openings
 module main_pcb_cuts() band() {
@@ -211,4 +219,8 @@ for (k = [0 : 3]) echo(str("cable ", k, ": ends on the band frame at ", end_of(k
                            k < 3 ? lead_of(1, zc_top) : lead_of(-1, zc_bot)));
 echo(str("board ", pcb_x[1] - pcb_x[0], " x ", pcb_y[1] - pcb_y[0], " x ", pcb_t));
 
-if (show == "cables") cables(); else main_pcb();
+if (show == "cables") cables();
+else if (show == "laminate") band() import(str(kicad, "kicad_board.stl"));
+else if (show == "parts") band() { import(str(kicad, "kicad_parts.stl")); jack_body(); }
+else if (show == "copper") band() import(str(kicad, "kicad_copper.stl"));
+else main_pcb();

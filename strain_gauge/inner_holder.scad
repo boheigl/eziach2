@@ -58,6 +58,28 @@ recess_w   = 9.0;    // width, centred on the column. The column is 6 mm wide
 recess_back = -8.0;  // back end of the recess, just behind the gauge
 gauge_y    = -3.5;   // gauge centre, for reference only
 
+/* [Latch] */
+// A spring tongue in the top wall each side, its tooth in the inner slot between web and
+// column (|x| 3 .. 6), behind the slot's closed end (y -6.5): it rides over the W's
+// bottom block while the holder slides on and drops into the slot at the end. It only
+// touches the W, never the column or the fixed arms, so the force still runs through
+// the column [given: latch in both positions]. The tongue bends into a relief in its
+// own wall, so it needs no room outside the holder.
+//   "lock"    retaining face square: holds the strap's pull; lift the lug on the
+//             tongue's tip to release (playing position)
+//   "detent"  retaining face at 45 deg: holds the discant's weight, a firm pull
+//             releases it; no lug (the stored position's socket, inside the deck)
+//   "none"    no latch
+latch    = "lock";
+tongue_t = 1.0;      // tongue thickness: the wall's inner layer
+tongue_x = [4.2, 7.2];   // tongue, x; mirrored
+tongue_y = [-15.5, -4.2];   // root (in the bridge) to tip
+tooth_x  = [4.2, 5.2];   // in the inner slot (3 .. 6), 1.0 from the column's edge
+tooth_y0 = -6.28;    // retaining face: the slot's arc end is at -6.33 .. -6.47 across the tooth
+tooth_d  = 0.6;      // how far the tooth reaches into the plate's thickness
+cut_w    = 0.5;      // the slot round the tongue
+lug_h    = 1.0;      // the lock's lug: above the holder's top face
+
 /* [Preview] */
 show_plate = false;  // true also draws the flexure plate, for checking fits
 
@@ -117,6 +139,27 @@ module outline() {
     }
 }
 
+// the tooth, x [0, w], in y-z: retaining face at y = 0 (square, or at 45 deg for the
+// detent), the lead-in ramp towards +y, which the plate's edge meets first
+tooth_h = z_high - (plate_t / 2 - tooth_d);       // from the pocket's ceiling down
+module tooth(w, angle) {
+    ret = tooth_h / tan(angle);                   // the retaining face's run
+    rotate([90, 0, 90]) linear_extrude(w) polygon([
+        [0, tooth_h], [ret, 0], [ret + 0.4, 0], [ret + 0.4 + 1.6, tooth_h]]);
+}
+module latch_cuts() for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0]) difference() {
+    translate([tongue_x[0] - cut_w, tongue_y[0], z_high - 0.01])
+        cube([tongue_x[1] - tongue_x[0] + 2 * cut_w, tongue_y[1] - tongue_y[0] + cut_w, wall + 1]);
+    translate([tongue_x[0], tongue_y[0] - 1, z_high - 0.02])
+        cube([tongue_x[1] - tongue_x[0], tongue_y[1] - tongue_y[0] + 1, tongue_t + 0.02]);
+}
+module latch_parts() for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0]) {
+    translate([tooth_x[0], tooth_y0, z_high - tooth_h]) tooth(tooth_x[1] - tooth_x[0], latch == "lock" ? 90 : 45);
+    if (latch == "lock")
+        translate([tongue_x[0] + 0.5, tongue_y[1] - 1, z_high + tongue_t - 0.01])
+            cube([tongue_x[1] - tongue_x[0] - 1, 1, wall - tongue_t + lug_h]);
+}
+
 module inner_holder() {
     difference() {
         translate([0, 0, z_bot]) linear_extrude(height = height) outline();
@@ -128,7 +171,9 @@ module inner_holder() {
         recess(1);
         recess(-1);
         if (lead_in > 0) mouth();
+        if (latch != "none") latch_cuts();
     }
+    if (latch != "none") latch_parts();
 }
 
 inner_holder();

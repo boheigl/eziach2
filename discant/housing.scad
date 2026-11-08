@@ -57,8 +57,8 @@
 // MAIN PCB. main_pcb.scad: floor pockets, wall openings and locating pins for
 // the board in the hole; main_pcb_cuts() and main_pcb_pads() below.
 //
-// GAUGE LINK. gauge_link.scad: the bore in the back wall for the wires to the
-// link board, and the pilots of the gauges' bracket.
+// GAUGE LINK. gauge_link.scad: on the back face the pad with the gauges' outer
+// holders, in the back wall the link board's pocket and the bore for its wires.
 //
 // make builds   openscad -o ../build/discant/housing.stl housing.scad
 
@@ -379,6 +379,7 @@ union() {
         union() {
             for (k = [0 : n_boards - 1]) { column(k); end_pads(k); cover_fill(k); }
             for (k = [0 : n_boards - 2]) { bridge(k); notch_fill(k, 0); notch_fill(k, 1); tab_gap_fill(k); }
+            gauge_housing_pads();
         }
         below_floor();
         face_hole();
@@ -388,4 +389,5 @@ union() {
         gauge_housing_cuts();
     }
     main_pcb_pads();
+    gauge_holders();
 }

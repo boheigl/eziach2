@@ -119,7 +119,8 @@ guide tubes.
   boards, connectors and cover.
 - **No back outlet** [given: all cabling through the connector]: the
   boards' cables end on the main PCB (§6), the back wall stays closed.
-- **Size:** 282.9 × 68.4 mm, z −20.6 … +11.04 (cover step 0 down to the same bottom plane).
+- **Size:** 282.9 × 68.4 mm, z −20.6 … +11.04 (cover step 0 down to the same bottom plane),
+  without the gauge pad and outer holders on the back face (§7).
 
 **Thinnest walls:** about 0.7 mm, between each connector pocket and the guide
 of the board's hole 1. Between the guides of board k+1 and the outer face of
@@ -196,39 +197,117 @@ the key's parts that `array.scad` imports from `build/switch/`.
 | `housing.scad`, `housing.stl`, `housing.js` | printed body with 46 guides, a bottom parallel to the steps, the hole behind the slanted −x face, the main PCB's pockets and the wires' bore |
 | `cover.scad`, `cover.stl`, `cover.js` | printed cover holding the four boards down |
 | `main_pcb.scad`, `main_pcb.stl`, `pcb_cable.stl`, `.js` | main PCB with part bodies, the four FFCs to it, floor pockets, openings and pins for the housing |
-| `gauge_link.scad`, `gauge_link.stl`, `.js` | two strain gauges on their bracket, link plate, link board and the six wires from the main PCB (§7) |
+| `gauge_link.scad`, `gauge_link.stl`, `.js` | two strain gauges (plates) with their pins, link board with its lid and the six wires from the main PCB; the outer holders, pad and pocket are in the housing (§7) |
 | `array.html` | 3D viewer of the four boards with connectors, housing, cover and cables; X/Z section plane. Loads the `.js` geometry |
 | `Makefile`, `stl2js.py` | `make` builds the files above into `build/discant/`; `stl2js.py` turns an STL into the `.js` geometry for `array.html` |
 | `phone.html`, `embed_parts.py` | phone view of the assembly: boards, connectors, housing, cover, cables and one button, with Press, a section and gestures (Interact). `make` writes `build/discant/phone.html` with every part embedded by `embed_parts.py`, one file that loads nothing else, so it also works in the claude.ai viewer on a phone |
 
 ## 6. Main PCB [given: in the hole where the cables ran; ESP32-S3-WROOM-1, DAC, 74HC154]
 
-`main_pcb.scad`. **Not final:** all bodies but the module are assumed sizes
-[unverified] until parts are chosen.
+`main_pcb/`: a KiCad project made from one table. `design.py` holds parts, nets and
+placement; `gen_sch.py` writes the schematic, `gen_pcb.py` the board, `route.py`
+routes it. **In the assembly** [given]: `main_pcb/export_3d.py` (run by make)
+exports the routed board in the band frame: laminate and copper from KiCad, and one
+body per part from its fabrication outline at the part's height, the ZIFs as
+actuator bar, body and nails. No 3D models are installed, so the parts are these
+boxes. `main_pcb.scad` imports them; its own boxes remain only as the housing's
+pockets and openings. **Not ordered, not bench tested.**
 
-- **Board:** 51.5 × 22 × 1.6 mm, parallel to the hole's floor, underside
-  1.1 mm above it. [chosen]
-- **Module** under the board, in a 2.2 mm pocket (0.8 mm of floor left): it is
-  25.5 mm long and the cables drop every 19.1 mm. No radio [given], so no
-  antenna keep-out. Other underside parts in a 1.2 mm pocket.
-- **Cables:** a 20 mm wide ZIF fits on a cable's line in only three places
-  (hole-1 tubes). Cables 0–2 keep the R3 bend towards the back, lead 1.8 mm, into
-  top ZIFs. Cable 3 bends the other way past the board's end, into a ZIF on the
-  underside. Each film twists 5.7° between connector and ZIF, as the floor
-  rolls against level along its width.
-- **Assembly** [given: no access from the bottom]: plug the cables into the
-  PCB, then the PCB's cables into the boards in the upside-down cover, and set
-  it all onto the housing. Four pins in the floor locate the board.
-  [unverified: that the board stays put; foam under the ribs proposed]
-- **Openings:** USB-C [given: firmware] and the 3.5 mm jack [given] in the
-  slanted wall; the jack on wires, ≤ 6 mm body, from outside.
-- **Scan** [chosen]: switches are closed at rest, so one Schottky diode per key.
-  74HC154: 13 discant columns, 4 board commons as rows; 3 outputs spare.
-- **Audio:** UDA1334A is obsolete and, like the PCM5102A, not rated for
-  earphones; TLV320DAC3100 proposed.
+Checked on the exported board: laminate, copper and parts touch neither housing,
+cover, boards nor connectors; each film ends inside its ZIF; film 2's edge brushes
+the rear top edge of USB-C's body (0.25 mm³, about 0.1 mm), left until the next
+reroute. The locating pins stop 0.1 mm under the board's top face, clear of the
+ZIFs, on ⌀2.3 pads.
 
-Checked by solid intersection: no part touches the housing, cover or boards,
-except each film inside its connector and USB-C and jack in the wall openings.
+**Board** [chosen]: 52 × 22.5 mm, 4 layers, 1.6 mm, parallel to the hole's floor,
+underside 1.1 mm above it, with tabs between the hole-1 tubes for the ZIFs' fitting
+nails. Layers: top, GND plane, column bus, bottom. Rules 0.127 / 0.127 mm, vias
+0.45 / 0.2 mm.
+
+**Height zones.** Under each cable's film about 1.2 mm is free on the top side:
+only 0402 parts and diodes go there. The strip over the films' edge (Y > 8) and
+the underside's pocket take the tall parts.
+
+**Cables** [chosen]: all four land on the same **bottom-contact** ZIF, 1.0 mm, 14
+way, 2.5 mm high (GCT FFC3B family; footprint JUSHUO AFA07-S14FCA-00), since each
+film's conductors face the board after its bend. Bend R2.4, mouths at X = 11.2, 30.3,
+49.5 and, underside, 54.9. The 21 mm actuator bar at the mouth is what limits them:
+its corners must clear the hole-1 tubes. Close the ZIFs before the board goes in:
+the bar moves towards the tube when opened. [unverified: which side the FFC3A20
+contacts, so whether the films are same-side or opposite-side contact]
+
+**Key scan** [chosen, 74HC154 given]: as the earlier eziach, the decoder pulls one
+of 13 columns low and four inputs with 10 k pull-ups read the board commons. The
+contacts are closed at rest, so each key needs its own diode, cathode on the column:
+46 Schottky diodes, SOD-882. A hole has the same contact number on all four cables,
+so each column is one straight line on the inner layer through all the ZIFs, and a
+diode sits at each pin: staggered behind ZIFs 0, 1 and 3, in front of ZIF 2, where
+the board ends. At rest a read row is low by the diode's drop, about 0.3 V.
+[unverified: the chosen diode type; needs ≤ 0.5 V at 0.33 mA and low leakage, 12
+reverse diodes share each pull-up]
+
+**Module:** ESP32-S3-WROOM-1-**N16R8** [chosen]: 8 MB PSRAM and 16 MB flash for the
+synthesizer and its soundfont; the earlier instrument used a 1.4 MB SF2 with
+FluidSynth on a Pi. [unverified: that the S3 can play it; the firmware does not exist
+yet] No radio [given]. On the underside, turned so its USB pins face the connector
+and its short end the logic.
+
+| Function | GPIO | | Function | GPIO |
+|---|---|---|---|---|
+| Rows 0–3 | 15, 16, 17, 18 | | I²C SDA, SCL | 9, 8 |
+| Decoder A0–A3 | 47, 48, 21, 14 | | Link interrupt | 7 |
+| I²S MCLK, BCLK, WCLK, DOUT | 10, 11, 12, 13 | | DAC reset | 6 |
+| USB D−, D+ | 19, 20 | | Battery voltage | 1 (ADC) |
+
+Free: GPIO 2, 3, 4, 5, 38–42, 45, 46. Not usable: 33–37 (PSRAM). Test pads for boot,
+reset, TX and RX. No boot button: the housing is closed, so firmware goes over USB;
+if a bad image blocks that, the boot pad needs the board out.
+
+**Audio:** TLV320DAC3100 (VQFN-32) [proposed earlier, chosen]: its headphone driver
+gives 20 mW into 32 Ω, 60 mW into 16 Ω [datasheet]. 3.3 V analog behind a ferrite,
+1.8 V core, speaker supply at 3.3 V as the datasheet asks for it not below AVDD, the
+speaker amplifier unused. Output AC coupled with 100 µF, 50 Hz at 32 Ω. MCLK is wired
+so that nothing rests on running the PLL from BCLK. [unverified: unused pin handling
+and decoupling values are not in the datasheet's text; taken from usual practice]
+
+**Power** [chosen, assuming a 1S Li-ion battery in the bass module]: a P-MOSFET passes
+the battery unless USB is present, a Schottky feeds from USB. TLV75533 to 3.3 V
+(500 mA), TLV75518 to 1.8 V. The battery runs down to about 3.4 V before 3.3 V sags.
+Battery voltage is read through a 1 M / 1 M divider.
+[unverified: TLV755 pinout, taken from the family's usual order; check the datasheet]
+
+**USB-C** [given: firmware]: GCT USB4105 at X = 36.2 … 45.2, just past the module: its
+shield legs would otherwise land on the module's pads. 5.1 k on CC, ESD array.
+**Jack** [given]: moved to X = 26.1, the same place in the staircase's 19.1 mm period.
+**Wires:** the six to the link board and three to the jack solder to pads: an 8 mm wide
+connector does not fit the 5 mm strip. Trade-off: desoldering to take the board out.
+
+**Assembly** [given: no access from the bottom]: plug the cables into the
+PCB, then the PCB's cables into the boards in the upside-down cover, and set
+it all onto the housing. Four pins in the floor locate the board.
+[unverified: that the board stays put; foam under the ribs proposed]
+
+**State of the board** (route.py, then KiCad's DRC with the schematic):
+- **Schematic:** 104 parts, ERC without errors. Every pin ends in a global label,
+  so the drawing is the table, not a readable circuit diagram yet.
+- **Placement:** every pad on the board. In the assembly the board, its parts and
+  the cables touch neither housing, cover nor connectors.
+- **Routing:** 1709 track segments and 185 vias on four layers; no clearance, hole or
+  short errors; **17 connections still open**, all in the crowded patch round the
+  DAC and the USB pins: GND (3), +3V3A (2), USB D+ (2), I²S WCLK and DOUT, SCL,
+  +1V8, DAC reset, HPL, HPR, the jack's right channel, row 2 and column 12. The
+  router has no rip-up; these are for KiCad by hand.
+- **Known DRC items:** diodes 0.5 mm inside the ZIFs' courtyards (the diodes stand
+  beside the tails, physically clear), the wire pads' courtyards overlap each other,
+  four pads 0.002 mm under the 0.127 mm clearance at the USB connector's rear and
+  its shield legs 0.002 mm inside the 0.25 mm edge clearance (both corrected in
+  design.py, not yet rerouted), unconnected ZIF contacts named differently in the
+  schematic and the board (38 parity warnings, no wrong connections).
+- **Make it:** `python3 gen_pcb.py && python3 gen_sch.py && sh build.sh` (about 45
+  minutes; six tries, keeps the best).
+
+**Open:** power switch (none yet; it could sit in the bass module); charging;
+whether the wire pads should become connectors; the items marked above.
 
 ## 7. Gauge and link to the bass module
 
@@ -238,29 +317,53 @@ except each film inside its connector and USB-C and jack in the wall openings.
   battery, joined by a detachable connector that carries all cabling.
 - **Force path** [given]: discant → gauges → connector → bass. Two gauges side by
   side [given], which also holds against torsion, central on the +y side [given]:
-  x = ±25 [chosen; the outline's middle is −6.7]. Plates in the x/y plane [given],
-  so they sense force along z. Outer holders on a bracket screwed to the back face.
-- **Link plate** [given: a plate for the bass side, part of the connector]:
-  76 × 10.8 × 6 mm on both inner holders, staying on the gauges, with the spring pins.
+  x = ±25 [chosen; the outline's middle is −6.7]. Plates in the slope's plane
+  [given; earlier the x/y plane]: tilted up by atan(3/16) = 10.62° about x, as the rows
+  climb and the housing's bottom runs, about the middle of the pad's face; they sense
+  force normal to that plane. So stored (`../assembly/spec.md`) they point straight up
+  the bass, and played the discant's slope plane lies level.
+- **Fixed side** [given: part of the 3D-printed housing, no screws]: a gauge pad,
+  96 × 10.8 mm on the back face, a wedge whose face turns with the plates (4 mm thick at
+  the bottom, 2 at the top), with both outer holders growing out of it,
+  so housing, pad and holders are one print, out to y = 89.6. They reach past the
+  bottom plane, which ends at the back face. Each plate slides into its holder from
+  the far end, leads ahead of it, until its edge lands on the pad; then the inner
+  holder; then a dowel pin ⌀1.5 × 10 across each jaw, four in all, keeps it in.
+  [chosen] [unverified: the 0.15 mm plate fit, printed in the housing]
+- **Inner holders** [given: the gauge is three parts; the inner holder is the bass's]:
+  printed with the bass on one mount (`../bass/link.scad`); the bass slides them onto
+  the plates' W and off again. The link plate and its spring pins are gone; the 12
+  contacts need their own connector [open].
 - **Reading:** each bridge reads moment, force × arm from the gauges (7 mm as
-  designed). The sum follows the force, the difference the twist. Arm and the bass
+  designed; on the bass the hand's push acts about 56 mm away, `../bass/spec.md` §4). The sum follows the force, the difference the twist. Arm and the bass
   module's weight therefore enter the reading. [estimated: with two gauges full
   scale is about 2 × 1400 N·mm, so about 35 N at an 81 mm arm]
 - **Link board** [chosen]: beside the gauges, about 100 mm from the main PCB: NAU7802 for
   both half bridges, MCP23017 for the bass keys (9 lines as 3 × 6). Six wires reach it:
   battery +, ground, 3.3 V, SDA, SCL, interrupt. They run behind cable 3 to the
   hole's back corner and along a ⌀2.6 bore inside the back wall (2 mm of wall each
-  side), out behind the link board.
+  side), straight into the board's pocket.
+- **Pocket** [given: the readout housed, in the housing, no screws]: the board, 20.5
+  × 13.5 mm, lies in a pocket in the back wall, x = −75.7 … −51.2, z = −6.85 … 7.25,
+  y = 54 … 59.3, so nothing stands out of the back face. Walls left: 1.3 mm to the
+  guides' line, 0.8 mm under board 3, 0.9 mm over the bottom plane, 1.2 mm to the
+  pad's end. Corner ledges carry the board, ribs at its ends locate it, and a
+  1.2 mm lid flush with the back face snaps in with a hook at each end and keeps
+  it there. [chosen] [unverified: the hooks, printed] The gauges' leads leave the
+  plates towards the pad and run in a 3.2 × 1.5 mm groove in it, into the pocket
+  through a notch in its +x wall, which the wires to the connector leave by too.
+  Under the plates' edges the groove runs behind a 1 mm
+  strip, the plates' stop; elsewhere it is open to the pad's face or the holders.
 - **Connector** [chosen]: 12 contacts: 9 keys, battery +, ground, a spare ground
   or sense. Spring pins on flat pads, two rows of 6. A separate lock with no play
   in either direction carries the load, not the contacts. [unverified: current
   rating] The wires from link board to connector cross the gauge as a soft loop.
 - **Open:** overload stop; the lock (no play either way);
-  charging; how the outer holders fix to the bracket; a shell round the link board;
-  a diode at each of the 18 bass keys: the contacts are closed at rest, so without
+  charging; a diode at each of the 18 bass keys: the contacts are closed at rest, so without
   diodes the 3 × 6 matrix joins every row to every column and no key can be told
   apart. They would sit in the bass module, with no change to the connector.
   [unverified: not designed yet]
 
-Checked by solid intersection: wires, bracket, link plate and link board
-touch nothing but what they are fixed to.
+Checked by solid intersection: wires, plates, pins,
+link board and lid touch nothing but what they are fixed to, and the paths of
+plates and inner holders into the outer holders are free.

@@ -138,7 +138,7 @@
     ['housing.js', function () { parts.housing = mesh('HOUSING_TRIS', 0xd9a441); scene.add(parts.housing); }],
     ['cover.js', function () { parts.cover = mesh('COVER_TRIS', 0x5b6f86); scene.add(parts.cover); }],
     ['pcb_cable.js', function () { parts.cable = mesh('CABLE_TRIS', 0xd8c08a); scene.add(parts.cable); }],
-    ['main_pcb.js', function () { parts.cable.add(mesh('MAIN_PCB_TRIS', 0x2f7a4f)); }],
+    ['main_pcb.js', function () { parts.cable.add(mesh('MAIN_PCB_TRIS', 0x2f7a4f), copper('MAIN_CU_TRIS'), mesh('MAIN_PARTS_TRIS', 0x2b2f33)); }],
     ['gauge_link.js', function () { parts.cable.add(mesh('LINK_TRIS', 0x8a8f96)); }],
     ['button.js', function () { moving.add(mesh('BUTTON_TRIS', 0x4a6fa5)); }],
     ['felt.js', function () { moving.add(mesh('FELT_TRIS', 0x8c3b3b)); }],

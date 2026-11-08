@@ -33,9 +33,10 @@ scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
 $(BODY_STL): $(B)/%.stl: %.scad
 	$(call scad,$<)
 
-# gauge_link.scad imports the gauge's STLs, built in ../strain_gauge/
+# gauge_link.scad imports the gauge's STLs, built in ../strain_gauge/; the outer
+# holders become part of the housing
 GAUGE_STL := $(addprefix ../build/strain_gauge/,outer_holder.stl inner_holder.stl strain_gauge_plate.stl)
-$(B)/gauge_link.stl: $(GAUGE_STL)
+$(B)/gauge_link.stl $(B)/housing.stl: $(GAUGE_STL)
 $(GAUGE_STL): gauge ;
 gauge:
 	@$(MAKE) --no-print-directory -C ../strain_gauge
@@ -43,6 +44,16 @@ gauge:
 # the cables come from the same source as the board
 $(B)/pcb_cable.stl: main_pcb.scad
 	$(call scad,$<,-D 'show="cables"')
+
+# the routed main PCB (main_pcb/, KiCad) in 3D, and its pieces for the phone page
+KICAD3D := $(addprefix $(B)/main_pcb/,kicad_board.stl kicad_copper.stl kicad_parts.stl)
+$(KICAD3D) &: main_pcb/main_pcb.kicad_pcb main_pcb/export_3d.py main_pcb/design.py
+	@echo "  KICAD    $(B)/main_pcb/"
+	@cd main_pcb && $(PYTHON) export_3d.py ../$(B)/main_pcb > /dev/null
+$(B)/main_pcb.stl: $(KICAD3D)
+MAIN_PIECES := $(addprefix $(B)/,main_pcb_laminate.stl main_pcb_parts.stl main_pcb_copper.stl)
+$(MAIN_PIECES): $(B)/main_pcb_%.stl: main_pcb.scad $(KICAD3D)
+	$(call scad,$<,-D 'show="$*"')
 
 # array.scad imports the key's STLs from ../build/switch/. The key's own
 # Makefile brings them up to date first (once per run); the assembly is rebuilt
@@ -70,10 +81,10 @@ PHONE_PARTS := BOARD13_TRIS=$(KEY)/pcb_board.stl COPPER13_TRIS=$(KEY)/pcb_copper
                BOARD11_TRIS=$(KEY)/pcb_board_11.stl COPPER11_TRIS=$(KEY)/pcb_copper_11.stl \
                BOARD10_TRIS=$(KEY)/pcb_board_10.stl COPPER10_TRIS=$(KEY)/pcb_copper_10.stl \
                CONN_TRIS=$(KEY)/pcb_connector.stl \
-               HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl CABLE_TRIS=$(B)/pcb_cable.stl MAIN_PCB_TRIS=$(B)/main_pcb.stl LINK_TRIS=$(B)/gauge_link.stl \
+               HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl CABLE_TRIS=$(B)/pcb_cable.stl MAIN_PCB_TRIS=$(B)/main_pcb_laminate.stl MAIN_PARTS_TRIS=$(B)/main_pcb_parts.stl MAIN_CU_TRIS=$(B)/main_pcb_copper.stl LINK_TRIS=$(B)/gauge_link.stl \
                BUTTON_TRIS=$(KEY)/button.stl FELT_TRIS=$(KEY)/felt.stl WASHER_TRIS=$(KEY)/washer.stl \
                SLEEVE_TRIS=$(KEY)/sleeve.stl SCREW_TRIS=$(KEY)/screw.stl SPRING_TRIS=$(KEY)/spring.stl
-$(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(B)/pcb_cable.stl $(KEY_STL) $(PHONE_KEY)
+$(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(B)/pcb_cable.stl $(MAIN_PIECES) $(KEY_STL) $(PHONE_KEY)
 	@echo "  EMBED    $@"
 	@$(PYTHON) embed_parts.py $< $@ $(PHONE_PARTS)
 

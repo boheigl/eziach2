@@ -99,18 +99,35 @@ webs and the bottom block, which the inner holder still holds over y = −12.7 �
 act as cantilevers. The flexing members become the column and the arms. The
 gauge placement is unaffected — the column flexes either way.
 
+**Latch** [given: in both positions of the bass]: a spring tongue in the top wall each
+side (3 × 1 mm, from its root in the bridge at y = −15.5 to its tip at −4.2, in a
+0.5 mm slot, bending into a relief in its own wall), its tooth (1 × 1.3 mm, 0.6 mm into
+the plate's thickness) at x = 4.2 … 5.2 in the inner slot between web and column, its
+retaining face at y = −6.28, just ahead of the slot's closed end (−6.33 … −6.47 across
+the tooth). Sliding on, a ramp lifts it over the bottom block; at the end it drops into
+the slot. It touches only the W (1.0 mm clear of the column), so the measured path is
+unchanged. Variants (`latch`): `"lock"`, square face and a lug 1 mm above the top face
+to lift it (the bass's playing mount); `"detent"`, 45° face, no lug (the stored
+position's socket, `../build/strain_gauge/inner_holder_detent.stl`); `"none"`.
+Checked: seated, clear of the plate; 0.3 mm towards pull-off, the teeth meet the plate.
+[estimate: bending strain 0.7 %, PETG advised]
+
 ## 6. Outer holder — `outer_holder.scad`
 
-Takes the two fixed arms. One piece. **38.4 × 26.2 × 10.8 mm**, 4190.0 mm³.
+Takes the two fixed arms. One piece. **38.4 × 27.3 × 10.8 mm**, 0.5 of the length
+inside the pad. **Printed as part of the discant's housing** [given]: its +y end
+grows out of the gauge pad on the back face (`discant/gauge_link.scad`), so
+nothing fixes it there, and it cannot slide on. The plate slides in instead.
 
 | Decision | Value | Why |
 |---|---|---|
-| Slides on from −y | same side as the inner holder | [given] |
+| Plate slides in from −y, +y edge first | same side as the inner holder; the jaws are open channels | follows from being part of the housing [given] |
 | Material above, below, outboard | 4 mm | [given] |
 | Jaw inner face | x = 12 | flush with the arm, 0.5 mm clear of the inner holder |
 | Two yokes | over and under the plate, y = 5.5…12.5, z = ±2.4…±5.4 | [given]; a pair rather than one ties the jaws symmetrically. Depth follows from keeping 1 mm back from the inner holder |
 | Lead gap between yokes | 4.8 mm, 1.15 mm clear of each plate face | the leads pass through here |
-| Stop wall at −y | 1 mm | [given]; only takes the push of assembly, not the measured load |
+| Stop | the plate's +y edge on the pad, on strips either side of each jaw | replaces the earlier stop wall at −y |
+| Retention | a dowel pin ⌀1.5 × 10 (ISO 2338) across each jaw, 0.05 mm beyond the arm's tip | [chosen]; keeps the plate from pulling out |
 | Plate fits | as the inner holder | same process |
 
 The yokes sit **across** the plate rather than beyond it, so nothing projects
@@ -124,12 +141,14 @@ up the cross-tie.
 
 ## 7. Assembly
 
-1. **Outer holder first.** Its yokes pass over and under the bare plate, but
-   cannot pass the inner holder, which stands 8.8 mm tall where the gap is 4.8.
+1. **Plate first**, into the outer holder from −y, leads ahead of it, until its
+   +y edge lands on the pad. It passes between the yokes, which the inner holder,
+   8.8 mm tall where the gap is 4.8, cannot do.
 2. **Inner holder second**, onto the W from −y.
-3. Leads leave in +y: along the recesses, out of the inner holder's mouth, across the
-   plate, through the gap between the yokes, standing **2 mm proud** of the
-   outer holder's +y face. Two per gauge, ⌀0.7, which clears the recess ceiling and
+3. **Dowel pins**, one across each jaw.
+4. Leads leave in +y: along the recesses, out of the inner holder's mouth, across the
+   plate, through the gap between the yokes, into the groove in the pad, which takes
+   them to the link board (`discant/gauge_link.scad`). Two per gauge, ⌀0.7, which clears the recess ceiling and
    the yokes by about 0.45 mm. [chosen]
 
 This order is forced by the geometry, not a preference.
@@ -160,7 +179,6 @@ deviation below 0.001 mm, both meshes watertight.
 
 ## 10. Still open
 
-- Mounting features on the outer holder — no holes or threads yet.
 - Force introduction on the inner holder — nothing to attach a loading rod to.
 - Gauge polarity, by test.
 - Material choice and an FEA or strain survey to replace the beam estimate.
