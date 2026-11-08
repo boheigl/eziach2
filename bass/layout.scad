@@ -51,6 +51,17 @@ plate_x  = [(deck_x[0] + deck_x[1]) / 2 - plate_w / 2, (deck_x[0] + deck_x[1]) /
 box_w    = 265;
 box_x    = [(deck_x[0] + deck_x[1]) / 2 - box_w / 2, (deck_x[0] + deck_x[1]) / 2 + box_w / 2];
 bottom_x = box_x;
+// its sides run parallel to the stored discant's ends [given]: each row of the discant is
+// a key shorter and steps in 10 at both ends, 16.28 apart along its slope; stored
+// (link.scad) the rows' end caps sit at z -94.2 (row 0) and up by 16.28 each, at x
+// -121.75 + 10 k and 118.25 - 10 k. So the box is straight (box_x) up to box_slant_z and
+// above that slants in, tangent 5 mm off those caps (12.5 round their centres), up to
+// the deck, which stands out over it at the top.
+box_slant   = 10 / sqrt(16 * 16 + 3 * 3);
+box_slant_z = -94.2 + (12.5 / cos(atan(box_slant)) - 12.5) / box_slant;
+function box_x_at(z) = let(c = (deck_x[0] + deck_x[1]) / 2,
+                           h = min(box_w / 2, box_w / 2 + (12.5 / cos(atan(box_slant)) - 12.5) - box_slant * (z + 94.2)))
+    [c - h, c + h];
 // longer than the hand plate at the bottom: room for the stored discant's travel onto its
 // short socket under the deck (link.scad): 3 [given: +3 mm], and 2.3 more for the
 // socket's latch [given: latch in both positions]

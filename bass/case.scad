@@ -4,7 +4,8 @@
 // SHAPE. On top the key deck, its full depth (y -12.5 .. 30.7). Below it the box is
 // thin [given]: box_depth (11.2) from the hand's face to its back wall, so that under the
 // deck, behind the box, a step opens where the gauges sit [given: integrated]. Its sides
-// are straight and 265 apart (box_x) [given: replaces the earlier taper, so that the box
+// are 265 apart (box_x) at the bottom and slant in above, parallel to the stored discant's
+// ends [given] (layout.scad: box_x_at()) [given: replaces the earlier taper, so that the box
 // covers the stored discant's keys], 3 longer at the bottom than the hand plate. The front wall (3 mm) carries the hand: the
 // example's hand plate, half as wide and 25 % lower (131.5 x 128.3) [given], is a 1 mm
 // recess in it with rounded corners. The vertical edges are rounded; the cover
@@ -73,19 +74,25 @@ module cavity2d(xr) intersection() {
     box2d(xr, back_t);
     translate([xr[0] + wall, plate_y[1]]) square([xr[1] - xr[0] - 2 * wall, 100]);
 }
+// the box: straight to box_slant_z, then slanting in (layout.scad: box_x_at())
+module slanted(z0, z1) hull() {
+    translate([0, 0, z0]) linear_extrude(0.01) children(0);
+    translate([0, 0, box_slant_z]) linear_extrude(0.01) children(0);
+    translate([0, 0, z1 - 0.01]) linear_extrude(0.01) children(1);
+}
 module tapered(z0, z1) hull() {
     translate([0, 0, z0]) linear_extrude(0.01) children(1);
     translate([0, 0, z1 - 0.01]) linear_extrude(0.01) children(0);
 }
 // the outline: the thin box below the deck, as wide as box_x; the deck above, full depth
 module outer3d() {
-    tapered(z_bot - 1, z_floor + 0.01) { box2d(box_x); box2d(bottom_x); }
+    slanted(z_bot - 1, z_floor + 0.01) { box2d(box_x); box2d(box_x_at(z_floor + 0.01)); }
     translate([0, 0, z_floor]) linear_extrude(60) rounded(deck_x, [plate_y[0], deck_y[1]]);
 }
 // the box is wider than the deck: beside the deck its top is a wall, under the deck
 // the cavity reaches up to the deck's underside
 module cavity3d() intersection() {
-    tapered(z_bot - 1, z_floor) { cavity2d(box_x); cavity2d(bottom_x); }
+    slanted(z_bot - 1, z_floor) { cavity2d(box_x); cavity2d(box_x_at(z_floor)); }
     union() {
         translate([-500, -500, z_bot - 2]) cube([1000, 1000, z_floor - wall - z_bot + 2]);
         translate([deck_x[0] + wall, -500, z_bot - 2]) cube([deck_x[1] - deck_x[0] - 2 * wall, 1000, 200]);
@@ -133,12 +140,16 @@ module body() {
             zt = z_floor + tunnel_floor;
             // the connector's pocket, down to the tunnel's floor
             translate([board_dx[k], rows_y[k], zt]) linear_extrude(board_z[k] - zt) con2d(fit);
-            // the tunnel: from under the connector forward, then down into the box
-            // centred under the connector, but kept 2 mm inside the deck's side walls
+            // the tunnel: from under the connector forward to the front wall, along it
+            // inwards to where the box is below (its sides slant in towards the deck),
+            // then down into the box; the FFC folds at each turn
             cy = rows_y[k] + con_c[1];
-            cx = max(board_dx[k] + con_c[0], deck_x[0] + wall + 2 + tunnel[0] / 2 + (deck_x[0] - bottom_x[0]) * -0.05);
-            translate([cx - tunnel[0] / 2, plate_y[1] + 1, zt]) cube([tunnel[0], cy + 12 - plate_y[1] - 1, tunnel[1]]);
-            translate([cx - tunnel[0] / 2, plate_y[1] + 1, z_floor - 1]) cube([tunnel[0], box_back - back_t - plate_y[1] - 1.5, tunnel_floor + tunnel[1] + 1]);
+            cx = max(board_dx[k] + con_c[0], deck_x[0] + wall + 2 + tunnel[0] / 2);
+            cx2 = box_x_at(z_floor)[0] + wall + 1 + tunnel[0] / 2;
+            ty = [plate_y[1] + 0.3, -5.3];          // along the front wall: clear of the front keys' guides (y -4.7)
+            translate([cx - tunnel[0] / 2, ty[0], zt]) cube([tunnel[0], cy + 12 - ty[0], tunnel[1]]);
+            translate([cx - tunnel[0] / 2, ty[0], zt]) cube([cx2 - cx + tunnel[0], ty[1] - ty[0], tunnel[1]]);
+            translate([cx2 - tunnel[0] / 2, ty[0], z_floor - 1]) cube([tunnel[0], ty[1] - ty[0], tunnel_floor + tunnel[1] + 1]);
             translate(at_board(k)) for (x = screws) translate([x, 0, -pcb_t / 2 - cu_t - gap - pilot_l]) cylinder(d = pilot_d, h = pilot_l + 1);
         }
         // the stored discant's gauge ends: their pocket in the deck's underside (link.scad)

@@ -26,7 +26,7 @@ here the gauge plates are the plug and the bass has two sockets:
   instead of 37.6. Its plates lie in the same slope plane [given: gauges in the slope's
   plane], so they point straight up the bass's z: the discant slides straight up until
   they sit 6 mm deep in a short socket in a pocket in the deck's underside [given: short
-  socket]. The box, 265 wide and straight [given: widen it], covers all 46 keys; the
+  socket]. The box, 265 wide at the bottom [given: widen it] and slanting in above, parallel to the discant's stepped ends [given], covers all 46 keys, 5 mm beyond the caps; the
   deck lies over the discant's back, the playing mount under its front edge.
 
 With the gauges in the slope plane, the playing position too has the discant's slope

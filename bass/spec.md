@@ -36,10 +36,11 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   On top the key deck, its full depth (y −12.5 … 27.8). Below it the box is **11.2 mm thin**
   [given: thinner; then 4.8 thinner still, so that the stored discant comes closer]
   (y −12.5 … −1.3): front wall 3, back wall 1.6, a 6 mm battery between, so that under the deck, behind the box, a step opens
-  where the gauges sit [given: integrated]. Its sides are straight and
-  **265 mm** apart, wider than the deck [given: widened so that the box covers the stored
-  discant's keys; replaces the earlier taper towards the −z end]; beside the deck its top
-  is a 2 mm wall. It reaches 5.3 mm below the hand plate (z −128.5) [given: room for the
+  where the gauges sit [given: integrated]. At the bottom its sides are
+  **265 mm** apart [given: widened so that the box covers the stored discant's keys;
+  replaces the earlier taper towards the −z end]; from z −90.7 up they slant in, parallel
+  to the stored discant's stepped ends [given], 10 in x per 16.28 (31.6°), 5 mm off the
+  rows' end caps, to 172.1 mm under the deck, which stands out over them. It reaches 5.3 mm below the hand plate (z −128.5) [given: room for the
   stored discant's travel, then for the socket's latch]. Vertical edges rounded (r 4); the cover follows them. The
   front wall is 3 mm thick; the hand plate is a 1 mm recess in it with rounded corners
   (r 6); the front caps keep 2 mm from its inner face [given: ≥ 2 mm].
@@ -52,7 +53,8 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   z = −15.1), M2 pilots for the cover's screws; the back block begins at y = 11, behind the
   cover's wall up the step. Both boards' FFC connectors stand partly over the step: their
   pockets have a 1.5 mm floor, and a tunnel inside the deck (18 × 3.5 mm) leads each cable
-  forward and down into the box.
+  forward, along the front wall inwards to x −75.8 (above the slanted side the box is
+  narrower than the deck) and down into the box; the FFC folds at each turn.
 - **Stored discant** (../assembly/spec.md): a pocket in the deck's underside takes the
   stored discant's gauge ends (x −46.4 … 42.9, y 13.1 … 24.7, up to z −6.4), with a
   short socket (the inner holder's last 8.3 mm and its bridge, with the latch as a
