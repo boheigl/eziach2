@@ -22,11 +22,11 @@ parts:
 	@$(MAKE) --no-print-directory -C ../discant
 	@$(MAKE) --no-print-directory -C ../bass
 
-PHONE_PARTS := B_CASE=$(BB)/case.stl B_LID=$(BB)/back_cover.stl B_BAT=$(BB)/battery.stl B_COVER=$(BB)/cover.stl B_LAM=$(BB)/laminate.stl B_CU=$(BB)/copper.stl B_CONN=$(BB)/connectors.stl B_ELEC=$(BB)/elec.stl \
+PHONE_PARTS := B_CASE=$(BB)/case.stl B_LID=$(BB)/back_cover.stl B_BAT=$(BB)/battery.stl B_COVER=$(BB)/cover.stl B_LAM=$(BB)/laminate.stl B_CU=$(BB)/copper.stl B_CONN=$(BB)/connectors.stl B_ELEC=$(BB)/elec.stl B_WIRES=$(BB)/wires.stl \
                D_HOUSING=$(B)/d_housing.stl D_COVER=$(B)/d_cover.stl D_BOARDS=$(B)/d_boards.stl D_CU=$(B)/d_copper.stl \
                D_CONN=$(B)/d_conn.stl D_MAIN=$(B)/d_main.stl D_MAIN_CU=$(B)/d_main_cu.stl D_CABLES=$(B)/d_cables.stl \
                KEYS_B=$(B)/keys_bass.stl KEYS_D=$(B)/keys_discant.stl
-BASS_STL := $(addprefix $(BB)/,case.stl back_cover.stl battery.stl cover.stl laminate.stl copper.stl connectors.stl elec.stl)
+BASS_STL := $(addprefix $(BB)/,case.stl back_cover.stl battery.stl cover.stl laminate.stl copper.stl connectors.stl elec.stl wires.stl)
 $(BASS_STL): parts ;
 $(B)/phone.html: phone.html ../discant/embed_parts.py $(PIECES) $(BASS_STL)
 	@echo "  EMBED    $@"

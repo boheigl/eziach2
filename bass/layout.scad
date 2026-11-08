@@ -56,12 +56,17 @@ bottom_x = box_x;
 // (link.scad) the rows' end caps sit at z -94.2 (row 0) and up by 16.28 each, at x
 // -121.75 + 10 k and 118.25 - 10 k. So the box is straight (box_x) up to box_slant_z and
 // above that slants in, tangent 5 mm off those caps (12.5 round their centres), up to
-// the deck, which stands out over it at the top.
+// the deck. Above z -46.9 they stand straight again, flush with the deck's ends (211):
+// there the bass boards' FFCs drop from the deck into the box (case.scad), which a box
+// narrower than the deck could not take (15 mm wide cables) [given: parallel edges; the
+// straight top keeps the FFCs' way].
 box_slant   = 10 / sqrt(16 * 16 + 3 * 3);
 box_slant_z = -94.2 + (12.5 / cos(atan(box_slant)) - 12.5) / box_slant;
 function box_x_at(z) = let(c = (deck_x[0] + deck_x[1]) / 2,
-                           h = min(box_w / 2, box_w / 2 + (12.5 / cos(atan(box_slant)) - 12.5) - box_slant * (z + 94.2)))
+                           h = max((deck_x[1] - deck_x[0]) / 2,
+                                   min(box_w / 2, box_w / 2 + (12.5 / cos(atan(box_slant)) - 12.5) - box_slant * (z + 94.2))))
     [c - h, c + h];
+box_top_z = -94.2 + (box_w / 2 + (12.5 / cos(atan(box_slant)) - 12.5) - (deck_x[1] - deck_x[0]) / 2) / box_slant;
 // longer than the hand plate at the bottom: room for the stored discant's travel onto its
 // short socket under the deck (link.scad): 3 [given: +3 mm], and 2.3 more for the
 // socket's latch [given: latch in both positions]

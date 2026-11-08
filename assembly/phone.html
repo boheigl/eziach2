@@ -138,7 +138,7 @@
     ['battery', function () { parts.pcb.add(mesh('B_BAT', 0x3d4a57)); }],
     ['covers', function () { parts.cover = mesh('B_COVER', 0x5b6f86); parts.cover.add(mesh('D_COVER', 0x5b6f86)); scene.add(parts.cover); }],
     ['keys', function () { parts.cable = mesh('KEYS_B', 0x4a6fa5); parts.cable.add(mesh('KEYS_D', 0x4a6fa5)); scene.add(parts.cable); }],
-    ['cables and gauges', function () { buttonGrp.add(mesh('D_CABLES', 0xd8c08a)); }]
+    ['cables and gauges', function () { buttonGrp.add(mesh('D_CABLES', 0xd8c08a), mesh('B_WIRES', 0xd8c08a)); }]
   ];
   scene.add(buttonGrp);
   parts.pcb = new THREE.Group(); scene.add(parts.pcb);   // the four boards and their connectors

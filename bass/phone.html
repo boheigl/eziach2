@@ -132,7 +132,7 @@
   var LOAD = [
     ['boards', function () { parts.pcb.add(mesh('BOARDS_TRIS', 0x2f7a4f), copper('COPPER_TRIS')); }],
     ['connectors', function () { parts.pcb.add(mesh('CONN_TRIS', 0x2b2f33)); }],
-    ['electronics', function () { parts.pcb.add(mesh('ELEC_TRIS', 0x2f7a4f)); }],
+    ['electronics', function () { parts.pcb.add(mesh('ELEC_TRIS', 0x2f7a4f), mesh('WIRES_TRIS', 0xd8c08a)); }],
     ['case', function () { parts.housing = mesh('CASE_TRIS', 0xd9a441); parts.housing.add(mesh('LID_TRIS', 0xc99430)); scene.add(parts.housing); }],
     ['battery', function () { parts.pcb.add(mesh('BATTERY_TRIS', 0x3d4a57)); }],
     ['cover', function () { parts.cover = mesh('COVER_TRIS', 0x5b6f86); scene.add(parts.cover); }],

@@ -63,6 +63,7 @@ con_w    = 21.0; con_d = 4.5; con_h = 5.5;
 con_rot  = atan2(16, 10);
 tunnel   = [18, 3.5];            // the FFC's tunnel: width, height (inside the deck)
 tunnel_floor = 1.5;
+tun_x    = -94.3;                // the tunnel's middle: 0.6 clear of the deck's end wall and of the front keys' guides
 
 wall     = 2;                    // sides and back
 corner_r = 4;
@@ -95,6 +96,7 @@ module cavity2d(xr) intersection() {
 module slanted(z0, z1) hull() {
     translate([0, 0, z0]) linear_extrude(0.01) children(0);
     translate([0, 0, box_slant_z]) linear_extrude(0.01) children(0);
+    translate([0, 0, box_top_z]) linear_extrude(0.01) children(1);
     translate([0, 0, z1 - 0.01]) linear_extrude(0.01) children(1);
 }
 module tapered(z0, z1) hull() {
@@ -148,7 +150,7 @@ module ribs() intersection() {
         translate([-58, rib_y[0] - 1, z_bot]) cube([5, 20, 120]);
         // the boards and the key board's FFCs
         translate([96, rib_y[0] - 1, -117]) cube([40, 20, 25]);
-        translate([-88, rib_y[0] - 1, -46]) cube([32, 20, 40]);
+        translate([-107, rib_y[0] - 1, -47]) cube([51, 20, 41]);
     }
     cavity3d();
 }
@@ -163,8 +165,12 @@ module pillars() for (p = cov_screws) difference() {
 // the side walls' ends, ribs and pillars, so the hand's push never loads it.
 module cover_slab() translate([-300, box_back - back_t, z_split]) cube([600, back_t + 0.001, z_floor - z_split]);
 cov_tongues = [[-85, -60], [55, 85]];
-module cover_tongues() for (x = cov_tongues)
-    translate([x[0], box_back - back_t - 1.2 - 0.05, z_split - 4]) cube([x[1] - x[0], 1.2, 4 + 0.01]);
+// each tongue: behind the strip's inner face below z_split (0.05 clear of it), joined to
+// the cover above it
+module cover_tongues() for (x = cov_tongues) {
+    translate([x[0], box_back - back_t - 1.25, z_split - 4]) cube([x[1] - x[0], 1.2, 6]);
+    translate([x[0], box_back - back_t - 1.25, z_split + 0.05]) cube([x[1] - x[0], 1.25 + 0.5, 1.95]);
+}
 
 // the board's connector, turned (board frame), grown by g
 module con2d(g) translate(con_c) rotate(con_rot) translate([-con_d / 2 - g, -con_w / 2 - g]) square([con_d + 2 * g, con_w + 2 * g]);
@@ -191,16 +197,12 @@ module body() {
             zt = z_floor + tunnel_floor;
             // the connector's pocket, down to the tunnel's floor
             translate([board_dx[k], rows_y[k], zt]) linear_extrude(board_z[k] - zt) con2d(fit);
-            // the tunnel: from under the connector forward to the front wall, along it
-            // inwards to where the box is below (its sides slant in towards the deck),
-            // then down into the box; the FFC folds at each turn
+            // the tunnel: from under the connector forward, then down into the box. One
+            // tunnel for both FFCs (15 wide, stacked), left of the front keys' guides
+            // (x -84.7): from under board 1's connector it leads to it
             cy = rows_y[k] + con_c[1];
-            cx = max(board_dx[k] + con_c[0], deck_x[0] + wall + 2 + tunnel[0] / 2);
-            cx2 = box_x_at(z_floor)[0] + wall + 1 + tunnel[0] / 2;
-            ty = [plate_y[1] + 0.3, -5.3];          // along the front wall: clear of the front keys' guides (y -4.7)
-            translate([cx - tunnel[0] / 2, ty[0], zt]) cube([tunnel[0], cy + 12 - ty[0], tunnel[1]]);
-            translate([cx - tunnel[0] / 2, ty[0], zt]) cube([cx2 - cx + tunnel[0], ty[1] - ty[0], tunnel[1]]);
-            translate([cx2 - tunnel[0] / 2, ty[0], z_floor - 1]) cube([tunnel[0], ty[1] - ty[0], tunnel_floor + tunnel[1] + 1]);
+            translate([tun_x - tunnel[0] / 2, plate_y[1] + 1, zt]) cube([tunnel[0], cy + 6 - plate_y[1] - 1, tunnel[1]]);
+            translate([tun_x - tunnel[0] / 2, plate_y[1] + 1, z_floor - 1]) cube([tunnel[0], box_back - back_t - plate_y[1] - 1.5, tunnel_floor + tunnel[1] + 1]);
             translate(at_board(k)) for (x = screws) translate([x, 0, -pcb_t / 2 - cu_t - gap - pilot_l]) cylinder(d = pilot_d, h = pilot_l + 1);
         }
         // the stored discant's gauge ends: their pocket in the deck's underside (link.scad)
@@ -209,6 +211,7 @@ module body() {
         // and the boards' pilots (elec.scad)
         mount_cuts();
         elec_cuts();
+        ffc_channels();
         // the hand plate: a shallow recess with rounded corners
         translate([0, plate_y[0] - 1, 0]) rotate([-90, 0, 0]) linear_extrude(recess + 1)
             offset(r = recess_r) offset(delta = -recess_r)

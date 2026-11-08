@@ -362,7 +362,8 @@ USB is for data and powers the discant alone through the ORing.
   outer holders (10.4 × 10 mm, to y = 83.2 in the gauge frame) carries a 0.8 mm board
   with nine gold pads, 3 × 3 at 2.54, facing the bass's spring pins: VBAT × 2, GND × 3,
   SDA, SCL, INT, DET (tied to GND on the board: switches the bass's battery on). A ⌀2.2
-  bore down the boss leads the wires into the pad's groove and on to the link board.
+  bore down the boss leads the wires (VBAT, GND, SDA, SCL, INT: a 1.3 mm bundle) into the
+  pad's groove and through its notch, 2 mm below the lid, to the link board's +x end.
   The latches in the inner holders carry the load, not the contacts.
   `../assembly/spec.md`, Contacts.
 - **Open:** overload stop.

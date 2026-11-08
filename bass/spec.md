@@ -41,7 +41,10 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   **265 mm** apart [given: widened so that the box covers the stored discant's keys;
   replaces the earlier taper towards the −z end]; from z −90.7 up they slant in, parallel
   to the stored discant's stepped ends [given], 10 in x per 16.28 (31.6°), 5 mm off the
-  rows' end caps, to 172.1 mm under the deck, which stands out over them. It reaches 5.3 mm below the hand plate (z −128.5) [given: room for the
+  rows' end caps; from z −46.9 up they stand straight, flush with the deck (211 mm), so
+  that the bass boards' 15 mm FFCs can drop from the deck into the box. (A box narrowing
+  to 172 mm under the deck, tried first, left the FFCs no way: the jog along the front
+  wall it needed was 3.9 × 3.5 mm.) It reaches 5.3 mm below the hand plate (z −128.5) [given: room for the
   stored discant's travel, then for the socket's latch]. Vertical edges rounded (r 4); the cover follows them. The
   front wall is 3 mm thick; the hand plate is a 1 mm recess in it with rounded corners
   (r 6); the front caps keep 2 mm from its inner face [given: ≥ 2 mm].
@@ -61,9 +64,10 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   underside, a guide for every key (⌀9.4, ⌀8.6 spring pocket, floor 1.5 under it,
   z = −15.1), M2 pilots for the cover's screws; the back block begins at y = 11, behind the
   cover's wall up the step. Both boards' FFC connectors stand partly over the step: their
-  pockets have a 1.5 mm floor, and a tunnel inside the deck (18 × 3.5 mm) leads each cable
-  forward, along the front wall inwards to x −75.8 (above the slanted side the box is
-  narrower than the deck) and down into the box; the FFC folds at each turn.
+  pockets have a 1.5 mm floor, and one tunnel inside the deck (18 × 3.5 mm, x −103.3 … −85.3, left
+  of the front keys' guides) leads both cables, stacked, forward and straight down into
+  the box. (The first bass's board-1 tunnel cut into the side of a front key's spring
+  pocket at x −80; that is gone.)
 - **Stored discant** (../assembly/spec.md): a pocket in the deck's underside takes the
   stored discant's gauge ends (x −46.4 … 42.9, y 13.1 … 24.7, up to z −6.4), with a
   short socket (the inner holder's last 8.3 mm and its bridge, with the latch as a
@@ -88,9 +92,21 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   protection and fuse, the P-FET switched by DET, a 3.3 V LDO) and a key board at the top
   on the −x side, where the FFCs come down (their two connectors, a 24-input I2C port
   expander: one input per key, no matrix, no diodes). Both lie on the front wall's
-  inside on two pads with M2 pilots, outside the hand plate's recess. Wires [not
-  modelled]: pins → mount's cavity → back wall bore → below the battery's shelf → power
-  board → beside the battery up to the key board. `../assembly/spec.md`, Contacts.
+  inside on two pads with M2 pilots, outside the hand plate's recess. The key board
+  (x −104.5 … −76.5) sits under the FFCs' drop and carries its own 3.3 V LDO.
+- **Wires** (`elec.scad`: `wires()`, `wires.stl`): the nine pins' wires leave the mount's
+  cavity through the back wall's ⌀2.6 bore as one bundle and part inside the box along
+  the bottom, under the battery's shelf, through notches in the ribs: right to the power
+  board VBAT × 2, GND × 2, DET; left and up beside the battery (x −55.5) to the key board
+  SDA, SCL, INT, GND and a second wire on a VBAT pin (the switched battery). No bundle
+  crosses another. The FFCs, 15 × 0.3 mm, each one piece from connector to connector:
+  down out of the board's connector (turned 58° in plan), twisted and folded flat into
+  the tunnel, forward, down the drop and into the key board's connectors, 1 mm into each.
+  Board 1's runs in the tunnel's lower layer, under the place where board 0's comes
+  down, and down the drop behind it, so they never cross. Their way is cut from the deck
+  with 0.75 mm round them; the wall between tunnel and the front key's guide at x −80 is
+  0.6 mm. [unverified: the twist and folds, about 15–20 mm long each]
+  `../assembly/spec.md`, Contacts.
 - **Size:** 211.1 × 40.3 mm at the deck; below it 11.2 mm deep and 265 mm wide, 149.5 mm
   high in all; the gauges' mount and holders stand in the step (y −1.3 … 25.9).
 - **Cover: one piece** [given]: a slab on each board, the board in a pocket underneath

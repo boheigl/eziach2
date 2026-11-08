@@ -167,7 +167,14 @@ module gauge_contact_boss() gauge_tilt_frame() difference() {
     translate([0, back_y + pad_t - 1, gz]) rotate([-90, 0, 0]) cylinder(d = contact_bore, h = contact_y - back_y);
 }
 
-module gauge_link() { gauge(); link_board(); lid(); bundle(); contact_board(); }
+// the contacts' wires (VBAT, GND, SDA, SCL, INT; DET stays on the board): down the boss's
+// bore, along the pad's groove and through its notch to the link board's +x end
+module contact_wires() gauge_tilt_frame() {
+    p = [[0, contact_y - contact_t - 0.2, gz], [0, 60.55, gz], [-50.6, 60.55, gz], [-50.6, 56.9, gz], [-51.95, 56.9, gz]];
+    for (i = [0 : len(p) - 2]) hull() { translate(p[i]) sphere(d = 1.3, $fn = 12); translate(p[i + 1]) sphere(d = 1.3, $fn = 12); }
+}
+
+module gauge_link() { gauge(); link_board(); lid(); bundle(); contact_board(); contact_wires(); }
 
 // added to the housing: the gauge pad, a wedge from the back face to its tilted face
 module gauge_housing_pads() hull() {
@@ -201,8 +208,9 @@ module gauge_housing_cuts() {
                   [-gauge_dx + strip_out, gauge_dx - strip_out], [gauge_dx - strip_in, gauge_dx + strip_in]])
             box([o[0], o[1]], [g_y, back_y + pad_t + 1.2], [gz - groove_h, gz + groove_h]);
     }
-    // the notch from the groove into the pocket, past the lid's +x edge
-    box([pk_x[1] - 0.1, pad_x[0] + 0.1], [lid_y - 1, g_y], [gz - groove_h - 0.9, gz + groove_h + 0.9]);
+    // the notch from the groove into the pocket, past the lid's +x edge; 2 below the lid,
+    // so the contacts' wires (1.3 bundle) pass from it into the pocket under the lid
+    box([pk_x[1] - 0.1, pad_x[0] + 0.1], [lid_y - 2, g_y], [gz - groove_h - 0.9, gz + groove_h + 0.9]);
     translate([bore_x[0], bore_y, bore_z]) rotate([0, 90, 0]) cylinder(d = bore_d, h = bore_x[1] - bore_x[0]);
     // the contacts' wires: from the boss's bore through the pad into the groove
     gauge_tilt_frame() translate([0, g_y - groove_d, gz]) rotate([-90, 0, 0]) cylinder(d = contact_bore, h = pad_t + 2);
