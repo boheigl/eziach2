@@ -1,5 +1,6 @@
-// Bass case: a closed box, one print, open only at the bottom, which a lid closes
-// (lid.scad) [given: nicer and closed].
+// Bass case: a closed box, one print, open only at the back, which a back cover closes
+// (part = "back_cover") [given: nicer and closed; the cover inside, on the side away from
+// the hand, so the hand plate stays one piece, and stiffness first].
 //
 // SHAPE. On top the key deck, its full depth (y -12.5 .. 30.7). Below it the box is
 // thin [given]: box_depth (11.2) from the hand's face to its back wall, so that under the
@@ -11,9 +12,14 @@
 // recess in it with rounded corners. The vertical edges are rounded; the cover
 // (cover.scad) follows them.
 //
-// STIFFNESS [given: the hand plate must not bend]: the closed box section itself, front
-// wall 3, back wall 1.6, 11.2 deep: estimate 0.05 mm at 50 N at the plate's middle (the
-// 16 mm box's 0.02, scaled by the walls' second moment, 2.65 x; PLA, E 3500 MPa assumed).
+// STIFFNESS [given: the hand plate must not bend; very important]: the hand bends the
+// front wall locally, between its edges, since the cavity is empty; the box section does
+// not help there (an earlier estimate of 0.05 mm missed that: a plain 3 mm wall between
+// clamped edges gives about 0.5 mm at 50 N mid-plate). So the front wall carries ribs
+// inside (ribs()), across the cavity, round battery and boards: the largest field left is
+// over the battery, 91 x 62 between ribs, about 0.15 mm at 50 N there [estimate: clamped
+// plate, PLA, E 3500 MPa, point load; a palm spreads it]. Three pillars join front wall and
+// back cover at the cover's screws.
 //
 // DECK. The housing of the keys, the discant's for two rows, the back one 10 higher:
 // each board rests on it 0.1 above its underside, every key has a guide (d9.4 for the
@@ -24,19 +30,26 @@
 //
 // BATTERY [given]. A 1S Li-ion pouch (606090: 6 x 60 x 90, about 4 Ah [unverified]; 6 mm
 // thick [given: box 4.8 thinner], it was a 9 mm 906090)
-// stands against the back wall: a shelf under it, stops at its ends, a lip over its top.
+// stands on a shelf, stops at its ends, a lip over its top, all on the front wall; the
+// back cover keeps it in.
 //
 // GAUGES. On the back wall's outside at the bottom, in the step, the mount with both
 // inner holders (link.scad) [given]. Under the deck the short socket the discant's plates
 // go into when it is stored (link.scad), in a pocket in the deck's underside.
 //
-// WIDTH [given: discant keys covered when stored]: the box below the deck is 265 wide,
-// straight, wider than the deck (211): beside the deck its top is a 2 mm wall.
+// WIDTH [given: discant keys covered when stored]: the box below the deck is 265 wide at
+// the bottom, its sides slanting in above (layout.scad).
+//
+// ASSEMBLY: back cover off (three screws, then lift it out of the tongues' slot): the
+// battery, both boards (screwed from the back into the front wall's pilots; the power
+// board goes in 2 mm to the left and slides right into the port), the FFCs from the deck
+// and the contacts' wires are all in reach. The bottom is closed.
 //
 // make builds   openscad -o ../build/bass/case.stl case.scad
 
 include <layout.scad>
 use <link.scad>
+use <elec.scad>
 
 guide_d  = 9.4;
 spring_d = 8.6;
@@ -55,8 +68,12 @@ wall     = 2;                    // sides and back
 corner_r = 4;
 recess   = 1;
 recess_r = 6;
-lid_t    = 2;
-boss_d   = 7;  boss_h = 10;
+floor_b  = 2;                    // the box's bottom, closed [given: access by the back cover]
+rib_t    = 1.6;                  // the front wall's ribs
+rib_gap  = 0.2;                  //   short of the back cover
+z_split  = z_bot + 12.5;         // the back cover from here up; below, the mount's strip stays
+cov_screws = [[-45, -21], [0, -21], [45, -21]];   // the back cover's screws: above the stored caps (z < -38)
+pillar_d = 6;
 bat       = [90, 6, 60];         // the battery: x, y, z
 bat_gap   = 0.3;
 cradle_t  = 2;
@@ -92,7 +109,7 @@ module outer3d() {
 // the box is wider than the deck: beside the deck its top is a wall, under the deck
 // the cavity reaches up to the deck's underside
 module cavity3d() intersection() {
-    slanted(z_bot - 1, z_floor) { cavity2d(box_x); cavity2d(box_x_at(z_floor)); }
+    slanted(z_bot + floor_b, z_floor) { cavity2d(box_x); cavity2d(box_x_at(z_floor)); }
     union() {
         translate([-500, -500, z_bot - 2]) cube([1000, 1000, z_floor - wall - z_bot + 2]);
         translate([deck_x[0] + wall, -500, z_bot - 2]) cube([deck_x[1] - deck_x[0] - 2 * wall, 1000, 200]);
@@ -100,23 +117,55 @@ module cavity3d() intersection() {
 }
 
 bat_xy = [(plate_x[0] + plate_x[1]) / 2 - bat[0] / 2, box_back - back_t - bat_gap - bat[1]];
-bat_z  = z_bot + lid_t + 6;
+bat_z  = z_bot + floor_b + 6;
 module battery() translate([bat_xy[0], bat_xy[1], bat_z]) cube(bat);
 module cradle() {
     x0 = bat_xy[0] - bat_gap; x1 = bat_xy[0] + bat[0] + bat_gap;
-    y0 = plate_y[1] - 0.01; y1 = box_back - back_t + 0.01;
+    y0 = plate_y[1] - 0.01; y1 = box_back - back_t - rib_gap;   // short of the back cover
     translate([x0 - cradle_t, y0, bat_z - bat_gap - cradle_t]) cube([x1 - x0 + 2 * cradle_t, y1 - y0, cradle_t]);   // shelf
     for (x = [x0 - cradle_t, x1]) translate([x, y0, bat_z - bat_gap - cradle_t]) cube([cradle_t, y1 - y0, 20]);       // end stops
     translate([x0 + 10, y0, bat_z + bat[2] + bat_gap]) cube([x1 - x0 - 20, y1 - y0, cradle_t]);                       // lip over the top
 }
-// two bosses for the lid's screws, one at each end of the narrow bottom
-function boss_xy() = [[bottom_x[0] + wall + boss_d / 2 - 0.5, (plate_y[1] + box_back - back_t) / 2],
-                      [bottom_x[1] - wall - boss_d / 2 + 0.5, (plate_y[1] + box_back - back_t) / 2]];
-// as blocks from the front wall to the back wall: in the thin box they join both
-module bosses() for (p = boss_xy()) difference() {
-    translate([p[0] - boss_d / 2, plate_y[1] - 0.01, z_bot + lid_t]) cube([boss_d, box_back - back_t - plate_y[1] + 0.02, boss_h]);
-    translate([p[0], p[1], z_bot + lid_t - 1]) cylinder(d = pilot_d, h = boss_h - 2 + 1);
+// RIBS [given: stiffness very important]: on the front wall's inside, 1.6 thick, across
+// the cavity to 0.2 short of the back cover, round the battery and clear of the boards
+// and the wires' way (notches): they make the hand plate a ribbed plate.
+rib_y = [plate_y[1] - 0.01, box_back - back_t - rib_gap];
+module rib_x(x, z0, z1) translate([x - rib_t / 2, rib_y[0], z0]) cube([rib_t, rib_y[1] - rib_y[0], z1 - z0]);
+module rib_z(z, x0, x1) translate([x0, rib_y[0], z - rib_t / 2]) cube([x1 - x0, rib_y[1] - rib_y[0], rib_t]);
+bat_x = [bat_xy[0] - bat_gap - cradle_t, bat_xy[0] + bat[0] + bat_gap + cradle_t];   // the cradle's ends
+module ribs() intersection() {
+    difference() {
+        union() {
+            for (x = [-90, bat_x[0] - 1.7, bat_x[1] + 1.7, 90]) rib_x(x, z_bot, z_floor);
+            rib_z(bat_z + bat[2] + bat_gap + cradle_t + 1.7, -200, 200);     // over the battery
+            rib_z(-36, -56, 200);                                            // beside the key board
+            rib_z(-90, -200, bat_x[0]); rib_z(-110, -200, bat_x[0]);          // left of the battery
+            rib_z(-88, bat_x[1], 200);                                       // over the power board
+        }
+        // the wires: along the bottom (from the contacts' bore to the power board and
+        // left), and up left of the battery to the key board
+        translate([-200, rib_y[0] - 1, z_bot]) cube([400, 20, floor_b + 3]);
+        translate([-58, rib_y[0] - 1, z_bot]) cube([5, 20, 120]);
+        // the boards and the key board's FFCs
+        translate([96, rib_y[0] - 1, -117]) cube([40, 20, 25]);
+        translate([-88, rib_y[0] - 1, -46]) cube([32, 20, 40]);
+    }
+    cavity3d();
 }
+// pillars for the back cover's screws, from the front wall across the cavity
+module pillars() for (p = cov_screws) difference() {
+    translate([p[0], plate_y[1] - 0.01, p[1]]) rotate([-90, 0, 0]) cylinder(d = pillar_d, h = box_back - back_t - plate_y[1] + 0.01);
+    translate([p[0], box_back - back_t - 6, p[1]]) rotate([-90, 0, 0]) cylinder(d = pilot_d, h = 7);
+}
+// BACK COVER [given: inside, on the side away from the hand]: the back wall from z_split
+// up to the deck, with the side walls' last back_t, as one plate; its bottom edge hooks
+// in behind the mount's strip with two tongues, three screws hold its top; it rests on
+// the side walls' ends, ribs and pillars, so the hand's push never loads it.
+module cover_slab() translate([-300, box_back - back_t, z_split]) cube([600, back_t + 0.001, z_floor - z_split]);
+cov_tongues = [[-85, -60], [55, 85]];
+module cover_tongues() for (x = cov_tongues)
+    translate([x[0], box_back - back_t - 1.2 - 0.05, z_split - 4]) cube([x[1] - x[0], 1.2, 4 + 0.01]);
+
 // the board's connector, turned (board frame), grown by g
 module con2d(g) translate(con_c) rotate(con_rot) translate([-con_d / 2 - g, -con_w / 2 - g]) square([con_d + 2 * g, con_w + 2 * g]);
 
@@ -129,8 +178,10 @@ module body() {
             // the deck
             translate([deck_x[0], deck_y[0] - 0.01, z_floor]) cube([deck_x[1] - deck_x[0], step_y - deck_y[0] + 0.02, top_of(0) - z_floor]);
             translate([deck_x[0], step_y, z_floor]) cube([deck_x[1] - deck_x[0], deck_y[1] - step_y, top_of(1) - z_floor]);
-            bosses();
             cradle();
+            ribs();
+            pillars();
+            elec_pads();
         }
         for (k = [0, 1], i = [0 : n_row - 1]) translate([key_xy(k, i)[0], key_xy(k, i)[1], board_z[k]]) {
             translate([0, 0, seat_z + collar_h]) cylinder(d = guide_d, h = 40);
@@ -154,6 +205,10 @@ module body() {
         }
         // the stored discant's gauge ends: their pocket in the deck's underside (link.scad)
         store_pocket();
+        // the contacts' wires into the box (link.scad), the charging port and its light,
+        // and the boards' pilots (elec.scad)
+        mount_cuts();
+        elec_cuts();
         // the hand plate: a shallow recess with rounded corners
         translate([0, plate_y[0] - 1, 0]) rotate([-90, 0, 0]) linear_extrude(recess + 1)
             offset(r = recess_r) offset(delta = -recess_r)
@@ -163,10 +218,14 @@ module body() {
 
 echo(str("box below the deck: y ", plate_y[0], " .. ", box_back, ", x ", deck_x, " -> ", bottom_x, "; battery at ", bat_xy, ", z ", bat_z));
 
-part = "case";                   // "case" or "battery"
+part = "case";                   // "case", "back_cover" or "battery"
 if (part == "case") {
-    intersection() { body(); outer3d(); }
+    difference() { intersection() { body(); outer3d(); } cover_slab(); }
     mount();
     store_socket();
 }
 if (part == "battery") battery();
+if (part == "back_cover") difference() {
+    union() { intersection() { body(); outer3d(); cover_slab(); } cover_tongues(); }
+    for (p = cov_screws) translate([p[0], box_back - back_t - 1, p[1]]) rotate([-90, 0, 0]) cylinder(d = 2.2, h = back_t + 2);
+}

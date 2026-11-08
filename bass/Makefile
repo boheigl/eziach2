@@ -15,10 +15,10 @@ scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
 
 KEY_STL   := $(addprefix $(KEY)/,button.stl felt.stl washer.stl sleeve.stl screw.stl spring.stl pcb_connector.stl)
 
-all: $(B)/case.stl $(B)/cover.stl $(B)/lid.stl $(B)/battery.stl $(B)/keys.stl $(B)/boards.stl $(B)/discant_link.stl $(B)/phone.html
+all: $(B)/elec.stl $(B)/case.stl $(B)/cover.stl $(B)/back_cover.stl $(B)/battery.stl $(B)/keys.stl $(B)/boards.stl $(B)/discant_link.stl $(B)/phone.html
 
-$(B)/lid.stl: lid.scad layout.scad
-	$(call scad,$<)
+$(B)/back_cover.stl: case.scad layout.scad elec.scad
+	$(call scad,$<,-D 'part="back_cover"')
 $(B)/battery.stl: case.scad layout.scad
 	$(call scad,$<,-D 'part="battery"')
 
@@ -29,8 +29,11 @@ $(B)/discant_link.stl: link.scad layout.scad ../discant/gauge_link.scad
 $(B)/case.stl $(B)/cover.stl: $(B)/%.stl: %.scad layout.scad
 	$(call scad,$<)
 # the case carries the gauges' mount and the stored discant's socket (link.scad)
+$(B)/elec.stl: elec.scad layout.scad
+	$(call scad,$<)
+$(B)/case.stl $(B)/battery.stl $(B)/elec.stl: elec.scad
 GAUGE_DEPS := link.scad ../discant/gauge_link.scad $(addprefix ../build/strain_gauge/,inner_holder.stl inner_holder_detent.stl outer_holder.stl strain_gauge_plate.stl)
-$(B)/case.stl $(B)/battery.stl: $(GAUGE_DEPS)
+$(B)/case.stl $(B)/battery.stl $(B)/elec.stl $(B)/back_cover.stl: $(GAUGE_DEPS)
 $(B)/discant_link.stl: $(GAUGE_DEPS)
 
 $(B)/pcb_board_9.stl: ../switch/pcb.scad
@@ -56,12 +59,12 @@ key:
 	@$(MAKE) --no-print-directory -C ../switch
 
 PHONE_PARTS := CASE_TRIS=$(B)/case.stl COVER_TRIS=$(B)/cover.stl BOARDS_TRIS=$(B)/laminate.stl \
-               COPPER_TRIS=$(B)/copper.stl CONN_TRIS=$(B)/connectors.stl KEYS_TRIS=$(B)/keys_static.stl \
+               COPPER_TRIS=$(B)/copper.stl CONN_TRIS=$(B)/connectors.stl ELEC_TRIS=$(B)/elec.stl KEYS_TRIS=$(B)/keys_static.stl \
                BUTTON_TRIS=$(KEY)/button.stl FELT_TRIS=$(KEY)/felt.stl WASHER_TRIS=$(KEY)/washer.stl \
                SLEEVE_TRIS=$(KEY)/sleeve.stl SCREW_TRIS=$(KEY)/screw.stl SPRING_TRIS=$(KEY)/spring.stl \
-               LINK_TRIS=$(B)/discant_link.stl LID_TRIS=$(B)/lid.stl BATTERY_TRIS=$(B)/battery.stl
+               LINK_TRIS=$(B)/discant_link.stl LID_TRIS=$(B)/back_cover.stl BATTERY_TRIS=$(B)/battery.stl
 $(B)/phone.html: phone.html ../discant/embed_parts.py $(B)/case.stl $(B)/cover.stl $(B)/laminate.stl $(B)/copper.stl \
-                 $(B)/connectors.stl $(B)/keys_static.stl $(B)/discant_link.stl $(B)/lid.stl $(B)/battery.stl $(KEY_STL)
+                 $(B)/connectors.stl $(B)/elec.stl $(B)/keys_static.stl $(B)/discant_link.stl $(B)/back_cover.stl $(B)/battery.stl $(KEY_STL)
 	@echo "  EMBED    $@"
 	@$(PYTHON) ../discant/embed_parts.py $< $@ $(PHONE_PARTS)
 

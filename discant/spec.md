@@ -306,8 +306,12 @@ it all onto the housing. Four pins in the floor locate the board.
 - **Make it:** `python3 gen_pcb.py && python3 gen_sch.py && sh build.sh` (about 45
   minutes; six tries, keeps the best).
 
-**Open:** power switch (none yet; it could sit in the bass module); charging;
-whether the wire pads should become connectors; the items marked above.
+**Power** [given]: the battery, its charger and USB charging socket are in the bass;
+plugging the bass on for playing switches the battery to this board through the
+contacts (`../assembly/spec.md`, Contacts), so that is the power switch. This board's
+USB is for data and powers the discant alone through the ORing.
+
+**Open:** whether the wire pads should become connectors; the items marked above.
 
 ## 7. Gauge and link to the bass module
 
@@ -339,7 +343,7 @@ whether the wire pads should become connectors; the items marked above.
   module's weight therefore enter the reading. [estimated: with two gauges full
   scale is about 2 × 1400 N·mm, so about 35 N at an 81 mm arm]
 - **Link board** [chosen]: beside the gauges, about 100 mm from the main PCB: NAU7802 for
-  both half bridges, MCP23017 for the bass keys (9 lines as 3 × 6). Six wires reach it:
+  both half bridges (the bass keys' expander is in the bass now). Six wires reach it:
   battery +, ground, 3.3 V, SDA, SCL, interrupt. They run behind cable 3 to the
   hole's back corner and along a ⌀2.6 bore inside the back wall (2 mm of wall each
   side), straight into the board's pocket.
@@ -354,15 +358,14 @@ whether the wire pads should become connectors; the items marked above.
   through a notch in its +x wall, which the wires to the connector leave by too.
   Under the plates' edges the groove runs behind a 1 mm
   strip, the plates' stop; elsewhere it is open to the pad's face or the holders.
-- **Connector** [chosen]: 12 contacts: 9 keys, battery +, ground, a spare ground
-  or sense. Spring pins on flat pads, two rows of 6. A separate lock with no play
-  in either direction carries the load, not the contacts. [unverified: current
-  rating] The wires from link board to connector cross the gauge as a soft loop.
-- **Open:** overload stop; the lock (no play either way);
-  charging; a diode at each of the 18 bass keys: the contacts are closed at rest, so without
-  diodes the 3 × 6 matrix joins every row to every column and no key can be told
-  apart. They would sit in the bass module, with no change to the connector.
-  [unverified: not designed yet]
+- **Contacts** [given: closing as the bass slides on]: a boss on the pad between the
+  outer holders (10.4 × 10 mm, to y = 83.2 in the gauge frame) carries a 0.8 mm board
+  with nine gold pads, 3 × 3 at 2.54, facing the bass's spring pins: VBAT × 2, GND × 3,
+  SDA, SCL, INT, DET (tied to GND on the board: switches the bass's battery on). A ⌀2.2
+  bore down the boss leads the wires into the pad's groove and on to the link board.
+  The latches in the inner holders carry the load, not the contacts.
+  `../assembly/spec.md`, Contacts.
+- **Open:** overload stop.
 
 Checked by solid intersection: wires, plates, pins,
 link board and lid touch nothing but what they are fixed to, and the paths of

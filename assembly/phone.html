@@ -131,7 +131,7 @@
   var parts = {}, moving = new THREE.Group(), springGrp = new THREE.Group();
   var buttonGrp = new THREE.Group(); buttonGrp.add(moving, springGrp);
   var LOAD = [
-    ['bass boards', function () { parts.pcb.add(mesh('B_LAM', 0x2f7a4f), copper('B_CU'), mesh('B_CONN', 0x2b2f33)); }],
+    ['bass boards', function () { parts.pcb.add(mesh('B_LAM', 0x2f7a4f), copper('B_CU'), mesh('B_CONN', 0x2b2f33), mesh('B_ELEC', 0x2f7a4f)); }],
     ['discant boards', function () { parts.pcb.add(mesh('D_BOARDS', 0x2f7a4f), copper('D_CU'), mesh('D_CONN', 0x2b2f33)); }],
     ['main PCB', function () { parts.pcb.add(mesh('D_MAIN', 0x2b6b48), copper('D_MAIN_CU')); }],
     ['housings', function () { parts.housing = mesh('B_CASE', 0xd9a441); parts.housing.add(mesh('B_LID', 0xc99430), mesh('D_HOUSING', 0xd9a441)); scene.add(parts.housing); }],

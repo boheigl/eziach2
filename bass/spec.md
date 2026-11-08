@@ -32,7 +32,8 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   one per row: front board moved x + 40, back board x + 50, y + 16. The back row stands
   **10 mm higher**, so that its caps reach the example's 21 mm with the standard button:
   board tops at z = 3.835 and 13.835. Neighbouring boards stand 1.3 mm apart in plan.
-- **Case** [given: nicer and closed]: a closed box, one print, open only at the bottom.
+- **Case** [given: nicer and closed]: a closed box, one print, open only at the back
+  (behind the battery and boards), which the back cover closes; the bottom is closed.
   On top the key deck, its full depth (y −12.5 … 27.8). Below it the box is **11.2 mm thin**
   [given: thinner; then 4.8 thinner still, so that the stored discant comes closer]
   (y −12.5 … −1.3): front wall 3, back wall 1.6, a 6 mm battery between, so that under the deck, behind the box, a step opens
@@ -44,10 +45,18 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   stored discant's travel, then for the socket's latch]. Vertical edges rounded (r 4); the cover follows them. The
   front wall is 3 mm thick; the hand plate is a 1 mm recess in it with rounded corners
   (r 6); the front caps keep 2 mm from its inner face [given: ≥ 2 mm].
-- **Stiffness** [given: the plate must not bend]: the closed 11.2 mm box section itself
-  (front wall 3, back wall 1.6): about **0.05 mm** at 50 N at the plate's middle (the 16 mm
-  box's 0.02 scaled by the walls' second moment) [estimate:
-  PLA, E = 3500 MPa assumed]; the ribs of the deep box are gone.
+- **Stiffness** [given: the plate must not bend; very important]: the hand bends the
+  front wall locally, between its edges, as the cavity is empty; the box section does
+  not help there. (Corrected: the earlier 0.05 mm took the box as a beam and missed that;
+  a plain 3 mm wall between clamped edges gives about 0.5 mm at 50 N mid-plate.) So the
+  front wall carries **ribs** inside, 1.6 thick, across the cavity to 0.2 short of the
+  back cover: upright at x −90, −50.75, 47.25, 90 (beside the battery and outside), across
+  over the battery (z −56.5), at z −36 right of the key board, at z −90 and −110 left of
+  the battery and at z −88 over the power board; notches leave the wires' way along the
+  bottom and up left of the battery. The largest field left is over the battery, 91 × 62
+  mm: about **0.15 mm** at 50 N there, less elsewhere and under a palm [estimate: clamped
+  plate, point load, PLA, E = 3500 MPa]. The front wall stays one piece with sides, bottom
+  and deck [given: the cover on the side away from the hand, for stiffness].
 - **Deck:** the discant's housing for two rows, each board resting on it 0.1 above its
   underside, a guide for every key (⌀9.4, ⌀8.6 spring pocket, floor 1.5 under it,
   z = −15.1), M2 pilots for the cover's screws; the back block begins at y = 11, behind the
@@ -59,12 +68,29 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   stored discant's gauge ends (x −46.4 … 42.9, y 13.1 … 24.7, up to z −6.4), with a
   short socket (the inner holder's last 8.3 mm and its bridge, with the latch as a
   detent) for each plate, printed with the case; 2.7 mm of deck stays under the back row's springs over it.
-- **Lid:** closes the thin bottom, flush, 2 mm, 0.2 inside the walls; two M2
-  countersunk screws into blocks at its ends. Through it the battery goes in and out.
+- **Back cover** [given: inside, on the side away from the hand]: the back wall from
+  z −116 up to the deck, with the side walls' last 1.6 mm, one 1.6 mm plate following the
+  box's outline. Two tongues at its bottom edge hook in behind the mount's strip (which
+  stays with the case: the gauges' and contacts' load never passes the cover); three M2
+  pan-head screws at z −21 (x −45, 0, 45), above the stored discant's caps, into pillars
+  from the front wall. It rests on the side walls' ends, the ribs and the pillars.
+  Assembly with it off: battery, both boards (screwed from the back into the front
+  wall's pilots; the power board goes in 2 mm to the left and slides right into the
+  port), the FFCs from the deck and the contacts' wires, all in reach. [unverified: screw
+  type]
 - **Battery** [given]: a 1S Li-ion pouch, 606090 (6 × 60 × 90 mm, about 4 Ah [unverified:
   type, capacity]) [given: 6 mm, for the thinner box; it was a 9 mm 906090 of about 6 Ah],
-  against the back wall, 0.3 clear each side: a shelf under it, stops at its ends, a lip
-  over its top. [open: charging, protection, its wires]
+  between front wall and back cover, 0.3 clear each side: a shelf under it, stops at its ends, a lip
+  over its top.
+- **Electronics** (`elec.scad`) [given: charging in the bass by its own USB socket; the
+  contacts switch the battery on]: a power board at the bottom on the +x side (USB-C
+  in the side wall at z −104.5 with a charge LED beside it, charger with power path,
+  protection and fuse, the P-FET switched by DET, a 3.3 V LDO) and a key board at the top
+  on the −x side, where the FFCs come down (their two connectors, a 24-input I2C port
+  expander: one input per key, no matrix, no diodes). Both lie on the front wall's
+  inside on two pads with M2 pilots, outside the hand plate's recess. Wires [not
+  modelled]: pins → mount's cavity → back wall bore → below the battery's shelf → power
+  board → beside the battery up to the key board. `../assembly/spec.md`, Contacts.
 - **Size:** 211.1 × 40.3 mm at the deck; below it 11.2 mm deep and 265 mm wide, 149.5 mm
   high in all; the gauges' mount and holders stand in the step (y −1.3 … 25.9).
 - **Cover: one piece** [given]: a slab on each board, the board in a pocket underneath
@@ -96,8 +122,9 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   holder is meant to, and comes off the same way. [open: what keeps them on; the holder
   only grips the W across z] [unverified: the holder's 0.15 mm fits, printed as part of
   the large case, not standing on its bridge as `../strain_gauge` recommends]
-- **Wires:** the 12 contacts the link plate's spring pins carried (9 keys, battery +,
-  ground, spare) now need their own connector between bass and discant [open].
+- **Contacts:** nine spring pins in a block on the mount between the inner holders,
+  against the discant's contact board; a cavity behind them and a ⌀2.6 bore through
+  the back wall take the wires into the box (`link.scad`, `../assembly/spec.md`).
 - **Reading** [given: the gauges are bent by the push, which works]: the hand pushes the
   plate along y, above the gauges, so the push bends their flexure plates as a force
   along z would; each bridge reads the moment at its column, push × arm. Pressed at the
@@ -113,17 +140,15 @@ touch nothing at rest and pressed 2.9 mm.
 
 ## 5. Open
 
-- **Wiring:** 18 keys as 2 rows (the boards' commons) × 9 columns need 11 lines; the
-  link's connector has 9 key lines (`../discant/spec.md` §7). Also the diode per key.
-- How bass and discant fold; the battery's charging and wiring; the electrical connector between bass and discant and its wiring.
+- The wires inside the box [not modelled]; the electronics' parts [unverified].
 
 ## 6. Files
 
 | File | |
 |---|---|
 | `layout.scad` | key arrangement, heights, boards, plate: shared by all |
-| `case.scad` → `case.stl`, `battery.stl` | the closed box: deck, hand plate, battery cradle, cable tunnels, the gauges' inner holders; the battery |
-| `lid.scad` → `lid.stl` | the bottom lid |
+| `case.scad` → `case.stl`, `back_cover.stl`, `battery.stl` | the box: deck, hand plate with its ribs, battery cradle, cable tunnels, the gauges' inner holders and the contacts' block; the back cover; the battery |
+| `elec.scad` → `elec.stl` | the power and key boards, the charging port, the contacts' plungers (placeholders) |
 | `link.scad` | the gauges' inner holders on their mount, and the discant's side (plates, pins, outer holders: `discant_link.stl`) |
 | `cover.scad` → `cover.stl` | the cover, one piece |
 | `keys.scad` → `keys.stl` | the 18 keys at rest |

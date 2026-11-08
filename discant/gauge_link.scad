@@ -17,9 +17,9 @@
 // to where the force acts. The sum follows the force, the difference the twist.
 //
 // The gauges sit at the middle of the row, about 130 mm from the main PCB. So a
-// link board beside them holds the bridges' ADC (NAU7802) and an I2C port expander
-// (MCP23017) for the bass keys. Only six wires then run the long way: battery +,
-// ground, 3.3 V, SDA, SCL, interrupt. They go from the main PCB behind cable 3 to
+// link board beside them holds the bridges' ADC (NAU7802); the bass keys' port expander
+// is in the bass now, behind the contacts (../bass/elec.scad). Only six wires then run
+// the long way: battery + (from the bass), ground, 3.3 V, SDA, SCL, interrupt. They go from the main PCB behind cable 3 to
 // the hole's back corner and along a bore inside the housing's back wall, which
 // is solid and 6.6 mm thick behind the guides.
 //
@@ -82,6 +82,20 @@ hook_z   = [[-4.4, -1.4], [1.8, 4.8]];   // the +x and -x hook: beside the notch
 hook_t   = 1;
 barb     = 0.4;                  // the hook's catch into the wall
 
+/* [Contacts to the bass, between the outer holders] */
+// [given: power and I2C cross by contacts that close when the bass slides on]: a boss
+// between the outer holders (5.8 clear either side of the middle) carries a small board
+// with nine gold pads, 3 x 3 at 2.54, facing the bass's spring pins (../bass/link.scad).
+// Pads: VBAT x 2, GND x 3, SDA, SCL, INT, DET; DET is tied to GND on this board, which
+// switches the bass's battery on (../assembly/spec.md). A bore down the boss's middle
+// takes the wires into the pad's lead groove, on to the link board.
+contact_y  = 84;                 // the pads' face, gauge frame (the outer holders' tips: 89.6)
+contact_t  = 0.8;
+contact_hw = 5.2;                // half width (x) and half height (z) of boss and board
+contact_hh = 5.0;
+contact_p  = 2.54;
+contact_bore = 2.2;
+
 /* [Six wires] */
 bundle_d = 1.8;
 bore_d   = 2.6;
@@ -105,8 +119,12 @@ module gauge() for (d = [-1, 1]) at_gauge(d) {
     import("../build/strain_gauge/strain_gauge_plate.stl");
     for (s = [-1, 1]) translate([s * pin_x, pin_y, -pin_l / 2]) cylinder(d = pin_d, h = pin_l);
 }
-// part of the housing: added after its bottom plane, which they reach past
-module gauge_holders() for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/outer_holder.stl");
+// part of the housing: added after its bottom plane, which they reach past; with them
+// the contacts' boss
+module gauge_holders() {
+    for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/outer_holder.stl");
+    gauge_contact_boss();
+}
 pk_h = board_h / 2 + pk_fit;                    // the pocket's half height
 pk_zz = [pk_z0 - pk_h, pk_z0 + pk_h];
 bd_x = [pk_x[1] - 1.5 - board_w, pk_x[1] - 1.5];   // the board
@@ -136,7 +154,20 @@ module bundle() {
     }
 }
 
-module gauge_link() { gauge(); link_board(); lid(); bundle(); }
+// the contact board, gauge frame; pads as thin discs on its face
+module contact_board() gauge_tilt_frame() {
+    box([-contact_hw, contact_hw], [contact_y - contact_t, contact_y - 0.035], [gz - contact_hh, gz + contact_hh]);
+    for (i = [-1 : 1], j = [-1 : 1]) translate([i * contact_p, contact_y - 0.035, gz + j * contact_p])
+        rotate([-90, 0, 0]) cylinder(d = 1.8, h = 0.035, $fn = 20);
+}
+// part of the housing, added after its bottom plane like the holders: the boss under
+// the contact board, with the wires' bore
+module gauge_contact_boss() gauge_tilt_frame() difference() {
+    box([-contact_hw, contact_hw], [back_y + pad_t - 0.5, contact_y - contact_t], [gz - contact_hh, gz + contact_hh]);
+    translate([0, back_y + pad_t - 1, gz]) rotate([-90, 0, 0]) cylinder(d = contact_bore, h = contact_y - back_y);
+}
+
+module gauge_link() { gauge(); link_board(); lid(); bundle(); contact_board(); }
 
 // added to the housing: the gauge pad, a wedge from the back face to its tilted face
 module gauge_housing_pads() hull() {
@@ -173,6 +204,8 @@ module gauge_housing_cuts() {
     // the notch from the groove into the pocket, past the lid's +x edge
     box([pk_x[1] - 0.1, pad_x[0] + 0.1], [lid_y - 1, g_y], [gz - groove_h - 0.9, gz + groove_h + 0.9]);
     translate([bore_x[0], bore_y, bore_z]) rotate([0, 90, 0]) cylinder(d = bore_d, h = bore_x[1] - bore_x[0]);
+    // the contacts' wires: from the boss's bore through the pad into the groove
+    gauge_tilt_frame() translate([0, g_y - groove_d, gz]) rotate([-90, 0, 0]) cylinder(d = contact_bore, h = pad_t + 2);
 }
 
 echo(str("plate frame y 0 at discant y = ", plate_y0, "; the inner holders' backs at y = ", link_y,

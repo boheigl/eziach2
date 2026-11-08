@@ -38,10 +38,39 @@ module to_bass()
 
 module box(x, y, z) translate([x[0], y[0], z[0]]) cube([x[1] - x[0], y[1] - y[0], z[1] - z[0]]);
 
+// --- CONTACTS [given: power and I2C cross by contacts closing as the bass slides on;
+// the bass's battery switched on by them]: a block on the mount between the inner holders,
+// reaching between the discant's outer holders, with nine spring pins (3 x 3 at 2.54)
+// against the discant's contact board (../discant/gauge_link.scad, face at gauge y 84).
+// Pins pressed in from the front, wires soldered on before, through a cavity behind
+// them and a bore through the back wall into the box (elec.scad).
+pin_p    = 2.54;
+pin_hole = 1.6;                  // the pins' barrels [unverified: pin type, e.g. Mill-Max 0906]
+blk_y    = [85, link_y];         // the block's face, 1 mm off the contact board, to the mount
+blk_hw   = 5.2;  blk_hh = 5.0;   // as the discant's boss
+cav      = [88.5, 3.6];          // cavity behind the barrels: from y, half size
+chan_d   = 2.6;  chan_dz = -2.1; // the wires' bore through mount and back wall, below the middle
+module contact_chan() translate([0, cav[0] + 2, gz + chan_dz]) rotate([-90, 0, 0]) cylinder(d = chan_d, h = 14);
+
 module mount() to_bass() {
-    gauge_tilt_frame() box([gauge_x - mount_x, gauge_x + mount_x], [link_y - 0.01, link_y + mount_t], [gz - half_h, gz + half_h]);
+    difference() {
+        gauge_tilt_frame() union() {
+            box([gauge_x - mount_x, gauge_x + mount_x], [link_y - 0.01, link_y + mount_t], [gz - half_h, gz + half_h]);
+            box([-blk_hw, blk_hw], [blk_y[0], blk_y[1] + 0.01], [gz - blk_hh, gz + blk_hh]);
+        }
+        gauge_tilt_frame() {
+            for (i = [-1 : 1], j = [-1 : 1]) translate([i * pin_p, blk_y[0] - 1, gz + j * pin_p]) rotate([-90, 0, 0]) cylinder(d = pin_hole, h = cav[0] - blk_y[0] + 1.01, $fn = 16);
+            box([-cav[1], cav[1]], [cav[0], link_y + mount_t - 1.5], [gz - cav[1], gz + cav[1]]);
+            contact_chan();
+        }
+    }
     for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/inner_holder.stl");
 }
+// cut from the case: the wires' bore through the back wall
+module mount_cuts() to_bass() gauge_tilt_frame() contact_chan();
+// the pins' plungers, mated: 1 mm out of the block, on the pads (elec.scad)
+module contact_plungers() to_bass() gauge_tilt_frame()
+    for (i = [-1 : 1], j = [-1 : 1]) translate([i * pin_p, 84.02, gz + j * pin_p]) rotate([-90, 0, 0]) cylinder(d = 1.0, h = blk_y[0] - 84.02 + 0.5, $fn = 12);
 // the discant's side, for checks and the page: plates with their dowel pins, and the
 // outer holders, which are the discant housing's
 module discant_side() to_bass() {
@@ -87,7 +116,7 @@ module store_socket() to_store() for (d = [-1, 1]) at_gauge(d)
 module store_pocket() to_store() difference() {
     gauge_tilt_frame() translate([0, 40, 0]) rotate([-90, 0, 0]) linear_extrude(89.6 + 0.5 - 40)
         offset(delta = 0.4) projection() rotate([90, 0, 0]) intersection() {
-            gauge_untilt() union() { gauge(); gauge_holders(); }
+            gauge_untilt() union() { gauge(); gauge_holders(); contact_board(); }
             translate([-200, 80, -50]) cube([400, 30, 100]);
         }
     for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/inner_holder_detent.stl");
