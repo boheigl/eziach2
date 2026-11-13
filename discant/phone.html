@@ -4,8 +4,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- Phone view of the discant assembly. make builds ../build/discant/phone.html from this
      page with every part embedded as an inactive data block (embed_parts.py): the page
-     loads no files, which the claude.ai viewer refuses on phones (403). STROKE, FLOOR_Z
-     and L_UP are as in ../switch/button.scad. -->
+     loads no files, which the claude.ai viewer refuses on phones (403). STROKE is as in
+     ../switch_hall/key.scad; the key positions come from the board (hall.scad). -->
 <title>Discant Assembly</title>
 <style>
   /* Layout: the 3D view first and as large as the phone allows, controls in wrapping rows under it */
@@ -41,7 +41,7 @@
 
 <main>
   <header>
-    <p class="eyebrow">discant · four boards as a staircase</p>
+    <p class="eyebrow">discant · one Hall-sensor board, 46 keys</p>
     <h1>Discant assembly</h1>
   </header>
   <div id="view"><p id="hint" hidden>1 finger: turn · 2 fingers: zoom and move</p><p id="status">Tap “Load assembly” to start.</p></div>
@@ -58,11 +58,12 @@
     <span class="val" id="cutval">y = 0</span>
   </div>
   <div class="row">
-    <button type="button" class="tog" id="showpcb" aria-pressed="true">PCBs</button>
-    <button type="button" class="tog" id="showhousing" aria-pressed="true">Housing</button>
-    <button type="button" class="tog" id="showcover" aria-pressed="true">Cover</button>
-    <button type="button" class="tog" id="showcable" aria-pressed="true">PCB + gauges</button>
-    <button type="button" class="tog" id="showbutton" aria-pressed="true">Button</button>
+    <button type="button" class="tog" data-part="pcb" aria-pressed="true">Board</button>
+    <button type="button" class="tog" data-part="housing" aria-pressed="true">Housing</button>
+    <button type="button" class="tog" data-part="cover" aria-pressed="true">Cover</button>
+    <button type="button" class="tog" data-part="lid" aria-pressed="true">Gauge lid</button>
+    <button type="button" class="tog" data-part="cable" aria-pressed="true">Wires + gauges</button>
+    <button type="button" class="tog" id="showbutton" aria-pressed="true">Keys</button>
   </div>
   <div class="row" aria-label="View">
     <button type="button" id="left" aria-label="Turn left">◀</button>
@@ -74,8 +75,9 @@
     <button type="button" id="interact" aria-pressed="false">Interact</button>
     <button type="button" id="reset">Reset view</button>
   </div>
-  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. The button sits in board 0's middle hole; Press moves it 2.965 mm
-    until its felt ring lands on the cover and back; Hold down keeps it there. All parts come from the OpenSCAD build (switch/ and discant/).</p>
+  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. Press moves the middle key of the front row 3 mm until its O-ring lands on the tube's top and back; Hold down keeps it there.
+    The board is drawn with its parts' bodies (boxes, from the KiCad board); the springs are left out, hidden under the caps' skirts.
+    All parts come from the OpenSCAD build (switch_hall/, discant/, hall_pcb/).</p>
 </main>
 
 <!-- parts: filled in by embed_parts.py -->
@@ -86,8 +88,9 @@
   function status(t, bad) { statusEl.textContent = t; statusEl.className = bad ? 'bad' : ''; }
   window.addEventListener('error', function (e) { status('Error: ' + e.message, true); });
 
-  var STROKE = 2.965, FLOOR_Z = -16.5834, L_UP = 9.14839;   // button.scad
-  var STEP = [10, 16, 3];                                      // board k is moved by k * STEP
+  var STROKE = 3;                     // ../switch_hall/key.scad
+  var STEP = [10, 16, 3];               // row k+1 relative to row k
+  var KEYS = /*KEYS*/[];                // [row, key, x] of all 46 (hall.scad)
 
   var view = document.getElementById('view');
   var renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'low-power' });
@@ -127,28 +130,44 @@
     m.polygonOffset = true; m.polygonOffsetFactor = -1; m.polygonOffsetUnits = -4;
     return g;
   }
-  var parts = {}, moving = new THREE.Group(), springGrp = new THREE.Group();
-  var buttonGrp = new THREE.Group(); buttonGrp.add(moving, springGrp);
+  var parts = {}, moving = new THREE.Group(), keysGrp = new THREE.Group();
+  var buttonGrp = new THREE.Group(); buttonGrp.add(keysGrp, moving);
+  var PRESSED = 6;                      // index in KEYS: row 0's middle key (x = 0)
+  // one key part, copied to every key; the pressed key's copy goes into moving
+  function keyPart(name, colour) {
+    var g = mesh(name, colour), m = g.children[0];
+    KEYS.forEach(function (k, i) {
+      var c = i === 0 ? m : new THREE.Mesh(m.geometry, m.material);
+      c.position.set(k[2] + STEP[0] * 0 , STEP[2] * k[0], -STEP[1] * k[0]);
+      if (i === PRESSED) moving.add(c); else keysGrp.add(c);
+    });
+  }
+  // each group of parts has its own button (data-part); parts[k] is made on first use
+  var vis = {};
+  function grp(k) {
+    if (!parts[k]) { parts[k] = new THREE.Group(); parts[k].visible = vis[k] !== false; scene.add(parts[k]); }
+    return parts[k];
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-part]'), function (b) {
+    b.addEventListener('click', function () {
+      var k = b.getAttribute('data-part'), on = vis[k] === false; vis[k] = on;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false'); showParts();
+    });
+  });
   var LOAD = [
-    ['board 13', function () { parts.pcb.add(mesh('BOARD13_TRIS', 0x2f7a4f), copper('COPPER13_TRIS')); }],
-    ['board 12', function () { parts.pcb.add(mesh('BOARD12_TRIS', 0x2f7a4f, [10, 16, 3]), copper('COPPER12_TRIS', [10, 16, 3])); }],
-    ['board 11', function () { parts.pcb.add(mesh('BOARD11_TRIS', 0x2f7a4f, [20, 32, 6]), copper('COPPER11_TRIS', [20, 32, 6])); }],
-    ['board 10', function () { parts.pcb.add(mesh('BOARD10_TRIS', 0x2f7a4f, [30, 48, 9]), copper('COPPER10_TRIS', [30, 48, 9])); }],
-    ['pcb_connector.js', function () { for (var k = 0; k < 4; k++) parts.pcb.add(mesh('CONN_TRIS', 0x2b2f33, [10 * k, 16 * k, 3 * k])); }],
-    ['housing.js', function () { parts.housing = mesh('HOUSING_TRIS', 0xd9a441); scene.add(parts.housing); }],
-    ['cover.js', function () { parts.cover = mesh('COVER_TRIS', 0x5b6f86); scene.add(parts.cover); }],
-    ['pcb_cable.js', function () { parts.cable = mesh('CABLE_TRIS', 0xd8c08a); scene.add(parts.cable); }],
-    ['main_pcb.js', function () { parts.cable.add(mesh('MAIN_PCB_TRIS', 0x2f7a4f), copper('MAIN_CU_TRIS'), mesh('MAIN_PARTS_TRIS', 0x2b2f33)); }],
-    ['gauge_link.js', function () { parts.cable.add(mesh('LINK_TRIS', 0x8a8f96)); }],
-    ['button.js', function () { moving.add(mesh('BUTTON_TRIS', 0x4a6fa5)); }],
-    ['felt.js', function () { moving.add(mesh('FELT_TRIS', 0x8c3b3b)); }],
-    ['washer.js', function () { moving.add(mesh('WASHER_TRIS', 0xc4c8cc)); }],
-    ['sleeve.js', function () { moving.add(mesh('SLEEVE_TRIS', 0xc9b37a)); }],
-    ['screw.js', function () { moving.add(mesh('SCREW_TRIS', 0x5d6166)); }],
-    ['spring.js', function () { springGrp.add(mesh('SPRING_TRIS', 0x9aa3ab)); }]
+    ['board', function () { grp('pcb').add(mesh('BOARD_TRIS', 0x2f7a4f)); }],
+    ['part bodies', function () { grp('pcb').add(mesh('PARTS_TRIS', 0x2b2f33)); }],
+    ['housing', function () { grp('housing').add(mesh('HOUSING_TRIS', 0xd9a441)); }],
+    ['cover', function () { grp('cover').add(mesh('COVER_TRIS', 0x5b6f86)); }],
+    ['gauge lid', function () { grp('lid').add(mesh('LID_TRIS', 0x7d93ab)); }],
+    ['gauges and wires', function () { grp('cable').add(mesh('LINK_TRIS', 0x8a8f96)); }],
+    ['caps', function () { keyPart('CAP_TRIS', 0x4a6fa5); }],
+    ['plungers', function () { keyPart('PLUNGER_TRIS', 0xe8e2d2); }],
+    ['magnets', function () { keyPart('MAGNET_TRIS', 0x7a8a99); }],
+    ['O-rings', function () { keyPart('ORING_TRIS', 0x2b2f33); }],
+    ['stops', function () { keyPart('STOP_TRIS', 0x8c3b3b); }]
   ];
   scene.add(buttonGrp);
-  parts.pcb = new THREE.Group(); scene.add(parts.pcb);   // the four boards and their connectors
 
   // camera orbits a target
   var target = new THREE.Vector3(-5, 0, -26), azim = -0.55, elev = 0.62, dist = 400;
@@ -239,8 +258,6 @@
   function setTravel(t) {
     travel = Math.max(0, Math.min(STROKE, t));
     moving.position.y = -travel;
-    var s = (L_UP - travel) / L_UP;
-    springGrp.scale.y = s; springGrp.position.y = FLOOR_Z * (1 - s);
     document.getElementById('travelval').textContent = travel.toFixed(3) + ' mm';
     draw();
   }
@@ -275,14 +292,9 @@
   document.getElementById('cut').addEventListener('click', function () {
     this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); applyCut();
   });
-  document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-10, cutY - 4); applyCut(); });
-  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(101, cutY + 4); applyCut(); });
-  [['showpcb', 'pcb'], ['showhousing', 'housing'], ['showcover', 'cover'], ['showcable', 'cable']].forEach(function (t) {
-    document.getElementById(t[0]).addEventListener('click', function () {
-      var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on ? 'true' : 'false');
-      if (parts[t[1]]) parts[t[1]].visible = on; draw();
-    });
-  });
+  document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-20, cutY - 4); applyCut(); });
+  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(92, cutY + 4); applyCut(); });
+  function showParts() { for (var k in parts) parts[k].visible = vis[k] !== false; draw(); }
   document.getElementById('showbutton').addEventListener('click', function () {
     var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on ? 'true' : 'false');
     buttonGrp.visible = on; draw();

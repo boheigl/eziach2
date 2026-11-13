@@ -44,6 +44,19 @@ margin_n = 5.3;      // row to the -y edge
 margin_p = 9.4;      // row to the +y edge
 stair    = [10, 16, 3];  // board k+1 relative to board k
 cover_t  = 1.2;      // cover plate on the board's top: the spring seat
+// The discant has one sensor board for all four rows, in the staircase's slope
+// plane (../hall_pcb/): it is tilted against each row by atan(3 / 16). The board
+// is drawn flat here; the tilt only lifts the collar (its edge up the slope would
+// otherwise come closer to the board) and lengthens the way through the board to
+// the sensor. 0 for a board square to the keys.
+board_tilt = atan(3 / 16);
+// The cover (../discant/cover.scad) is a flat plate on the tilted board [given:
+// variant A], so its top is tilted too: the skirt's lower edge keeps skirt_clear
+// from it at the lower stop on the up-slope side as well (tilt_rise below).
+// Bass back row: the board lies flat under both rows and the back row stands
+// 10 mm higher, so its spring seat, tube top and everything above rise by riser;
+// collar, magnet and step keep their place at the board [chosen].
+riser = 0;
 
 /* [Cap — as in ../switch/button.scad] */
 cap_d    = 15;
@@ -114,23 +127,26 @@ $fa = 2; $fs = 0.1;
 // ---------------------------------------------------------------- derived
 z_top    = pcb_t / 2 + cu_t;               // board's top surface
 z_bot    = -pcb_t / 2 - cu_t;
-z_seat   = pcb_t / 2 + cover_t;            // spring seat: top of the cover plate
-z_cb     = z_top + floor_gap + stroke;     // collar's lower face at rest
+z_seat   = pcb_t / 2 + cover_t + riser;    // spring seat: a level floor inside the shroud
+z_cb     = z_top + floor_gap + collar_d / 2 * tan(board_tilt) + stroke;   // collar's lower face at rest
 z_step   = z_cb + collar_h + stop_t;       // step between the bores
-z_tt     = z_cb + guide_min;               // tube top
+z_tt     = z_cb + guide_min + riser;       // tube top
 oring_od = oring_id + 2 * oring_cs;
 oring_out = oring_cs - oring_seat;         // O-ring below the cap's underside
 cbore_d  = oring_od + 2 * oring_gap;
 z_cu     = z_tt + oring_out + stroke;      // cap underside at rest
 z_ct     = z_cu + cap_h;                   // cap top at rest
+function key_cap_top() = z_ct;             // for ../discant/cover.scad (the thumb bar follows the caps)
 bore_lo  = collar_d + 2 * gap;
 bore_hi  = pin_d + 2 * gap;
 shroud_id = spring_od + 2 * shroud_gap;
 shroud_od = shroud_id + 2 * shroud_wall;
 skirt_id  = shroud_od + 2 * skirt_gap;
 skirt_od  = skirt_id + 2 * skirt_wall;
-z_sht    = z_seat + skirt_clear + stroke + overlap_min;   // shroud top
-skirt_l  = z_cu - stroke - z_seat - skirt_clear;          // skirt below the cap's underside
+// the tilted plate's top under the skirt's edge, above the level seat
+tilt_rise = max(0, z_top + cover_t / cos(board_tilt) - (pcb_t / 2 + cover_t)) + skirt_od / 2 * tan(board_tilt);
+z_sht    = z_seat + skirt_clear + tilt_rise + stroke + overlap_min;   // shroud top
+skirt_l  = z_cu - stroke - z_seat - skirt_clear - tilt_rise;          // skirt below the cap's underside
 
 // spring
 spring_dm  = spring_od - spring_wd;
@@ -149,7 +165,7 @@ e_jam    = span / (2 * mu);
 // field on the axis of a cylinder magnet, at distance s from its near face (mT)
 function bz(s) = 1000 * mag_Br / 2 * ((s + mag_l) / sqrt(pow(s + mag_l, 2) + pow(mag_d / 2, 2))
                                      - s / sqrt(s * s + pow(mag_d / 2, 2)));
-z_el     = z_bot - sens_el;
+z_el     = z_top - (pcb_t + 2 * cu_t + sens_el) / cos(board_tilt);   // on the axis
 s_rest   = z_cb - z_el;
 b_rest   = bz(s_rest);
 b_bot    = bz(s_rest - stroke);
@@ -224,18 +240,27 @@ module stop() translate([0, 0, z_cb + collar_h + dz]) difference() {
     cylinder(d = stop_od, h = stop_t);
     translate([0, 0, -1]) cylinder(d = pin_d, h = stop_t + 2);
 }
-// cover plate (one pitch of it) with the tube
+// tube, shroud and the level spring seat in between, from the board's top up: added
+// to the cover plate (here, and in ../discant/cover.scad); tube_cut() is taken out after
+module tube_body() {
+    translate([0, 0, z_top]) cylinder(d = tube_od, h = z_tt - z_top);
+    translate([0, 0, z_top]) cylinder(d = shroud_od, h = z_sht - z_top);
+}
+module tube_cut() {
+    translate([0, 0, z_top - 0.01]) cylinder(d = bore_lo, h = z_step - z_top + 0.01);
+    translate([0, 0, z_top]) cylinder(d = bore_hi, h = z_tt);
+    translate([0, 0, z_seat]) difference() {   // the spring's room above the seat
+        cylinder(d = shroud_id, h = z_sht);
+        translate([0, 0, -1]) cylinder(d = tube_od, h = z_sht + 2);
+    }
+}
+// cover plate (one pitch of it, drawn flat) with the tube
 module tube() difference() {
     union() {
         translate([-pitch / 2, -margin_n, pcb_t / 2]) cube([pitch, margin_n + margin_p, cover_t]);
-        translate([0, 0, pcb_t / 2]) cylinder(d = tube_od, h = z_tt - pcb_t / 2);
-        translate([0, 0, pcb_t / 2]) difference() {   // shroud round the spring
-            cylinder(d = shroud_od, h = z_sht - pcb_t / 2);
-            translate([0, 0, cover_t]) cylinder(d = shroud_id, h = z_sht);
-        }
+        tube_body();
     }
-    translate([0, 0, pcb_t / 2 - 0.01]) cylinder(d = bore_lo, h = z_step - pcb_t / 2 + 0.01);
-    translate([0, 0, pcb_t / 2]) cylinder(d = bore_hi, h = z_tt);
+    tube_cut();
 }
 // spring drawn at its working length: a helix of short hulls
 module spring() {

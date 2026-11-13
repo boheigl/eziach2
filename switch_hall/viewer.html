@@ -150,6 +150,7 @@
 <script>
 (function () {
   // ---------------- parameters, as in key.scad ----------------
+  var BOARD_TILT = Math.atan(3 / 16);   // one sensor board in the staircase's slope plane
   var PCB_T = 1.6, CU_T = 0.035, PITCH = 20, MARGIN_N = 5.3, MARGIN_P = 9.4, STAIR = [10, 16, 3], COVER_T = 1.2;
   var CAP_D = 15, CAP_H = 2, CAP_R = 0.5, STROKE = 3;
   var PIN_D = 3.6, COLLAR_D = 4.6, COLLAR_H = 2, FLOOR_GAP = 0.3, GAP = 0.1, GUIDE_MIN = 4.5, MU = 0.25;
@@ -162,7 +163,7 @@
 
   // ---------------- derived, as in key.scad ----------------
   var Z_TOP = PCB_T / 2 + CU_T, Z_BOT = -PCB_T / 2 - CU_T, Z_SEAT = PCB_T / 2 + COVER_T;
-  var Z_CB = Z_TOP + FLOOR_GAP + STROKE, Z_STEP = Z_CB + COLLAR_H + STOP_T, Z_TT = Z_CB + GUIDE_MIN;
+  var Z_CB = Z_TOP + FLOOR_GAP + COLLAR_D / 2 * Math.tan(BOARD_TILT) + STROKE, Z_STEP = Z_CB + COLLAR_H + STOP_T, Z_TT = Z_CB + GUIDE_MIN;
   var Z_CU = Z_TT + ORING_OUT + STROKE, Z_CT = Z_CU + CAP_H;
   var BORE_LO = COLLAR_D + 2 * GAP, BORE_HI = PIN_D + 2 * GAP;
   var SHROUD_ID = SPRING_OD + 2 * SHROUD_GAP, SHROUD_OD = SHROUD_ID + 2 * SHROUD_WALL;
@@ -177,7 +178,7 @@
     var r = MAG_D / 2;
     return 1000 * MAG_BR / 2 * ((s + MAG_L) / Math.sqrt((s + MAG_L) * (s + MAG_L) + r * r) - s / Math.sqrt(s * s + r * r));
   }
-  var Z_EL = Z_BOT - SENS_EL, S_REST = Z_CB - Z_EL;
+  var Z_EL = Z_TOP - (PCB_T + 2 * CU_T + SENS_EL) / Math.cos(BOARD_TILT), S_REST = Z_CB - Z_EL;
   var MAG_V = Math.PI * MAG_D * MAG_D / 4 * MAG_L;
   function bzOff(h, rho) { return 1000 * MAG_BR * MAG_V / (4 * Math.PI) * (2 * h * h - rho * rho) / Math.pow(h * h + rho * rho, 2.5); }
   var B_NB = bzOff(S_REST + MAG_L / 2, PITCH) - bzOff(S_REST - STROKE + MAG_L / 2, PITCH);

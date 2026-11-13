@@ -56,19 +56,26 @@ is above the board, and **the board has no key holes**.
 
 ## 3. Geometry (key frame as in ../switch/pcb.scad, at rest)
 
+**One sensor board for the discant** [given, 2026-11-13]: `../hall_pcb/` lies in
+the staircase's slope plane, tilted against every row by atan(3/16) = 10.6°.
+`board_tilt` in key.scad lifts the collar by its radius × tan(tilt) = 0.43 mm, so
+that its edge up the slope keeps 0.3 mm from the board, and lengthens the way to
+the sensor through the board. The numbers below include it; the board is drawn
+flat.
+
 | | z | |
 |---|---|---|
 | Board, no hole | −0.8 … 0.8 | |
 | Hall sensor, underside | −1.935 … −0.835 | element assumed 0.55 below its mounting face [unverified] |
 | Cover plate, spring seat | 0.8 … 2.0 | |
-| Tube ⌀6.6, lower bore ⌀4.8 / upper ⌀3.8 | 0.8 … 8.635, step at 7.135 | |
-| Collar ⌀4.6 × 2 with magnet ⌀3 × 1.5 | 4.135 … 6.135 | 0.3 above the board at the lower stop |
-| Pin ⌀3.6 | 6.135 … 14.135 | 1.5 into the cap |
-| Silicone washer ⌀4.5 / ⌀3.5 × 1 on the collar | 6.135 … 7.135 | upper stop |
-| O-ring 4 × 1.5 in the cap | 11.635 … 13.135 | lands on the tube's top after 3 mm |
-| Cap ⌀15 × 2, R0.5 | 12.635 … 14.635 | as in ../switch [given] |
+| Tube ⌀6.6, lower bore ⌀4.8 / upper ⌀3.8 | 0.8 … 9.066, step at 7.566 | |
+| Collar ⌀4.6 × 2 with magnet ⌀3 × 1.5 | 4.566 … 6.566 | 0.3 above the tilted board at its edge, lower stop |
+| Pin ⌀3.6 | 6.566 … 14.566 | 1.5 into the cap |
+| Silicone washer ⌀4.5 / ⌀3.5 × 1 on the collar | 6.566 … 7.566 | upper stop |
+| O-ring 4 × 1.5 in the cap | 12.066 … 13.566 | lands on the tube's top after 3 mm |
+| Cap ⌀15 × 2, R0.5 | 13.066 … 15.066 | as in ../switch [given] |
 
-- **Height** from the cap top to the board's underside is **15.5 mm**. Only the
+- **Height** from the cap top to the board's underside is **15.9 mm** (15.5 mm on a board square to the keys). Only the
   sensor (1.1 mm) is below the board.
 - For comparison, the switch key is 27.1 mm (cap top to its guide tube's bottom),
   and the leaf version was 19.6 mm.
@@ -104,18 +111,19 @@ closed dead coil at each end assumed (switch §8).
 | | |
 |---|---|
 | Rate | 0.074 N/mm [estimated] |
-| Length at rest / at the bottom | 10.6 / 7.6 mm (minimum working length about 6.25 mm) |
-| Force at rest → at the bottom | **109 → 131 g (+21 %)** [estimated] |
-| Shear stress at the bottom | 390 N/mm², uncorrected |
+| Length at rest / at the bottom | 11.1 / 8.1 mm (minimum working length about 6.25 mm) |
+| Force at rest → at the bottom | **105 → 128 g (+22 %)** [estimated] |
+| Shear stress at the bottom | 380 N/mm², uncorrected |
 
 **For exactly 100 g at rest:** use a spring about 10 % softer (9 active coils),
 or install this one 1.2 mm longer, which adds 1.2 mm of height.
 
 ## 6. Sensor [estimated, field of a cylinder magnet on its axis]
 
-- **Magnet:** ⌀3 × 1.5 N52 in the collar. Its lower face is 5.5 mm from the
-  sensor element at rest and 2.5 mm at the bottom.
-- **Field:** 9.3 mT at rest, 55.9 mT at the bottom, inside the DRV5055A3's
+- **Magnet:** ⌀3 × 1.5 N52 in the collar. Its lower face is 6.0 mm from the
+  sensor element at rest and 3.0 mm at the bottom (along the axis, through the
+  tilted board).
+- **Field:** 7.5 mT at rest, 39.3 mT at the bottom, inside the DRV5055A3's
   ±85 mT range.
 - **Calibration:** the field rises monotonically but not linearly with travel.
   The firmware stores each key's rest and bottom readings and maps the reading

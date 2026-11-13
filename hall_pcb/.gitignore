@@ -1,0 +1,13 @@
+# logs and intermediate files of build.sh; the boards, schematics, channel tables and
+# fab files are committed once a board is routed clean
+*/gen.log
+*/route.log
+*/build.log
+*/drc.json
+*/drc_try.json
+*/erc.json
+*/route_failed.json
+*/best*.json
+*/best.kicad_pcb
+*.kicad_prl
+*/viewer.html

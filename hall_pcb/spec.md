@@ -1,0 +1,107 @@
+# Hall-sensor boards — design record
+
+The key boards for the Hall-sensor keys of `../switch_hall/`. Tags as in
+`../switch/spec.md`: **[given]**, **[datasheet]**, **[chosen]**, **[estimated]**,
+**[unverified]**.
+
+`design.py` is the one source (parts, nets, placement) for both boards; the
+environment variable `HALL_BOARD` picks `discant` or `bass`. `build.sh discant` /
+`build.sh bass` runs `gen_pcb.py` (board), `route.py` (routing, up to three tries
+scored by KiCad's DRC) and `gen_sch.py` (schematic), then writes the fabrication
+files to `<board>/fab/` and a browser view (`export_view.py`, `<board>/viewer.html`). The routing scripts come from the old `../discant/main_pcb`
+(git history), reduced to two layers.
+
+## 1. Decisions [given, 2026-11-13]
+
+- **One board for the whole discant**, in the staircase's slope plane. A board
+  for the bass will follow from the same description.
+- **No controller on the board.** ADS7138 ADCs on I²C; the ESP32 in the bass
+  reads them over the existing 5-wire bus (INT, 3V3, SDA, SCL, GND) through the
+  bellows. The calibration lives in the ESP32.
+- Sensors **always powered** (no group switching, since nothing on the board
+  could switch them).
+
+## 2. Geometry [chosen]
+
+- **Frame:** X along the rows, Y up the slope in the board's plane; row k's keys
+  at Y = k × 16.28 (√(16² + 3²)), key h of row k at X = −120 + 20 (h − 1) + 10 k.
+- **Tilt:** the four rows differ by a pure shift (10, 16, 3), so a flat board in
+  the slope plane lies under every key at the same place. It is tilted 10.6°
+  against each row; `../switch_hall/key.scad` (`board_tilt`) keeps the collar
+  0.43 mm higher for it.
+- **Sensor position:** each sensor sits on the board's underside where its key's
+  axis meets the Hall element: 0.40 mm down the slope from where the axis meets
+  the board's top ((1.6 + 0.55) × 3/16; element depth 0.55 [unverified]).
+- **Outline:** a trapezoid 265.8 × 64.8 mm, its slanted ends parallel to the
+  staircase's ends: 8 mm beyond the outermost keys along X, 8 mm in front of row
+  0 and behind row 3.
+- **Screw holes:** seven ⌀2.2 for M2 (cover through the board into the housing),
+  between keys and clear of the tubes' shrouds: (±80, 0) and (0, 0) at
+  Y = 24.4 (between rows 1 and 2), (±50, −5) and (±60, 53.8).
+- **All parts on the underside**, so the cover with the key tubes lies flat on
+  the top, which carries only the ground plane.
+
+## 3. Circuit
+
+| Part | Count | What for |
+|---|---|---|
+| DRV5055A3QDBZR, SOT-23 | 46 | linear Hall sensor, ±85 mT, ratiometric to 3.3 V [datasheet] |
+| 100 nF 0402 | 46 | one beside every sensor (datasheet: at least 10 nF) |
+| ADS7138IRTER, WQFN-16 3 × 3 | 6 | 8 channels, 12 bit, I²C [datasheet SBAS976A] |
+| 1 µF 0402 | 18 | AVDD, DVDD and DECAP of every ADC [datasheet] |
+| address resistors 0402 | 5 | 11h/12h/13h: 11k/33k/100k to GND; 14h/15h: 100k/33k to DECAP; 10h: none |
+| JST SH BM05B-SRSS-TB | 1 | bus, pins as on the switch boards: INT, 3V3, SDA, SCL, GND |
+| 10 µF 0805 | 1 | at the connector |
+| 10k, 4k7, 4k7 0402 | 3 | pull-ups INT, SDA, SCL |
+
+- **ADCs:** AVDD is also the ADC's reference. Sensors and ADCs share 3.3 V, so the
+  reading is ratiometric and supply drift cancels. [datasheet]
+- **ALERT** is its own pin on the ADS7138, so all 8 channels are inputs: 6 ADCs
+  give 48 channels for 46 keys. The six ALERTs (open drain) are wired together to
+  INT. Each channel's digital window comparator takes the calibrated actuation
+  point with hysteresis, and the ESP32 reads the flags when INT falls.
+- **Addresses 10h … 15h** do not collide with the PCAL9555A expanders (20h–27h).
+- **Pull-ups:** INT here. SDA and SCL are fitted here as well, marked "DNP?":
+  leave them out if the host's pull-ups suffice on the cable through the bellows.
+  [unverified]
+- **Current:** 46 × 2–4 mA ≈ 140 mA for the sensors, plus a few mA for the ADCs.
+  [datasheet: DRV5055, current revision]
+
+## 4. Which ADC reads which key
+
+- **Lower three ADCs** (between rows 0 and 1, Y = 8.1): all of row 0 and row 1
+  except its rightmost key, eight each, by X.
+- **Upper three ADCs** (between rows 2 and 3, Y = 40.7): the rest, 7/7/8, by X.
+- **Channels:** `gen_pcb.py` assigns the keys to the AIN pins by angle round the
+  chip, so the tracks fan out without crossing. The firmware's table is
+  `discant/channels.json` (address → AINn → row, key).
+
+## 5. Layout rules [chosen]
+
+- Two layers, 1.6 mm. Tracks 0.2 mm, clearance 0.2 mm; 3.3 V 0.4 mm where it
+  fits. Vias 0.6 / 0.3. Copper to the edge 0.3 mm.
+- **Routing:** on the underside. The top is the ground plane; tracks cross it
+  only briefly (4 × the cost per mm). Every ground pad gets a via to the plane
+  first; both faces are then filled with ground.
+
+## 6. Bass board [given: from the same description]
+
+- **Keys:** 2 × 9 as `../bass/layout.scad`: front row x = −80 … 80 at y = 0, back
+  row x = −70 … 90 at y = 16.
+- **Flat, not tilted** [chosen]. The back row stands 10 mm higher; a board in
+  that slope would be tilted 32°, and the collar would have to stop 1.4 mm
+  earlier. Instead the board lies flat under both rows, and the back row's tubes
+  and pins are 10 mm longer. Spring, stops and the magnet's distance to the sensor
+  stay the same, so all keys behave alike. (The key model has no parameter for
+  the longer back-row parts yet.)
+- **Outline:** a parallelogram 176 × 32 mm, both ends slanting with the rows'
+  10 mm offset, 8 mm beyond the outer keys.
+- **Three ADS7138**, between the rows at x = −55 / 5 / 65, six keys each, by X;
+  addresses 10h, 11h, 12h.
+- **Own I²C bus:** the discant already uses 10h–15h, and the ADS7138 has only
+  eight addresses, so the bass board goes to the ESP32's second I²C controller
+  inside the bass box. Same 5-pin JST SH, at the −x end between the rows, where
+  the bass boards' wires drop into the box today.
+- **Screw holes:** four, (±50, −5), (−40, 21), (60, 21).
+- **Current:** 18 × 2–4 mA ≈ 55 mA.
+- Replaces the two sawn switch boards and their PCAL9555A expanders (24h, 25h).

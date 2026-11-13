@@ -1,92 +1,74 @@
 # Builds every file generated from the discant's sources into ../build/discant/:
-# the housing, cover, main PCB and cable STLs, the assembly array.stl, the .js geometry
-# for array.html and the phone page phone.html. Only what changed is rebuilt.
+# housing, cover, the gauges with their wires, the Hall-sensor board with its part
+# bodies, the 46 keys, and the phone page phone.html. Only what changed is rebuilt.
 #   make                             everything (and the key's parts it needs)
-#   make ../build/discant/housing.js one file (and what it needs)
+#   make ../build/discant/cover.stl  one file (and what it needs)
 #   make -j                          in parallel
 #   make clean                       deletes ../build/discant/
 #
-# The key's parts (boards, connector, button) come from ../switch/ and are
-# built there, into ../build/switch/. OpenSCAD writes the files each output
-# reads (use <...>, import()) to ../build/discant/.deps/, so those dependencies
-# are tracked without listing them here.
+# The key's parts come from ../switch_hall/, built there into ../build/switch_hall/;
+# the board's data from ../hall_pcb/discant/board.scad (written by its build.sh).
+# OpenSCAD writes the files each output reads (use <...>, import()) to
+# ../build/discant/.deps/, so those dependencies are tracked without listing them here.
+#
+# Still in this folder from the four-board staircase, not built any more and kept for
+# the bass and the assembly until they are moved over: array.scad, array.html,
+# main_pcb.scad, stl2js.py.
 
 OPENSCAD ?= openscad
 PYTHON   ?= python3
 B        := ../build/discant
-KEY      := ../build/switch
+KEY      := ../build/switch_hall
 
-BODY_STL := $(addprefix $(B)/,main_pcb.stl gauge_link.stl housing.stl cover.stl)
-JS       := $(addprefix $(B)/,housing.js cover.js pcb_cable.js main_pcb.js gauge_link.js)
-KEY_STL  := $(addprefix $(KEY)/,pcb.stl pcb_12.stl pcb_11.stl pcb_10.stl pcb_connector.stl \
-                                button.stl felt.stl washer.stl sleeve.stl screw.stl guide.stl spring.stl)
-PHONE_KEY := $(addprefix $(KEY)/,pcb_board.stl pcb_copper.stl pcb_board_12.stl pcb_copper_12.stl \
-                                 pcb_board_11.stl pcb_copper_11.stl pcb_board_10.stl pcb_copper_10.stl)
+BODY_STL := $(addprefix $(B)/,housing.stl cover.stl gauge_link.stl)
+KEY_STL  := $(addprefix $(KEY)/,cap.stl plunger.stl magnet.stl oring.stl stop.stl \
+                                cap_down.stl plunger_down.stl magnet_down.stl oring_down.stl stop_down.stl)
 
-all: $(BODY_STL) $(B)/pcb_cable.stl $(B)/array.stl $(JS) $(B)/phone.html
+all: $(BODY_STL) $(B)/gauge_lid.stl $(B)/board.stl $(B)/board_parts.stl $(B)/keys.stl $(B)/keys_down.stl $(B)/phone.html
 
 # $(call scad,source,extra options)
 scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
-       $(OPENSCAD) -q -o $@ -d $(B)/.deps/$(notdir $@).d $(2) $(1)
+       $(OPENSCAD) -q --export-format binstl -o $@ -d $(B)/.deps/$(notdir $@).d $(2) $(1)
 
-# --- one part per file
 $(BODY_STL): $(B)/%.stl: %.scad
 	$(call scad,$<)
 
 # gauge_link.scad imports the gauge's STLs, built in ../strain_gauge/; the outer
-# holders become part of the housing
+# holders are part of the housing
 GAUGE_STL := $(addprefix ../build/strain_gauge/,outer_holder.stl inner_holder.stl strain_gauge_plate.stl)
 $(B)/gauge_link.stl $(B)/housing.stl: $(GAUGE_STL)
 $(GAUGE_STL): gauge ;
 gauge:
 	@$(MAKE) --no-print-directory -C ../strain_gauge
 
-# the cables come from the same source as the board
-$(B)/pcb_cable.stl: main_pcb.scad
-	$(call scad,$<,-D 'show="cables"')
+# the link pocket's lid, a printed part of its own
+$(B)/gauge_lid.stl: gauge_link.scad
+	$(call scad,$<,-D 'part="lid"')
 
-# the routed main PCB (main_pcb/, KiCad) in 3D, and its pieces for the phone page
-KICAD3D := $(addprefix $(B)/main_pcb/,kicad_board.stl kicad_copper.stl kicad_parts.stl)
-$(KICAD3D) &: main_pcb/main_pcb.kicad_pcb main_pcb/export_3d.py main_pcb/design.py
-	@echo "  KICAD    $(B)/main_pcb/"
-	@cd main_pcb && $(PYTHON) export_3d.py ../$(B)/main_pcb > /dev/null
-$(B)/main_pcb.stl: $(KICAD3D)
-MAIN_PIECES := $(addprefix $(B)/,main_pcb_laminate.stl main_pcb_parts.stl main_pcb_copper.stl)
-$(MAIN_PIECES): $(B)/main_pcb_%.stl: main_pcb.scad $(KICAD3D)
-	$(call scad,$<,-D 'show="$*"')
+# the board: laminate, and the parts' bodies on its underside
+$(B)/board.stl: board.scad
+	$(call scad,$<,-D 'part="board"')
+$(B)/board_parts.stl: board.scad
+	$(call scad,$<,-D 'part="parts"')
 
-# array.scad imports the key's STLs from ../build/switch/. The key's own
-# Makefile brings them up to date first (once per run); the assembly is rebuilt
-# only if one of them changed.
-$(B)/array.stl: array.scad $(KEY_STL)
+# the keys, at rest and pressed (springs left out, see keys.scad)
+$(B)/keys.stl: keys.scad $(KEY_STL)
 	$(call scad,$<)
-$(KEY_STL) $(PHONE_KEY): key ;
+$(B)/keys_down.stl: keys.scad $(KEY_STL)
+	$(call scad,$<,-D down=true)
+$(KEY_STL): key ;
 key:
-	@$(MAKE) --no-print-directory -C ../switch
-
-# --- geometry for array.html
-$(B)/housing.js:    VAR = HOUSING_TRIS
-$(B)/cover.js:      VAR = COVER_TRIS
-$(B)/pcb_cable.js:  VAR = CABLE_TRIS
-$(B)/main_pcb.js:   VAR = MAIN_PCB_TRIS
-$(B)/gauge_link.js: VAR = LINK_TRIS
-$(JS): $(B)/%.js: $(B)/%.stl stl2js.py
-	@echo "  STL2JS   $@"
-	@$(PYTHON) stl2js.py $< $@ $(VAR)
+	@$(MAKE) --no-print-directory -C ../switch_hall
 
 # --- phone page: phone.html with every part embedded (embed_parts.py), one
 # file that loads nothing else; NAME=stl as the page reads them
-PHONE_PARTS := BOARD13_TRIS=$(KEY)/pcb_board.stl COPPER13_TRIS=$(KEY)/pcb_copper.stl \
-               BOARD12_TRIS=$(KEY)/pcb_board_12.stl COPPER12_TRIS=$(KEY)/pcb_copper_12.stl \
-               BOARD11_TRIS=$(KEY)/pcb_board_11.stl COPPER11_TRIS=$(KEY)/pcb_copper_11.stl \
-               BOARD10_TRIS=$(KEY)/pcb_board_10.stl COPPER10_TRIS=$(KEY)/pcb_copper_10.stl \
-               CONN_TRIS=$(KEY)/pcb_connector.stl \
-               HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl CABLE_TRIS=$(B)/pcb_cable.stl MAIN_PCB_TRIS=$(B)/main_pcb_laminate.stl MAIN_PARTS_TRIS=$(B)/main_pcb_parts.stl MAIN_CU_TRIS=$(B)/main_pcb_copper.stl LINK_TRIS=$(B)/gauge_link.stl \
-               BUTTON_TRIS=$(KEY)/button.stl FELT_TRIS=$(KEY)/felt.stl WASHER_TRIS=$(KEY)/washer.stl \
-               SLEEVE_TRIS=$(KEY)/sleeve.stl SCREW_TRIS=$(KEY)/screw.stl SPRING_TRIS=$(KEY)/spring.stl
-$(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(B)/pcb_cable.stl $(MAIN_PIECES) $(KEY_STL) $(PHONE_KEY)
+PHONE_PARTS := BOARD_TRIS=$(B)/board.stl PARTS_TRIS=$(B)/board_parts.stl \
+               HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl LINK_TRIS=$(B)/gauge_link.stl LID_TRIS=$(B)/gauge_lid.stl \
+               CAP_TRIS=$(KEY)/cap.stl PLUNGER_TRIS=$(KEY)/plunger.stl MAGNET_TRIS=$(KEY)/magnet.stl \
+               ORING_TRIS=$(KEY)/oring.stl STOP_TRIS=$(KEY)/stop.stl
+$(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(B)/gauge_lid.stl $(B)/board.stl $(B)/board_parts.stl $(KEY_STL) ../hall_pcb/discant/board.scad
 	@echo "  EMBED    $@"
-	@$(PYTHON) embed_parts.py $< $@ $(PHONE_PARTS)
+	@$(PYTHON) embed_parts.py $< $@ --keys ../hall_pcb/discant/board.scad $(PHONE_PARTS)
 
 clean:
 	rm -rf $(B)

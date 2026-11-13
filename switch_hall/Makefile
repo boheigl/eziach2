@@ -8,12 +8,17 @@ OPENSCAD ?= openscad
 B        := ../build/switch_hall
 
 PARTS := cap plunger magnet oring stop spring tube sensor board
+MOVING := cap plunger magnet oring stop spring
 STL   := $(addprefix $(B)/,$(addsuffix .stl,$(PARTS)) key.stl)
+# the moving parts at the lower stop, for the cases' assemblies and clash checks
+DOWN  := $(addprefix $(B)/,$(addsuffix _down.stl,$(MOVING)))
 
-all: $(STL)
+all: $(STL) $(DOWN)
 
 $(B)/key.stl: key.scad
 	@mkdir -p $(B) && echo "  OPENSCAD $@" && $(OPENSCAD) -q -o $@ $<
+$(DOWN): $(B)/%_down.stl: key.scad
+	@mkdir -p $(B) && echo "  OPENSCAD $@" && $(OPENSCAD) -q -o $@ -D 'part="$*"' -D travel=3 $<
 $(B)/%.stl: key.scad
 	@mkdir -p $(B) && echo "  OPENSCAD $@" && $(OPENSCAD) -q -o $@ -D 'part="$*"' $<
 

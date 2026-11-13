@@ -3,7 +3,9 @@
 # <script type="text/plain" id="d-NAME"> block of base64 little-endian float32
 # x,y,z, three vertices per triangle (as stl2js.py), put where the page has
 # its "parts: filled in by embed_parts.py" comment.
-#   python3 embed_parts.py phone.html ../build/discant/phone.html NAME=part.stl ...
+#   python3 embed_parts.py phone.html ../build/discant/phone.html [--keys board.scad] NAME=part.stl ...
+# --keys fills the page's /*KEYS*/[] with [row, key, x] of every key (hall_keys in the
+# board's data, ../hall_pcb/<board>/board.scad).
 import base64, re, struct, sys
 
 MARK = '<!-- parts: filled in by embed_parts.py -->'
@@ -20,10 +22,16 @@ def triangles(stl):
 
 
 page, out = sys.argv[1:3]
+args = sys.argv[3:]
 s = open(page).read()
+if args[:1] == ['--keys']:
+    m = re.search(r'hall_keys = (\[.*?\]\]);', open(args[1]).read())
+    keys = [[k[0], k[1], k[2]] for k in eval(m.group(1))]
+    s = s.replace('/*KEYS*/[]', repr(keys))
+    args = args[2:]
 assert s.count(MARK) == 1, 'the page needs exactly one parts comment'
 blocks = []
-for arg in sys.argv[3:]:
+for arg in args:
     name, stl = arg.split('=', 1)
     blocks.append('<script type="text/plain" id="d-%s">%s</script>' % (name, triangles(stl)))
 open(out, 'w').write(s.replace(MARK, '\n'.join(blocks)))
