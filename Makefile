@@ -5,7 +5,7 @@
 #   make -j               in parallel
 #   make clean            deletes build/
 
-FAST := switch discant strain_gauge
+FAST := switch switch_hall discant strain_gauge
 
 all: $(FAST)
 
