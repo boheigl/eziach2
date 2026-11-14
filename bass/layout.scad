@@ -18,7 +18,7 @@ cap_top  = [11, 21];             // cap tops at rest: the example's short and ta
 key_top   = 17.135;              // key.scad, board_tilt = 0: cap top over the board's middle (with the 4 mm bronze bushing)
 key_riser = 10;
 assert(abs(cap_top[1] - cap_top[0] - key_riser) < 1e-6, "the back row's riser must match the caps");
-cover_t  = 1.2;
+cover_t  = 2.4;                  // [given 2026-11-14: thicker, 1.2 before]
 pcb_t    = 1.6;
 cu_t     = 0.035;
 stroke   = 3;

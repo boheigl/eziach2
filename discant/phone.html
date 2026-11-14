@@ -49,6 +49,7 @@
   <div class="row">
     <button type="button" id="press">Press</button>
     <button type="button" id="hold" aria-pressed="false">Hold down</button>
+    <button type="button" id="allkeys" aria-pressed="false">All keys</button>
     <span class="val" id="travelval">0.000 mm</span>
   </div>
   <div class="row">
@@ -74,7 +75,7 @@
     <button type="button" id="interact" aria-pressed="false">Interact</button>
     <button type="button" id="reset">Reset view</button>
   </div>
-  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. Press moves the middle key of the front row 3 mm until its O-ring lands on the tube's top and back; Hold down keeps it there.
+  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. Press moves the middle key of the front row 3 mm until its O-ring lands on the tube's top and back; Hold down keeps it there; with All keys on, both act on every key. With Interact off, tap or click any key to press it.
     The board is drawn with its parts' bodies (boxes, from the KiCad board); the springs are left out, hidden under the caps' skirts.
     All parts come from the OpenSCAD build (switch_hall/, discant/, hall_pcb/).</p>
 </main>
@@ -135,15 +136,25 @@
   }
   var parts = {}, moving = new THREE.Group(), keysGrp = new THREE.Group();
   var buttonGrp = new THREE.Group(); buttonGrp.add(keysGrp, moving);
-  var PRESSED = 6;                      // index in KEYS: row 0's middle key (x = 0)
-  // one key part, copied to every key; the pressed key's copy goes into moving
+  var PRESSED = 6;                      // index in KEYS: row 0's middle key (x = 0), the one Press moves
+  // every key its own group at its place, each part copied into every group, so that any
+  // key can move on its own (Press, All keys, or tapped in the view)
+  var KEY_GRPS = KEYS.map(function (k) {
+    var g = new THREE.Group(); g.position.set(k[2], STEP[2] * k[0], -STEP[1] * k[0]);
+    g.userData.base = STEP[2] * k[0]; keysGrp.add(g); return g;
+  });
+  var tapAnim = KEYS.map(function () { return null; });
   function keyPart(name, colour) {
-    var g = mesh(name, colour), m = g.children[0];
-    KEYS.forEach(function (k, i) {
-      var c = i === 0 ? m : new THREE.Mesh(m.geometry, m.material);
-      c.position.set(k[2] + STEP[0] * 0 , STEP[2] * k[0], -STEP[1] * k[0]);
-      if (i === PRESSED) moving.add(c); else keysGrp.add(c);
+    var m = mesh(name, colour).children[0];
+    KEY_GRPS.forEach(function (g, i) { var c = new THREE.Mesh(m.geometry, m.material); c.userData.key = i; g.add(c); });
+  }
+  function placeKeys() {
+    KEY_GRPS.forEach(function (g, i) {
+      var d = (allKeys || i === PRESSED) ? travel : 0;
+      if (tapAnim[i] !== null) d = Math.max(d, STROKE * Math.sin(Math.PI * tapAnim[i]));
+      g.position.y = g.userData.base - d;
     });
+    draw();
   }
   // each group of parts has its own button (data-part); parts[k] is made on first use
   var vis = {};
@@ -259,7 +270,7 @@
   var travel = 0, anim = null;
   function setTravel(t) {
     travel = Math.max(0, Math.min(STROKE, t));
-    moving.position.y = -travel;
+    placeKeys();
     document.getElementById('travelval').textContent = travel.toFixed(3) + ' mm';
     draw();
   }
@@ -268,6 +279,23 @@
     b.setAttribute('aria-pressed', down ? 'true' : 'false'); anim = null; setTravel(down ? STROKE : 0);
   });
   document.getElementById('press').addEventListener('click', function () { anim = 0; });
+  // tap or click a key (Interact off) to press it
+  var ray = new THREE.Raycaster();
+  view.addEventListener('click', function (e) {
+    if (live || !KEY_GRPS) return;
+    var r = renderer.domElement.getBoundingClientRect();
+    var p = new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+    scene.updateMatrixWorld(); ray.setFromCamera(p, camera);
+    var hits = ray.intersectObjects(KEY_GRPS, true).filter(function (h) {
+      return h.object.visible && (!clipped || cutPlane.distanceToPoint(h.point) >= 0);
+    });
+    if (hits.length && hits[0].object.userData.key !== undefined) { tapAnim[hits[0].object.userData.key] = 0; draw(); }
+  });
+  // All keys: Press and Hold down move every key, not only the front row's middle one
+  var allKeys = false;
+  document.getElementById('allkeys').addEventListener('click', function () {
+    allKeys = !allKeys; this.setAttribute('aria-pressed', allKeys ? 'true' : 'false'); setTravel(travel);
+  });
 
   // section plane parallel to Y/Z (normal along x): keeps part x >= the value
   function applyCut() {
@@ -304,12 +332,16 @@
 
   var last = performance.now();
   function loop(now) {
-    var dt = (now - last) / 1000; last = now;
+    var dt = Math.min((now - last) / 1000, 0.05); last = now;   // a long pause must not skip an animation
     if (anim !== null) {   // down and back up, 1.4 s
       anim += dt / 1.4;
       setTravel(STROKE * Math.sin(Math.PI * Math.min(anim, 1)));
       if (anim >= 1) { anim = null; setTravel(0); }
     }
+    // keys tapped in the view: each its own press, down and back up
+    var tapping = false;
+    tapAnim.forEach(function (a, i) { if (a !== null) { tapAnim[i] = a + dt / 1.4 >= 1 ? null : a + dt / 1.4; tapping = true; } });
+    if (tapping) placeKeys();
     if (dirty) { renderer.render(scene, camera); dirty = false; }
     requestAnimationFrame(loop);
   }

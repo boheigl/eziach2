@@ -47,7 +47,7 @@
   <div id="view"><p id="hint" hidden>1 finger: turn · 2 fingers: zoom and move</p><p id="status">Tap “Load assembly” to start.</p></div>
   <div class="row"><button type="button" id="load">Load assembly</button></div>
   <div class="row" hidden>
-    <button type="button" id="press">Press</button>
+    <button type="button" id="press">Press all keys</button>
     <button type="button" id="hold" aria-pressed="false">Hold down</button>
     <span class="val" id="travelval">0.000 mm</span>
   </div>
@@ -80,7 +80,7 @@
     <button type="button" id="interact" aria-pressed="false">Interact</button>
     <button type="button" id="reset">Reset view</button>
   </div>
-  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. The bass on top, a closed box with its battery inside; the discant turned and behind it below: the gauges' plates sit in the discant's outer holders and the bass's inner holders, pointing along the bass's y. Both halves carry one Hall-sensor board each; the keys are drawn simply (cap, skirt, pin). Stored shows them for carrying: the discant turned and plugged into the short socket under the bass's deck, tilted by its slope so that its keys lie flat against the bass's box, which covers all but the outer ones: 271 × 38 × 158 mm. The thumb bar stays whole, the bass's box is long enough for it to slide past the mount. All parts come from the OpenSCAD build (switch_hall/, hall_pcb/, discant/, bass/, assembly/).</p>
+  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. The bass on top, a closed box with its battery inside; the discant turned and behind it below: the gauges' plates sit in the discant's outer holders and the bass's inner holders, pointing along the bass's y. Both halves carry one Hall-sensor board each; the keys are drawn simply (cap, skirt, pin; no springs). Press all keys moves all 64 by 3 mm and back, Hold down keeps them down; the discant's move along their own axis, tilted with the slope. Stored shows them for carrying: the discant turned and plugged into the short socket under the bass's deck, tilted by its slope so that its keys lie flat against the bass's box, which covers all but the outer ones: 271 × 38 × 158 mm. The thumb bar stays whole, the bass's box is long enough for it to slide past the mount. All parts come from the OpenSCAD build (switch_hall/, hall_pcb/, discant/, bass/, assembly/).</p>
 </main>
 
 <!-- parts: filled in by embed_parts.py -->
@@ -92,6 +92,7 @@
   window.addEventListener('error', function (e) { status('Error: ' + e.message, true); });
 
   var STROKE = 3;                                               // ../switch_hall/key.scad
+  var SLOPE = Math.atan(3 / 16), keysB = null, keysD = null;   // the discant's tilt; the two key sets
 
   var view = document.getElementById('view');
   var renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'low-power' });
@@ -158,7 +159,7 @@
     ['battery', function () { grp('pcb').add(mesh('B_BAT', 0x3d4a57)); }],
     ['bass cover', function () { grp('bcover').add(mesh('B_COVER', 0x5b6f86)); }],
     ['discant cover', function () { grp('dcover').add(mesh('D_COVER', 0x5b6f86)); }],
-    ['keys', function () { grp('keys').add(mesh('KEYS_B', 0x4a6fa5), mesh('KEYS_D', 0x4a6fa5)); }],
+    ['keys', function () { keysB = mesh('KEYS_B', 0x4a6fa5); keysD = mesh('KEYS_D', 0x4a6fa5); grp('keys').add(keysB, keysD); }],
     ['cables and gauges', function () { grp('cables').add(mesh('D_CABLES', 0xd8c08a), mesh('B_WIRES', 0xd8c08a), mesh('B_STRAP', 0x6b4a32)); }]
   ];
   scene.add(buttonGrp);
@@ -252,6 +253,11 @@
   function setTravel(t) {
     travel = Math.max(0, Math.min(STROKE, t));
     moving.position.y = -travel;
+    // Press and Hold down move all 64 keys (drawn simply, no springs): the bass's straight
+    // down, the discant's along their own axis, which played is tilted by the slope
+    // (atan(3/16)) towards the bass: part direction (0, sin t, -cos t), world (0, -cos t, -sin t)
+    if (keysB) keysB.position.y = -travel;
+    if (keysD) keysD.position.set(0, -travel * Math.cos(SLOPE), -travel * Math.sin(SLOPE));
     document.getElementById('travelval').textContent = travel.toFixed(3) + ' mm';
     draw();
   }
@@ -298,7 +304,7 @@
 
   var last = performance.now();
   function loop(now) {
-    var dt = (now - last) / 1000; last = now;
+    var dt = Math.min((now - last) / 1000, 0.05); last = now;   // a long pause must not skip an animation
     if (anim !== null) {   // down and back up, 1.4 s
       anim += dt / 1.4;
       setTravel(STROKE * Math.sin(Math.PI * Math.min(anim, 1)));

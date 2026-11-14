@@ -23,7 +23,7 @@ include <layout.scad>
 screw_d = 2.2; csk_d = 4.0;
 col_d   = 6.4;                   // the screw columns in the back block
 bore_d  = 4.4;                   // the screwdriver's bore down a column
-shell   = 1.2;
+shell   = 2.4;                   // the back block's walls and top, as thick as the slab
 corner_r = 4;                    // as the case's vertical edges
 recess = 1; recess_r = 6;        // the hand plate's recess, as case.scad
 K = "../build/switch_hall/";

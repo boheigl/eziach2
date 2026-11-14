@@ -49,6 +49,7 @@
   <div class="row">
     <button type="button" id="press">Press</button>
     <button type="button" id="hold" aria-pressed="false">Hold down</button>
+    <button type="button" id="allkeys" aria-pressed="false">All keys</button>
     <span class="val" id="travelval">0.000 mm</span>
   </div>
   <div class="row">
@@ -76,7 +77,7 @@
     <button type="button" id="interact" aria-pressed="false">Interact</button>
     <button type="button" id="reset">Reset view</button>
   </div>
-  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. The key deck on top: a thin tray round one Hall-sensor board under both rows, a cover with the keys' tubes and a 10 mm step for the back row, the hand plate's top flush with the cover; below it a thin closed box (11.2 mm), 211 mm wide, one rectangular block with the deck (stored, the discant's outer keys stay uncovered), ribbed inside for a stiff hand plate, closed at the back by a screwed cover; the hand plate (131.5 × 128.3 mm, from the earlier BassCase, half as wide and 25 % lower) is a shallow recess in its front. Inside, a 1S battery (dark, with the PCBs). In the step under the deck, behind the box, the gauges' inner holders are printed with the case, on the discant's gauge plates (grey). Every printed part (case, back cover, cover) has its own button; turn the Case off to see inside. Press moves the front row's middle key 3 mm until its O-ring lands on the tube's top and back; the springs are left out, hidden under the caps' skirts. Under the deck behind the box hangs the short socket for the stored discant; the box is long enough below the hand plate for the discant's whole thumb bar to slide past the mount. All parts come from the OpenSCAD build (switch_hall/, hall_pcb/ and bass/).</p>
+  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. The key deck on top: a thin tray round one Hall-sensor board under both rows, a cover with the keys' tubes and a 10 mm step for the back row, the hand plate's top flush with the cover; below it a thin closed box (11.2 mm), 211 mm wide, one rectangular block with the deck (stored, the discant's outer keys stay uncovered), ribbed inside for a stiff hand plate, closed at the back by a screwed cover; the hand plate (131.5 × 128.3 mm, from the earlier BassCase, half as wide and 25 % lower) is a shallow recess in its front. Inside, a 1S battery (dark, with the PCBs). In the step under the deck, behind the box, the gauges' inner holders are printed with the case, on the discant's gauge plates (grey). Every printed part (case, back cover, cover) has its own button; turn the Case off to see inside. Press moves the front row's middle key 3 mm until its O-ring lands on the tube's top and back (with All keys on, every key; with Interact off, tap or click any key to press it); the springs are left out, hidden under the caps' skirts. Under the deck behind the box hangs the short socket for the stored discant; the box is long enough below the hand plate for the discant's whole thumb bar to slide past the mount. All parts come from the OpenSCAD build (switch_hall/, hall_pcb/ and bass/).</p>
 </main>
 
 <!-- parts: filled in by embed_parts.py -->
@@ -87,7 +88,7 @@
   function status(t, bad) { statusEl.textContent = t; statusEl.className = bad ? 'bad' : ''; }
   window.addEventListener('error', function (e) { status('Error: ' + e.message, true); });
 
-  var BOARD_Z = -3.635;                                         // layout.scad: board_mid
+  var BOARD_Z = -6.135;                                         // layout.scad: board_mid (cap top 11 - key_top 17.135)
   var STROKE = 3;                                               // ../switch_hall/key.scad
   var KEY = [0, 0, BOARD_Z];                                    // the moving key: front row, x = 0
   // the keys (layout.scad): front row x = -80 .. 80 at y = 0, back row x = -70 .. 90 at y = 16
@@ -138,18 +139,34 @@
   }
   var parts = {}, moving = new THREE.Group(), springGrp = new THREE.Group();
   var buttonGrp = new THREE.Group(); buttonGrp.add(moving, springGrp);
-  // one key part per row (the back row's with the riser), copied to every key of the row;
-  // the front row's middle key goes into moving, the others into the keys' group
+  // every key its own group at its place, each row's part (the back row's with the riser)
+  // copied into its keys' groups, so that any key can move on its own (Press moves the
+  // front row's middle one, All keys every one, or tap a key in the view)
+  var KEY_GRPS = null, tapAnim = KEYS.map(function () { return null; });
+  var PRESSED = KEYS.findIndex(function (k) { return k[0] === 0 && k[1] === 0; });
+  function keyGroups() {
+    if (!KEY_GRPS) KEY_GRPS = KEYS.map(function (k) {
+      var g = new THREE.Group(); g.position.set(k[1], BOARD_Z, -k[2]); grp('keys').add(g); return g;
+    });
+    return KEY_GRPS;
+  }
   function keyPart(name, colour) {
     [0, 1].forEach(function (r) {
       var m = mesh(name + r + '_TRIS', colour).children[0];
-      KEYS.forEach(function (k) {
-        if (k[0] !== r) return;
-        var c = new THREE.Mesh(m.geometry, m.material);
-        c.position.set(k[1], BOARD_Z, -k[2]);
-        if (r === 0 && k[1] === 0) moving.add(c); else grp('keys').add(c);
+      keyGroups().forEach(function (g, i) {
+        if (KEYS[i][0] !== r) return;
+        var c = new THREE.Mesh(m.geometry, m.material); c.userData.key = i; g.add(c);
       });
     });
+  }
+  function placeKeys() {
+    if (!KEY_GRPS) return;
+    KEY_GRPS.forEach(function (g, i) {
+      var d = (allKeys || i === PRESSED) ? travel : 0;
+      if (tapAnim[i] !== null) d = Math.max(d, STROKE * Math.sin(Math.PI * tapAnim[i]));
+      g.position.y = BOARD_Z - d;
+    });
+    draw();
   }
   // each group of parts has its own button (data-part); parts[k] is made on first use
   var vis = {};
@@ -269,7 +286,7 @@
   var travel = 0, anim = null;
   function setTravel(t) {
     travel = Math.max(0, Math.min(STROKE, t));
-    moving.position.y = -travel;
+    placeKeys();
     document.getElementById('travelval').textContent = travel.toFixed(3) + ' mm';
     draw();
   }
@@ -278,6 +295,23 @@
     b.setAttribute('aria-pressed', down ? 'true' : 'false'); anim = null; setTravel(down ? STROKE : 0);
   });
   document.getElementById('press').addEventListener('click', function () { anim = 0; });
+  // tap or click a key (Interact off) to press it
+  var ray = new THREE.Raycaster();
+  view.addEventListener('click', function (e) {
+    if (live || !KEY_GRPS) return;
+    var r = renderer.domElement.getBoundingClientRect();
+    var p = new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+    scene.updateMatrixWorld(); ray.setFromCamera(p, camera);
+    var hits = ray.intersectObjects(KEY_GRPS, true).filter(function (h) {
+      return h.object.visible && (!clipped || cutPlane.distanceToPoint(h.point) >= 0);
+    });
+    if (hits.length && hits[0].object.userData.key !== undefined) { tapAnim[hits[0].object.userData.key] = 0; draw(); }
+  });
+  // All keys: Press and Hold down move every key, not only the front row's middle one
+  var allKeys = false;
+  document.getElementById('allkeys').addEventListener('click', function () {
+    allKeys = !allKeys; this.setAttribute('aria-pressed', allKeys ? 'true' : 'false'); setTravel(travel);
+  });
 
   // section plane parallel to Y/Z (normal along x): keeps part x >= the value
   function applyCut() {
@@ -314,12 +348,16 @@
 
   var last = performance.now();
   function loop(now) {
-    var dt = (now - last) / 1000; last = now;
+    var dt = Math.min((now - last) / 1000, 0.05); last = now;   // a long pause must not skip an animation
     if (anim !== null) {   // down and back up, 1.4 s
       anim += dt / 1.4;
       setTravel(STROKE * Math.sin(Math.PI * Math.min(anim, 1)));
       if (anim >= 1) { anim = null; setTravel(0); }
     }
+    // keys tapped in the view: each its own press, down and back up
+    var tapping = false;
+    tapAnim.forEach(function (a, i) { if (a !== null) { tapAnim[i] = a + dt / 1.4 >= 1 ? null : a + dt / 1.4; tapping = true; } });
+    if (tapping) placeKeys();
     if (dirty) { renderer.render(scene, camera); dirty = false; }
     requestAnimationFrame(loop);
   }

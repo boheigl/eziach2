@@ -36,11 +36,12 @@ case_wall  = 1.2;
 case_rim   = case_fit + case_wall;   // board edge to the outer faces
 part_gap   = 0.3;
 case_floor = 1.2;
-cover_t    = 1.2;
+cover_t    = 2.4;                    // [given 2026-11-14: thicker, 1.2 before]
 h_max = max([for (p = hall_parts) if (p[0] != "J1") p[6]]);
 w_ft  = -hall_t - h_max - part_gap;  // the floor's top (W)
 w_b   = w_ft - case_floor;           // the tray's bottom
-w_mid = (w_b + cover_t) / 2;         // the middle of the case's thickness
+w_mid = (w_b + 1.2) / 2;             // the gauges' plane: the middle of the case as it was with the 1.2 cover,
+                                     // kept (../bass/link.scad's mount and the stored position build on it)
 slab_back = hall_outline[2][1] + case_rim;   // the back face (Y)
 
 // THE THUMB BAR'S SHELF [given 2026-11-14: stiff enough]: along the tray's front face, at

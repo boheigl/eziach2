@@ -45,7 +45,7 @@ pitch    = 20;
 margin_n = 5.3;      // row to the -y edge
 margin_p = 9.4;      // row to the +y edge
 stair    = [10, 16, 3];  // board k+1 relative to board k
-cover_t  = 1.2;      // cover plate on the board's top: the spring seat
+cover_t  = 2.4;      // cover plate on the board's top [given 2026-11-14: thicker, 1.2 before]
 // The discant has one sensor board for all four rows, in the staircase's slope
 // plane (../hall_pcb/): it is tilted against each row by atan(3 / 16). The board
 // is drawn flat here; the tilt only lifts the collar (its edge up the slope would
@@ -137,7 +137,7 @@ z_top    = pcb_t / 2 + cu_t;               // board's top surface
 z_bot    = -pcb_t / 2 - cu_t;
 // the bushing stands spring_lift higher than the old printed guide's top (collar's edge + 4.5):
 // the spring's seat rises with it, so the spring keeps its length and its force
-spring_lift = collar_h + stop_t + bush_l - 4.5;
+spring_lift = collar_h + stop_t + bush_l - 4.5 - (cover_t - 1.2);   // the seat stays where it was with the 1.2 plate
 z_seat   = pcb_t / 2 + cover_t + riser + spring_lift;   // spring seat: a level floor inside the shroud
 z_cb     = z_top + floor_gap + collar_d / 2 * tan(board_tilt) + stroke;   // collar's lower face at rest
 z_step   = z_cb + collar_h + stop_t;       // the bushing's lower face: the upper stop
