@@ -4,14 +4,16 @@
 // Everything that moves is above the board, which has no key holes. The key
 // works like a linear Hall-effect keyboard switch:
 //
-// GUIDE. The cover plate (1.2 mm on the board's top, as ../discant/cover.scad)
-// carries a fixed tube round each key. A plunger runs in it: a collar at its
-// lower end in the tube's wider lower bore, and a pin above it in the narrower
-// upper bore. Collar and pin are the two guide points; at rest they are
-// guide_min apart, enough that a press at the cap's edge cannot jam it
-// (jamming needs an offset beyond span / (2 mu)). The plunger goes in from
-// below before the cover is screwed onto the board, so the step between the
-// two bores holds it captive; the cap is then pressed onto the pin's top.
+// GUIDE [given 2026-11-14: metal, less friction; the 4 mm bushing]. The cover plate
+// (1.2 mm on the board's top, as ../discant/cover.scad) carries a fixed tube round each
+// key, with a sintered bronze sleeve bearing pressed into it (d3 x D5 x 4, oil-
+// impregnated, a stock part). The plunger is a ground stainless steel rod d3 h6 running
+// in it, with a printed collar on its lower end that carries the magnet and the stop
+// washer and does not touch the tube. One bushing is the whole guide: steel in oiled
+// bronze runs at mu about 0.1, so a press jams only beyond bush_l / (2 mu) = 20 mm off
+// the axis, and still beyond 8 dry (mu 0.25): the cap's edge is at 7.5. The plunger
+// goes in from below before the cover is screwed onto the board; the collar under the
+// bushing holds it captive; the cap is then pressed onto the rod's top.
 //
 // SPRING. A stock compression spring (the one of ../switch/: d8 x 0.4 x 25,
 // 8 active coils) stands on the cover plate round the tube and pushes the cap
@@ -19,7 +21,7 @@
 // the lower stop it is still well above its minimum length.
 //
 // STOPS, both soft, so nothing clicks. Upper: a washer punched from 1 mm
-// silicone or PU sheet sits on the collar and bears on the step in the bore.
+// silicone or PU sheet sits on the collar and bears on the bushing's lower face.
 // Lower: a stock O-ring (silicone, soft) lies in a shallow counterbore in the
 // cap's underside round the pin and lands on the tube's top; it also centres
 // the spring's top coil.
@@ -62,17 +64,23 @@ riser = 0;
 cap_d    = 15;
 cap_h    = 2;
 cap_r    = 0.5;
-cap_sock = 1.5;      // pin pressed this far into the cap
+cap_sock = 1.5;      // rod pressed this far into the cap
 stroke   = 3;        // [given]
 
-/* [Plunger: pin and collar] */
-pin_d    = 3.6;
-collar_d = 4.6;
+/* [Plunger: a steel rod in a bronze bushing, a printed collar on its lower end] */
+rod_d    = 3;        // stainless steel 1.4301 (not magnetic), ground h6
+bush_d   = 3;        // sintered bronze sleeve bearing, oil-impregnated: d3 x D5 x 4 [stock]
+bush_od  = 5;
+bush_l   = 4;        // [given: 4, not 3: margin when it runs dry]
+bush_fit = 0.05;     // pressed into the printed tube: its seat 0.05 under D
+rod_clear = 0.2;     // radial, the rod above the bushing, where it does not guide
+pin_d    = rod_d;    // (the rod, as the cap and the O-ring see it)
+collar_d = 4.4;      // printed: carries magnet and stop washer, no longer guides
 collar_h = 2;
 floor_gap = 0.3;     // collar above the board at the lower stop
-gap      = 0.1;      // radial, pin and collar in their bores
-guide_min = 4.5;     // collar's lower edge to the tube's top, at rest
-mu       = 0.25;     // friction, plunger in the tube (POM, greased) [estimated]
+gap      = 0.2;      // radial, collar in the lower bore: no contact
+mu       = 0.1;      // steel in oiled sintered bronze [estimated]
+mu_dry   = 0.25;     // dry or dirty [estimated]
 
 /* [Tube — part of the cover] */
 tube_od  = 6.6;
@@ -95,7 +103,7 @@ oring_gap  = 0.1;    // radial, O-ring in its counterbore
 /* [Upper stop: washer punched from 1 mm silicone or PU sheet] */
 stop_t   = 1;
 stop_od  = 4.5;      // hollow punches in 0.5 mm steps
-stop_id  = 3.5;      // a little under the pin: it holds itself
+stop_id  = 2.5;      // a little under the rod: it holds itself (punched, stretched over it)
 
 /* [Spring — stock, as ../switch/: d8 x 0.4 x 25, 8 active coils] */
 spring_wd = 0.4;
@@ -120,17 +128,21 @@ sens_range = 85;     // mT, DRV5055A3
 
 /* [Position and output] */
 travel   = 0;        // 0 .. stroke
-part     = "all";    // all, plunger, cap, magnet, oring, stop, spring, tube, sensor, board
+part     = "all";    // all, plunger, cap, magnet, oring, stop, spring, tube, tube_body, tube_cut, sensor, board
 
 $fa = 2; $fs = 0.1;
 
 // ---------------------------------------------------------------- derived
 z_top    = pcb_t / 2 + cu_t;               // board's top surface
 z_bot    = -pcb_t / 2 - cu_t;
-z_seat   = pcb_t / 2 + cover_t + riser;    // spring seat: a level floor inside the shroud
+// the bushing stands spring_lift higher than the old printed guide's top (collar's edge + 4.5):
+// the spring's seat rises with it, so the spring keeps its length and its force
+spring_lift = collar_h + stop_t + bush_l - 4.5;
+z_seat   = pcb_t / 2 + cover_t + riser + spring_lift;   // spring seat: a level floor inside the shroud
 z_cb     = z_top + floor_gap + collar_d / 2 * tan(board_tilt) + stroke;   // collar's lower face at rest
-z_step   = z_cb + collar_h + stop_t;       // step between the bores
-z_tt     = z_cb + guide_min + riser;       // tube top
+z_step   = z_cb + collar_h + stop_t;       // the bushing's lower face: the upper stop
+z_bush   = [z_step, z_step + bush_l];      // the bushing
+z_tt     = z_bush[1] + riser;              // tube top: the bushing's top (the bass's back row: riser higher)
 oring_od = oring_id + 2 * oring_cs;
 oring_out = oring_cs - oring_seat;         // O-ring below the cap's underside
 cbore_d  = oring_od + 2 * oring_gap;
@@ -138,7 +150,7 @@ z_cu     = z_tt + oring_out + stroke;      // cap underside at rest
 z_ct     = z_cu + cap_h;                   // cap top at rest
 function key_cap_top() = z_ct;             // for ../discant/cover.scad (the thumb bar follows the caps)
 bore_lo  = collar_d + 2 * gap;
-bore_hi  = pin_d + 2 * gap;
+bore_hi  = rod_d + 2 * rod_clear;          // above the bushing
 shroud_id = spring_od + 2 * shroud_gap;
 shroud_od = shroud_id + 2 * shroud_wall;
 skirt_id  = shroud_od + 2 * skirt_gap;
@@ -159,8 +171,9 @@ f_bot      = spring_k * (spring_l0 - l_bot);
 tau_bot    = 8 * f_bot * spring_dm / (PI * pow(spring_wd, 3));   // uncorrected
 
 // guide
-span     = z_tt - z_cb;                    // guide points at rest
+span     = bush_l;                         // the guide's length
 e_jam    = span / (2 * mu);
+e_dry    = span / (2 * mu_dry);
 
 // field on the axis of a cylinder magnet, at distance s from its near face (mT)
 function bz(s) = 1000 * mag_Br / 2 * ((s + mag_l) / sqrt(pow(s + mag_l, 2) + pow(mag_d / 2, 2))
@@ -174,9 +187,9 @@ mag_V    = PI * mag_d * mag_d / 4 * mag_l;
 function bz_off(h, rho) = 1000 * mag_Br * mag_V / (4 * PI) * (2 * h * h - rho * rho) / pow(h * h + rho * rho, 2.5);
 b_nb     = bz_off(s_rest + mag_l / 2, pitch) - bz_off(s_rest - stroke + mag_l / 2, pitch);
 
-echo(str("plunger: collar d", collar_d, " x ", collar_h, " in d", bore_lo, ", pin d", pin_d, " in d", bore_hi,
-         "; tube d", tube_od, " up to z = ", z_tt, ", step at ", z_step));
-echo(str("guide span ", span, " at rest: jams only beyond ", e_jam, " off centre (cap edge ", cap_d / 2, ")"));
+echo(str("plunger: rod d", rod_d, " in a bushing d", bush_d, " x D", bush_od, " x ", bush_l, " at z = ", z_bush,
+         "; collar d", collar_d, " x ", collar_h, " in d", bore_lo, "; tube d", tube_od, " up to z = ", z_tt));
+echo(str("guide: jams only beyond ", e_jam, " off centre, dry beyond ", e_dry, " (cap edge ", cap_d / 2, ")"));
 echo(str("spring ", l_rest, " long at rest, ", l_bot, " at the bottom; rate ", spring_k, " N/mm; ",
          f_rest / 9.81 * 1000, " g -> ", f_bot / 9.81 * 1000, " g (+", (f_bot / f_rest - 1) * 100, " %); tau ", tau_bot));
 echo(str("field on the axis: ", b_rest, " mT at rest, ", b_bot, " mT at the bottom; neighbour pressed: ", b_nb, " mT"));
@@ -185,20 +198,20 @@ echo(str("spring hidden: skirt d", skirt_od, " / d", skirt_id, " x ", skirt_l, "
 echo(str("height: cap top ", z_ct, " .. board underside ", z_bot, " = ", z_ct - z_bot,
          "; sensor reaches ", z_bot - sens_h));
 
-assert(e_jam >= cap_d / 2, "guide too short: a press at the cap's edge can jam it");
+assert(e_dry >= cap_d / 2, "guide too short: a press at the cap's edge can jam it once the bushing runs dry");
+assert((tube_od - bush_od) / 2 >= 0.8 - 1e-6, "tube wall too thin round the bushing");
 assert(l_bot >= spring_lmin, "spring too short at the lower stop");
 assert(l_rest < spring_l0, "spring has no preload");
 assert(tube_od <= spring_od - 2 * spring_wd - 0.5, "tube too wide for the spring");
 assert((tube_od - bore_lo) / 2 >= 0.8, "tube wall too thin round the collar");
-assert(z_step < z_tt - 1, "upper bore too short");
 assert(z_tt > z_seat + 1, "tube does not rise above the cover");
 assert(cbore_d <= spring_od - 2 * spring_wd, "O-ring counterbore wider than the spring's inside: the top coil loses its seat");
 assert(oring_id > bore_hi && oring_id < tube_od, "O-ring does not land on the tube's top");
 assert(oring_id >= pin_d, "O-ring too tight on the pin");
 assert(oring_seat < oring_cs - 0.5, "O-ring hardly stands out of its counterbore");
 assert(stop_od <= bore_lo - 0.2, "stop washer rubs in the lower bore");
-assert(stop_id < pin_d && stop_id > pin_d - 0.3, "stop washer must sit a little tight on the pin");
-assert(stop_od > bore_hi + 0.4, "stop washer hardly meets the step");
+assert(stop_id < pin_d && stop_id >= pin_d - 0.5, "stop washer must sit a little tight on the rod (silicone stretches)");
+assert(stop_od > bush_d + 0.8, "stop washer hardly meets the bushing's face");
 assert(mag_d <= collar_d - 1.2 && mag_l <= collar_h - 0.3, "magnet does not fit the collar");
 assert(b_bot <= sens_range, "field beyond the sensor's range at the lower stop");
 assert(sens_l / 2 < margin_n, "sensor beyond the board's edge");
@@ -226,12 +239,19 @@ module skirt() translate([0, 0, z_cu - skirt_l + dz]) difference() {
     cylinder(d = skirt_od, h = skirt_l + 0.01);
     translate([0, 0, -1]) cylinder(d = skirt_id, h = skirt_l + 2);
 }
-module plunger() translate([0, 0, dz]) difference() {
-    union() {
-        translate([0, 0, z_cb]) cylinder(d = collar_d, h = collar_h);
-        translate([0, 0, z_cb + collar_h - 0.01]) cylinder(d = pin_d, h = z_cu + cap_sock - z_cb - collar_h);
-    }
-    translate([0, 0, z_cb - 0.01]) cylinder(d = mag_d + 0.05, h = mag_l);   // magnet pocket
+// the printed collar: magnet pocket from below, the rod glued in from above
+module collar() translate([0, 0, z_cb + dz]) difference() {
+    cylinder(d = collar_d, h = collar_h);
+    translate([0, 0, -0.01]) cylinder(d = mag_d + 0.05, h = mag_l);
+    translate([0, 0, mag_l - 0.01]) cylinder(d = rod_d, h = collar_h);
+}
+// the steel rod: from the magnet up into the cap
+module rod() translate([0, 0, z_cb + mag_l + dz]) cylinder(d = rod_d, h = z_cu + cap_sock - z_cb - mag_l);
+module plunger() { collar(); rod(); }
+// the bushing, fixed in the tube
+module bushing() translate([0, 0, z_bush[0]]) difference() {
+    cylinder(d = bush_od, h = bush_l);
+    translate([0, 0, -1]) cylinder(d = bush_d, h = bush_l + 2);
 }
 module magnet() translate([0, 0, z_cb + dz]) cylinder(d = mag_d, h = mag_l);
 module oring() translate([0, 0, z_cu + oring_seat - oring_cs / 2 + dz])
@@ -248,6 +268,7 @@ module tube_body() {
 }
 module tube_cut() {
     translate([0, 0, z_top - 0.01]) cylinder(d = bore_lo, h = z_step - z_top + 0.01);
+    translate([0, 0, z_bush[0] - 0.01]) cylinder(d = bush_od - bush_fit, h = bush_l + 0.01);   // the bushing's seat
     translate([0, 0, z_top]) cylinder(d = bore_hi, h = z_tt);
     translate([0, 0, z_seat]) difference() {   // the spring's room above the seat
         cylinder(d = shroud_id, h = z_sht);
@@ -289,7 +310,9 @@ if (part == "all") {
     color("Gainsboro") tube();
     color("Ivory") cap();
     color("Ivory") skirt();
-    color("Ivory") plunger();
+    color("Ivory") collar();
+    color("Silver") rod();
+    color("Peru") bushing();
     color("SlateGray") magnet();
     color("DimGray") oring();
     color("Firebrick") stop();
@@ -298,10 +321,15 @@ if (part == "all") {
 }
 else if (part == "cap")     { cap(); skirt(); }
 else if (part == "plunger") plunger();
+else if (part == "collar")  collar();
+else if (part == "rod")     rod();
+else if (part == "bushing") bushing();
 else if (part == "magnet")  magnet();
 else if (part == "oring")   oring();
 else if (part == "stop")    stop();
 else if (part == "spring")  spring();
 else if (part == "tube")    tube();
+else if (part == "tube_body") tube_body();   // for the cases that cannot use this file (another tilt or riser)
+else if (part == "tube_cut")  tube_cut();
 else if (part == "sensor")  sensor();
 else if (part == "board")   board();

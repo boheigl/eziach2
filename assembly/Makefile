@@ -8,13 +8,13 @@ PYTHON   ?= python3
 B  := ../build/assembly
 BB := ../build/bass
 
-PIECES := $(addprefix $(B)/,d_housing.stl d_cover.stl d_boards.stl d_copper.stl d_conn.stl d_main.stl d_main_cu.stl d_cables.stl \
+PIECES := $(addprefix $(B)/,d_housing.stl d_cover.stl d_boards.stl d_parts.stl d_cables.stl \
                            keys_bass.stl keys_discant.stl)
 
 all: $(B)/phone.html
 
-# the discant's pieces come in as its built STLs (and the routed board's 3D export)
-D_STL := $(wildcard ../build/discant/*.stl ../build/discant/main_pcb/*.stl)
+# the discant's pieces come in as its built STLs
+D_STL := $(wildcard ../build/discant/*.stl)
 $(PIECES): $(B)/%.stl: assembly.scad ../bass/link.scad ../bass/layout.scad $(D_STL) | parts
 	@mkdir -p $(B) && echo "  OPENSCAD $@" && $(OPENSCAD) -q -o $@ -D 'part="$*"' $<
 
@@ -22,11 +22,11 @@ parts:
 	@$(MAKE) --no-print-directory -C ../discant
 	@$(MAKE) --no-print-directory -C ../bass
 
-PHONE_PARTS := B_CASE=$(BB)/case.stl B_LID=$(BB)/back_cover.stl B_BAT=$(BB)/battery.stl B_COVER=$(BB)/cover.stl B_LAM=$(BB)/laminate.stl B_CU=$(BB)/copper.stl B_CONN=$(BB)/connectors.stl B_ELEC=$(BB)/elec.stl B_WIRES=$(BB)/wires.stl \
-               D_HOUSING=$(B)/d_housing.stl D_COVER=$(B)/d_cover.stl D_BOARDS=$(B)/d_boards.stl D_CU=$(B)/d_copper.stl \
-               D_CONN=$(B)/d_conn.stl D_MAIN=$(B)/d_main.stl D_MAIN_CU=$(B)/d_main_cu.stl D_CABLES=$(B)/d_cables.stl \
+PHONE_PARTS := B_CASE=$(BB)/case.stl B_LID=$(BB)/back_cover.stl B_CSCREW=$(BB)/cover_screws.stl B_BAT=$(BB)/battery.stl B_COVER=$(BB)/cover.stl B_BOARD=$(BB)/boards.stl B_CONN=$(BB)/connectors.stl B_ELEC=$(BB)/elec.stl B_WIRES=$(BB)/wires.stl B_STRAP=$(BB)/strap.stl \
+               D_HOUSING=$(B)/d_housing.stl D_COVER=$(B)/d_cover.stl D_BOARDS=$(B)/d_boards.stl D_PARTS=$(B)/d_parts.stl \
+               D_CABLES=$(B)/d_cables.stl \
                KEYS_B=$(B)/keys_bass.stl KEYS_D=$(B)/keys_discant.stl
-BASS_STL := $(addprefix $(BB)/,case.stl back_cover.stl battery.stl cover.stl laminate.stl copper.stl connectors.stl elec.stl wires.stl)
+BASS_STL := $(addprefix $(BB)/,case.stl back_cover.stl cover_screws.stl battery.stl cover.stl boards.stl connectors.stl elec.stl wires.stl strap.stl)
 $(BASS_STL): parts ;
 $(B)/phone.html: phone.html ../discant/embed_parts.py $(PIECES) $(BASS_STL)
 	@echo "  EMBED    $@"

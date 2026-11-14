@@ -14,8 +14,8 @@
 //
 // GAUGES AND LINK BOARD (gauge_link.scad) [given 2026-11-13: in the tray's plane]: on
 // the back face, centred in the case's thickness, a pad with the gauges' outer holders,
-// and beside it a block with the link board's pocket, the board lying flat, closed by
-// a lid. The board's side-entry bus connector (J1, opening to the back) sits just in
+// and beside it a block with the link board's pocket, the board lying flat, flush with
+// the board's top: the cover closes it. The board's side-entry bus connector (J1, opening to the back) sits just in
 // front of the pocket: the plug's wires run straight in.
 //
 // Coordinates: the discant's frame (row 0 / board 0, z up); the tray is built in the
@@ -60,6 +60,13 @@ module supports() difference() {
     on_slab() hall_bodies(part_gap);
 }
 
+// J1 (2.95 high) and its plug stand deeper than the tray: a pod under them, its floor
+// pod_floor under the plug, from the link pocket's block forward [given 2026-11-14: hide it]
+pod_floor = 1.0;
+j1 = [for (q = hall_parts) if (q[0] == "J1") q][0];
+pod_b = -hall_t - max(j1[6] + part_gap, plug_h) - pod_floor;
+module conn_pod() on_slab() translate([-86.5, j1[3] - 1.5, pod_b])
+    cube([j1[4] + 1.5 - (-86.5), slab_back - (j1[3] - 1.5), w_b - pod_b + 0.01]);
 // the plug in J1, through the rim straight into the link pocket behind the back face
 module plug_cavity()
     on_slab() translate([hall_conn[0] - plug_hw, hall_conn_front - 0.3, -hall_t - plug_h])
@@ -72,6 +79,8 @@ module housing() union() {
     difference() {
         union() {
             slab_solid(w_b, 0, fit + wall);
+            front_shelf(w_b, w_b + shelf_t);              // the thumb bar sits on it (hall.scad)
+            conn_pod();
             gauge_housing_pads();
         }
         difference() { slab_solid(w_ft, 1, fit); supports(); }

@@ -11,3 +11,4 @@
 */best.kicad_pcb
 *.kicad_prl
 */viewer.html
+__pycache__/

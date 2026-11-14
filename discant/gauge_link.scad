@@ -26,8 +26,9 @@
 // discant's body lies relative to the bass changes (../assembly/).
 //
 // LINK BOARD [given: housed, no screws]: the bridges' ADC (NAU7802) on a small board,
-// lying flat in a pocket in a block beside the pad, closed by a lid from above that
-// snaps in with a hook at each end. Corner ledges carry the board. Five wires come from
+// lying flat in a pocket in a block beside the pad, flush with the board's top; the
+// discant's cover reaches out over the block and closes it [given 2026-11-14: cover and
+// lid one part] (gauge_cover_tongue(), cover.scad). Corner ledges carry the board. Five wires come from
 // the Hall-sensor board's bus connector J1 (../hall_pcb/): 3.3 V, ground, SDA, SCL, INT;
 // J1 is a side-entry JST at the board's back edge, just in front of the pocket, and the
 // plug's wires run straight in (housing.scad, plug_cavity()). The gauges' leads leave the
@@ -43,8 +44,8 @@
 // Part bodies are boxes; sizes [unverified] until the parts are chosen.
 //
 // make builds   openscad -o ../build/discant/gauge_link.stl gauge_link.scad   (part "link")
-//               openscad -o ../build/discant/gauge_lid.stl -D 'part="lid"' gauge_link.scad
-// housing.scad uses gauge_housing_pads(), gauge_holders() and gauge_housing_cuts().
+// housing.scad uses gauge_housing_pads(), gauge_holders() and gauge_housing_cuts();
+// cover.scad gauge_cover_tongue().
 
 include <hall.scad>
 
@@ -81,11 +82,7 @@ pk_y     = [back_y, back_y + 16.5];
 blk_y1   = back_y + 18;          // the block's back: 1.5 behind the pocket
 pk_floor = 1.0;                  // under the pocket
 ledge    = 1;                    // floor to the board: room for the wires' joints
-lid_t    = 1.2;
-lid_fit  = 0.1;
-lid_ledge = 0.8;                 // the lid rests on a step round the pocket
-hook_t   = 1;
-barb     = 0.4;                  // the hook's catch into the wall
+pk_head  = 0.3;                  // the board's parts to the cover over them
 
 /* [Contacts to the bass, between the outer holders (local)] */
 contact_y  = 84;                 // the pads' face (the outer holders' tips: 89.6)
@@ -127,23 +124,18 @@ module gauge_holders() {
     for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/outer_holder.stl");
     gauge_contact_boss();
 }
-pk_z     = [gz - half_h + pk_floor, gz + half_h - lid_t];   // the pocket below the lid
-lid_z    = [gz + half_h - lid_t, gz + half_h];
+// the pocket: its top at the board's top (W 0), where the cover lies; the board under it
+pk_top   = gz + (0 - w_mid);
+pk_z     = [pk_top - pk_head - board_t - ledge, pk_top];
+blk_z    = [pk_z[0] - pk_floor, pk_top];
 bd_x     = [pk_x[1] - 1.5 - board_w, pk_x[1] - 1.5];        // the board, at the pocket's +x end
 bd_y     = [pk_y[0] + 1.5, pk_y[0] + 1.5 + board_d];
 bd_z     = pk_z[0] + ledge;
 link_y   = plate_y0 + inner_end_abs;   // the inner holders' backs: where the bass's mount begins
 module link_board() gauge_tilt_frame() box(bd_x, bd_y, [bd_z, bd_z + board_t]);
-// the lid: flush with the block's top, on a step round the pocket; a hook at each end
-// snaps behind a catch in the wall
-module lid() gauge_tilt_frame() {
-    box([pk_x[0] - lid_ledge + lid_fit, pk_x[1] + lid_ledge - lid_fit],
-        [pk_y[0] - lid_ledge + lid_fit, pk_y[1] + lid_ledge - lid_fit], lid_z);
-    for (s = [0, 1]) let(e = pk_x[s] + (s == 0 ? lid_fit : -lid_fit), d = s == 0 ? 1 : -1) {
-        box([min(e, e + d * hook_t), max(e, e + d * hook_t)], [pk_y[0] + 4, pk_y[1] - 4], [lid_z[0] - 2.2, lid_z[0] + 0.01]);
-        box([min(e, e - d * barb), max(e, e - d * barb) + 0.01], [pk_y[0] + 4, pk_y[1] - 4], [lid_z[0] - 2.2, lid_z[0] - 1.6]);
-    }
-}
+// part of the cover: the plate over the pocket's block, cover_t thick, flush with the
+// cover's top (W 0 .. cover_t), out to the block's back
+module gauge_cover_tongue() gauge_tilt_frame() box([blk_x[0], gauge_x + pad_x[0]], [back_y - 1, blk_y1], [pk_top, pk_top + cover_t]);   // up to the pad, which stands higher
 
 // the bus wires: from the plug's end in J1 straight into the pocket, to the board's -x end
 function bundle_pts() = let(e = slab_local([hall_conn[0], hall_conn_front + 4.4, -hall_t - 1.6]))
@@ -177,25 +169,21 @@ module contact_wires() gauge_tilt_frame() {
 }
 
 module gauge_link() { gauge(); link_board(); bundle(); contact_board(); contact_wires(); }
-part = "link";   // "link": the gauges, boards and wires; "lid": the printed lid over the pocket
+part = "link";   // "link": the gauges, boards and wires
 
 // added to the housing: the gauge pad on the back face, and the pocket's block beside it
 module gauge_housing_pads() gauge_tilt_frame() {
     box([gauge_x + pad_x[0], gauge_x + pad_x[1]], [back_y - 1, back_y + pad_t], [gz - half_h, gz + half_h]);
-    box(blk_x, [back_y - 1, blk_y1], [gz - half_h, gz + half_h]);
+    box(blk_x, [back_y - 1, blk_y1], blk_z);
 }
 
-// cut from the housing: the pocket with its lid's step and catches, the groove
+// cut from the housing: the pocket, the groove
 module gauge_housing_cuts() gauge_tilt_frame() {
     difference() {
-        box(pk_x, pk_y, [pk_z[0], lid_z[0] + 0.01]);
+        box(pk_x, pk_y, [pk_z[0], pk_z[1] + 0.01]);
         // corner ledges under the board
         for (x = [bd_x[0], bd_x[1] - 3], y = [bd_y[0], bd_y[1] - 3]) box([x, x + 3], [y, y + 3], [pk_z[0] - 1, bd_z]);
     }
-    box([pk_x[0] - lid_ledge, pk_x[1] + lid_ledge], [pk_y[0] - lid_ledge, pk_y[1] + lid_ledge], [lid_z[0], lid_z[1] + 1]);
-    // the catches for the lid's hooks
-    box([pk_x[0] - barb, pk_x[0] + 0.01], [pk_y[0] + 3.8, pk_y[1] - 3.8], [lid_z[0] - 2.25, lid_z[0] - 1.55]);
-    box([pk_x[1] - 0.01, pk_x[1] + barb], [pk_y[0] + 3.8, pk_y[1] - 3.8], [lid_z[0] - 2.25, lid_z[0] - 1.55]);
     // groove and strips along the pad's face, from the pocket to past the far gauge
     g_x = [pk_x[1] - 0.1, gauge_x + gauge_dx + strip_in];
     box(g_x, [g_y - groove_d, g_y + 0.01], [gz - groove_h, gz + groove_h]);
@@ -211,4 +199,3 @@ echo(str("gauge frame on the tray's back face: pad face's middle at ", pivot_new
          "]), moved by ", gauge_shift, "; link board pocket x = ", pk_x, ", local y = ", pk_y));
 
 if (part == "link") gauge_link();
-if (part == "lid") lid();

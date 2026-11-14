@@ -52,16 +52,15 @@
     <span class="val" id="travelval">0.000 mm</span>
   </div>
   <div class="row">
-    <button type="button" id="cut" aria-pressed="false">Section X/Z</button>
-    <button type="button" id="cutback" aria-label="Move the section towards −y" disabled>−y</button>
-    <button type="button" id="cutfwd" aria-label="Move the section towards +y" disabled>+y</button>
-    <span class="val" id="cutval">y = 0</span>
+    <button type="button" id="cut" aria-pressed="false">Section Y/Z</button>
+    <button type="button" id="cutback" aria-label="Move the section towards −x" disabled>−x</button>
+    <button type="button" id="cutfwd" aria-label="Move the section towards +x" disabled>+x</button>
+    <span class="val" id="cutval">x = 0</span>
   </div>
   <div class="row">
     <button type="button" class="tog" data-part="pcb" aria-pressed="true">Board</button>
     <button type="button" class="tog" data-part="housing" aria-pressed="true">Housing</button>
     <button type="button" class="tog" data-part="cover" aria-pressed="true">Cover</button>
-    <button type="button" class="tog" data-part="lid" aria-pressed="true">Gauge lid</button>
     <button type="button" class="tog" data-part="cable" aria-pressed="true">Wires + gauges</button>
     <button type="button" class="tog" id="showbutton" aria-pressed="true">Keys</button>
   </div>
@@ -99,12 +98,16 @@
   renderer.domElement.addEventListener('webglcontextlost', function (e) { e.preventDefault(); status('Graphics memory ran out', true); });
   var scene = new THREE.Scene();
   scene.background = new THREE.Color(0xdfe5e2);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x58625e, 0.75));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x58625e, 0.6));
   var key = new THREE.DirectionalLight(0xffffff, 0.75); key.position.set(-3, 6, 5); scene.add(key);
   var under = new THREE.DirectionalLight(0xffffff, 0.7); under.position.set(2, -5, 3); scene.add(under);
+  // fill from behind, slightly below, and a little ambient, so faces turned away from the
+  // two lights above do not go black (kept weak: up and back faces got too bright)
+  var fill = new THREE.DirectionalLight(0xffffff, 0.4); fill.position.set(5, -2, -6); scene.add(fill);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.12));
   var camera = new THREE.PerspectiveCamera(30, 4 / 3, 2, 4000);
 
-  var cutPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0), planes = [cutPlane], solids = [], clipped = false;
+  var cutPlane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0), planes = [cutPlane], solids = [], clipped = false;
   // part (x, y, z) -> world (x, z, -y)
   function mesh(name, colour, offset) {
     var raw = atob(document.getElementById('d-' + name).textContent), bytes = new Uint8Array(raw.length);
@@ -159,7 +162,6 @@
     ['part bodies', function () { grp('pcb').add(mesh('PARTS_TRIS', 0x2b2f33)); }],
     ['housing', function () { grp('housing').add(mesh('HOUSING_TRIS', 0xd9a441)); }],
     ['cover', function () { grp('cover').add(mesh('COVER_TRIS', 0x5b6f86)); }],
-    ['gauge lid', function () { grp('lid').add(mesh('LID_TRIS', 0x7d93ab)); }],
     ['gauges and wires', function () { grp('cable').add(mesh('LINK_TRIS', 0x8a8f96)); }],
     ['caps', function () { keyPart('CAP_TRIS', 0x4a6fa5); }],
     ['plungers', function () { keyPart('PLUNGER_TRIS', 0xe8e2d2); }],
@@ -267,7 +269,7 @@
   });
   document.getElementById('press').addEventListener('click', function () { anim = 0; });
 
-  // section plane parallel to X/Z: keeps part y >= the slider value
+  // section plane parallel to Y/Z (normal along x): keeps part x >= the value
   function applyCut() {
     var on = document.getElementById('cut').getAttribute('aria-pressed') === 'true', y = cutY;
     if (on !== clipped) {   // clipping only while the section is on: materials and caps change then
@@ -283,17 +285,17 @@
       renderer.localClippingEnabled = on;
       clipped = on;
     }
-    cutPlane.set(new THREE.Vector3(0, 0, -1), -y);
+    cutPlane.set(new THREE.Vector3(1, 0, 0), -y);   // keeps x >= the value (y here is the section's x)
     document.getElementById('cutback').disabled = document.getElementById('cutfwd').disabled = !on;
-    document.getElementById('cutval').textContent = 'y = ' + y.toFixed(0);
+    document.getElementById('cutval').textContent = 'x = ' + y.toFixed(0);
     draw();
   }
   var cutY = 0;
   document.getElementById('cut').addEventListener('click', function () {
     this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); applyCut();
   });
-  document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-20, cutY - 4); applyCut(); });
-  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(92, cutY + 4); applyCut(); });
+  document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-135, cutY - 5); applyCut(); });
+  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(135, cutY + 5); applyCut(); });
   function showParts() { for (var k in parts) parts[k].visible = vis[k] !== false; draw(); }
   document.getElementById('showbutton').addEventListener('click', function () {
     var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on ? 'true' : 'false');

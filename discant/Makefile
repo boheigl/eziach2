@@ -24,7 +24,7 @@ BODY_STL := $(addprefix $(B)/,housing.stl cover.stl gauge_link.stl)
 KEY_STL  := $(addprefix $(KEY)/,cap.stl plunger.stl magnet.stl oring.stl stop.stl \
                                 cap_down.stl plunger_down.stl magnet_down.stl oring_down.stl stop_down.stl)
 
-all: $(BODY_STL) $(B)/gauge_lid.stl $(B)/board.stl $(B)/board_parts.stl $(B)/keys.stl $(B)/keys_down.stl $(B)/phone.html
+all: $(BODY_STL) $(B)/board.stl $(B)/board_parts.stl $(B)/keys.stl $(B)/keys_down.stl $(B)/phone.html
 
 # $(call scad,source,extra options)
 scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
@@ -41,9 +41,6 @@ $(GAUGE_STL): gauge ;
 gauge:
 	@$(MAKE) --no-print-directory -C ../strain_gauge
 
-# the link pocket's lid, a printed part of its own
-$(B)/gauge_lid.stl: gauge_link.scad
-	$(call scad,$<,-D 'part="lid"')
 
 # the board: laminate, and the parts' bodies on its underside
 $(B)/board.stl: board.scad
@@ -63,10 +60,10 @@ key:
 # --- phone page: phone.html with every part embedded (embed_parts.py), one
 # file that loads nothing else; NAME=stl as the page reads them
 PHONE_PARTS := BOARD_TRIS=$(B)/board.stl PARTS_TRIS=$(B)/board_parts.stl \
-               HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl LINK_TRIS=$(B)/gauge_link.stl LID_TRIS=$(B)/gauge_lid.stl \
+               HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl LINK_TRIS=$(B)/gauge_link.stl \
                CAP_TRIS=$(KEY)/cap.stl PLUNGER_TRIS=$(KEY)/plunger.stl MAGNET_TRIS=$(KEY)/magnet.stl \
                ORING_TRIS=$(KEY)/oring.stl STOP_TRIS=$(KEY)/stop.stl
-$(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(B)/gauge_lid.stl $(B)/board.stl $(B)/board_parts.stl $(KEY_STL) ../hall_pcb/discant/board.scad
+$(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(B)/board.stl $(B)/board_parts.stl $(KEY_STL) ../hall_pcb/discant/board.scad
 	@echo "  EMBED    $@"
 	@$(PYTHON) embed_parts.py $< $@ --keys ../hall_pcb/discant/board.scad $(PHONE_PARTS)
 

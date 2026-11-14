@@ -44,9 +44,17 @@ if BOARD == "discant":
     Y_FRONT, Y_BACK = -MARGIN_Y, (ROWS - 1) * D + MARGIN_Y
     def x_left(y):  return -120 - MARGIN_X + STAIR[0] * y / D
     def x_right(y): return 120 + MARGIN_X - STAIR[0] * y / D
-    # screws between keys, clear of the tubes' shrouds (r 5.1) and of the ADCs
-    HOLES = [(-80, 1.5 * D), (0, 1.5 * D), (80, 1.5 * D),
-             (-50, -5.0), (50, -5.0), (-60, 3 * D + 5.0), (60, 3 * D + 5.0)]
+    # SCREWS on a regular grid [given 2026-11-14: regular, stiff enough]: in each gap between
+    # two rows every GRID mm, half way between a key of each row (9.5 from both axes; the
+    # tubes' shrouds end at 5.1), so the lines step 10 per row as the staircase does; a line
+    # in front of row 0 and one behind row 3, half way between their keys. The ADCs sit
+    # between the screws (ADC_SLOTS).
+    GRID = 40
+    def _line(y, x0):
+        return [(x0 + GRID * j, y) for j in range(-8, 9) if x_left(y) + 6 <= x0 + GRID * j <= x_right(y) - 6]
+    HOLES = (_line(-5.0, -110) + [h for g in range(ROWS - 1) for h in _line((g + 0.5) * D, -115 + 10 * g)]
+             + _line(3 * D + 5.0, -60))
+    ADC_SLOTS = {g: [x + GRID / 2 for x, y in _line((g + 0.5) * D, -115 + 10 * g)] for g in range(ROWS - 1)}
     TITLE = "Discant Hall-sensor board"
     BUS_TITLE = "Bus to the ESP32 in the bass (through the bellows)"
 else:
@@ -67,7 +75,15 @@ else:
     Y_FRONT, Y_BACK = -MARGIN_Y, (ROWS - 1) * D + MARGIN_Y
     def x_left(y):  return -80 - MARGIN_X + STAIR[0] * y / D
     def x_right(y): return 80 + MARGIN_X + STAIR[0] * y / D
-    HOLES = [(-50, -5.0), (50, -5.0), (-40, D + 5.0), (60, D + 5.0)]
+    # SCREWS on a regular grid, as the discant's: in the gap every GRID mm half way between a
+    # key of each row, a line in front of the front row and one behind the back row, half
+    # way between their keys (J1 sits between the front keys at -80 and -60). The back line
+    # also carries the stored discant's sockets (../bass/link.scad, at x -20 and 30).
+    GRID = 40
+    def _line(y, x0):
+        return [(x0 + GRID * j, y) for j in range(-8, 9) if x_left(y) + 6 <= x0 + GRID * j <= x_right(y) - 6]
+    HOLES = _line(-5.0, -50) + _line(0.5 * D, -75) + _line(D + 5.0, -40)
+    ADC_SLOTS = {0: [x + GRID / 2 for x, y in _line(0.5 * D, -75)]}
     TITLE = "Bass Hall-sensor board"
     BUS_TITLE = "Second I2C bus of the ESP32 (inside the bass box)"
 
@@ -122,8 +138,13 @@ else:
     GROUPS = [both[0:6], both[6:12], both[12:18]]
     ADC_Y = [0.5 * D] * 3
 assert sum(len(g) for g in GROUPS) == len(KEYS) and all(len(g) <= 8 for g in GROUPS)
+_taken = []
 for a, g in enumerate(GROUPS):
-    x = sum(key_xy(*q)[0] for q in g) / len(g)
+    # the slot between two screws nearest the keys' middle, in the ADC's gap
+    gap = round(ADC_Y[a] / D - 0.5)
+    xm = sum(key_xy(*q)[0] for q in g) / len(g)
+    x = min((sl for sl in ADC_SLOTS[gap] if sl not in _taken), key=lambda sl: abs(sl - xm))
+    _taken.append(x)
     pins = {"7": "+3V3", "8": f"DECAP{a}", "9": "GND", "10": "+3V3", "11": f"ADDR{a}", "12": "INT",
             "13": "SCL", "14": "SDA", "17": "GND"}
     # channels: gen_pcb.py assigns the keys to the AIN pins by angle round the chip, so
@@ -143,6 +164,7 @@ for a, g in enumerate(GROUPS):
         # 10h: ADDR left open; the net still needs its pin alone
         pins["11"] = None
 GROUP_OF = {q: a for a, g in enumerate(GROUPS) for q in g}
+
 # small parts round each ADC: (ref suffix, pin it serves), placed by gen_pcb.py
 ADC_SMALL = [("C{}1", "7"), ("C{}2", "8"), ("C{}3", "10"), ("R{}", "11")]
 
@@ -151,7 +173,6 @@ ADC_SMALL = [("C{}1", "7"), ("C{}2", "8"), ("C{}3", "10"), ("R{}", "11")]
 # discant: side entry at the back edge between keys 1 and 2 of row 3, its opening to
 #   the back, straight in front of the link board's pocket in the housing's back wall
 #   (../discant/gauge_link.scad), so the plug's wires run straight into it;
-# bass: vertical, at the -x end between the rows, where the wires drop into the box
 if BOARD == "discant":
     CONN_XY = (-80.0, Y_BACK - 3.0 - 2.575)   # opening 3 inside the back edge: room for the plug
     part("J1", "SM05B-SRSS-TB", JST5_SIDE, {"1": "INT", "2": "+3V3", "3": "SDA", "4": "SCL", "5": "GND", "MP": "GND"},
@@ -163,13 +184,15 @@ if BOARD == "discant":
     for i, (r, v, n) in enumerate([("R11", "10k", "INT"), ("R12", "4k7 (DNP?)", "SDA"), ("R13", "4k7 (DNP?)", "SCL")]):
         part(r, v, R0402, {"1": n, "2": "+3V3"}, (CONN_XY[0] - 6.0, CONN_XY[1] + 1.3 - 1.3 * i), group="bus")
 else:
-    CONN_XY = (-76.0, 0.5 * D)
+    # bass: vertical, between keys 1 and 2 of the front row, in front of them: the plug comes
+    # from below and its wires drop straight into the thin box under the deck (../bass/)
+    CONN_XY = (-70.0, -4.5)
     part("J1", "BM05B-SRSS-TB", JST5, {"1": "INT", "2": "+3V3", "3": "SDA", "4": "SCL", "5": "GND", "MP": "GND"},
          CONN_XY, group="bus", title=BUS_TITLE,
          pinfo={"1": "INT", "2": "3V3", "3": "SDA", "4": "SCL", "5": "GND", "MP": "MP"})
-    part("C1", "10u", C0805, {"1": "+3V3", "2": "GND"}, (CONN_XY[0] + 1.0, CONN_XY[1] + 4.5), group="bus")
-    part("R11", "10k", R0402, {"1": "INT", "2": "+3V3"}, (CONN_XY[0] - 1.6, CONN_XY[1] - 4.5), rot=90, group="bus")
-    part("R12", "4k7 (DNP?)", R0402, {"1": "SDA", "2": "+3V3"}, (CONN_XY[0], CONN_XY[1] - 4.5), rot=90, group="bus")
-    part("R13", "4k7 (DNP?)", R0402, {"1": "SCL", "2": "+3V3"}, (CONN_XY[0] + 1.6, CONN_XY[1] - 4.5), rot=90, group="bus")
+    part("C1", "10u", C0805, {"1": "+3V3", "2": "GND"}, (-62.0, 0.5 * D), rot=90, group="bus")
+    for i, (r, v, n) in enumerate([("R11", "10k", "INT"), ("R12", "4k7 (DNP?)", "SDA"), ("R13", "4k7 (DNP?)", "SCL")]):
+        part(r, v, R0402, {"1": n, "2": "+3V3"}, (-66.0, 0.5 * D - 1.3 + 1.3 * i), group="bus")
+
 
 POWER = {"+3V3"}

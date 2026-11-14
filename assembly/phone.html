@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- Phone view of the discant assembly. make builds ../build/discant/phone.html from this
      page with every part embedded as an inactive data block (embed_parts.py): the page
-     loads no files, which the claude.ai viewer refuses on phones (403). STROKE, FLOOR_Z
+     loads no files, which the claude.ai viewer refuses on phones (403). STROKE as
      and L_UP are as in ../switch/button.scad. -->
 <title>Eziach Assembly</title>
 <style>
@@ -52,17 +52,22 @@
     <span class="val" id="travelval">0.000 mm</span>
   </div>
   <div class="row">
-    <button type="button" id="cut" aria-pressed="false">Section X/Z</button>
-    <button type="button" id="cutback" aria-label="Move the section towards −y" disabled>−y</button>
-    <button type="button" id="cutfwd" aria-label="Move the section towards +y" disabled>+y</button>
-    <span class="val" id="cutval">y = 0</span>
+    <button type="button" id="cut" aria-pressed="false">Section Y/Z</button>
+    <button type="button" id="cutback" aria-label="Move the section towards −x" disabled>−x</button>
+    <button type="button" id="cutfwd" aria-label="Move the section towards +x" disabled>+x</button>
+    <span class="val" id="cutval">x = 0</span>
   </div>
   <div class="row">
-    <button type="button" class="tog" id="showpcb" aria-pressed="true">PCBs</button>
-    <button type="button" class="tog" id="showhousing" aria-pressed="true">Housings</button>
-    <button type="button" class="tog" id="showcover" aria-pressed="true">Covers</button>
-    <button type="button" class="tog" id="showcable" aria-pressed="true">Keys</button>
-    <button type="button" class="tog" id="showbutton" aria-pressed="true">Cables + gauges</button>
+    <button type="button" class="tog" data-part="bcase" aria-pressed="true">Bass case</button>
+    <button type="button" class="tog" data-part="blid" aria-pressed="true">Bass back cover</button>
+    <button type="button" class="tog" data-part="bcover" aria-pressed="true">Bass cover</button>
+    <button type="button" class="tog" data-part="dhousing" aria-pressed="true">Discant housing</button>
+    <button type="button" class="tog" data-part="dcover" aria-pressed="true">Discant cover</button>
+  </div>
+  <div class="row">
+    <button type="button" class="tog" data-part="pcb" aria-pressed="true">PCBs</button>
+    <button type="button" class="tog" data-part="keys" aria-pressed="true">Keys</button>
+    <button type="button" class="tog" data-part="cables" aria-pressed="true">Cables, strap, gauges</button>
     <button type="button" id="packed" aria-pressed="false">Stored</button>
   </div>
   <div class="row" aria-label="View">
@@ -75,7 +80,7 @@
     <button type="button" id="interact" aria-pressed="false">Interact</button>
     <button type="button" id="reset">Reset view</button>
   </div>
-  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. The bass, a closed box with its battery inside, on top; the discant turned and behind it below: the gauges' plates sit in the discant's outer holders and the bass's inner holders, pointing along the bass's y. The keys are drawn simply (stem, felt, cap). Stored shows them for carrying: the discant turned and plugged into the socket under the bass's deck, tilted by its slope so that its keys lie flat against the bass's box, which covers them, 283 × 40 × 150 mm. All parts come from the OpenSCAD build (switch/, discant/, bass/, assembly/).</p>
+  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. The bass on top, a closed box with its battery inside; the discant turned and behind it below: the gauges' plates sit in the discant's outer holders and the bass's inner holders, pointing along the bass's y. Both halves carry one Hall-sensor board each; the keys are drawn simply (cap, skirt, pin). Stored shows them for carrying: the discant turned and plugged into the short socket under the bass's deck, tilted by its slope so that its keys lie flat against the bass's box, which covers all but the outer ones: 271 × 38 × 158 mm. The thumb bar stays whole, the bass's box is long enough for it to slide past the mount. All parts come from the OpenSCAD build (switch_hall/, hall_pcb/, discant/, bass/, assembly/).</p>
 </main>
 
 <!-- parts: filled in by embed_parts.py -->
@@ -86,9 +91,7 @@
   function status(t, bad) { statusEl.textContent = t; statusEl.className = bad ? 'bad' : ''; }
   window.addEventListener('error', function (e) { status('Error: ' + e.message, true); });
 
-  var BOARD_Z = 3.0;                                            // layout.scad: front board centre
-  var STROKE = 2.965, FLOOR_Z = -16.5834 + BOARD_Z, L_UP = 9.14839;   // button.scad
-  var B0 = [40, 0, BOARD_Z], B1 = [50, 16, BOARD_Z], KEY = [0, 0, BOARD_Z];
+  var STROKE = 3;                                               // ../switch_hall/key.scad
 
   var view = document.getElementById('view');
   var renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'low-power' });
@@ -97,12 +100,16 @@
   renderer.domElement.addEventListener('webglcontextlost', function (e) { e.preventDefault(); status('Graphics memory ran out', true); });
   var scene = new THREE.Scene();
   scene.background = new THREE.Color(0xdfe5e2);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x58625e, 0.75));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x58625e, 0.6));
   var key = new THREE.DirectionalLight(0xffffff, 0.75); key.position.set(-3, 6, 5); scene.add(key);
   var under = new THREE.DirectionalLight(0xffffff, 0.7); under.position.set(2, -5, 3); scene.add(under);
+  // fill from behind, slightly below, and a little ambient, so faces turned away from the
+  // two lights above do not go black (kept weak: up and back faces got too bright)
+  var fill = new THREE.DirectionalLight(0xffffff, 0.4); fill.position.set(5, -2, -6); scene.add(fill);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.12));
   var camera = new THREE.PerspectiveCamera(30, 4 / 3, 2, 4000);
 
-  var cutPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0), planes = [cutPlane], solids = [], clipped = false;
+  var cutPlane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0), planes = [cutPlane], solids = [], clipped = false;
   // part (x, y, z) -> world (x, z, -y)
   function mesh(name, colour, offset) {
     var raw = atob(document.getElementById('d-' + name).textContent), bytes = new Uint8Array(raw.length);
@@ -130,18 +137,31 @@
   }
   var parts = {}, moving = new THREE.Group(), springGrp = new THREE.Group();
   var buttonGrp = new THREE.Group(); buttonGrp.add(moving, springGrp);
+  // each group of parts has its own button (data-part); parts[k] is made on first use
+  var vis = {};
+  function grp(k) {
+    if (!parts[k]) { parts[k] = new THREE.Group(); parts[k].visible = vis[k] !== false; scene.add(parts[k]); }
+    return parts[k];
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-part]'), function (b) {
+    b.addEventListener('click', function () {
+      var k = b.getAttribute('data-part'), on = vis[k] === false; vis[k] = on;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false'); showParts();
+    });
+  });
   var LOAD = [
-    ['bass boards', function () { parts.pcb.add(mesh('B_LAM', 0x2f7a4f), copper('B_CU'), mesh('B_CONN', 0x2b2f33), mesh('B_ELEC', 0x2f7a4f)); }],
-    ['discant boards', function () { parts.pcb.add(mesh('D_BOARDS', 0x2f7a4f), copper('D_CU'), mesh('D_CONN', 0x2b2f33)); }],
-    ['main PCB', function () { parts.pcb.add(mesh('D_MAIN', 0x2b6b48), copper('D_MAIN_CU')); }],
-    ['housings', function () { parts.housing = mesh('B_CASE', 0xd9a441); parts.housing.add(mesh('B_LID', 0xc99430), mesh('D_HOUSING', 0xd9a441)); scene.add(parts.housing); }],
-    ['battery', function () { parts.pcb.add(mesh('B_BAT', 0x3d4a57)); }],
-    ['covers', function () { parts.cover = mesh('B_COVER', 0x5b6f86); parts.cover.add(mesh('D_COVER', 0x5b6f86)); scene.add(parts.cover); }],
-    ['keys', function () { parts.cable = mesh('KEYS_B', 0x4a6fa5); parts.cable.add(mesh('KEYS_D', 0x4a6fa5)); scene.add(parts.cable); }],
-    ['cables and gauges', function () { buttonGrp.add(mesh('D_CABLES', 0xd8c08a), mesh('B_WIRES', 0xd8c08a)); }]
+    ['bass boards', function () { grp('pcb').add(mesh('B_BOARD', 0x2f7a4f), mesh('B_CONN', 0x2b2f33), mesh('B_ELEC', 0x2f7a4f)); }],
+    ['discant board', function () { grp('pcb').add(mesh('D_BOARDS', 0x2f7a4f), mesh('D_PARTS', 0x2b2f33)); }],
+    ['bass case', function () { grp('bcase').add(mesh('B_CASE', 0xd9a441)); }],
+    ['bass back cover', function () { grp('blid').add(mesh('B_LID', 0xc99430), mesh('B_CSCREW', 0x5d6166)); }],
+    ['discant housing', function () { grp('dhousing').add(mesh('D_HOUSING', 0xd9a441)); }],
+    ['battery', function () { grp('pcb').add(mesh('B_BAT', 0x3d4a57)); }],
+    ['bass cover', function () { grp('bcover').add(mesh('B_COVER', 0x5b6f86)); }],
+    ['discant cover', function () { grp('dcover').add(mesh('D_COVER', 0x5b6f86)); }],
+    ['keys', function () { grp('keys').add(mesh('KEYS_B', 0x4a6fa5), mesh('KEYS_D', 0x4a6fa5)); }],
+    ['cables and gauges', function () { grp('cables').add(mesh('D_CABLES', 0xd8c08a), mesh('B_WIRES', 0xd8c08a), mesh('B_STRAP', 0x6b4a32)); }]
   ];
   scene.add(buttonGrp);
-  parts.pcb = new THREE.Group(); scene.add(parts.pcb);   // the four boards and their connectors
 
   // camera orbits a target
   var target = new THREE.Vector3(0, -60, -40), azim = -0.95, elev = 0.4, dist = 820;
@@ -232,8 +252,6 @@
   function setTravel(t) {
     travel = Math.max(0, Math.min(STROKE, t));
     moving.position.y = -travel;
-    var s = (L_UP - travel) / L_UP;
-    springGrp.scale.y = s; springGrp.position.y = FLOOR_Z * (1 - s);
     document.getElementById('travelval').textContent = travel.toFixed(3) + ' mm';
     draw();
   }
@@ -243,7 +261,7 @@
   });
   document.getElementById('press').addEventListener('click', function () { anim = 0; });
 
-  // section plane parallel to X/Z: keeps part y >= the slider value
+  // section plane parallel to Y/Z (normal along x): keeps part x >= the value
   function applyCut() {
     var on = document.getElementById('cut').getAttribute('aria-pressed') === 'true', y = cutY;
     if (on !== clipped) {   // clipping only while the section is on: materials and caps change then
@@ -259,27 +277,24 @@
       renderer.localClippingEnabled = on;
       clipped = on;
     }
-    cutPlane.set(new THREE.Vector3(0, 0, -1), -y);
+    cutPlane.set(new THREE.Vector3(1, 0, 0), -y);   // keeps x >= the value (y here is the section's x)
     document.getElementById('cutback').disabled = document.getElementById('cutfwd').disabled = !on;
-    document.getElementById('cutval').textContent = 'y = ' + y.toFixed(0);
+    document.getElementById('cutval').textContent = 'x = ' + y.toFixed(0);
     draw();
   }
   var cutY = 0;
   document.getElementById('cut').addEventListener('click', function () {
     this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); applyCut();
   });
-  document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-10, cutY - 4); applyCut(); });
-  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(101, cutY + 4); applyCut(); });
-  [['showpcb', 'pcb'], ['showhousing', 'housing'], ['showcover', 'cover'], ['showcable', 'cable']].forEach(function (t) {
-    document.getElementById(t[0]).addEventListener('click', function () {
-      var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on ? 'true' : 'false');
-      if (parts[t[1]]) parts[t[1]].visible = on; draw();
-    });
-  });
-  document.getElementById('showbutton').addEventListener('click', function () {
-    var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on ? 'true' : 'false');
-    buttonGrp.visible = on; draw();
-  });
+  document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-135, cutY - 5); applyCut(); });
+  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(140, cutY + 5); applyCut(); });
+  // in the stored view the same buttons act on its copies (packedParts)
+  var packedOn = false, packedParts = {};
+  function showParts() {
+    for (var k in parts) parts[k].visible = vis[k] !== false && !packedOn;
+    for (var q in packedParts) packedParts[q].visible = vis[q] !== false && packedOn;
+    buttonGrp.visible = !packedOn; draw();
+  }
 
   var last = performance.now();
   function loop(now) {
@@ -312,23 +327,27 @@
   // STORED: the discant off the playing mount, turned 90 deg about x, its plates in the
   // short socket under the bass's deck, its keys toward the box's back wall
   // (../bass/link.scad: to_store()). The matrices act on the parts as drawn (world frame).
-  var PACK_B = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0], PACK_D = [-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, -3.496, -0.283501, 104.28742, 1.0], PACK_C = [-8.5, -53.77, -7.65];
-  var packed = null, playing = [];
+  // PACK_D = to_store() after the inverse of to_bass(), in the page's world frame (x, z, -y);
+  // computed from ../bass/link.scad's numbers (to_bass at [5, -1.3, -132.97], to_store at
+  // [5, 18.246, -100.01], the gauge frame moved by [0, -1.709, 8.907])
+  var PACK_B = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0], PACK_D = [-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 10.0, -4.630117, 113.884694, 1.0], PACK_C = [5.0, -57.91, -6.69];
+  var packedBuilt = false;
   function packedView() {
-    var g = new THREE.Group();
-    function add(name, colour, m) {
-      var k = mesh(name, colour); k.matrixAutoUpdate = false; k.matrix.fromArray(m); g.add(k);
+    function add(k, name, colour, m) {
+      if (!packedParts[k]) { packedParts[k] = new THREE.Group(); scene.add(packedParts[k]); }
+      var g = mesh(name, colour); g.matrixAutoUpdate = false; g.matrix.fromArray(m); packedParts[k].add(g);
     }
-    add('B_CASE', 0xd9a441, PACK_B); add('B_LID', 0xc99430, PACK_B); add('B_COVER', 0x5b6f86, PACK_B); add('KEYS_B', 0x4a6fa5, PACK_B);
-    add('D_HOUSING', 0xd9a441, PACK_D); add('D_COVER', 0x5b6f86, PACK_D); add('KEYS_D', 0x4a6fa5, PACK_D); add('D_CABLES', 0xd8c08a, PACK_D);
-    return g;
+    add('bcase', 'B_CASE', 0xd9a441, PACK_B); add('blid', 'B_LID', 0xc99430, PACK_B); add('blid', 'B_CSCREW', 0x5d6166, PACK_B); add('bcover', 'B_COVER', 0x5b6f86, PACK_B); add('keys', 'KEYS_B', 0x4a6fa5, PACK_B);
+    add('dhousing', 'D_HOUSING', 0xd9a441, PACK_D); add('dcover', 'D_COVER', 0x5b6f86, PACK_D);
+    add('keys', 'KEYS_D', 0x4a6fa5, PACK_D); add('cables', 'D_CABLES', 0xd8c08a, PACK_D);
+    add('pcb', 'D_BOARDS', 0x2f7a4f, PACK_D); add('pcb', 'D_PARTS', 0x2b2f33, PACK_D);
+    packedBuilt = true;
   }
   document.getElementById('packed').addEventListener('click', function () {
-    if (!parts.housing) return;                  // load first
+    if (!parts.bcase) return;                    // load first
     var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on ? 'true' : 'false');
-    if (!packed) { packed = packedView(); scene.add(packed); playing = [parts.pcb, parts.housing, parts.cover, parts.cable, buttonGrp]; }
-    packed.visible = on; playing.forEach(function (p) { if (p) p.visible = !on; });
-    ['showpcb', 'showhousing', 'showcover', 'showcable', 'showbutton'].forEach(function (id) { document.getElementById(id).disabled = on; });
+    if (!packedBuilt) packedView();
+    packedOn = on; showParts();
     if (on) { target.set(PACK_C[0], PACK_C[1], PACK_C[2]); dist = 620; } else { target.set(0, -60, -40); dist = 820; }
     place(); draw();
   });

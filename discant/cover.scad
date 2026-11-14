@@ -15,8 +15,8 @@
 // below the caps' top), solid from there back to 0.4 in front of the caps (y = -7.9, as
 // the old front wall stood), so it overlaps the cover plate along its whole length.
 // The caps now stand higher (key.scad key_cap_top()), so the bar moves up with them by
-// tb_dz [given 2026-11-13]. Cut back over the bass's playing mount as before (tb_cut_x,
-// tb_cut_d: a level in the stored frame, to be checked again with the new gauge place).
+// tb_dz [given 2026-11-13]. Never cut [given 2026-11-14]: it keeps its whole profile over
+// its whole length; the bass makes room for it (its box is longer, ../bass/layout.scad).
 //
 // ASSEMBLY (../switch_hall/spec.md). The cover lies on a jig whose pins reach into the
 // tubes from below; the plungers go in from below onto the pins, the springs from above
@@ -33,6 +33,7 @@
 
 include <hall.scad>
 use <../switch_hall/key.scad>
+use <gauge_link.scad>              // gauge_cover_tongue(): the cover closes the link board's pocket
 use <../thumb-bar/profile.scad>   // thumb_profile(): the thumb bar's section
 
 /* [As in housing.scad: hall.scad's case dimensions] */
@@ -47,7 +48,6 @@ bore_lo  = 4.8;      // key.scad: the collar's bore, run down through the plate
 /* [Thumb bar, as before] */
 tb_len = 21.7;  tb_angle = 86.1;  tb_r = 1.2;  tb_R = 20.6;   // thumb_profile()'s parameters
 tb_y   = -13.9; tb_z0 = -18.8;
-tb_cut_x = 38;  tb_cut_d = -13.94;
 tb_fill  = -7.5 - 0.4;   // the bar's solid back: 0.4 in front of the caps (cap_d / 2), into the plate
 tb_cap0  = 8;        // the caps' top the bar was fitted to (row 0, z)
 tb_dz    = key_cap_top() - tb_cap0;   // the bar follows the caps up
@@ -65,17 +65,15 @@ module below_top() on_slab() translate([-500, -500, -100]) cube([1000, 1000, 100
 // the bar along the whole front edge
 front = [for (p = hall_outline) p[1]][0];
 x_front = [hall_outline[0][0] - (fit + wall) * 1.2, hall_outline[1][0] + (fit + wall) * 1.2];
-module thumb_bar() let(t = slab_t) difference() {
+module thumb_bar() difference() {
     translate([x_front[0], 0, tb_dz]) rotate([90, 0, 90]) linear_extrude(x_front[1] - x_front[0]) {
         translate([tb_y, tb_z0]) rotate(90 - tb_angle) thumb_profile(tb_len, tb_angle, tb_r, tb_R);
         translate([tb_y - 0.01, tb_z0]) square([tb_fill - tb_y + 0.02, tb_len]);
     }
-    rotate([-(90 - t), 0, 0]) hull() {      // over the bass's mount, in the stored frame
-        translate([-tb_cut_x, -100, tb_cut_d - 0.01]) cube([2 * tb_cut_x, 200, 0.01]);
-        translate([-tb_cut_x - 20, -100, tb_cut_d - 20]) cube([2 * tb_cut_x + 40, 200, 0.01]);
-    }
-    // the tray and the board stay whole: the bar ends at their front face
+    // the tray and the board stay whole: the bar ends at their front face, and sits on the
+    // tray's shelf (hall.scad), with nothing under it
     slab_solid(-50, 0, fit + wall);
+    front_shelf(-50, w_b + shelf_t);
     // and the bar does not stand into the plate's ends
     translate([-1000, -500, -500]) cube([1000 + x_front[0], 1000, 1000]);
     translate([x_front[1], -500, -500]) cube([1000, 1000, 1000]);
@@ -84,6 +82,7 @@ module thumb_bar() let(t = slab_t) difference() {
 module cover() difference() {
     union() {
         slab_solid(0, cover_t, fit + wall);
+        gauge_cover_tongue();
         difference() {
             for (i = [0 : len(hall_keys) - 1]) at_key(key_row(i), key_x(i)) tube_body();
             below_top();

@@ -43,6 +43,16 @@ w_b   = w_ft - case_floor;           // the tray's bottom
 w_mid = (w_b + cover_t) / 2;         // the middle of the case's thickness
 slab_back = hall_outline[2][1] + case_rim;   // the back face (Y)
 
+// THE THUMB BAR'S SHELF [given 2026-11-14: stiff enough]: along the tray's front face, at
+// its bottom, a ledge shelf_d deep and shelf_t high on which the thumb bar's back sits
+// (cover.scad): pressed down, the bar bears on the tray, not only on the cover plate;
+// pressed back, on the tray's front face. The cover still goes on from above (the bar has
+// nothing under the ledge). Part of the housing between w0 and w1 (slab frame).
+shelf_d = 2.5;
+shelf_t = 1.6;
+module front_shelf(w0, w1) let(f = hall_outline[0][1] - case_rim, x0 = hall_outline[0][0] + 3, x1 = hall_outline[1][0] - 3)
+    on_slab() translate([x0, f - shelf_d, w0]) cube([x1 - x0, shelf_d + 0.5, w1 - w0]);
+
 // the board: laminate with its holes, and the parts' bodies on the underside
 module hall_board() on_slab() {
     color("SeaGreen") translate([0, 0, -hall_t]) linear_extrude(hall_t) difference() {

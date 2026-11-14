@@ -10,68 +10,87 @@ rows_x0  = [-80, -70];           // first key of each row; 9 per row [given: 2 x
 n_row    = 9;                    //   example's 8 + 8, its half-closed front-left well and an added x = 90
 cap_top  = [11, 21];             // cap tops at rest: the example's short and tall keys
 
-// --- the discant's mechanism (switch/button.scad): the felt lands on a 1.2 cover on the board
+// --- the keys: ../switch_hall/ (Hall sensor, spring under the cap) [given 2026-11-13], on
+// one Hall-sensor board under both rows (../hall_pcb/bass/), lying flat (key.scad with
+// board_tilt = 0). The back row's spring seat, tube top and all above it stand
+// key_riser higher (key.scad riser), so its caps reach the example's 21 with the same
+// board; collar, magnet and sensor keep their place at the board.
+key_top   = 17.135;              // key.scad, board_tilt = 0: cap top over the board's middle (with the 4 mm bronze bushing)
+key_riser = 10;
+assert(abs(cap_top[1] - cap_top[0] - key_riser) < 1e-6, "the back row's riser must match the caps");
 cover_t  = 1.2;
 pcb_t    = 1.6;
 cu_t     = 0.035;
-stroke   = 2.965;
-cap_above = cover_t + stroke + 1 + 2;          // board top to cap top at rest: cover, stroke, felt, cap
-board_top = [for (c = cap_top) c - cap_above]; // 3.835, 13.835: the back row 10 higher
-board_z  = [for (t = board_top) t - cu_t - pcb_t / 2];
-cover_top = [for (t = board_top) t + cover_t];
+stroke   = 3;
+board_mid = cap_top[0] - key_top;               // -3.635: the board's middle plane
+board_top = board_mid + pcb_t / 2 + cu_t;        // -2.8
+board_bot = board_mid - pcb_t / 2 - cu_t;
+board_z  = [board_mid, board_mid];               // per row, for code that indexes rows
+cover_top = [board_top + cover_t, board_top + cover_t + key_riser];   // front slab, back step
 
-// --- the hand plate: the example's flat middle part, half as wide [given]
+// --- the hand plate: the example's flat middle part, half as wide [given], 131.5 x 128.3;
+// its top flush with the front cover [given 2026-11-14: no raised edge over the cover],
+// which lies 6.6 lower against the caps than before, since the new keys stand taller
 plate_w  = 263 / 2;
 plate_y  = [-12.5, -9.5];        // the front wall, 3 thick; the hand presses on y = -12.5
-plate_h  = 0.75 * (166 + cover_top[0]);   // the example's height (z -166 to the front cover) less 25 % [given]
-plate_z  = [cover_top[0] - plate_h, cover_top[0]];   // flush with the front cover at the top
+plate_top0 = 5.035;              // the old front cover's top: the plate's height and the old bottom follow from it
+plate_h  = 0.75 * (166 + plate_top0);   // the example's height (z -166 to the front cover) less 25 % [given]
+plate_z  = [cover_top[0] - plate_h, cover_top[0]];
+plate_rise = plate_z[1] - cover_top[0];   // 0
 
 gap      = 0.1;                  // housing to the boards' undersides
 fit      = 0.3;
 
-// --- the boards: the discant's board sawn to 9 holes (pcb.scad, cut_holes = 4)
-board_dx = [for (k = [0, 1]) rows_x0[k] + 120];   // hole 1 of 13 at x = -120: 40, 50
-x_start  = -145.796;             // as pcb.scad
-x_cut    = 52.3;
-margin_n = 5.3;
-margin_p = 9.4;
-tab_x1   = -142.038;
-tab_y    = 10.6;
-screws   = [-142, -50, 50];      // per board, board frame, on the row line: M2 from the top
+// --- the board: ../hall_pcb/bass/ (its data from the routed KiCad board): board frame
+// X = x, Y = y, its middle at board_mid; the tray round it as the discant's (part_gap
+// under the tallest part but the plug, case_fit and a case_wall rim)
+include <../hall_pcb/bass/board.scad>
+case_fit   = 0.3;
+case_wall  = 1.2;
+case_rim   = case_fit + case_wall;
+part_gap   = 0.3;
+case_floor = 1.2;
+h_max  = max([for (q = hall_parts) if (q[0] != "J1") q[6]]);
+w_ft   = board_bot - h_max - part_gap;          // the tray's floor, top (z)
+z_floor = w_ft - case_floor;                    // the deck's underside
+hx = [for (q = hall_outline) q[0]];
+hy = [for (q = hall_outline) q[1]];
 
-// --- the deck: the block behind the plate's top edge, as short in x as the boards
-// allow [given]: their ends, fit, and a wall as the discant's cover
+// --- the deck and the box below it: one rectangular block [given 2026-11-14: a
+// rectangular footprint; stored, not all of the discant's keys need be covered], as
+// narrow as the strap allows: its outer slots end 100 from the middle, 1.5 inside the
+// front face's rounded edge (case.scad), so 211 wide; the board (with its rim) is
+// narrower and lies in the middle
 end_wall = 1.2;
-deck_x   = [min([for (k = [0, 1]) x_start + board_dx[k]]) - fit - end_wall,
-            max([for (k = [0, 1]) x_cut + board_dx[k]]) + fit + end_wall];
+deck_core = [min(hx) - case_rim, max(hx) + case_rim];   // the board and its rim
+x_mid    = (deck_core[0] + deck_core[1]) / 2;
+box_w    = max(deck_core[1] - deck_core[0], 2 * (100 + 1.5 + 4));
+deck_x   = [x_mid - box_w / 2, x_mid + box_w / 2];
+// the box, hand plate, strap and mount are centred on the deck; what was placed by hand
+// on the old deck's middle (x -1.75, two sawn boards with their connector ends) moves
+// with it by ex
+ex       = x_mid + 1.75;
 plate_x  = [(deck_x[0] + deck_x[1]) / 2 - plate_w / 2, (deck_x[0] + deck_x[1]) / 2 + plate_w / 2];   // centred on the deck
-// the box below the deck: straight sides, wide enough to cover the discant's 46 keys
-// (255 wide) when it is stored in the step [given: widen the box, keys covered]; it no
-// longer tapers. box_x is centred on the deck, which keeps its width.
-box_w    = 265;
-box_x    = [(deck_x[0] + deck_x[1]) / 2 - box_w / 2, (deck_x[0] + deck_x[1]) / 2 + box_w / 2];
+box_x    = deck_x;                    // straight sides, flush with the deck's ends
 bottom_x = box_x;
-// its sides run parallel to the stored discant's ends [given]: each row of the discant is
-// a key shorter and steps in 10 at both ends, 16.28 apart along its slope; stored
-// (link.scad) the rows' end caps sit at z -94.2 (row 0) and up by 16.28 each, at x
-// -121.75 + 10 k and 118.25 - 10 k. So the box is straight (box_x) up to box_slant_z and
-// above that slants in, tangent 5 mm off those caps (12.5 round their centres), up to
-// the deck. Above z -46.9 they stand straight again, flush with the deck's ends (211):
-// there the bass boards' FFCs drop from the deck into the box (case.scad), which a box
-// narrower than the deck could not take (15 mm wide cables) [given: parallel edges; the
-// straight top keeps the FFCs' way].
-box_slant   = 10 / sqrt(16 * 16 + 3 * 3);
-box_slant_z = -94.2 + (12.5 / cos(atan(box_slant)) - 12.5) / box_slant;
-function box_x_at(z) = let(c = (deck_x[0] + deck_x[1]) / 2,
-                           h = max((deck_x[1] - deck_x[0]) / 2,
-                                   min(box_w / 2, box_w / 2 + (12.5 / cos(atan(box_slant)) - 12.5) - box_slant * (z + 94.2))))
-    [c - h, c + h];
-box_top_z = -94.2 + (box_w / 2 + (12.5 / cos(atan(box_slant)) - 12.5) - (deck_x[1] - deck_x[0]) / 2) / box_slant;
-// longer than the hand plate at the bottom: room for the stored discant's travel onto its
-// short socket under the deck (link.scad): 3 [given: +3 mm], and 2.3 more for the
-// socket's latch [given: latch in both positions]
-box_ext  = 5.3;
-z_bot    = plate_z[0] - box_ext;
+function box_x_at(z) = box_x;
+// THE BOX'S LENGTH, from the stored discant (link.scad: to_store()) [2026-11-14: the thin
+// discant]: its short socket hangs right under the deck (its top store_socket_top over
+// to_store()'s origin, measured from the build); the discant below it, and under its
+// lowest point over the playing mount (store_front_d: the thumb bar, whole [given
+// 2026-11-14: never cut, the bass is longer instead]) the travel to slide it on and off
+// plus 0.3 over the mount's holders (hold_lo + hold_hi), which sit at the box's bottom.
+// That fixes the bottom: 14.1 below the hand plate (it was 7.6 with the old discant, whose
+// thick deck took the socket and whose bar was cut back over the mount). As link.scad:
+// hold_lo, hold_hi, travel, front_d.
+store_socket_top = 90.69;
+store_front_d    = -16.47;
+store_z  = z_floor + 0.5 - store_socket_top;             // to_store()'s z: the socket 0.5 into the deck's floor, one body with it
+z_bot    = store_z - (5.9 + 6.89 + 0.3 + (8.3 + 1) - store_front_d);
+box_ext  = plate_z[0] - z_bot;
+assert(box_ext >= 2, "the box's bottom must stay under the hand plate");
+// what was placed by hand in the box's lower part on the old bottom (z -130.84) moves with it
+ez       = z_bot - (plate_top0 - 0.75 * (166 + plate_top0) - 7.6);
 // below the deck the box is thin [given: thinner, gauges in the step behind it]: from the
 // hand's face to box_back; the deck above keeps its full depth, and behind the box,
 // under the deck, is the step where the gauges sit. 11.2 [given: 4.8 thinner, so that
@@ -82,14 +101,14 @@ box_back  = plate_y[0] + box_depth;
 back_t    = 1.6;
 // to the back: 0.9 of wall behind the back board's tab; the stored discant's gauge pocket
 // (link.scad) reaches y 24.65, 3.2 inside
-deck_y   = [plate_y[1], 27.8];
+// to the back: the board's rim, or the stored discant's socket under the deck (link.scad,
+// its holders' walls reach y 25.89), whichever is further: nothing stands out behind the cover
+deck_y   = [plate_y[1], max(max(hy) + case_rim, 25.9)];
 riser_y  = 9.8;                  // front of the back step: 2.3 clear of the front caps [given: >= 2]
 step_wall = 1.2;                 // the cover's wall up the step, one piece with both slabs [given]
-step_y   = riser_y + step_wall;  // where the case's back block begins
+step_y   = riser_y + step_wall;  // where the back block begins
+assert(min(hy) - case_rim >= plate_y[1] - 0.01, "the board's rim runs into the front wall");
 
 function key_xy(k, i) = [rows_x0[k] + i * pitch, rows_y[k]];
-function at_board(k) = [board_dx[k], rows_y[k], board_z[k]];
-module board2d() union() {
-    translate([x_start, -margin_n]) square([x_cut - x_start, margin_n + margin_p]);
-    translate([x_start, 0]) square([tab_x1 - x_start, tab_y]);
-}
+function at_key(k, i) = [key_xy(k, i)[0], key_xy(k, i)[1], board_mid];   // key k, i's frame (key.scad)
+module board2d(g = 0) offset(delta = g) polygon(hall_outline);
