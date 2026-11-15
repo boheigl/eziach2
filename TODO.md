@@ -27,8 +27,8 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
 
 ## Electronics
 
-4. **Discant Hall board routing**: 13 connections open (+3V3 ×6, SDA ×2, a GND
-   zone island, KEY1_3, KEY1_8, KEY3_3, KEY3_7). `hall_pcb/discant`.
+4. ~~**Discant Hall board routing**~~ done 2026-11-15: finished by hand, 0 open, no copper
+   errors (`hall_pcb/spec.md` §5). A new `build.sh discant` would lose the hand edits.
 5. **Bass Hall board routing**: 2 open, both stubs of 0.02 and 0.06 mm (+3V3 at U1,
    KEY1_9 at U3). `hall_pcb/bass`.
 6. ~~**The discant's 3.3 V ramp after DET**~~ done 2026-11-15: R14 10k → 100k, Q3 on

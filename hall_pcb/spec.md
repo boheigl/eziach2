@@ -195,7 +195,19 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   bass (0°: 14). Five more tries on the discant, starting from its open nets
   (`HALL_PRI`), brought it to 9: SDA, SCL, INT and four key lines (KEY1_6, KEY1_10,
   KEY3_6, KEY3_7); four more on the bass did no better than 2 (+3V3 and one key
-  line). [open: finish these by hand in KiCad, or four layers]
+  line).
+- **Discant finished by hand** [2026-11-15]: six more tries left 11 open (best);
+  they were closed on the routed board itself, not in `design.py`: the +3V3 pin 7
+  of U1, U2, U3, U5 (the pin 6 key line moved onto its own radial lane, pin 7 to the
+  ring cap's +3V3 pad beside it; at U2 and U5 also pin 10, with the ADDR line on its
+  own lane), SDA and SCL to U3 (about 42 mm each over both faces, three and six vias,
+  with KEY1_11 and KEY0_12 re-laid round them), KEY3_3 from U139 to U4 (28 mm, SDA's
+  via at U4 moved 0.4), the SDA pull-up R12 moved 2.9 down out of a boxed-in corner,
+  and two ground vias (x 147.6 / 148.4, y 57.4 / 57.6) that join a ground island
+  round C4 / C5 (the NAU7802's caps) to the planes. KiCad's DRC: no unconnected
+  items, no clearance errors or shorts; left are silkscreen, 7 starved thermals and
+  nothing else. **A new `build.sh discant` routes from scratch and loses these
+  edits**: the routed board in git is the reference.
 
 ## 6. Bass board [given: from the same description]
 
