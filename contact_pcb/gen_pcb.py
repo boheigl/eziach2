@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Writes contact_pcb/contact.kicad_pcb: the two small boards of the spring contacts
-between bass and discant, as one panel of two, split by a V-cut after assembly.
+between bass and discant, as one panel of two in a frame, broken out after assembly
+(milled gaps and tabs with mouse bites: JLCPCB cuts V-grooves only in panels of at least
+70 x 70 mm; its economic assembly takes 10 x 10 and up, the panel is 16 x 25).
 
   pins (bass)    three PG2541-03-003P strips (3 spring pins each, 2.54 pitch, SMD,
                  C49451741), nine wire pads on the back, one wire per pin, as the main
@@ -43,8 +45,15 @@ PAD_NET = {"3V3_A": "3V3", "3V3_B": "3V3", "GND_A": "GND", "GND_B": "GND", "GND_
            "SDA": "SDA", "SCL": "SCL", "INT": "INT"}
 WIRES_DISCANT = {"3V3": (-1, 1), "SDA": (0, 1), "SCL": (1, 1), "GND": (0, 0), "INT": (0, -1)}
 
-BOARDS = {"pins": dict(vc=+H / 2, mirror=+1, prefix="B_"),      # bass, upper half of the panel
-          "pads": dict(vc=-H / 2, mirror=-1, prefix="D_")}      # discant, lower half
+# the panel: the boards 1 mm apart (GAP, milled), a frame round them (RAIL wide, GAP
+# off), each board held by one tab on either side (x edges, TAB long, its middle TAB_Z
+# from the board's middle towards the panel's end, clear of the vias at the middle row);
+# mouse bites: BITE_N holes BITE_D on the tab's board side, touching the board's edge
+GAP, RAIL = 1.0, 2.0
+TAB, TAB_Z = 2.0, 2.25
+BITE_D, BITE_P, BITE_N = 0.5, 0.75, 3
+BOARDS = {"pins": dict(vc=+(H + GAP) / 2, mirror=+1, prefix="B_"),      # bass, upper half of the panel
+          "pads": dict(vc=-(H + GAP) / 2, mirror=-1, prefix="D_")}      # discant, lower half
 
 b = pcbnew.BOARD()
 b.SetCopperLayerCount(2)
@@ -126,10 +135,35 @@ for name, bd in BOARDS.items():
         seg(pcbnew.B_Cu, uv(*back_xz(1, -1)), uv(*back_xz(1, 0)), g, TW_P)       # DET to GND
         seg(pcbnew.B_Cu, uv(*VIAS[(-1, 1)]), uv(*VIAS[(-1, -1)]), net(pre + "3V3"), TW_P)   # the 3.3 V pair
 
-# outline: the panel, and the V-cut between the two boards (User.1; ordered with V-cut)
-rect(pcbnew.Edge_Cuts, -W / 2, -H, W / 2, H, 0.05)
-line(pcbnew.User_1, (-W / 2 - 1, 0), (W / 2 + 1, 0), 0.1)
-text(pcbnew.User_1, "V-CUT", (0, 0.6), 0.6)
+# outline: the frame's outside, and the milled gaps as closed cut-outs: one round each
+# board's outer end (tab to tab), one H between the boards (both boards' split edges and
+# their sides up to the tabs)
+def poly(pts):
+    for a, c in zip(pts, pts[1:] + pts[:1]): line(pcbnew.Edge_Cuts, a, c, 0.05)
+xb, xg = W / 2, W / 2 + GAP                     # board's side, gap's outside
+zi, zo = GAP / 2, GAP / 2 + H                   # board's split edge, its outer end
+zt0, zt1 = (H + GAP) / 2 + TAB_Z - TAB / 2, (H + GAP) / 2 + TAB_Z + TAB / 2   # the tab
+PW, PH = 2 * (xg + RAIL), 2 * (zo + GAP + RAIL)
+rect(pcbnew.Edge_Cuts, -PW / 2, -PH / 2, PW / 2, PH / 2, 0.05)
+for sz in (1, -1):
+    poly([(-xg, sz * zt1), (-xg, sz * (zo + GAP)), (xg, sz * (zo + GAP)), (xg, sz * zt1),
+          (xb, sz * zt1), (xb, sz * zo), (-xb, sz * zo), (-xb, sz * zt1)])
+poly([(-xg, zt0), (-xb, zt0), (-xb, zi), (xb, zi), (xb, zt0), (xg, zt0),
+      (xg, -zt0), (xb, -zt0), (xb, -zi), (-xb, -zi), (-xb, -zt0), (-xg, -zt0)])
+# mouse bites: non-plated holes in each tab, touching the board's edge
+mb = footprint("MB", "mouse bites", (0, 0), NOPOS)
+k = 0
+for sz in (1, -1):
+    for sx in (1, -1):
+        for i in range(BITE_N):
+            z = sz * ((zt0 + zt1) / 2 + (i - (BITE_N - 1) / 2) * BITE_P)
+            p = pcbnew.PAD(mb); k += 1; p.SetNumber(""); p.SetAttribute(pcbnew.PAD_ATTRIB_NPTH)
+            p.SetShape(pcbnew.PAD_SHAPE_CIRCLE); p.SetSize(pcbnew.VECTOR2I(mm(BITE_D), mm(BITE_D)))
+            p.SetDrillSize(pcbnew.VECTOR2I(mm(BITE_D), mm(BITE_D)))
+            ls = pcbnew.LSET(); ls.AddLayer(pcbnew.F_Mask); ls.AddLayer(pcbnew.B_Mask); p.SetLayerSet(ls)
+            mb.Add(p); p.SetPosition(P(sx * (xb + BITE_D / 2), z))
+text(pcbnew.F_SilkS, "PINS (BASS)", (0, zo + GAP + RAIL / 2), 0.8)
+text(pcbnew.F_SilkS, "PADS (DISCANT)", (0, -(zo + GAP + RAIL / 2)), 0.8)
 
 pcbnew.SaveBoard(OUT, b)
 print(OUT, len(nets), "nets")

@@ -112,9 +112,9 @@ teeth of both positions meet the slots' ends.
 - **Power switched by plugging:** DET, pulled to ground by the discant's contact board,
   switches the bass's system supply on (ESP32, both halves' 3.3 V). Apart or stored only
   the charger works: the pins carry nothing, the battery is not drained. The nine pins
-  are alike, so DET may close before the others: the discant's 3.3 V ramps up after DET
-  (Q3's gate on the main board, now about 1 ms) [open: about 10 ms, to cover the pins'
-  spread as the bass slides on].
+  are alike, so DET may close before the others: the discant's 3.3 V comes on 3–7 ms
+  after DET and is fully on after about 12 ms (Q3's gate on the main board, R14 100k,
+  C9 100 nF; `../main_pcb/spec.md` §3), so all pins touch first [chosen 2026-11-15].
 - **Charging and data:** one USB-C in the bass's +x side wall, free both stored and
   played, with a charge LED and the earphone jack beside it; the charger has a power
   path, so it also runs the system while charging. Firmware goes in by this socket.
@@ -143,7 +143,7 @@ echoed by `../bass/elec.scad` (`wires()`, `path_len()`) and `../discant/gauge_li
 | 3 | discant | gauge plates → along the pad's groove, through the channels at x = ∓12 → Hall board's J2 / J3 (NAU7802) | 2 half bridges, 3 each | pads / pads | 19 mm each | 60 mm each |
 | 4 | bass | spring-pin board's back pads → main board's pads, out of the mount's cavity and bore, along the bottom | 9: 3V3 × 2, GND × 3, SDA, SCL, INT, DET | pads / pads | 94 mm | 140 mm |
 | 5 | bass | bass Hall board J1 → down its shaft, over the strap bar's block, beside the battery → joins #4 → main board's pads | 5: 3V3, GND, SDA, SCL, INT | SH plug / pads | 279 mm (82 shared with #4) | 320 mm |
-| 6 | bass | battery → main board (+ through the PTC, −) | 2 | the cell's leads / pads | about 50 mm [estimate, not modelled] | the cell's own leads, cut to fit |
+| 6 | bass | battery → main board (+ through the PTC, −, NTC to TS) | 3; 4 with a 2-wire cell and a taped-on NTC (its two wires to P17 TS and P16 GND, twisted) | the cell's leads / pads | about 50 mm [estimate, not modelled] | the cell's own leads, cut to fit |
 | 7 | bass | earphone jack's lugs → P19–P21 | 3: tip, ring, sleeve | lugs / pads | about 15 mm [estimate: the jack lies over the board] | 50 mm |
 
 - **Wire** [chosen]: AWG 30 stranded (7 × 0.1), PTFE thin wall, outside ⌀ ≤ 0.55 mm

@@ -38,7 +38,11 @@ files to `<board>/fab/` and a browser view (`export_view.py`, `<board>/viewer.ht
 - **Outline:** a trapezoid 265.8 × 64.8 mm, its slanted ends parallel to the
   staircase's ends: 8 mm beyond the outermost keys along X, 8 mm in front of row
   0 and behind row 3.
-- **Screw holes:** ⌀2.2 for M2 (cover through the board into the housing), on a regular
+- **Screw holes:** ⌀2.2 for M2 (cover through the board into the housing; **brass**
+  countersunk machine screws, DIN 965 CuZn, which cut their own thread in the housing's
+  ⌀1.7 pilots (over the tap drill 1.6: printed holes come out small) [given 2026-11-15: brass, not steel, near the magnets]; the pilots hold
+  only about 2.2 mm under the board, too little for heat-set inserts; tighten gently,
+  brass is soft), on a regular
   grid every 40 mm [given 2026-11-14]. In each gap between two rows a line of them, each
   in the middle of three keys [given 2026-11-15: half way between two keys, 9.5 from
   their axes, they came too near the keys]: two of the lower row and the upper row's key
@@ -117,9 +121,10 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   5 V) [datasheet]; the LDO at 3.0 V would have left none. The ferrite keeps the Hall
   sensors' and ADCs' ripple off AVDD.
 - **Analog beside digital, checked 2026-11-15:**
-  - Signal: about 3.6 mV full scale per half bridge (1100 µε, GF 2, 3.3 V,
-    `../strain_gauge/spec.md`); the NAU7802's noise is 50 nV at 10 SPS, 150 nV at
-    80 SPS [datasheet]. Disturbances under about 1 µV do not matter.
+  - Signal: the bought load cells give 1 mV/V at 490 N, 6.7 µV/N at 3.3 V; playing
+    forces of 20–40 N are 0.13–0.27 mV (`../strain_gauge/spec.md` §4a). The NAU7802's
+    noise is 50 nV at 10 SPS, 150 nV at 80 SPS [datasheet]: about 0.02 N. Disturbances
+    under about 0.1 µV do not matter; the estimates below stay under that.
   - I²C (400 kHz, SDA/SCL beside and over the chip): coupled through about 0.02 pF
     into an input that carries 100 nF, 3.3 V edges give under 1 nV; the input filter
     (47 R + 47 R, 100 nF: about 17 kHz) and the sinc filter at 2.3 / 18 Hz bandwidth
@@ -131,18 +136,18 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   - Leads: 19 mm each in the groove, away from the bus wires; before, the far gauge's
     76 mm ran beside SDA/SCL in the same groove. Better than before.
   - The other way round, the gauges' currents against the Hall sensors [estimate
-    2026-11-15]: the bridges' excitation (DC, 9 mA at 350 Ω, 28 mA at 120 Ω) is the
-    only current worth a look; 14 mA 1 mm from a sensor gives 2.8 µT, 0.04 mV at
-    15 mV/mT, a twentieth of the ADS7128's 0.8 mV step, constant (the calibration takes
+    2026-11-15]: the bridges' excitation (DC, about 3.3 mA per 1000 Ω cell) is the
+    only current worth a look; 3.3 mA 1 mm from a sensor gives 0.7 µT, 0.01 mV at
+    15 mV/mT, far under the ADS7128's 0.8 mV step, constant (the calibration takes
     it), mostly cancelled by its return beside it and lying in the board's plane, which
     the DRV5055 does not sense. The ferrite FB1 sits 5 mm beside U141, off the
     magnet's axis. The sensors' own 90–180 mA on +3V3 were there before.
   - Heat: the board's 0.3–0.6 W warms the dividers slowly and both resistors alike;
     their ratio drifts with their 25 ppm/K mismatch at most, which taring at start
     takes out.
-- **Open:** the gauges' resistance (120 or 350 Ω) is not chosen: 2 × 350 Ω half bridges
-  draw about 9.4 mA, 120 Ω about 28 mA from AVDD through the ferrite (300 mA), both
-  fine. DRDY is unused (the ESP32 polls, `../assembly/spec.md`).
+- **Gauges** [given 2026-11-15]: two bought half-bridge load cells of 1000 Ω, about
+  6.6 mA from AVDD in all through the ferrite (300 mA). DRDY is unused (the ESP32 polls,
+  `../assembly/spec.md`).
 
 ## 4. Which ADC reads which key
 

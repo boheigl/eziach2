@@ -122,15 +122,31 @@ keys: `../BOM.md`. (This section used to describe the old discant button of
   tongues swing clear of board, wires and battery up to 20° of tilt; three M2 × 6
   countersunk screws (DIN 965, modelled: `cover_screws.stl`) at z −21 (x −45, 0, 45),
   above the stored discant's caps, flush in 90° countersinks (⌀4.0, 0.9 deep, 0.7 of the
-  plate left under them), 4.4 mm into ⌀1.6 pilots in pillars from the front wall. It rests on the side walls' ends, the ribs and the pillars.
+  plate left under them), 4.4 mm into ⌀1.7 pilots in pillars from the front wall. It rests on the side walls' ends, the ribs and the pillars.
   Assembly with it off: battery, both boards (screwed from the back into the front
   wall's pilots; the power board goes in 2 mm to the left and slides right into the
-  port), the FFCs from the deck and the contacts' wires, all in reach. [unverified: screw
-  type]
-- **Battery** [given]: a 1S Li-ion pouch, 606090 (6 × 60 × 90 mm, about 4 Ah [unverified:
-  type, capacity]) [given: 6 mm, for the thinner box; it was a 9 mm 906090 of about 6 Ah],
-  between front wall and back cover, 0.3 clear each side: a shelf under it, stops at its ends, a lip
-  over its top.
+  port), the FFCs from the deck and the contacts' wires, all in reach. Screws
+  [chosen 2026-11-15]: main board 3 × M2 × 3 pan head (ISO 7045, A2): through board
+  (1.0) and pad (0.47), 2.0 mm into the 2 mm pilots in the 3 mm front wall, 1 mm left to
+  the hand's face; the key board 12 × M2 × 6 countersunk brass (DIN 965), 1.9 mm into
+  the case as on the discant.
+- **Battery** [given: 6 mm, for the thinner box; it was a 9 mm 906090 of about 6 Ah]: a
+  1S LiPo pouch 606090 of 4000 mAh with its protection board (PCM) and a 10k NTC, three
+  wires (e.g. DNK606090 [datasheet]; 3-wire variants with JST-PH are sold). With the PCM it
+  is 92 × 60 × 6.0 (some list 92.5); the cradle takes 93 [chosen 2026-11-15; was 90].
+  Between front wall and back cover, 0.3 clear each side: a shelf under it, stops at its
+  ends, a lip over its top. Clear of case, board, wires, back cover and screws (the
+  control, a 93 mm cell in the old 90 mm cradle, overlapped by 255 mm³). Not modelled:
+  where the leads leave the PCM.
+  - **Variant: a 2-wire cell with a taped-on NTC** [chosen 2026-11-15]: a 10k NTC
+    (B 3435) on the cell's top edge, 3–5 mm from the end away from the PCM. That is the
+    only place with room: the broad faces have 0.3 to front wall and back cover, the
+    middle of the top edge has the lip 0.3 over it, but the last 10 mm at either end
+    are clear of the lip, about 2.9 mm up to the rib over the battery, 6.6 wide.
+    Wires (AWG 30, joints in heat-shrink, twisted) extended first, then the NTC laid
+    flat and held by Kapton tape, the wires taped to the cell as strain relief; no glue
+    or solder on the pouch. Its two wires run with the cell's to the main board (P17,
+    P16).
 - **Electronics** (`elec.scad`) [given: charging in the bass by its own USB socket; the
   contacts switch the system on; the electronics moved from the discant to the bass]:
   - **Main board**, 45.5 × 33 mm at the bottom on the +x side, between the outer rib and

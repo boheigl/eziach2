@@ -16,7 +16,7 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 | O-ring 4 × 1.5 (silicone about 50 Shore A, or NBR 70) | 1 | 64 | stock |
 | Stop washer ⌀4.5 / ⌀2.5 | 1 | 64 | punched from 1 mm silicone or PU sheet |
 | Cap, collar | 1 each | 64 + 64 | printed |
-| Adhesive for the rod in cap and collar | | | [open: type] |
+| Adhesive for the rod in cap and collar: slow 2-component epoxy, e.g. UHU plus endfest | a drop each | 1 pack | not cyanoacrylate (creeps into the bushing); `switch_hall/spec.md` §2 |
 
 ## Discant — `discant/spec.md`
 
@@ -31,8 +31,7 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 
 | Part | Count | |
 |---|---|---|
-| Flexure plate | 2 | [open: material and making; the sizing is for steel] |
-| Strain gauge | 4 (2 per plate, half bridge) | [open: 120 or 350 Ω] |
+| Half-bridge load cell, 50 kg, 1000 Ω, 1.0 mV/V, 3 wires (the bathroom-scale cell: plate with its gauges) | 2 | sold as 4 with an HX711 board (unused); `strain_gauge/spec.md` §4a |
 | Dowel pin ⌀1.5 × 10, ISO 2338 | 4 | hold the plates in the outer holders |
 
 ## Bass — `bass/spec.md`
@@ -41,10 +40,11 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 |---|---|---|
 | Case (with inner holders, latches, contacts' block), cover, back cover | 1 + 1 + 1 | printed, PETG |
 | Latch rod ⌀2 × 68, stainless or silver steel | 1 | bar stock, cut to length, pressed into the lugs |
-| Countersunk screw M2, brass (as the discant's) | 12 | cover through the board into the case [open: length] |
+| Countersunk screw **M2 × 6**, DIN 965, brass (as the discant's) | 12 | cover (2.4) and board (1.67) into ⌀1.7 pilots in the case: 1.9 mm of thread, the tip 0.5 above the pilot's end; × 8 would be too long |
 | Countersunk screw M2 × 6, DIN 965 | 3 | back cover |
-| Screw M2 | 3 | main board [unverified: type] |
-| Li-ion cell 1S, pouch 606090 (6 × 60 × 90 mm, about 4 Ah) | 1 | [unverified: type, capacity] |
+| Pan head screw **M2 × 3**, ISO 7045, stainless A2 | 3 | main board: board (1.0) and pad (0.47) into ⌀1.7 pilots 2 mm into the front wall: 2.0 mm of thread, the tip 0.5 above the pilot's end, 1 mm of wall left to the hand's face; × 4 would go too deep. Head ⌀4 × 1.6 in the ⌀4.4 copper keepout, 3.5 short of the back cover |
+| LiPo cell 1S, pouch 606090, 4000 mAh, with PCM and 10k NTC, 3 wires (e.g. DNK606090; 92 × 60 × 6.0 with the PCM) | 1 | [checked 2026-11-15: datasheet] |
+| or: the same cell with 2 wires (e.g. EREMIT 606090) plus a 10k NTC, B 3435, bead ⌀1.5–2 or 0603, and Kapton tape | 1 | variant, `bass/spec.md` |
 | Panel jack **Switchcraft 35PRM3** | 1 | |
 | Hand strap, leather 40 × 2–3 mm, with buckle | 1 | [assumed] |
 | Main board, Hall board bass (assembled) | 1 + 1 | `main_pcb`, `hall_pcb/bass` |
@@ -66,4 +66,4 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 | Main board | `main_pcb` |
 | Hall board, discant | `hall_pcb/discant` |
 | Hall board, bass | `hall_pcb/bass` |
-| Contacts' panel (pin board + pad board), ENIG, V-cut | `contact_pcb` |
+| Contacts' panel (pin board + pad board), 16 × 25, ENIG, milled gaps and tabs with mouse bites | `contact_pcb` |

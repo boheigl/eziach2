@@ -87,9 +87,11 @@ part("U2", "USBLC6-2SC6", SOT236,
 
 # --- charger with power path ------------------------------------------------------
 # BQ24074: OUT carries the system from USB or battery; EN2 high, EN1 low: input
-# current set by ILIM (1.5k: about 1.0 A); ISET 1k: about 0.9 A charge; TS a fixed 10k
-# (no thermistor in the pouch [unverified]); TMR 75k: fast-charge timer about 10 h for
-# the 4 Ah cell [unverified: K_TMR]; ITERM open: 10 % termination.
+# current set by ILIM (1.5k: about 1.0 A); ISET 1k: about 0.9 A charge; TS to the cell's
+# own 10k NTC (a 3-wire cell, third wire on pad P17): charging only within 0 ... 50 C;
+# TMR 68k: fast-charge timer 10 x 68k x K_TMR 48 s/kOhm = 9.1 h (6.8 ... 11.3 h; TMR is
+# specified for 18 ... 72k only) against about 5 ... 6 h for a full charge; ITERM open:
+# 10 % termination.
 chg = {"1": "TS", "2": "VBAT", "3": "VBAT", "4": "GND", "5": "VBUS", "6": "GND", "7": "PGOOD", "8": "GND",
        "9": "CHG", "10": "VSYS", "11": "VSYS", "12": "ILIM", "13": "VBUS", "14": "TMR", "15": None,
        "16": "ISET", "17": "GND"}
@@ -100,10 +102,9 @@ part("U3", "BQ24074RGTR", "Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm"
 Cc("C4", "4u7", "VBUS", "GND", (12.9, 24.9, 0), "charger", C0603)
 Cc("C5", "10u", "VSYS", "GND", (15.9, 21.3, 90), "charger", C0603)
 Cc("C6", "10u", "VBAT", "GND", (12.9, 17.7, 0), "charger", C0603)
-R("R5", "10k", "TS", "GND", (9.6, 16.1, 0), "charger")
 R("R6", "1k5", "ILIM", "GND", (12.9, 26.2, 0), "charger")
 R("R7", "1k", "ISET", "GND", (11.6, 16.1, 0), "charger")
-R("R8", "75k", "TMR", "GND", (13.6, 16.1, 0), "charger")
+R("R8", "68k", "TMR", "GND", (13.6, 16.1, 0), "charger")
 # charge light [given 2026-11-15: red while charging, green when full; red too when the
 # battery runs low]: a side-emitting red/green LED with a common anode on VSYS (USB or
 # battery), LiteOn LTST-S326KGJRKT [unverified: which pad is which colour, datasheet
@@ -136,7 +137,10 @@ Cc("C8", "100n", "VBAT_SENSE", "GND", (23.6, 12.4, 90), "battery")
 # playing. Pulled low it turns on Q2 (system on) and Q3 (3.3 V to the discant through the
 # contacts). USB's VBUS also turns the system on (firmware, MIDI, charging with the ESP32
 # awake), never the discant's 3.3 V: apart, the contacts carry nothing.
-R("R14", "10k", "DET", "DET_G", (19.9, 28.8, 90), "power")
+# R14 100k with C9 100n: the gate falls with about 9 ms, so Q3 turns on 3 ... 7 ms after DET
+# closes and is fully on after about 12: the pins' spread as the bass slides on is
+# covered before the discant's capacitors charge through them
+R("R14", "100k", "DET", "DET_G", (19.9, 28.8, 90), "power")
 R("R15", "1M", "DET_G", "VSYS", (21.0, 28.8, 90), "power")
 Cc("C9", "100n", "DET_G", "GND", (22.1, 28.8, 90), "power")
 part("Q2", "AO3401A", SOT23, {"1": "DET_G", "2": "VSYS", "3": "EN_DET"}, (12.9, 28.8, 0),
@@ -213,7 +217,7 @@ WIRES = [("+3V3_D", "contacts 3.3 V"), ("+3V3_D", "contacts 3.3 V"), ("GND", "co
          ("GND", "contacts GND"), ("SDA1", "contacts SDA"), ("SCL1", "contacts SCL"), ("INT1", "contacts INT"),
          ("GND", "battery -"),
          ("DET", "contacts DET"), ("+3V3", "bass keys 3.3 V"), ("GND", "bass keys GND"), ("SDA2", "bass keys SDA"),
-         ("SCL2", "bass keys SCL"), ("INT2", "bass keys INT"), ("GND", "spare GND"), ("+3V3", "spare 3.3 V"),
+         ("SCL2", "bass keys SCL"), ("INT2", "bass keys INT"), ("GND", "spare GND"), ("TS", "battery NTC"),
          ("BATP", "battery +")]
 for i, (net, name) in enumerate(WIRES):
     part(f"P{i + 1}", name, PAD, {"1": net}, (1.2 + 2.0 * (i % 9), 1.0 + 1.85 * (i // 9), 0), group="wires",
@@ -247,5 +251,5 @@ LCSC = {
     ("100n", C0402): "C1525",                          # basic, 16 V
     ("100R", R0402): "C25076", ("1k", R0402): "C11702", ("1k5", R0402): "C25867", ("2k2", R0402): "C25879",
     ("5k1", R0402): "C25905", ("10k", R0402): "C25744", ("100k", R0402): "C25741", ("1M", R0402): "C26083",
-    ("75k", R0402): "C25798",                          # extended; the rest basic
+    ("68k", R0402): "C36871",                          # UNI-ROYAL 0402WGF6802TCE, extended; the rest basic
 }

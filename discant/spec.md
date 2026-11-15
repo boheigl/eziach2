@@ -165,10 +165,22 @@ generated from `build/discant/housing.stl`.
    recess r = 9.5 (cap + 2 mm), down to the lower step's top, closed by a 1.2 mm
    ring wall, which merges with the front rib above (1.1 mm thick there). Checked on cover.stl: every
    point of the cover above a cap's own plate keeps ≥ 2.0 mm from that cap.
-   Held by **sixteen M2 countersunk self-tapping screws** (ISO 7046 / DIN 965
-   heads, flush; 90° countersinks ⌀4 in the cover), four per board, all
-   through the board on the row line into ⌀1.6 × 7 pilots in the housing: one
-   near each end and two between (⌀2.2 clearance in cover and board). [chosen]
+   Held by **27 M2 × 6 countersunk brass machine screws** (DIN 965 CuZn, near the
+   magnets [given 2026-11-15]; heads flush in 90° countersinks ⌀4 in the cover) on the
+   board's 40 mm grid (`../hall_pcb/spec.md`), through cover (2.4) and board (1.67),
+   ⌀2.2 clearance in both, into ⌀1.7 pilots in ⌀4.4 bosses of the housing. The screw
+   cuts its own thread there, about 1.9 mm deep (bosses 1.65 plus the floor; the pilot
+   stops 0.4 above the outside, M2 × 8 would go through). [chosen]
+   - **Loads:** the springs push between seat and bushing, both in the cover, so they
+     load no screw; a press pushes cover and board onto the bosses. Only the thumb
+     bar's side loads (shear, spread over 27 screws) and lifting the discant by its
+     cover pull or shear them. Pull-out about 100 … 200 N per screw [estimated].
+   - **Pilot ⌀1.7, not the M2 tap drill 1.6** [given 2026-11-15]: printed holes come out
+     0.1 … 0.2 under size, and soft brass would tear in its slot cutting a full thread.
+   - **Tightening:** with two fingers on a small screwdriver, stop when the head is
+     flush; the thread in the plastic strips long before the brass breaks. When
+     reopened, turn each screw back until it drops into its thread before driving it,
+     or every assembly cuts a new one.
 
 Checked by grid sampling: no cap touches the cover, at rest or pressed, on any
 of the 46 holes. Housing and cover are each a single solid.
@@ -272,8 +284,8 @@ longer part of the build's design).
   [chosen] [unverified: the 0.15 mm plate fit, printed in the housing]
 - **Inner holders** [given: the gauge is three parts; the inner holder is the bass's]:
   printed with the bass on one mount (`../bass/link.scad`); the bass slides them onto
-  the plates' W and off again. The link plate and its spring pins are gone; the 12
-  contacts need their own connector [open].
+  the plates' W and off again. The contacts are the spring-pin boards between the
+  outer holders (below, and `../contact_pcb/`).
 - **Reading:** each bridge reads moment, force × arm from the gauges (7 mm as
   designed; on the bass the hand's push acts about 56 mm away, `../bass/spec.md` §4). The sum follows the force, the difference the twist. Arm and the bass
   module's weight therefore enter the reading. [estimated: with two gauges full
@@ -304,7 +316,7 @@ longer part of the build's design).
   (28 mm).
   The latches in the inner holders carry the load, not the contacts.
   `../assembly/spec.md`, Contacts.
-- **Open:** overload stop.
+- **Overload:** no stop needed [2026-11-15]: the bought load cells are rated 490 N with 150 % overload; 100 N is a fifth of that (`../strain_gauge/spec.md` §4a).
 
 Checked by solid intersection (2026-11-15, with the NAU7802 on the board; control pair
 overlapping): the wires touch only the pads they end at; housing, board, its parts and

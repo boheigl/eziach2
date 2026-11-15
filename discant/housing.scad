@@ -32,7 +32,7 @@ fit      = case_fit;
 wall     = case_wall;
 ledge    = 0.8;      // under the board's edge, inside the rim
 boss_d   = 4.4;      // at the screw holes, under the board
-pilot_d  = 1.6;      // M2 self-tapping
+pilot_d  = 1.7;      // M2 brass machine screws (DIN 965) cut their own thread; over the tap drill 1.6: printed holes come out small
 floor_keep = 0.4;    // under the pilots
 
 $fa = 4; $fs = 0.4;

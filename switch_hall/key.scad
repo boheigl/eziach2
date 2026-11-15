@@ -5,19 +5,23 @@
 // works like a linear Hall-effect keyboard switch:
 //
 // GUIDE [given 2026-11-14: metal, less friction; the 4 mm bushing]. The cover plate
-// (1.2 mm on the board's top, as ../discant/cover.scad) carries a fixed tube round each
+// (2.4 mm on the board's top, as ../discant/cover.scad) carries a fixed tube round each
 // key, with a sintered bronze sleeve bearing pressed into it (d3 x D5 x 4, oil-
-// impregnated, a stock part). The plunger is a ground stainless steel rod d3 h6 running
+// impregnated, a stock part). It goes in from below and bears on a rim at the tube's top
+// (rim_t), which takes the collar's pull at the upper stop. The plunger is a ground stainless steel rod d3 h6 running
 // in it, with a printed collar on its lower end that carries the magnet and the stop
 // washer and does not touch the tube. One bushing is the whole guide: steel in oiled
 // bronze runs at mu about 0.1, so a press jams only beyond bush_l / (2 mu) = 20 mm off
-// the axis, and still beyond 8 dry (mu 0.25): the cap's edge is at 7.5. The plunger
-// goes in from below before the cover is screwed onto the board; the collar under the
-// bushing holds it captive; the cap is then pressed onto the rod's top.
+// the axis, and still beyond 8 dry (mu 0.25): the cap's edge is at 7.5.
 //
-// SPRING. A stock compression spring (the one of ../switch/: d8 x 0.4 x 25,
-// 8 active coils) stands on the cover plate round the tube and pushes the cap
-// up. Its length between the plate and the cap's underside sets the force; at
+// ASSEMBLY, before the cover is screwed onto the board: rod pressed and glued into the
+// cap, magnet pressed into the collar; bushing into the tube from below, against the
+// rim; spring round the tube, O-ring into the cap; rod with cap from above through the
+// bushing; cover turned over onto its caps, stop washer over the rod's end, collar
+// glued on (the spring holds it against the bushing while the glue sets).
+//
+// SPRING. A stock compression spring (Misumi C-UY8-25, stainless) stands on a seat
+// round the tube and pushes the cap up. Its length between the plate and the cap's underside sets the force; at
 // the lower stop it is still well above its minimum length.
 //
 // STOPS, both soft, so nothing clicks. Upper: a washer punched from 1 mm
@@ -62,9 +66,9 @@ riser = 0;
 
 /* [Cap — as in ../switch/button.scad] */
 cap_d    = 15;
-cap_h    = 2;
+cap_h    = 3;        // deep enough for the rod's socket
 cap_r    = 0.5;
-cap_sock = 1.5;      // rod pressed this far into the cap
+cap_sock = 2.5;      // rod pressed and glued this far into the cap: it carries the spring's force
 stroke   = 3;        // [given]
 
 /* [Plunger: a steel rod in a bronze bushing, a printed collar on its lower end] */
@@ -73,12 +77,13 @@ bush_d   = 3;        // sintered bronze sleeve bearing, oil-impregnated: d3 x D5
 bush_od  = 5;
 bush_l   = 4;        // [given: 4, not 3: margin when it runs dry]
 bush_fit = 0.05;     // pressed into the printed tube: its seat 0.05 under D
+bush_slip = 0.1;     // the bore below the seat: the bushing slides through it
+rim_t    = 0.8;      // the tube's top rim over the bushing: its stop against the collar's pull
 rod_clear = 0.2;     // radial, the rod above the bushing, where it does not guide
 pin_d    = rod_d;    // (the rod, as the cap and the O-ring see it)
 collar_d = 4.4;      // printed: carries magnet and stop washer, no longer guides
-collar_h = 2;
+collar_h = 3;        // the rod glued 1.5 deep into it, over the magnet
 floor_gap = 0.3;     // collar above the board at the lower stop
-gap      = 0.2;      // radial, collar in the lower bore: no contact
 mu       = 0.1;      // steel in oiled sintered bronze [estimated]
 mu_dry   = 0.25;     // dry or dirty [estimated]
 
@@ -98,20 +103,22 @@ overlap_min = 1;     // skirt over the shroud at rest
 oring_id   = 4;      // 4 x 1.5, silicone 50 Shore A (or NBR 70)
 oring_cs   = 1.5;
 oring_seat = 0.5;    // depth of the counterbore in the cap's underside
-oring_gap  = 0.1;    // radial, O-ring in its counterbore
+oring_gap  = 0.05;   // radial, O-ring in its counterbore (the counterbore stays inside the spring)
 
 /* [Upper stop: washer punched from 1 mm silicone or PU sheet] */
 stop_t   = 1;
 stop_od  = 4.5;      // hollow punches in 0.5 mm steps
 stop_id  = 2.5;      // a little under the rod: it holds itself (punched, stretched over it)
 
-/* [Spring — stock, as ../switch/: d8 x 0.4 x 25, 8 active coils] */
-spring_wd = 0.4;
+/* [Spring — standard part: Misumi C-UY8-25, SUS304-WPB, d8 x 0.45 x 25] */
+spring_wd = 0.45;
 spring_od = 8;
-spring_n  = 10;      // total coils: 8 active + one dead coil each end (assumed)
+spring_n  = 12;      // total coils, from the catalogue's solid height 5.4 (drawing only)
 spring_l0 = 25;
-spring_G  = 81500;
-spring_lmin = 6.25;  // shortest recommended working length (DIN EN 13906-1), as ../switch/
+spring_rate = 0.098; // N/mm, catalogue (±10 %); stainless, weakly magnetic
+spring_lmin = 6.25;  // the catalogue's shortest working length (L1)
+spring_rest = 13.1;  // length at rest: 119 g, 149 g at the bottom [given 2026-11-15]
+seat_floor = 0.8;    // the cover plate left under the spring's seat, at its thinnest [given 2026-11-15]
 
 /* [Hall sensor — SOT-23 on the underside, on the axis] */
 sens_l   = 2.9;
@@ -136,34 +143,42 @@ $fa = 2; $fs = 0.1;
 z_top    = pcb_t / 2 + cu_t;               // board's top surface
 z_bot    = -pcb_t / 2 - cu_t;
 // the bushing stands spring_lift higher than the old printed guide's top (collar's edge + 4.5):
-// the spring's seat rises with it, so the spring keeps its length and its force
-spring_lift = collar_h + stop_t + bush_l - 4.5 - (cover_t - 1.2);   // the seat stays where it was with the 1.2 plate
-z_seat   = pcb_t / 2 + cover_t + riser + spring_lift;   // spring seat: a level floor inside the shroud
+// shroud and skirt rise with it
+spring_lift = collar_h + stop_t + bush_l + rim_t - 4.5 - (cover_t - 1.2);
+z_lvl    = pcb_t / 2 + cover_t + riser + spring_lift;   // the level the shroud and skirt are reckoned from
 z_cb     = z_top + floor_gap + collar_d / 2 * tan(board_tilt) + stroke;   // collar's lower face at rest
 z_step   = z_cb + collar_h + stop_t;       // the bushing's lower face: the upper stop
 z_bush   = [z_step, z_step + bush_l];      // the bushing
-z_tt     = z_bush[1] + riser;              // tube top: the bushing's top (the bass's back row: riser higher)
+z_tt     = z_bush[1] + rim_t + riser;      // tube top: the rim over the bushing (the bass's back row: riser higher)
 oring_od = oring_id + 2 * oring_cs;
 oring_out = oring_cs - oring_seat;         // O-ring below the cap's underside
 cbore_d  = oring_od + 2 * oring_gap;
 z_cu     = z_tt + oring_out + stroke;      // cap underside at rest
 z_ct     = z_cu + cap_h;                   // cap top at rest
 function key_cap_top() = z_ct;             // for ../discant/cover.scad (the thumb bar follows the caps)
-bore_lo  = collar_d + 2 * gap;
+function key_bore_lo() = bore_lo;          // for ../discant/cover.scad (run down through the plate)
+bore_lo  = bush_od + bush_slip;           // the bushing's way in; the collar runs in it without contact
 bore_hi  = rod_d + 2 * rod_clear;          // above the bushing
 shroud_id = spring_od + 2 * shroud_gap;
 shroud_od = shroud_id + 2 * shroud_wall;
+// spring seat: a level floor between tube and shroud, spring_rest under the cap's
+// underside, so both halves have the same spring length and force. It may not come
+// lower than seat_floor above the board at its outer edge on the discant's up-slope side
+// (its board tilted by atan(3 / 16)); on the bass's flat board the collar, and with it
+// the cap, sit lower by the tilt's lift (z_cb).
+z_seat_min = z_top + shroud_id / 2 * 3 / 16 + seat_floor + riser
+           - collar_d / 2 * (3 / 16 - tan(board_tilt));
+z_seat   = z_cu - spring_rest;
 skirt_id  = shroud_od + 2 * skirt_gap;
 skirt_od  = skirt_id + 2 * skirt_wall;
 // the tilted plate's top under the skirt's edge, above the level seat
 tilt_rise = max(0, z_top + cover_t / cos(board_tilt) - (pcb_t / 2 + cover_t)) + skirt_od / 2 * tan(board_tilt);
-z_sht    = z_seat + skirt_clear + tilt_rise + stroke + overlap_min;   // shroud top
-skirt_l  = z_cu - stroke - z_seat - skirt_clear - tilt_rise;          // skirt below the cap's underside
+z_sht    = z_lvl + skirt_clear + tilt_rise + stroke + overlap_min;   // shroud top
+skirt_l  = z_cu - stroke - z_lvl - skirt_clear - tilt_rise;          // skirt below the cap's underside
 
 // spring
 spring_dm  = spring_od - spring_wd;
-spring_na  = spring_n - 2;
-spring_k   = spring_G * pow(spring_wd, 4) / (8 * pow(spring_dm, 3) * spring_na);
+spring_k   = spring_rate;
 l_rest     = z_cu - z_seat;
 l_bot      = l_rest - stroke;
 f_rest     = spring_k * (spring_l0 - l_rest);
@@ -203,7 +218,9 @@ assert((tube_od - bush_od) / 2 >= 0.8 - 1e-6, "tube wall too thin round the bush
 assert(l_bot >= spring_lmin, "spring too short at the lower stop");
 assert(l_rest < spring_l0, "spring has no preload");
 assert(tube_od <= spring_od - 2 * spring_wd - 0.5, "tube too wide for the spring");
-assert((tube_od - bore_lo) / 2 >= 0.8, "tube wall too thin round the collar");
+assert((tube_od - bore_lo) / 2 >= 0.75 - 1e-6, "tube wall too thin round the bushing's way in");
+assert(z_seat >= z_seat_min - 1e-6, "spring seat too deep: the plate under it too thin");
+assert(bore_lo > collar_d + 0.4, "collar touches the lower bore");
 assert(z_tt > z_seat + 1, "tube does not rise above the cover");
 assert(cbore_d <= spring_od - 2 * spring_wd, "O-ring counterbore wider than the spring's inside: the top coil loses its seat");
 assert(oring_id > bore_hi && oring_id < tube_od, "O-ring does not land on the tube's top");
@@ -212,7 +229,7 @@ assert(oring_seat < oring_cs - 0.5, "O-ring hardly stands out of its counterbore
 assert(stop_od <= bore_lo - 0.2, "stop washer rubs in the lower bore");
 assert(stop_id < pin_d && stop_id >= pin_d - 0.5, "stop washer must sit a little tight on the rod (silicone stretches)");
 assert(stop_od > bush_d + 0.8, "stop washer hardly meets the bushing's face");
-assert(mag_d <= collar_d - 1.2 && mag_l <= collar_h - 0.3, "magnet does not fit the collar");
+assert(mag_d <= collar_d - 1.2 && mag_l <= collar_h - 1.5, "magnet does not fit the collar, or the rod's glued length is short");
 assert(b_bot <= sens_range, "field beyond the sensor's range at the lower stop");
 assert(sens_l / 2 < margin_n, "sensor beyond the board's edge");
 // staircase: the next board's caps and cover must stay clear of this cap
@@ -269,7 +286,7 @@ module tube_body() {
 module tube_cut() {
     translate([0, 0, z_top - 0.01]) cylinder(d = bore_lo, h = z_step - z_top + 0.01);
     translate([0, 0, z_bush[0] - 0.01]) cylinder(d = bush_od - bush_fit, h = bush_l + 0.01);   // the bushing's seat
-    translate([0, 0, z_top]) cylinder(d = bore_hi, h = z_tt);
+    translate([0, 0, z_top]) cylinder(d = bore_hi, h = z_tt);   // through the rim
     translate([0, 0, z_seat]) difference() {   // the spring's room above the seat
         cylinder(d = shroud_id, h = z_sht);
         translate([0, 0, -1]) cylinder(d = tube_od, h = z_sht + 2);

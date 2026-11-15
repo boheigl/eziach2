@@ -37,7 +37,7 @@ PARTS = [
     ("bushing", "Sleeve bearing",    "sintered bronze d3 x D5 x 4",      G["z_bush0"]),
     ("tube",    "Cover with tube",   "printed, 2.4 mm plate",            G["pcb_t"] / 2),
     ("board",   "Board + Hall sensor", "DRV5055 on the underside",       G["z_bot"] - G["sens_h"]),
-    ("spring",  "Spring",            "d8 x 0.4, 10 coils",               G["z_seat"]),
+    ("spring",  "Spring",            "d8 x 0.45, 12 coils",               G["z_seat"]),
     ("oring",   "O-ring",            "4 x 1.5 silicone, lower stop",     G["z_cu"] + G["oring_seat"] - G["oring_cs"]),
     ("cap",     "Cap with skirt",    "printed, hides the spring",        G["z_cu"] - G["skirt_l"]),
 ]

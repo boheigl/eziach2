@@ -74,6 +74,44 @@ bridge wiring. [unverified]
 A half bridge needs three leads (E+, E−, mid-tap). The render shows two, which
 cannot drive one — assume the render is schematic.
 
+## 4a. The bought load cell [given 2026-11-15]
+
+The plate with its gauges is a stock part: the half-bridge load cell of bathroom
+scales, sold in fours with an HX711 board (unused here). The seller's data:
+
+| | |
+|---|---|
+| Range | 50 kg (490 N); overload 150 % (735 N) |
+| Bridge | half bridge, 3 wires (E+, middle, E−); 1000 ± 10 Ω |
+| Output | 1.0 ± 0.15 mV/V at full range; zero ±0.3 mV/V |
+| Linearity, hysteresis, repeatability | 0.2, 0.2, 0.1 % F.S. |
+| Creep | 0.1 % F.S. in 3 min |
+| Zero drift, span drift | 0.3 % F.S. per 10 °C each |
+| Excitation | 5–10 V DC (3.3 V here, see below) |
+| Temperature | −10 … +40 °C |
+| Leads | 45 cm (cut to 19 mm here) |
+
+What follows from it:
+
+- **Material and making** need no choice: steel and gauges come made. §4's beam
+  estimate (1100 µε at about 200 N) is replaced by the seller's 1 mV/V at 490 N, about
+  2 µε/N. [unverified: that the bought cell's plate is the STEP's 30 × 25 × 2.5;
+  measure one before printing the holders]
+- **Signal at 3.3 V excitation** (AVDD, ratiometric): 3.3 mV at 490 N, **6.7 µV/N**.
+  Playing forces of 20–40 N give 0.13–0.27 mV; the NAU7802's 150 nV at 80 SPS
+  resolves about 0.02 N, over a thousand steps in 30 N. Below the seller's 5 V, but a
+  bridge has no lower limit; only the signal scales.
+- **Overload:** 100 N is a fifth of the range, the cell's 150 % is 735 N. The cell
+  needs no stop; the printed holders and latches are the weaker parts.
+- **Current:** 3.3 mA per cell at 1000 Ω (1.65 mA if the 1000 Ω is per gauge
+  [unverified: measure E+ to E−]).
+- **Drift is the weak point:** 0.3 % F.S. per 10 °C is 1.5 N per 10 °C, as much as a
+  soft note. The firmware tares at start and keeps re-taring while no key is pressed
+  and the force is steady; the hand warms the cells slowly.
+- **Polarity:** find the leads by resistance (E+ to E− is the largest), wire them to
+  E+, middle, E−; which way a push goes is the firmware's sign, set once by pressing.
+  Nothing in the hardware depends on it.
+
 ## 5. Inner holder — `inner_holder.scad`
 
 Grips the W-shaped inner part and introduces the load. **23 × 21.2 × 8.8 mm**,
@@ -204,8 +242,7 @@ deviation below 0.001 mm, both meshes watertight.
 ## 10. Still open
 
 - Force introduction on the inner holder — nothing to attach a loading rod to.
-- Gauge polarity, by test.
-- Material choice and an FEA or strain survey to replace the beam estimate.
+- Measure one bought cell against the STEP (§4a) and its E+ / E− resistance.
 - Lead wires appear in `viewer.html` only, as straight runs for clearance — they are not a manufactured part and have no `.scad`.
 
 ## 11. Files

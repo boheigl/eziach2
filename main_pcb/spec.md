@@ -25,7 +25,9 @@ includes. The scripts come from `../hall_pcb/` and from the discant's old main b
 - **Four layers** [chosen]: top, ground plane, signals, bottom. The bottom carries no
   parts, so it routes freely; all four are filled with ground where nothing else runs.
   Tracks 0.127 mm, power 0.4 mm where it fits; vias 0.45 / 0.2.
-- **Screws:** three M2 from the parts' side into pilots in the front wall,
+- **Screws:** three M2 × 3 pan head (ISO 7045, A2 [chosen 2026-11-15]; head ⌀4 × 1.6) from
+  the parts' side through the board and the 0.47 pads, 2.0 mm into ⌀1.7 pilots 2 mm deep
+  in the front wall (1 mm of wall left to the hand's face; M2 × 4 would go too deep),
   (4.4, 30.6), (25.0, 30.6), (22.4, 2.6). No copper on the top under the heads
   (⌀4.4). The pilots were placed clear of the hand plate's 1 mm recess (2 mm wall
   behind it); the recess is gone since [given 2026-11-15], the wall 3 mm everywhere.
@@ -65,11 +67,24 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 - **Battery protection in the cell** [chosen 2026-11-14]: the pouch cell comes with
   its own protection board (PCM), as cells with leads usually do; the board only adds
   the fuse. This saves the DW01A and its two FETs, for which the board had no room.
-  [unverified: the cell actually ordered]
-- **Charger settings** [datasheet, values to check]: ISET 1k ≈ 0.9 A charge (0.22 C for
-  4 Ah); ILIM 1.5k ≈ 1.0 A from USB (EN2 high, EN1 low); TS a fixed 10k (no
-  thermistor in the cell [unverified]); TMR 75k, a fast-charge timer of about 10 h
-  [unverified: K_TMR]; ITERM open, 10 % termination; CE low.
+  The cell [checked 2026-11-15: DNK606090 datasheet]: 4000 mAh, 4.2 V at 0.2 C
+  recommended (0.5 C max), 0–45 °C charging; its PCM trips at 4.275 V, 2.5 V, 3–5 A and
+  on a short. A 3-wire variant, with a 10k NTC.
+- **Charger settings** [datasheet: SLUS810]: ISET 1k ≈ 0.89 A charge (0.22 C for
+  4 Ah); ILIM 1.5k ≈ 1.0 A from USB (EN2 high, EN1 low); ITERM open, 10 % termination;
+  CE low.
+  - **TS to the cell's 10k NTC** [chosen 2026-11-15] on pad P17 (the former spare
+    3.3 V), the NTC's other end on the cell's minus; the fixed 10k (R5) is gone. The
+    charger then charges only within about 0–50 °C (the cell allows 0–45). Without the
+    NTC wire TS floats high and the charger does not charge.
+  - **Variant for a 2-wire cell** [chosen 2026-11-15]: a separate 10k NTC (B 3435, as
+    the BQ24074's 103AT; a ⌀1.5–2 bead, or an 0603 NTC on two enamelled wires) taped
+    to the cell, both its wires to the board: P17 (TS) and P16 (the spare GND, then the
+    NTC's return). Nothing is soldered at the cell or its PCM. Check: about 10 kΩ from
+    P17 to GND at room temperature.
+  - **TMR 68k** [chosen 2026-11-15; was 75k, outside the 18–72k the datasheet
+    specifies]: t_MAXCHG = 10 × 68k × K_TMR (36/48/60 s/kΩ) = 9.1 h (6.8–11.3 h), against
+    about 5–6 h for a full charge at 0.89 A.
 - **Charge light** [given 2026-11-15: red while charging, green when full, red also when
   the battery runs low]: a side-emitting red/green LED with a common anode on VSYS
   (LiteOn LTST-S326KGJRKT [unverified: which pad is which colour; height 1.6]), its lens
@@ -94,12 +109,19 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 
 ## 3. Switching on [given: assembly/spec.md, plugging switches the system on]
 
-- **DET** is pulled up to VSYS (1M, 10k in series) and tied to ground by the discant's
+- **DET** is pulled up to VSYS (1M, 100k in series) and tied to ground by the discant's
   contact board when the halves are plugged for playing. Pulled low:
   - **Q2** (AO3401A, from VSYS) drives the regulator's EN: the system is on;
-  - **Q3** (AO3401A, from 3.3 V) passes 3.3 V to the contacts for the discant. The
-    100 nF on its gate (with the 10k) ramps it over about 1 ms, against the
-    discant's capacitors.
+  - **Q3** (AO3401A, from 3.3 V) passes 3.3 V to the contacts for the discant.
+- **Delay and ramp** [chosen 2026-11-15; was 10k, about 1 ms]: the nine spring pins are
+  alike, so DET may close while a 3.3 V pin is still open; the discant's capacitors
+  would then charge with a spark through the last pin to touch and pull the bass's
+  3.3 V down. R14 100k and C9 100 nF make the gate fall with τ ≈ 9 ms (100k ∥ 1M ×
+  100 nF) towards 0.36 V: Q3 (|V_th| 0.5–1.3 V [datasheet]) starts conducting 3–7 ms
+  after DET closes and is fully on after about 12 ms, by then all pins touch. Q2, on the
+  same gate, switches the system on equally later (about 3 ms), which nobody notices.
+  Apart, the gate rises through R15 with τ ≈ 100 ms (unchanged): when unplugged, the
+  discant's 3.3 V stays on that long while its pins separate. [estimated]
 - **USB alone** also switches the system on (VBUS into EN through the BAT54C), so that
   firmware can go in and the ESP32 can show the battery while it charges; the
   discant's 3.3 V stays off: apart, the contacts carry nothing. The firmware may put
@@ -124,7 +146,7 @@ I²S drops straight from pins 18–21 to the DAC above them.
 **Solder pads** along the bottom edge, two rows of nine at 2 mm, where the wires
 arrive (elec.scad `wires()`): the contacts' nine (3.3 V × 2, GND × 3, SDA, SCL, INT,
 DET), the bass key board's five (3.3 V, GND, SDA, SCL, INT), the battery (+ via the
-fuse, −), a spare GND and 3.3 V. The wires and their lengths: `../assembly/spec.md`, Wiring. Test pads for boot, reset and GND at the top; TX and RX
+fuse, −, NTC to TS), a spare GND. The wires and their lengths: `../assembly/spec.md`, Wiring. Test pads for boot, reset and GND at the top; TX and RX
 at (10.4, 11.4 / 13.5), halfway to the module's pins 36/37 (no room beside them), so
 their tracks stay short. EN_SYS's pull-down R16 sits beside D2, so that net needs one
 track, D2 to the regulator.
@@ -145,12 +167,12 @@ track, D2 to the regulator.
   VINA through 100 Ω); 10 µF in (≥ 4.7 µF), 3 × 22 µF out (15 µF nominal) are within
   its advice. L1 is 2.2 µH as in all the datasheet's examples [chosen 2026-11-15; was
   1.5 µH], 1008, Isat 2 A (peak about 0.82 A at 3.0 V, by Equation 4).
-- **Routing** [2026-11-14]: all nets routed (four tries, the best kept); KiCad's DRC
-  finds no clearance errors, shorts or open connections. What it still lists: the
-  USB socket's shell pads at the board's edge (they reach past it by design), the
-  wire pads' and the module's courtyards (the pads sit closer than their courtyards,
-  the module's courtyard carries its antenna's keepout), silkscreen, and one GND
-  pad with fewer thermal spokes. One fix by hand after build.sh: a 0.4 mm +1V8
-  piece at the DAC narrowed to 0.127 mm, too near SCL2; route.py no longer counts
-  +1V8 as power (a few mA), so a new build does not need it.
+- **Routing** [2026-11-15, with the charge light, the low-battery switch and the panel
+  jack's pads]: all nets routed (four tries, the best kept); KiCad's DRC finds no
+  clearance errors, shorts or open connections. The try before left EN_SYS and TXD0
+  open; R16 beside D2 and the TX/RX pads nearer the module (§4) fixed that. What it
+  still lists: the USB socket's shell pads at the board's edge (they reach past it by
+  design), courtyards (wire pads, module antenna keepout), silkscreen, and three GND
+  pads with fewer thermal spokes. In the bass: no clash with case, back cover, wires or
+  battery.
 - The DAC's speaker outputs are left open (earphones only).

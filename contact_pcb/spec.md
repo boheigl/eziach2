@@ -2,14 +2,14 @@
 
 The spring contacts that join the two halves when the bass is plugged for playing
 [given: power and I2C cross by contacts that close as the bass slides on; chosen
-2026-11-15: spring pins on a small board]. Two boards, made as one panel and split
-along a V-cut after assembly: the **pin board** goes into the bass (`../bass/link.scad`),
+2026-11-15: spring pins on a small board]. Two boards, made as one panel and broken out
+after assembly: the **pin board** goes into the bass (`../bass/link.scad`),
 the **pad board** onto the discant (`../discant/gauge_link.scad`). Why spring pins and
 not blade or card-edge contacts: `../assembly/spec.md`, Contacts.
 
 | | |
 |---|---|
-| Panel | 10.0 × 18.0 mm, 2 layers, 1.6 mm, **ENIG** (the pads are contacts), V-cut at the middle (drawn on User.1) |
+| Panel | 16 × 25 mm, 2 layers, 1.6 mm, **ENIG** (the pads are contacts): both boards in a 2 mm frame, 1 mm milled gaps round them, each held by a 2 mm tab on either side with three ⌀0.5 mouse-bite holes at the board's edge [given 2026-11-15: tabs, not V-cut] |
 | Each board | 10.0 × 9.0 mm |
 | Grid | 3 × 3: 2.54 mm across (x), 3.0 mm up (z); the strips are 2.5 wide, so 3.0 leaves them 0.5 apart |
 | Pads | ⌀2.2 on both boards (the strip's recommended pad) |
@@ -25,6 +25,15 @@ not blade or card-edge contacts: `../assembly/spec.md`, Contacts.
 
 Nine wire pads on the back, one per pin, because the main board takes nine wires
 (`../main_pcb/design.py`, WIRES).
+
+**Supply** [checked 2026-11-15 at lcsc.com]: 50 in stock, enough for 16 instruments. Buy
+what the planned instruments need now (into JLCPCB's private parts library, so the
+assembly can use them later). The same pin comes in CHIN-BAN's 2-pin strip
+**PG2541-02-001P** (C49451493, 897 in stock, $0.30): ⌀0.9 / ⌀1.5, free 5.5, working 4.5,
+limit 4.2, 120 ± 20 gf, SMD, ⌀2.4 pads [datasheet]; it is not a drop-in (5.2 long for two
+pins, so no three at 2.54 in a row), it would need a new grid, e.g. five strips of two
+(one pin spare). The 5-pin PG2541-05-004P is a through-hole part of another height, the
+2-pin PG2541-02-002P a 13.7 mm long one: neither fits.
 
 ## Pad board (discant)
 
@@ -46,11 +55,18 @@ board, seen from the bass, shows it mirrored.
 
 ## Open
 
-- DET closes no later than the other pins: all nine pins are alike. The main board ramps
-  the discant's 3.3 V up after DET; that ramp should cover the pins' spread as the bass
-  slides on (about 10 ms; now about 1 ms) (`../assembly/spec.md`).
-- JLCPCB's minimum size for assembly, believed to be 10 × 10 mm, is why the two boards
-  are one panel [unverified]. The V-cut on User.1 must be named in the order.
+- DET closes no later than the other pins: all nine pins are alike. The main board turns
+  the discant's 3.3 V on 3–7 ms after DET, fully after about 12 ms, which covers the pins'
+  spread as the bass slides on (`../main_pcb/spec.md` §3).
+- **Ordering** [checked 2026-11-15, jlcpcb.com]: JLCPCB cuts V-grooves only in panels of
+  70 × 70 mm or more, and its economic assembly takes boards from 10 × 10 mm; each board
+  alone is 10 × 9. Hence the panel with milled gaps and tabs: in the order "Panel by
+  Customer", different designs 2 [unverified: whether JLCPCB charges for the second
+  design], edge rails none, ENIG, economic assembly of the top side. The mouse bites are
+  in the drill file (non-plated).
+- **Breaking out:** bend each board out over its tabs; the tabs break through their
+  holes and leave half holes and little stubs on the boards' sides (x). Those sides
+  locate the pin board in the bass's pocket (0.1 clearance), so file them flush.
 - The strip's housing height is estimated in the model (`contact_pins()`), only its
   overall heights are from the datasheet.
 
@@ -58,5 +74,5 @@ board, seen from the bass, shows it mirrored.
 
 | File | |
 |---|---|
-| `gen_pcb.py` | writes `contact.kicad_pcb`: footprints, pads, tracks and vias, outline and V-cut |
+| `gen_pcb.py` | writes `contact.kicad_pcb`: footprints, pads, tracks and vias, the panel's outline, gaps, tabs and mouse bites |
 | `build.sh` | runs it, KiCad's DRC (`drc.json`), and writes `fab/`: gerbers, drill, `contact-pos.csv`, `contact-bom.csv` |

@@ -27,16 +27,52 @@ rebuilds the same geometry from parameters copied at the top of its script.
 The key works like a linear Hall-effect keyboard switch. Everything that moves
 is above the board, and **the board has no key holes**.
 
-- **Tube:** the cover plate (1.2 mm on the board's top, as in
-  `../discant/cover.scad`) carries a fixed tube at every key.
-- **Plunger:** it runs in the tube. A collar at its lower end slides in the
-  tube's wider lower bore, and a pin above it in the narrower upper bore. Collar
-  and pin are the two guide points.
-- **Assembly:** the plunger goes into the tube from below before the cover is
-  screwed onto the board. The step between the two bores then holds it captive.
-  The cap is pressed onto the pin from above.
-- **Spring:** a stock compression spring stands on the cover plate round the
-  tube and pushes the cap up.
+- **Tube:** the cover plate (2.4 mm on the board's top, as in
+  `../discant/cover.scad`) carries a fixed tube at every key, with a sintered bronze
+  sleeve bearing (d3 × D5 × 4, oil-impregnated, stock) in it.
+- **Plunger:** a ground stainless rod ⌀3 h6 runs in the bushing; a printed collar on
+  its lower end carries the magnet and the stop washer and touches nothing.
+- **Bushing from below, against a rim** [given 2026-11-15]: the tube's lower bore
+  (⌀5.1) lets the bushing slide in from below; it is pressed into its seat (⌀4.95) up
+  against a 0.8 mm rim at the tube's top. At rest the spring pulls the collar up
+  against the bushing (1.2 N, and a knock when a key is let go): the rim takes that
+  by its shape, with no glue and no screw. Screwing from above, as on an acoustic
+  Steirische, does not fit: the spring stands round the tube right up to the cap, so a
+  plate over the tubes would cut through it.
+- **Joints on the rod** [given 2026-11-15]: the rod is pressed and glued 2.5 mm deep
+  into the cap (3 mm thick) and glued 1.5 mm deep into the collar (3 mm high, over
+  the magnet's 1.5). Both carry the spring's force at rest.
+- **Spring:** a stock compression spring stands on a seat round the tube and pushes
+  the cap up.
+
+**Assembly of one key**, before the cover is screwed onto the board:
+
+1. Cut the rod to 13.8 mm (23.8 in the bass's back row), chamfer its ends lightly.
+   Roughen both ends over about 3 mm (240 grit; the ground h6 surface holds glue
+   poorly) and degrease them with isopropanol; keep the middle, which runs in the
+   bushing, smooth and clean.
+2. Press and glue the rod into the cap's socket, square, down to the bottom.
+
+   **Adhesive** [chosen 2026-11-15]: a slow 2-component epoxy, e.g. UHU plus endfest
+   (about 90 min to work, firm after 12 h), for both joints. Slow, because one mix then
+   does a whole cover and the spring holds the collar while it cures (step 6), and
+   slow epoxies are the stronger. Not cyanoacrylate: thin, it creeps along the rod into
+   the bushing and the stop washer and fixes the key. A small drop with a toothpick
+   into the hole (not on the rod), squeeze-out wiped off. Glued length 2.5 mm in the
+   cap, 1.5 mm in the collar (where it also holds the magnet): about 24 and 14 mm²,
+   some 50 N at a few N/mm² on PETG, against 1.2 N and a knock. [estimated]
+3. Press the magnet into the collar from below; every key with the same pole down
+   (check against a marked magnet).
+4. Cover upside down: the bushing into the tube from below, up against the rim.
+5. Cover the right way up: the spring round the tube onto its seat, the O-ring into
+   the cap's counterbore, the rod with the cap from above through the bushing.
+6. Cover turned over onto its caps (the springs keep the keys at rest): the stop
+   washer over the rod's end (it holds itself), then the collar glued on until the rod
+   sits on the magnet. The spring pulls the collar against the bushing while the glue
+   sets; no jig. No glue may reach washer or bushing: little glue, in the collar's hole
+   only. Leave the cover on its caps until the glue is firm (12 h).
+7. When all keys are in: the cover onto the board, the brass screws (27 on the discant); then each key
+   calibrated once at rest and once pressed.
 - **Sensor:** a linear ratiometric Hall sensor in SOT-23 (e.g. DRV5055A3,
   ±85 mT) sits on the board's **underside, exactly on the key's axis**, and
   senses through the board. A magnet magnetised along its axis is pressed into
@@ -49,9 +85,8 @@ is above the board, and **the board has no key holes**.
     pin. It stands 1 mm out and lands on the tube's top after 3 mm. It also
     centres the spring's top coil.
   - **Rest:** a washer punched with hollow punches from 1 mm silicone or PU
-    sheet, ⌀4.5 / ⌀3.5. It sits slightly tight on the ⌀3.6 pin, rests on the
-    collar and bears on the step between the bores. Its contact ring with the
-    step is 0.35 mm wide, so it carries about 0.23 N/mm² at rest. [estimated]
+    sheet, ⌀4.5 / ⌀2.5. It sits slightly tight on the ⌀3 rod, rests on the
+    collar and bears on the bushing's lower face.
   - **Rest position drift:** if the washer sets over time, the key rests a
     little lower. The firmware should keep tracking each key's rest reading
     while the key is not pressed.
@@ -70,23 +105,26 @@ flat.
 raises the spring seat, the tube top and everything above by that much; collar,
 magnet, stop washer and bushing keep their place at the board. Only the rod is
 10 mm longer: spring, stops, field and guide are the same as in the front row
-(cap top 27.1 instead of 17.1 above the board's middle). The Makefile builds
+(cap top 29.9 instead of 19.9 above the board's middle). The Makefile builds
 both rows as `bass0_*` / `bass1_*`.
 
 | | z | |
 |---|---|---|
 | Board, no hole | −0.8 … 0.8 | |
 | Hall sensor, underside | −1.935 … −0.835 | element assumed 0.55 below its mounting face [unverified; the datasheet's Figure 6-5 gives 0.65 ± 0.08 in the SOT-23, about 0.1 mm off, not acted on] |
-| Cover plate, spring seat | 0.8 … 2.0 | |
-| Tube ⌀6.6, lower bore ⌀4.8 / upper ⌀3.8 | 0.8 … 9.066, step at 7.566 | |
-| Collar ⌀4.6 × 2 with magnet ⌀3 × 1.5 | 4.566 … 6.566 | 0.3 above the tilted board at its edge, lower stop |
-| Pin ⌀3.6 | 6.566 … 14.566 | 1.5 into the cap |
-| Silicone washer ⌀4.5 / ⌀3.5 × 1 on the collar | 6.566 … 7.566 | upper stop |
-| O-ring 4 × 1.5 in the cap | 12.066 … 13.566 | lands on the tube's top after 3 mm |
-| Cap ⌀15 × 2, R0.5 | 13.066 … 15.066 | as in ../switch [given] |
+| Cover plate | 0.8 … 3.2 | |
+| Spring seat, between tube and shroud | 4.25 (§5) | |
+| Tube ⌀6.6: lower bore ⌀5.1, bushing seat ⌀4.95, rim with ⌀3.4 | 0.8 … 13.35; bushing 8.55 … 12.55, rim 12.55 … 13.35 | |
+| Collar ⌀4.4 × 3 with magnet ⌀3 × 1.5 | 4.55 … 7.55 | 0.3 above the tilted board at its edge, lower stop |
+| Rod ⌀3 | 6.05 … 19.85 | 1.5 into the collar, 2.5 into the cap |
+| Silicone washer ⌀4.5 / ⌀2.5 × 1 on the collar | 7.55 … 8.55 | upper stop |
+| O-ring 4 × 1.5 in the cap | 16.35 … 17.85 | lands on the tube's top after 3 mm |
+| Cap ⌀15 × 3, R0.5 | 17.35 … 20.35 | |
 
-- **Height** from the cap top to the board's underside is **15.9 mm** (15.5 mm on a board square to the keys). Only the
-  sensor (1.1 mm) is below the board.
+- **Height** from the cap top to the board's underside is **21.2 mm** on the discant
+  (20.8 on the bass's flat board); 2.8 more than before the rim (0.8), the longer
+  collar (1) and the thicker cap (1) [2026-11-15]. Only the sensor (1.1 mm) is below
+  the board.
 - For comparison, the switch key is 27.1 mm (cap top to its guide tube's bottom),
   and the leaf version was 19.6 mm.
 - Relative to its own board, the cap top stands 6.6 mm higher than with the
@@ -105,28 +143,49 @@ both rows as `bass0_*` / `bass1_*`.
 
 ## 4. Guide
 
-- **Fit:** 0.1 mm radial play for both the collar and the pin.
-- **Guide span at rest** (collar's lower edge to the tube's top): 4.5 mm. It
-  grows as the key goes down.
-- **Jamming:** a key in a two-point guide jams when it is pressed further off
-  centre than span / (2 μ). With μ = 0.25 (POM, greased) [estimated] that is
-  9 mm, beyond the cap's 7.5 mm radius.
-- The tube's wall is 0.9 mm round the lower bore and 1.4 mm round the upper bore.
+- **One bushing is the whole guide** [given 2026-11-14]: steel in oiled sintered bronze,
+  μ about 0.1 [estimated]. A press jams only beyond bush_l / (2 μ) = 20 mm off the
+  axis, and still beyond 8 mm dry (μ 0.25); the cap's edge is at 7.5.
+- The collar runs in the ⌀5.1 bore with 0.35 mm round it and touches nothing.
+- The tube's wall is 0.8 mm round the bushing and 0.75 round the lower bore, where
+  the spring stands round it; that part carries no load.
 
 ## 5. Spring
 
-The stock spring of `../switch/` [given]: ⌀8 × 0.4 × 25, 8 active coils, one
-closed dead coil at each end assumed (switch §8).
+**A standard part** [given 2026-11-15: stainless, a standard spring, not a custom one;
+C-UY8-25 with the lowered seat]: **Misumi C-UY8-25**, SUS304-WPB stainless, ⌀8
+outside × 0.45 wire × 25 free length, closed ends, inside ⌀7.1, 12 coils (solid 5.4).
+Cold drawn 304 is weakly magnetic (Misumi says so), far less than spring steel; the
+per-key calibration takes the rest out (§6).
+
+- **Seat** [given 2026-11-15]: a level floor between the tube (⌀6.6) and the shroud
+  (⌀8.6), 13.1 mm under the cap's underside (`spring_rest`), so the force stays as
+  chosen whatever the heights below. Since the rim, the longer collar and the thicker
+  cap raised the cap by 2.8 mm, the seat stands 1 mm above the plate's top (z 4.25),
+  about 2.6 mm of material under it at its thinnest. It may not come lower than
+  0.8 mm above the board at its outer edge up the discant's slope (`seat_floor`,
+  asserted); that limit was reached when the seat was a groove in the plate.
+- **O-ring counterbore** ⌀7.1 (0.05 round the O-ring instead of 0.1), so it stays
+  inside the spring and the top coil keeps its seat.
 
 | | |
 |---|---|
-| Rate | 0.074 N/mm [estimated] |
-| Length at rest / at the bottom | 11.1 / 8.1 mm (minimum working length about 6.25 mm) |
-| Force at rest → at the bottom | **105 → 128 g (+22 %)** [estimated] |
-| Shear stress at the bottom | 380 N/mm², uncorrected |
+| Rate | 0.098 N/mm ±10 % [catalogue] |
+| Length at rest / at the bottom | 13.1 / 10.1 mm (shortest working length 6.25 [catalogue]) |
+| Force at rest → at the bottom | **119 → 149 g (+25 %)**, both halves [from the catalogue's rate; ±10 %] |
+| Shear stress at the bottom | 310 N/mm², uncorrected |
 
-**For exactly 100 g at rest:** use a spring about 10 % softer (9 active coils),
-or install this one 1.2 mm longer, which adds 1.2 mm of height.
+Misumi's light series have one rate per size and free lengths in 5 mm steps, so the
+force cannot be tuned finely. With this spring the seat sets the force: as high as the
+old floor 139 → 169 g; on the plate's top 126 → 156 g; lower the floor gets too thin.
+The neighbours (⌀8, seat as now): C-UV8-25 (0.4 wire, 0.049 N/mm) 70 → 84 g; C-UY8-20
+(0.4 wire) 69 → 99 g. No stock spring of any maker searched gives about 100 g
+with a flat rise in this room (Gutekunst's 4536 and Misumi's sizes, 2026-11-15): that
+needs a soft spring heavily preloaded, wire 0.4 on ⌀8 (index 19), which no catalogue
+keeps. The custom alternative: 0.4 × ⌀8 × 25 in 1.4310 with 7 active coils, 104 → 126 g
+(+22 %).
+
+Before: a spring-steel ⌀8 × 0.4 × 25 with 8 coils, 105 → 128 g (+22 %).
 
 ## 6. Sensor [estimated, field of a cylinder magnet on its axis]
 
@@ -146,6 +205,10 @@ or install this one 1.2 mm longer, which adds 1.2 mm of height.
   its rest on the soft washer: the firmware tracks each key's rest reading while
   the key is up and triggers a little above it, e.g. on at 0.15 mm and off at
   0.08 mm. How small this can be is to be measured on a prototype. [estimated]
+- **Iron near the magnet:** spring, screws and the pads' finish bend the field a little,
+  the same way at every press; the per-key calibration takes it out. To keep it small:
+  a stainless spring (§5), brass screws in the key boards (`../hall_pcb/spec.md`), and
+  HASL rather than ENIG (its nickel) on the sensor boards [chosen 2026-11-15].
 - **Crosstalk:** pressing a neighbour on the same board (20 mm away) changes the
   reading by 0.04 mT, under 0.1 % of the swing. It can be ignored.
 - **Supply:** the DRV5055 draws 2 mA typical, 4 mA maximum at 3.3 V, continuously

@@ -53,7 +53,7 @@ include <layout.scad>
 use <link.scad>
 use <elec.scad>
 
-pilot_d  = 1.6;
+pilot_d  = 1.7;                  // M2 machine screws cut their own thread; over the tap drill 1.6: printed holes come out small
 ledge    = 0.8;                  // under the board's edge, inside the rim
 boss_d   = 4.4;                  // under the board at its screw holes
 floor_keep = 0.4;                // under the pilots
@@ -69,7 +69,7 @@ rib_gap  = 0.2;                  //   short of the back cover
 z_split  = z_bot + 12.5;         // the back cover from here up; below, the mount's strip stays
 cov_screws = [[-45 + ex, -21], [ex, -21], [45 + ex, -21]];   // the back cover's screws: above the stored caps (z < -38)
 pillar_d = 6;
-bat       = [90, 6, 60];         // the battery: x, y, z
+bat       = [93, 6, 60];         // the battery: x, y, z; a 606090 4 Ah LiPo with its PCM, 92 ... 92.5 long
 bat_gap   = 0.3;
 cradle_t  = 2;
 
