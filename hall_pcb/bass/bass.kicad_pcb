@@ -1130,7 +1130,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "4k7 (DNP?)"
+		(property "Value" "4k7"
 			(at 0 -1.17 180)
 			(layer "B.Fab")
 			(uuid "e806a222-f82e-4f64-ac7b-c93ecd9e9b23")
@@ -12664,7 +12664,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "4k7 (DNP?)"
+		(property "Value" "4k7"
 			(at 0 -1.17 180)
 			(layer "B.Fab")
 			(uuid "a4d5cda7-c034-4672-b1a7-7bed3fbeb317")

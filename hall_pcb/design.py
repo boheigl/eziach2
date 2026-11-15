@@ -194,9 +194,9 @@ if BOARD == "discant":
          CONN_XY, group="bus", title=BUS_TITLE,
          pinfo={"1": "INT", "2": "3V3", "3": "SDA", "4": "SCL", "5": "GND", "MP": "MP"})
     part("C1", "10u", C0805, {"1": "+3V3", "2": "GND"}, (CONN_XY[0] + 5.6, CONN_XY[1]), rot=90, group="bus")
-    # pull-ups: INT here (the ALERTs are open drain); SDA/SCL only if the host has none
-    # [unverified: fit or leave out once the bus is measured]
-    for i, (r, v, n) in enumerate([("R11", "10k", "INT"), ("R12", "4k7 (DNP?)", "SDA"), ("R13", "4k7 (DNP?)", "SCL")]):
+    # pull-ups: INT here (the ALERTs are open drain); SDA/SCL fitted as well, parallel to the
+    # main board's 2k2: 1k5 together, see spec.md
+    for i, (r, v, n) in enumerate([("R11", "10k", "INT"), ("R12", "4k7", "SDA"), ("R13", "4k7", "SCL")]):
         part(r, v, R0402, {"1": n, "2": "+3V3"}, (CONN_XY[0] - 6.0, CONN_XY[1] + 1.3 - 1.3 * i), group="bus")
 else:
     # bass: vertical, between keys 1 and 2 of the front row, in front of them: the plug comes
@@ -206,7 +206,7 @@ else:
          CONN_XY, group="bus", title=BUS_TITLE,
          pinfo={"1": "INT", "2": "3V3", "3": "SDA", "4": "SCL", "5": "GND", "MP": "MP"})
     part("C1", "10u", C0805, {"1": "+3V3", "2": "GND"}, (-62.0, 0.5 * D), rot=90, group="bus")
-    for i, (r, v, n) in enumerate([("R11", "10k", "INT"), ("R12", "4k7 (DNP?)", "SDA"), ("R13", "4k7 (DNP?)", "SCL")]):
+    for i, (r, v, n) in enumerate([("R11", "10k", "INT"), ("R12", "4k7", "SDA"), ("R13", "4k7", "SCL")]):
         part(r, v, R0402, {"1": n, "2": "+3V3"}, (-66.0, 0.5 * D - 1.3 + 1.3 * i), group="bus")
 
 
@@ -223,7 +223,7 @@ LCSC = {
     ("1u", C0402): "C52923",                      # basic, 25 V X5R
     ("10u", C0805): "C15850",                     # basic, 25 V X5R
     ("10k", R0402): "C25744",                     # basic
-    ("4k7 (DNP?)", R0402): "C25900",              # basic
+    ("4k7", R0402): "C25900",              # basic
     ("11k", R0402): "C25749",
     ("33k", R0402): "C25779",                     # basic
     ("100k", R0402): "C25741",                    # basic

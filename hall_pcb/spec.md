@@ -81,9 +81,15 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   E3h–E7h) [datasheets SBAS868A, SBAS976A compared 2026-11-15]. Firmware written for
   the ADS7138 runs unchanged. The TLA2528 (cheaper still) has no ALERT pin (pin 12 NC).
 - **Addresses 10h … 15h** do not collide with the PCAL9555A expanders (20h–27h).
-- **Pull-ups:** INT here. SDA and SCL are fitted here as well, marked "DNP?":
-  leave them out if the host's pull-ups suffice on the cable through the bellows.
-  [unverified]
+- **Pull-ups:** INT here. SDA and SCL 4k7 here as well [chosen 2026-11-15: fitted],
+  parallel to the main board's 2k2 on the same 3.3 V: about 1k5 per line. The ADS7128
+  allows a rise time of 120 ns [datasheet SBAS868A, 7.6: one column for standard, fast
+  and fast mode plus], the I²C standard 300 ns at 400 kHz; at t_r ≈ 0.85 R C, 2k2 alone
+  meets 120 ns only up to about 64 pF, 1k5 up to about 94 pF. Each bus carries about
+  80–120 pF [estimate: wire, 6 or 3 ADCs, NAU7802 or DAC, ESD diodes, ESP32, tracks].
+  1k5 sinks about 2 mA at 0.4 V, within I²C's 3 mA (R ≥ 1 kΩ). To check: the rise time
+  on SCL/SDA with a scope on the assembled instrument (bus 1 with the discant plugged);
+  if it stays under 120 ns without them, they can come off.
 - **Current:** 46 × 2–4 mA = 92 … 184 mA for the sensors, plus well under 1 mA for
   the ADCs. [datasheet: SBAS640C, SBAS868A]
 

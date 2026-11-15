@@ -6,6 +6,6 @@
 "11k","R2","Resistor_SMD:R_0402_1005Metric","C25749","1"
 "33k","R3","Resistor_SMD:R_0402_1005Metric","C25779","1"
 "10k","R11","Resistor_SMD:R_0402_1005Metric","C25744","1"
-"4k7 (DNP?)","R12,R13","Resistor_SMD:R_0402_1005Metric","C25900","2"
+"4k7","R12,R13","Resistor_SMD:R_0402_1005Metric","C25900","2"
 "ADS7128IRTER","U1-U3","Package_DFN_QFN:WQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm","C2867992","3"
 "DRV5055A3QDBZR","U101-U118","Package_TO_SOT_SMD:SOT-23","C266128","18"
