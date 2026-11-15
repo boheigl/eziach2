@@ -82,7 +82,7 @@ Grips the W-shaped inner part and introduces the load. **23 × 21.2 × 8.8 mm**,
 | Decision | Value | Why |
 |---|---|---|
 | Slides on from −y | mouth faces +y | the slots are open at that edge |
-| Wall above and below | 3 mm | [given] |
+| Wall above and below | 4.5 mm | [given: thicker for strength under a strong push; was 3] |
 | Closed box | side walls run inside the open slots at \|x\| = 9.2…11.5 | far stiffer than a bare C, and the slots are the only through-opening available |
 | Fit to the W | 0.2 mm per side, 0.15 mm per face | FDM; the walls guide along 17 mm of web, so tighter binds rather than grips |
 | Clearance to the outer arms | 0.5 mm | must never touch — they are the fixed side |

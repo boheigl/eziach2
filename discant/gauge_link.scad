@@ -91,6 +91,7 @@ contact_hw = 5.2;                // half width (x) and half height (z) of boss a
 contact_hh = 5.0;
 contact_p  = 2.54;
 contact_bore = 2.2;
+contact_wire_d = 1.4;            // five AWG 30 PTFE (⌀0.55 each) bundled (../assembly/spec.md, Wiring)
 
 /* [The bus wires from J1] */
 bundle_d = 1.8;
@@ -162,11 +163,16 @@ module gauge_contact_boss() gauge_tilt_frame() difference() {
 g_y = back_y + pad_t - strip_t;                 // the groove's front, behind the strips
 // the contacts' wires (3.3 V, GND, SDA, SCL, INT; DET stays on the board): down the boss's
 // bore, along the pad's groove into the pocket, to the link board's +x end
+function contact_pts() = [[0, contact_y - contact_t - 0.2, gz], [0, g_y - groove_d / 2, gz], [pk_x[1] - 0.6, g_y - groove_d / 2, gz],
+                           [bd_x[1] + 0.6, bd_y[0] + 3, bd_z + 1.5]];
 module contact_wires() gauge_tilt_frame() {
-    p = [[0, contact_y - contact_t - 0.2, gz], [0, g_y - groove_d / 2, gz], [pk_x[1] - 0.6, g_y - groove_d / 2, gz],
-         [bd_x[1] + 0.6, bd_y[0] + 3, bd_z + 1.5]];
-    for (i = [0 : len(p) - 2]) hull() { translate(p[i]) sphere(d = 1.3, $fn = 12); translate(p[i + 1]) sphere(d = 1.3, $fn = 12); }
+    p = contact_pts();
+    for (i = [0 : len(p) - 2]) hull() { translate(p[i]) sphere(d = contact_wire_d, $fn = 12); translate(p[i + 1]) sphere(d = contact_wire_d, $fn = 12); }
 }
+// the cable list (../assembly/spec.md, Wiring) takes its lengths from the point lists
+function path_len(p) = len(p) < 2 ? 0 : norm(p[1] - p[0]) + path_len([for (i = [1 : len(p) - 1]) p[i]]);
+echo(str("wire lengths: J1 to link board ", path_len(bundle_pts()), ", contacts to link board ", path_len(contact_pts()),
+         "; gauge leads along the groove to the pocket: near ", (gauge_x - gauge_dx) - pk_x[1], ", far ", (gauge_x + gauge_dx) - pk_x[1]));
 
 module gauge_link() { gauge(); link_board(); bundle(); contact_board(); contact_wires(); }
 part = "link";   // "link": the gauges, boards and wires

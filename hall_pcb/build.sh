@@ -7,9 +7,10 @@ cd "$(dirname "$0")"
 B=${1:-discant}
 export HALL_BOARD=$B
 mkdir -p $B
-PRI="SDA,SCL,INT"
+# HALL_PRI: the nets routed first in the first try; HALL_TRIES: how many tries
+PRI=${HALL_PRI:-SDA,SCL,INT,+3V3}
 best=9999
-for try in 1 2 3; do
+for try in $(seq 1 ${HALL_TRIES:-3}); do
     python3 gen_pcb.py $B/$B.kicad_pcb > $B/gen.log 2>&1
     timeout 3000 python3 route.py $B/$B.kicad_pcb "$PRI" > $B/route.log 2>&1 || { echo "try $try: router stopped"; continue; }
     kicad-cli pcb drc --format json -o $B/drc_try.json $B/$B.kicad_pcb > /dev/null 2>&1 || true

@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
-"""Writes main_pcb.kicad_sch from design.py. Run gen_pcb.py first (it writes
-zif_pads.json: which ZIF pad carries which conductor). Every pin ends in a net
-label: the netlist is the design table, drawn."""
-import json, uuid
+"""Writes main_pcb.kicad_sch from design.py. Run gen_pcb.py first: it writes the pins
+with their nets (pins.json). Every pin ends in a net label: the netlist is the design
+table, drawn. From ../hall_pcb/gen_sch.py.
+usage: gen_sch.py"""
+import json, uuid, sys, os
 import design as d
 
 G = 1.27
 U = lambda s: str(uuid.uuid5(uuid.NAMESPACE_DNS, "eziach-main-" + s))
 ROOT = U("root")
-POWER = {"+3V3", "+3V3A", "+1V8", "GND", "VIN"}
-zif = json.load(open("zif_pads.json"))
+POWER = {"+3V3", "+3V3A", "+3V3_D", "+1V8", "VSYS", "VBUS", "VBAT", "GND"}
+DIR = os.path.dirname(os.path.abspath(__file__))
+BOARD = "main_pcb"
+PINS = json.load(open(os.path.join(DIR, "pins.json")))
 
 def font(s=1.27): return f"(effects (font (size {s} {s})))"
 def q(s): return '"' + str(s).replace('"', "'") + '"'
 
 def pins_of(c):
     """[(number, name, net)]"""
-    if c["ref"] in zif:
-        out = [(p, f"C{i + 1}", n) for i, (p, n) in enumerate(zif[c["ref"]].items())]
-        return out + [("MP", "MP", "GND")]
-    return [(p, c["pinfo"].get(p, p), n) for p, n in c["pins"].items()]
+    return [(p, c["pinfo"].get(p, p), n) for p, n in PINS[c["ref"]].items()]
 
 lib, items = {}, []
 def symbol(key, pins, two):
@@ -58,8 +58,7 @@ def snap(v): return round(v / G) * G
 def instance(c, x, y):
     pins = pins_of(c)
     two = len(pins) == 2
-    key = c["ref"][0:1] + "2" if two else c["ref"]
-    if c["ref"][0] == "D" and two: key = "D2"
+    key = c["ref"][0:1] + "2" if two else c["value"]
     pos, box = symbol(key, pins, two)
     u = U(c["ref"])
     pin_s = "".join(f'(pin {q(p[0])} (uuid {U(c["ref"] + "/" + p[0])}))\n' for p in pins)
@@ -69,7 +68,7 @@ def instance(c, x, y):
                  f'(property "Footprint" {q(c["fp"])} (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
                  f'(property "Datasheet" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
                  f'(property "Description" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
-                 f'{pin_s}(instances (project "main_pcb" (path {q("/" + ROOT)} (reference {q(c["ref"])}) (unit 1)))))\n')
+                 f'{pin_s}(instances (project {q(BOARD)} (path {q("/" + ROOT)} (reference {q(c["ref"])}) (unit 1)))))\n')
     for num, name, net in pins:
         px, py, a = pos[num]
         X, Y = x + px, y - py
@@ -83,19 +82,17 @@ def instance(c, x, y):
 def text(s, x, y, size=3):
     items.append(f'(text {q(s)} (exclude_from_sim no) (at {x:.2f} {y:.2f} 0) (effects (font (size {size} {size})) (justify left)) (uuid {U("t" + s)}))\n')
 
-TITLES = {"scan": "Key scan: 74HC154 columns, four board commons as rows", "diodes": "One diode per key: contacts are closed at rest",
-          "mcu": "ESP32-S3-WROOM-1-N16R8", "power": "Power: battery or USB, 3.3 V and 1.8 V", "usb": "USB-C, firmware",
-          "audio": "TLV320DAC3100, earphones", "wires": "Soldered wires", "test": "Test pads"}
-LAY = {"mcu": (30, 40, 500), "scan": (140, 40, 500), "audio": (270, 40, 300), "usb": (270, 330, 200),
-       "power": (400, 40, 300), "wires": (400, 330, 200), "test": (530, 40, 100), "diodes": (530, 160, 400)}
+TITLES = {"mcu": "ESP32-S3-WROOM-1: EN and BOOT, test pads", "usb": "USB-C: charging, firmware, MIDI",
+          "charger": "BQ24074: charger with power path; charge light", "battery": "Battery: the cell's own PCM, a fuse here",
+          "power": "System switch (DET, VBUS) and 3.3 V: TPS63001 buck-boost; 3.3 V to the discant switched by DET",
+          "audio": "TLV320DAC3100: I2S DAC, headphone out to the jack", "i2c": "I2C: bus 1 to the discant (contacts), bus 2 in the bass",
+          "wires": "Solder pads: contacts, bass key board, battery"}
+LAY = {"mcu": (30, 40, 150), "usb": (30, 230, 110), "charger": (180, 40, 140), "battery": (180, 230, 60),
+       "power": (330, 40, 220), "audio": (520, 40, 220), "i2c": (180, 330, 90), "wires": (520, 300, 130)}
 for g, (x0, y0, _h) in LAY.items():
     text(TITLES[g], x0, y0 - 12)
     x, y = snap(x0 + 25), snap(y0)
     cs = [c for c in d.C if c["group"] == g]
-    if g == "diodes":
-        for i, c in enumerate(cs):
-            instance(c, snap(x0 + 25 + (i // 12) * 70), snap(y0 + (i % 12) * 20))
-        continue
     col = 0
     for c in cs:
         n = len(pins_of(c))
@@ -103,6 +100,7 @@ for g, (x0, y0, _h) in LAY.items():
         if y + h > y0 + _h:
             col += 1; y = snap(y0); x = snap(x0 + 25 + col * 62)
         instance(c, x, snap(y + h / 2 - 7))
+        if c.get("title") and n > 3: text(c["title"], x - 12, y - 4, 1.27)
         y = snap(y + h)
 
 # power flags
@@ -113,7 +111,7 @@ lib["PWR_FLAG"] = (f'(symbol "main:PWR_FLAG" (power) (pin_names (offset 0)) (exc
                    f'(property "Description" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
                    f'(symbol "PWR_FLAG_1_1" (pin power_out line (at 0 0 90) (length 0) (name "pwr" {font()}) (number "1" {font()}))))\n')
 for i, n in enumerate(sorted(POWER)):
-    x, y = snap(530 + i * 30), snap(120)
+    x, y = snap(30 + i * 30), snap(180)
     r = f"#FLG{i + 1:02d}"
     items.append(f'(symbol (lib_id "main:PWR_FLAG") (at {x:.2f} {y:.2f} 0) (unit 1) (exclude_from_sim no) (in_bom no) (on_board no) (dnp no) (uuid {U(r)})\n'
                  f'(property "Reference" {q(r)} (at {x:.2f} {y + 3:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
@@ -121,11 +119,11 @@ for i, n in enumerate(sorted(POWER)):
                  f'(property "Footprint" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
                  f'(property "Datasheet" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
                  f'(property "Description" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
-                 f'(pin "1" (uuid {U(r + "/1")}))\n(instances (project "main_pcb" (path {q("/" + ROOT)} (reference {q(r)}) (unit 1)))))\n')
+                 f'(pin "1" (uuid {U(r + "/1")}))\n(instances (project {q(BOARD)} (path {q("/" + ROOT)} (reference {q(r)}) (unit 1)))))\n')
     items.append(f'(global_label {q(n)} (shape passive) (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid {U("fl" + n)}))\n')
 
 s = (f'(kicad_sch (version 20250114) (generator "eziach") (generator_version "9.0") (uuid {ROOT}) (paper "A0")\n'
-     f'(title_block (title "Discant main PCB") (comment 1 "Generated by gen_sch.py from design.py"))\n'
+     f'(title_block (title {q("eziach: main board in the bass")}) (comment 1 "Generated by gen_sch.py from design.py"))\n'
      f'(lib_symbols\n{"".join(lib.values())})\n{"".join(items)}\n(sheet_instances (path "/" (page "1"))) (embedded_fonts no))\n')
-open("main_pcb.kicad_sch", "w").write(s)
+open(os.path.join(DIR, BOARD + ".kicad_sch"), "w").write(s)
 print(len(d.C), "parts", len(items), "items")

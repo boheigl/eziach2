@@ -22,9 +22,9 @@
   .eyebrow { margin: 0; font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
   h1 { margin: 4px 0 0; font-size: clamp(22px, 5vw, 30px); line-height: 1.1; text-wrap: balance; }
   #view { position: relative; width: 100%; max-width: 100%; aspect-ratio: 4 / 3; max-height: 72vh; border: 1px solid var(--line);
-          border-radius: 6px; overflow: hidden; background: var(--panel); }
+          border-radius: 6px; overflow: hidden; background: var(--panel);
+          touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
   #view canvas { display: block; width: 100%; height: 100%; }
-  #view.live { touch-action: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
   #hint { position: absolute; right: 10px; top: 8px; margin: 0; font: 12px/1.3 var(--mono); color: var(--muted); }
   #status { position: absolute; left: 10px; bottom: 8px; margin: 0; font: 12px/1.3 var(--mono); color: var(--muted); }
   #status.bad { color: var(--bad); }
@@ -44,8 +44,7 @@
     <p class="eyebrow">discant · one Hall-sensor board, 46 keys</p>
     <h1>Discant assembly</h1>
   </header>
-  <div id="view"><p id="hint" hidden>1 finger: turn · 2 fingers: zoom and move</p><p id="status">Tap “Load assembly” to start.</p></div>
-  <div class="row"><button type="button" id="load">Load assembly</button></div>
+  <div id="view"><p id="hint">1 finger: turn · 2: zoom, move · double tap: centre</p><p id="status">Loading …</p></div>
   <div class="row">
     <button type="button" id="press">Press</button>
     <button type="button" id="hold" aria-pressed="false">Hold down</button>
@@ -72,16 +71,16 @@
     <button type="button" id="down" aria-label="Look from lower">▼</button>
     <button type="button" id="zin" aria-label="Zoom in">＋</button>
     <button type="button" id="zout" aria-label="Zoom out">－</button>
-    <button type="button" id="interact" aria-pressed="false">Interact</button>
     <button type="button" id="reset">Reset view</button>
   </div>
-  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. Press moves the middle key of the front row 3 mm until its O-ring lands on the tube's top and back; Hold down keeps it there; with All keys on, both act on every key. With Interact off, tap or click any key to press it.
+  <p class="note">In the view: turn with one finger, zoom or move with two (mouse: drag, right-drag or Shift-drag, wheel); double-tap (double-click) a surface to make that point the centre of turning and zooming; tap a key to press it. Scroll the page outside the view. The arrow and ＋/－ buttons work too; Reset view goes back to the start. Press moves the middle key of the front row 3 mm until its O-ring lands on the tube's top and back; Hold down keeps it there; with All keys on, both act on every key.
     The board is drawn with its parts' bodies (boxes, from the KiCad board); the springs are left out, hidden under the caps' skirts.
     All parts come from the OpenSCAD build (switch_hall/, discant/, hall_pcb/).</p>
 </main>
 
 <!-- parts: filled in by embed_parts.py -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="viewer_nav.js"></script>
 <script>
 (function () {
   var statusEl = document.getElementById('status');
@@ -182,13 +181,6 @@
   ];
   scene.add(buttonGrp);
 
-  // camera orbits a target
-  var target = new THREE.Vector3(-5, 0, -26), azim = -0.55, elev = 0.62, dist = 400;
-  function place() {
-    camera.position.set(target.x + dist * Math.cos(elev) * Math.sin(azim), target.y + dist * Math.sin(elev),
-                        target.z + dist * Math.cos(elev) * Math.cos(azim));
-    camera.lookAt(target);
-  }
   function size() {
     var r = view.getBoundingClientRect();
     renderer.setSize(r.width, r.height, false);
@@ -198,73 +190,18 @@
   function draw() { dirty = true; }
   window.addEventListener('resize', function () { size(); draw(); });
 
-  // orbit and zoom with buttons (no touch handlers on the view)
-  function orbit(da, de, dz) {
-    azim += da; elev = Math.max(-1.5, Math.min(1.5, elev + de));
-    dist = Math.max(20, Math.min(1500, dist * dz)); place(); draw();
-  }
+  // turning, zooming, moving, the centre by double tap: viewer_nav.js; a single tap on a key presses it
+  var HOME = { target: [-5, 0, -26], azim: -0.55, elev: 0.62, dist: 400 };
+  var nav = viewerNav({ view: view, canvas: renderer.domElement, camera: camera, scene: scene, draw: draw, home: HOME,
+                        ok: function (p) { return !clipped || cutPlane.distanceToPoint(p) >= 0; },
+                        onTap: function (hits) {
+                          if (hits.length && hits[0].object.userData.key !== undefined) { tapAnim[hits[0].object.userData.key] = 0; draw(); }
+                        } });
   [['left', 0.25, 0, 1], ['right', -0.25, 0, 1], ['up', 0, 0.15, 1], ['down', 0, -0.15, 1],
    ['zin', 0, 0, 1 / 1.25], ['zout', 0, 0, 1.25]].forEach(function (b) {
-    document.getElementById(b[0]).addEventListener('click', function () { orbit(b[1], b[2], b[3]); });
+    document.getElementById(b[0]).addEventListener('click', function () { nav.orbit(b[1], b[2], b[3]); });
   });
-  // gestures in the view, while Interact is on: one pointer turns (mouse: left
-  // button; right button or Shift pans), two pointers pinch to zoom and move
-  // together to pan; the wheel zooms
-  var live = false, pts = {}, prevMid = null, prevDist = 0;
-  function setLive(on) {
-    live = on; pts = {}; prevMid = null; prevDist = 0;
-    view.classList.toggle('live', on);
-    document.getElementById('hint').hidden = !on;
-    document.getElementById('interact').setAttribute('aria-pressed', on ? 'true' : 'false');
-  }
-  document.getElementById('interact').addEventListener('click', function () { setLive(!live); });
-  function pan(dx, dy) {   // move the target in the view plane by screen pixels
-    var h = view.getBoundingClientRect().height || 1;
-    var k = 2 * dist * Math.tan(camera.fov * Math.PI / 360) / h;
-    var right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
-    var up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
-    target.addScaledVector(right, -dx * k).addScaledVector(up, dy * k);
-  }
-  function midDist() {
-    var a = Object.keys(pts).map(function (id) { return pts[id]; });
-    return [[(a[0][0] + a[1][0]) / 2, (a[0][1] + a[1][1]) / 2], Math.hypot(a[0][0] - a[1][0], a[0][1] - a[1][1])];
-  }
-  view.addEventListener('pointerdown', function (e) {
-    if (!live) return;
-    e.preventDefault();
-    try { view.setPointerCapture(e.pointerId); } catch (err) {}
-    pts[e.pointerId] = [e.clientX, e.clientY, e.button === 2 || e.shiftKey];
-    if (Object.keys(pts).length === 2) { var md = midDist(); prevMid = md[0]; prevDist = md[1]; }
-  });
-  view.addEventListener('pointermove', function (e) {
-    if (!live || !pts[e.pointerId]) return;
-    var n = Object.keys(pts).length, q = pts[e.pointerId];
-    var dx = e.clientX - q[0], dy = e.clientY - q[1];
-    pts[e.pointerId] = [e.clientX, e.clientY, q[2]];
-    if (n === 1) {
-      if (q[2]) pan(dx, dy);
-      else { azim -= dx * 0.008; elev = Math.max(-1.5, Math.min(1.5, elev + dy * 0.008)); }
-    } else if (n === 2) {
-      var md = midDist();
-      if (prevMid) pan(md[0][0] - prevMid[0], md[0][1] - prevMid[1]);
-      if (prevDist > 0 && md[1] > 0) dist = Math.max(20, Math.min(1500, dist * prevDist / md[1]));
-      prevMid = md[0]; prevDist = md[1];
-    }
-    place(); draw();
-  });
-  function lift(e) {
-    delete pts[e.pointerId]; prevMid = null; prevDist = 0;
-    if (Object.keys(pts).length === 2) { var md = midDist(); prevMid = md[0]; prevDist = md[1]; }
-  }
-  view.addEventListener('pointerup', lift);
-  view.addEventListener('pointercancel', lift);
-  view.addEventListener('contextmenu', function (e) { if (live) e.preventDefault(); });
-  view.addEventListener('wheel', function (e) {
-    if (!live) return;
-    e.preventDefault();
-    dist = Math.max(20, Math.min(1500, dist * (1 + Math.sign(e.deltaY) * 0.09))); place(); draw();
-  }, { passive: false });
-  document.getElementById('reset').addEventListener('click', function () { target.set(-5, 0, -26); azim = -0.55; elev = 0.62; dist = 400; place(); draw(); });
+  document.getElementById('reset').addEventListener('click', function () { nav.home(); });
 
   // travel: the moving parts go down, the spring is squeezed towards its floor
   var travel = 0, anim = null;
@@ -279,18 +216,6 @@
     b.setAttribute('aria-pressed', down ? 'true' : 'false'); anim = null; setTravel(down ? STROKE : 0);
   });
   document.getElementById('press').addEventListener('click', function () { anim = 0; });
-  // tap or click a key (Interact off) to press it
-  var ray = new THREE.Raycaster();
-  view.addEventListener('click', function (e) {
-    if (live || !KEY_GRPS) return;
-    var r = renderer.domElement.getBoundingClientRect();
-    var p = new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
-    scene.updateMatrixWorld(); ray.setFromCamera(p, camera);
-    var hits = ray.intersectObjects(KEY_GRPS, true).filter(function (h) {
-      return h.object.visible && (!clipped || cutPlane.distanceToPoint(h.point) >= 0);
-    });
-    if (hits.length && hits[0].object.userData.key !== undefined) { tapAnim[hits[0].object.userData.key] = 0; draw(); }
-  });
   // All keys: Press and Hold down move every key, not only the front row's middle one
   var allKeys = false;
   document.getElementById('allkeys').addEventListener('click', function () {
@@ -342,6 +267,7 @@
     var tapping = false;
     tapAnim.forEach(function (a, i) { if (a !== null) { tapAnim[i] = a + dt / 1.4 >= 1 ? null : a + dt / 1.4; tapping = true; } });
     if (tapping) placeKeys();
+    if (nav.step(dt)) dirty = true;
     if (dirty) { renderer.render(scene, camera); dirty = false; }
     requestAnimationFrame(loop);
   }
@@ -359,7 +285,7 @@
       i++; draw(); setTimeout(next, 30);
     }, 30);
   }
-  size(); place(); requestAnimationFrame(loop);
-  document.getElementById('load').addEventListener('click', function () { this.disabled = true; next(); });
+  size(); nav.home(); requestAnimationFrame(loop);
+  next();                                         // the parts load at once, one after the other
 })();
 </script>

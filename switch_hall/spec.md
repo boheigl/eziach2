@@ -11,10 +11,12 @@ rebuilds the same geometry from parameters copied at the top of its script.
 
 ## 1. Requirements [given]
 
-- Actuation point set by calibration, per key.
+- Actuation point set by calibration, per key, **as early as possible** after the
+  key leaves its rest (user, 2026-11-14): see §6.
 - No click; force rising linearly with travel, like a spring.
 - About 100 g at rest, "ideally not much more" at the bottom.
-- Stroke 3 mm.
+- Stroke 3 mm; it stays 3 mm (user, 2026-11-14, after a shorter stroke was
+  offered for a steeper field at rest).
 - As low as possible.
 - A conventional spring under the cap (user, 2026-11-13). This replaced a
   first version with a pair of preformed CuBe2 leaves under the board: those
@@ -63,10 +65,18 @@ that its edge up the slope keeps 0.3 mm from the board, and lengthens the way to
 the sensor through the board. The numbers below include it; the board is drawn
 flat.
 
+**Bass back row** [chosen]: the bass board lies flat under both rows
+(`board_tilt = 0`) and the back row stands 10 mm higher. `riser` in key.scad
+raises the spring seat, the tube top and everything above by that much; collar,
+magnet, stop washer and bushing keep their place at the board. Only the rod is
+10 mm longer: spring, stops, field and guide are the same as in the front row
+(cap top 27.1 instead of 17.1 above the board's middle). The Makefile builds
+both rows as `bass0_*` / `bass1_*`.
+
 | | z | |
 |---|---|---|
 | Board, no hole | −0.8 … 0.8 | |
-| Hall sensor, underside | −1.935 … −0.835 | element assumed 0.55 below its mounting face [unverified] |
+| Hall sensor, underside | −1.935 … −0.835 | element assumed 0.55 below its mounting face [unverified; the datasheet's Figure 6-5 gives 0.65 ± 0.08 in the SOT-23, about 0.1 mm off, not acted on] |
 | Cover plate, spring seat | 0.8 … 2.0 | |
 | Tube ⌀6.6, lower bore ⌀4.8 / upper ⌀3.8 | 0.8 … 9.066, step at 7.566 | |
 | Collar ⌀4.6 × 2 with magnet ⌀3 × 1.5 | 4.566 … 6.566 | 0.3 above the tilted board at its edge, lower stop |
@@ -129,10 +139,20 @@ or install this one 1.2 mm longer, which adds 1.2 mm of height.
   The firmware stores each key's rest and bottom readings and maps the reading
   back to travel. The actuation point and hysteresis are then set as fractions
   of the stroke.
+- **Early actuation:** at rest the field rises by 3.2 mT/mm; 0.1 / 0.2 / 0.5 mT
+  above the rest reading are reached after 31 / 61 / 149 µm. One ADC step
+  (12 bit, DRV5055A3 at 3.3 V) is about 0.05 mT, about 15 µm here. The limit is
+  not the field but noise, temperature drift and how exactly the key returns to
+  its rest on the soft washer: the firmware tracks each key's rest reading while
+  the key is up and triggers a little above it, e.g. on at 0.15 mm and off at
+  0.08 mm. How small this can be is to be measured on a prototype. [estimated]
 - **Crosstalk:** pressing a neighbour on the same board (20 mm away) changes the
   reading by 0.04 mT, under 0.1 % of the swing. It can be ignored.
-- **Supply:** a linear Hall sensor draws about 6 mA continuously. For all keys,
-  either budget for that or switch the sensors on in groups. [unverified]
+- **Supply:** the DRV5055 draws 2 mA typical, 4 mA maximum at 3.3 V, continuously
+  [datasheet: SBAS640C, 5.5]: 64 sensors 130 … 260 mA, budgeted on the main board
+  (`../main_pcb/spec.md`).
+- **Noise:** 0.2 mT peak to peak at 3.3 V [datasheet], about 4 ADC steps or 60 µm of
+  travel at rest; switch on the ADS7138's averaging (OSR) to trigger near rest.
 - **Electronics:** each board needs 13 analog inputs, from an MCU or ADCs on the
   I²C bus, in place of the PCAL9555A. Still open.
 

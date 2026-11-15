@@ -99,6 +99,10 @@ ez       = z_bot - (plate_top0 - 0.75 * (166 + plate_top0) - 7.6);
 box_depth = 11.2;
 box_back  = plate_y[0] + box_depth;
 back_t    = 1.6;
+// the wires' bundles (elec.scad wires()) run at this y, close under the back cover, in
+// notches at the ribs' back edges (case.scad), so the ribs stay whole along the front
+// wall [given 2026-11-15: the wires' way cut the ribs through]
+wire_y    = box_back - back_t - 1.6;
 // to the back: 0.9 of wall behind the back board's tab; the stored discant's gauge pocket
 // (link.scad) reaches y 24.65, 3.2 inside
 // to the back: the board's rim, or the stored discant's socket under the deck (link.scad,

@@ -255,3 +255,48 @@ Sources: GCT FFC3A20 drawing (<https://gct.co/files/drawings/ffc3a20.pdf>) and
 1.0 mm FFC specification (<https://gct.co/files/specs/1.0mm-ffc-spec.pdf>), via
 DigiKey FFC3A20-14-G; Federnfabrik Schmid, *Normfedern* catalogue
 (<https://federnfabrikschmid.com/assets/images/products/Federnfabrik-Schmid_Normfedern_Katalog.pdf>).
+
+## I2C expander on every key board [given] (`ioexp = true`, the default)
+
+Each key board (4 in the discant, 2 in the bass) gets its own expander at the connector
+(tab) end; the 14-way FFC becomes a 5-wire bus cable (3.3 V, GND, SDA, SCL, INT),
+plugged into each board (JST SH). The discant's key board in the hole (discant/main_pcb/, two
+PCAL6524) and the bass's key board and its 15 mm FFC tunnels then go.
+
+Part: **NXP PCAL9555A** (datasheet Rev. 2, 19 Dec 2014): 16 I/Os (a board has at most
+13 keys), 100 kΩ pull-up/down selectable per pin (typ.; 50–150 kΩ), open-drain INT,
+address 0100 A2 A1 A0 = 20h…27h (A0–A2 straight to VDD or VSS: eight boards possible,
+set per board by solder jumpers). Package HWQFN24 (PCAL9555AHF, SOT994-1, 4 × 4 ×
+0.75 mm; centre pad = VSS) or TSSOP24 (PCAL9555APW, SOT355-1). HWQFN24 pins: P0_0–P0_7
+1–8, VSS 9 (+ centre pad), P1_0–P1_7 10–17, A0 18, SCL 19, SDA 20, VDD 21, INT 22,
+A1 23, A2 24.
+
+**Layout** (`ioexp_layout.py` writes `ioexp.scad`, which `pcb.scad` includes; `make`
+fails on a clearance violation): the chip on the bottom face at (−130.3, 1.0), where the
+FFC connector was; seen from the top its pins run clockwise. The thirteen key tracks
+come from the +y band as before: the four lowest (holes 1–4) round the chip's east side
+to its south pins, the next five (5–9) into its east pins, the four highest (10–13)
+down into its north pins; nothing crosses. Unused: P0_0, P0_1, P1_7.
+
+**Bus connector** [given: connectors instead of soldered wires]: **JST SH, 5 pins, 1.0
+mm pitch, vertical SMT, BM05B-SRSS-TB**, on the bottom face west of the chip, footprint
+centre (−137.9, −2.8), pins along x (land pattern as KiCad's: pads 0.6 × 1.55 at 1.325
+from the centre towards +y, two fixing pads 1.2 × 1.8 at ±3.3). Pins from −x: 1 INT,
+2 3.3 V, 3 SDA, 4 SCL, 5 GND. The header is 4.25 mm high; its plug (SHR-05V-S, crimp
+contacts SSH-003T-P0.2 for AWG 32–28, or a ready-made lead) comes in from below, so the
+cable leaves downwards, 5.85 mm under the board [unverified: the mated height, taken as
+header + 1.6]. The west pins SCL, SDA, VDD, INT run straight west and down into pins
+4…1; GND by a via under the header to the top copper.
+
+Three solder jumpers set the address (A2, A1 north-west of the chip, pads along y; A0
+south of it, pads along x; the middle pad is the pin, bridged to VDD or GND); a 100 nF
+0402 beside A2. VDD to the jumpers on the top copper from a via on the bus's VDD run.
+GND on the top copper: the common bus along y −4.5 goes on to the connector's GND via,
+to a via in the centre pad and to the jumpers' GND vias. Clearances: 0.15 everywhere
+(the closest pairs are the band's parallel tracks), 0.3 to the board edge, 0.5 to the
+screw holes. The outline, tab included, stays as for the FFC connector (the housings
+depend on it). The housings have a pocket under each board's −x end for the chip and
+the jumpers (3 mm) and for the header with its plug (7.7 × 3.6, 7.85 mm deep). `ioexp =
+false` builds the FFC version.
+
+Not updated: `viewer.html` still shows the FFC version.

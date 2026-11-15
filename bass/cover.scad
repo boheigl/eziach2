@@ -25,7 +25,7 @@ col_d   = 6.4;                   // the screw columns in the back block
 bore_d  = 4.4;                   // the screwdriver's bore down a column
 shell   = 2.4;                   // the back block's walls and top, as thick as the slab
 corner_r = 4;                    // as the case's vertical edges
-recess = 1; recess_r = 6;        // the hand plate's recess, as case.scad
+recess = 0; recess_r = 6;        // the hand plate's recess, as case.scad (none since 2026-11-15)
 K = "../build/switch_hall/";
 
 $fa = 3; $fs = 0.3;
@@ -51,8 +51,8 @@ module cover() intersection() {
             keys_do(0) import(str(K, "bass0_tube_body.stl"));
             keys_do(1) import(str(K, "bass1_tube_body.stl"));
         }
-        // the hand plate's recess, where it reaches the cover
-        translate([0, plate_y[0] - 1, 0]) rotate([-90, 0, 0]) linear_extrude(recess + 1)
+        // the hand plate's recess, where it reaches the cover (none now: recess 0)
+        if (recess > 0) translate([0, plate_y[0] - 1, 0]) rotate([-90, 0, 0]) linear_extrude(recess + 1)
             offset(r = recess_r) offset(delta = -recess_r)
                 translate([plate_x[0], -plate_z[1]]) square([plate_x[1] - plate_x[0], plate_z[1] - plate_z[0]]);
         keys_do(0) import(str(K, "bass0_tube_cut.stl"));

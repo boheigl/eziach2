@@ -8,8 +8,8 @@
 // straight and flush with the deck's ends: deck and box are one rectangular block, 211 wide
 // [given 2026-11-14: a rectangular footprint, replacing the sides that slanted in along the
 // stored discant's ends]; the box reaches 14.1 below the hand plate (layout.scad). The front wall (3 mm) carries the hand: the
-// example's hand plate, half as wide and 25 % lower (131.5 x 128.3) [given], is a 1 mm
-// recess in it with rounded corners. The vertical edges are rounded; the cover
+// example's hand plate, half as wide and 25 % lower (131.5 x 128.3) [given], is the
+// flat face of it (no recess [given 2026-11-15]). The vertical edges are rounded; the cover
 // (cover.scad) follows them.
 //
 // STIFFNESS [given: the hand plate must not bend; very important]: the hand bends the
@@ -61,7 +61,7 @@ plug_h   = 6.5;                  // J1's plug below the board's underside, with 
 
 wall     = 2;                    // sides and back
 corner_r = 4;
-recess   = 1;
+recess   = 0;                   // the hand plate's recess [given 2026-11-15: none, the plate flat; 1 before]
 recess_r = 6;
 floor_b  = 2;                    // the box's bottom, closed [given: access by the back cover]
 rib_t    = 1.6;                  // the front wall's ribs
@@ -115,6 +115,7 @@ module tapered(z0, z1) hull() {
 module outer3d() {
     slanted(z_bot - 1, z_floor + 0.01) { box2d(box_x); box2d(box_x_at(z_floor + 0.01)); }
     translate([0, 0, z_floor]) linear_extrude(60) rounded(deck_x, [plate_y[0], deck_y[1]]);
+    jack_bump();                 // the earphone jack's bulge in the back (elec.scad)
 }
 // the box is wider than the deck: beside the deck its top is a wall, under the deck
 // the cavity reaches up to the deck's underside
@@ -152,11 +153,21 @@ module ribs() intersection() {
             rib_z(-36, -56 + ex, 200);                                       // right of the wires' way down
             rib_z(-90 + ez, -200, bat_x[0]); rib_z(-110 + ez, -200, bat_x[0]);   // left of the battery
             rib_z(-88 + ez, bat_x[1], 200);                                  // over the power board
+            // at the wires' notches each rib is 6 thick, 3 beyond the notch on either side
+            // [given 2026-11-15]: with the 3.4 left under the notch it keeps about 84 % of
+            // its bending stiffness there (T-section with 20 of the front wall [estimated])
+            for (z = [bat_z + bat[2] + bat_gap + cradle_t + 1.7, -90 + ez, -110 + ez])
+                translate([-61 + ex, rib_y[0], z - 3]) cube([11, rib_y[1] - rib_y[0], 6]);
+            translate([-56 + ex, rib_y[0], -36 - 3]) cube([6, rib_y[1] - rib_y[0], 6]);
+            for (x = [rib_out[0], bat_x[0] - 1.7, bat_x[1] + 1.7, rib_out[1]])
+                translate([x - 3, rib_y[0], z_bot]) cube([6, rib_y[1] - rib_y[0], floor_b + 3 + 3]);
         }
         // the wires: along the bottom (from the contacts' bore to the power board and
-        // left), and up left of the battery to the key board
-        translate([-200, rib_y[0] - 1, z_bot]) cube([400, 20, floor_b + 3]);
-        translate([-58 + ex, rib_y[0] - 1, z_bot]) cube([5, 20, 120]);
+        // left), and up left of the battery to the key board; notches 3 deep at the ribs'
+        // back edges, open to the back cover (the wires go in from there), so 3.4 of each
+        // rib stays whole along the front wall [given 2026-11-15: not cut through]
+        translate([-200, wire_y - 1.5, z_bot]) cube([400, 20, floor_b + 3]);
+        translate([-58 + ex, wire_y - 1.5, z_bot]) cube([5, 20, 120]);
         // the boards and the key board's FFCs
         main_board_room();   // the main board (elec.scad)
         translate([-107 + ex, rib_y[0] - 1, -47]) cube([51, 20, 41 + 10]);
@@ -219,13 +230,24 @@ module pillars() for (p = cov_screws) difference() {
 // up to the deck, with the side walls' last back_t, as one plate; its bottom edge hooks
 // in behind the mount's strip with two tongues, three screws hold its top; it rests on
 // the side walls' ends, ribs and pillars, so the hand's push never loads it.
-module cover_slab() translate([-300, box_back - back_t, z_split]) cube([600, back_t + 0.001, z_floor - z_split]);
-cov_tongues = [[-80 + ex, -56 + ex], [52 + ex, 78 + ex]];   // between the ribs
+module cover_slab() difference() {
+    union() {
+        translate([-300, box_back - back_t, z_split]) cube([600, back_t + 0.001, z_floor - z_split]);
+        jack_cover_zone();       // the jack's bulge, down past z_split (elec.scad)
+        screw_cover_zone();      // in front of the main board's lowest screw (elec.scad)
+    }
+    jack_wall_zone();            // but not the side wall that holds the jack
+}
+// between the ribs; the right one beside the main board, between the rib at the battery
+// and the board's edge [given 2026-11-15: over the ESP32 module it left 0.6 mm, and
+// tilting the cover to hook it in swung it onto the module beyond about 9 deg]
+// [x0, x1, thickness]: the narrow right one 2 mm thicker, inwards [given 2026-11-15]
+cov_tongues = [[-80 + ex, -56 + ex, 1.2], [48.3 + ex, 55.2 + ex, 3.2]];
 // each tongue: behind the strip's inner face below z_split (0.05 clear of it), joined to
 // the cover above it
 module cover_tongues() for (x = cov_tongues) {
-    translate([x[0], box_back - back_t - 1.25, z_split - 4]) cube([x[1] - x[0], 1.2, 6]);
-    translate([x[0], box_back - back_t - 1.25, z_split + 0.05]) cube([x[1] - x[0], 1.25 + 0.5, 1.95]);
+    translate([x[0], box_back - back_t - 0.05 - x[2], z_split - 4]) cube([x[1] - x[0], x[2], 6]);
+    translate([x[0], box_back - back_t - 0.05 - x[2], z_split + 0.05]) cube([x[1] - x[0], x[2] + 0.55, 1.95]);
 }
 
 module body() {
@@ -257,8 +279,8 @@ module body() {
         elec_cuts();
         strap_slots3d();
         strap_room();
-        // the hand plate: a shallow recess with rounded corners
-        translate([0, plate_y[0] - 1, 0]) rotate([-90, 0, 0]) linear_extrude(recess + 1)
+        // the hand plate: a shallow recess with rounded corners (none now: recess 0)
+        if (recess > 0) translate([0, plate_y[0] - 1, 0]) rotate([-90, 0, 0]) linear_extrude(recess + 1)
             offset(r = recess_r) offset(delta = -recess_r)
                 translate([plate_x[0], -plate_z[1]]) square([plate_x[1] - plate_x[0], plate_z[1] - plate_z[0]]);
     }

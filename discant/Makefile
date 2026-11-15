@@ -63,7 +63,7 @@ PHONE_PARTS := BOARD_TRIS=$(B)/board.stl PARTS_TRIS=$(B)/board_parts.stl \
                HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl LINK_TRIS=$(B)/gauge_link.stl \
                CAP_TRIS=$(KEY)/cap.stl PLUNGER_TRIS=$(KEY)/plunger.stl MAGNET_TRIS=$(KEY)/magnet.stl \
                ORING_TRIS=$(KEY)/oring.stl STOP_TRIS=$(KEY)/stop.stl
-$(B)/phone.html: phone.html embed_parts.py $(BODY_STL) $(B)/board.stl $(B)/board_parts.stl $(KEY_STL) ../hall_pcb/discant/board.scad
+$(B)/phone.html: phone.html embed_parts.py viewer_nav.js $(BODY_STL) $(B)/board.stl $(B)/board_parts.stl $(KEY_STL) ../hall_pcb/discant/board.scad
 	@echo "  EMBED    $@"
 	@$(PYTHON) embed_parts.py $< $@ --keys ../hall_pcb/discant/board.scad $(PHONE_PARTS)
 

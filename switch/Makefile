@@ -21,11 +21,16 @@ PCB_STL    := $(addprefix $(B)/,pcb.stl pcb_12.stl pcb_11.stl pcb_10.stl \
 PCB_DXF    := $(addprefix $(B)/,pcb.dxf pcb_copper.dxf pcb_copper_top.dxf pcb_drill.dxf pcb_mask.dxf)
 BUTTON_STL := $(addprefix $(B)/,button.stl felt.stl washer.stl sleeve.stl screw.stl guide.stl spring.stl)
 
-all: $(PCB_STL) $(PCB_DXF) $(BUTTON_STL)
+all: ioexp.scad $(PCB_STL) $(PCB_DXF) $(BUTTON_STL)
+$(PCB_STL) $(PCB_DXF): ioexp.scad
 
 # $(call scad,source,extra options)
 scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
        $(OPENSCAD) -q -o $@ -d $(B)/.deps/$(notdir $@).d $(2) $(1)
+
+# --- the -x end's expander layout, checked (fails on a clearance violation)
+ioexp.scad: ioexp_layout.py
+	@echo "  LAYOUT   $@" && python3 ioexp_layout.py
 
 # --- pcb.scad
 $(B)/pcb.stl: pcb.scad

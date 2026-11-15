@@ -1,6 +1,8 @@
 # Builds the Hall-sensor key's parts into ../build/switch_hall/.
 #   make          everything
 #   make clean    deletes ../build/switch_hall/
+#   make video    the build-and-assembly video, ../build/switch_hall/key_assembly.webm and .mp4
+#                 (video/key_video.py; about half an hour, not part of all)
 # key.scad asserts its clearances, stresses and the staircase lanes; a failed
 # assert stops the build.
 
@@ -37,8 +39,11 @@ $(DOWN): $(B)/%_down.stl: key.scad
 $(B)/%.stl: key.scad
 	@mkdir -p $(B) && echo "  OPENSCAD $@" && $(OPENSCAD) -q -o $@ -D 'part="$*"' $<
 
+video: video/key_video.py video/key_video.scad video/geom.scad key.scad
+	python3 video/key_video.py $(B)/key_assembly.webm
+
 clean:
 	rm -rf $(B)
 
-.PHONY: all clean
+.PHONY: all clean video
 .DELETE_ON_ERROR:

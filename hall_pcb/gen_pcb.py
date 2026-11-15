@@ -3,11 +3,12 @@
 nets, outline, placement, and the ADC channel table (<board>/channels.json).
 usage: gen_pcb.py [OUT]"""
 import sys, os, json, math, uuid, pcbnew
+import numpy as np
 import design as d
 
 mm = pcbnew.FromMM
 OX, OY = 150.0, 100.0            # board frame -> KiCad: x = OX + X, y = OY - Y
-def P(x, y): return pcbnew.VECTOR2I(mm(OX + x), mm(OY - y))
+def P(x, y): return pcbnew.VECTOR2I(mm(float(OX + x)), mm(float(OY - y)))
 def W(v): return (pcbnew.ToMM(v.x) - OX, OY - pcbnew.ToMM(v.y))     # KiCad -> board frame
 FPLIB = "/usr/share/kicad/footprints"
 OUT = sys.argv[1] if len(sys.argv) > 1 else f"{d.BOARD}/{d.BOARD}.kicad_pcb"
@@ -66,11 +67,20 @@ for c in d.C:
 channels = {}
 for a, g in enumerate(d.GROUPS):
     ref = f"U{a + 1}"; c = byref[ref]
-    f = load(c); x0, y0 = c["pos"]; place(f, x0, y0, "B", 0)
+    f = load(c); x0, y0 = c["pos"]
+    # the chip's own frame: its pads at rotation 0, then turned by ADC_ROT; R maps the
+    # chip frame to the board (fitted from the pads, whatever KiCad's sign on the underside)
+    place(f, x0, y0, "B", 0)
+    loc = {q.GetNumber(): np.subtract(W(q.GetPosition()), (x0, y0)) for q in f.Pads()}
+    f.SetOrientationDegrees(d.ADC_ROT); f.SetPosition(P(x0, y0))
+    world = {q.GetNumber(): np.subtract(W(q.GetPosition()), (x0, y0)) for q in f.Pads()}
+    A_ = np.array([loc[k] for k in loc]); B_ = np.array([world[k] for k in loc])
+    U_, _, Vt = np.linalg.svd(A_.T @ B_); R = (U_ @ Vt).T
+    phi = math.degrees(math.atan2(R[1, 0], R[0, 0]))
+    def to_board(v): return (x0 + (R @ v)[0], y0 + (R @ v)[1])
     # keys to AIN pins by angle round the chip: both sorted, best cyclic match
-    pins = sorted(d.ADC_AIN, key=lambda p: math.atan2(W(pad(f, p).GetPosition())[1] - y0,
-                                                      W(pad(f, p).GetPosition())[0] - x0))
-    pa = [math.atan2(W(pad(f, p).GetPosition())[1] - y0, W(pad(f, p).GetPosition())[0] - x0) for p in pins]
+    pins = sorted(d.ADC_AIN, key=lambda p: math.atan2(world[p][1], world[p][0]))
+    pa = [math.atan2(world[p][1], world[p][0]) for p in pins]
     keys = sorted(g, key=lambda q: math.atan2(d.key_xy(*q)[1] + d.SENS_DY - y0, d.key_xy(*q)[0] - x0))
     ka = [math.atan2(d.key_xy(*q)[1] + d.SENS_DY - y0, d.key_xy(*q)[0] - x0) for q in keys]
     best = None
@@ -84,23 +94,34 @@ for a, g in enumerate(d.GROUPS):
         c["pins"][p] = d.key_net(*q)
         channels.setdefault(f"{0x10 + a:02X}h", {})[f"AIN{d.ADC_AIN[p]}"] = {"row": q[0], "key": q[1]}
     connect(f, c); placed[ref] = f
-    # caps and the address resistor: just outside the pin they serve, pads radial
-    for fmt, pin in d.ADC_SMALL:
+    # caps and the address resistor: just outside the pin they serve, pads radial; laid
+    # out in the chip's frame, then turned with it
+    for fmt, pin, along in d.ADC_SMALL:
         r = fmt.format(a + 1)
         if r not in byref: continue
-        cs = byref[r]; px, py = W(pad(f, pin).GetPosition())
-        dx, dy = px - x0, py - y0
+        cs = byref[r]; dx, dy = loc[pin]
         if abs(dx) > abs(dy):
             nx, ny, t, rot = (1 if dx > 0 else -1), 0, dy, 0
         else:
             nx, ny, t, rot = 0, (1 if dy > 0 else -1), dx, 90
+        if along:
+            (ax, ay), (bx, by) = loc[along[0]], loc[along[1]]
+            ta, tb = (ay, by) if nx else (ax, bx)
+            t_ = ta + along[2] * (tb - ta)
+        else:
+            t_ = t * 2.6
         dist = 3.5
-        cx = x0 + nx * dist + (0 if nx else t * 2.6); cy = y0 + ny * dist + (0 if ny else t * 2.6)
-        fs = load(cs); place(fs, cx, cy, "B", rot)
-        # pad 1 (the pin's net) towards the chip
-        if math.hypot(*[u - v for u, v in zip(W(pad(fs, "1").GetPosition()), (x0, y0))]) > \
-           math.hypot(*[u - v for u, v in zip(W(pad(fs, "2").GetPosition()), (x0, y0))]):
-            fs.SetOrientationDegrees(rot + 180)
+        v = np.array([nx * dist + (0 if nx else t_), ny * dist + (0 if ny else t_)])
+        fs = load(cs); place(fs, *to_board(v), "B", 0)
+        # pads radial: the turn of the two that puts pad 1 nearest the chip on the radial line
+        out = R @ np.array([nx, ny], float)
+        best_r = None
+        for rr in (rot + phi, rot - phi, rot + phi + 180, rot - phi + 180):
+            fs.SetOrientationDegrees(rr % 360); fs.SetPosition(P(*to_board(v)))
+            p1, p2 = np.array(W(pad(fs, "1").GetPosition())), np.array(W(pad(fs, "2").GetPosition()))
+            e = p2 - p1; sc = -np.dot(e / np.linalg.norm(e), out)
+            if best_r is None or sc < best_r[0]: best_r = (sc, rr)
+        fs.SetOrientationDegrees(best_r[1] % 360); fs.SetPosition(P(*to_board(v)))
         connect(fs, cs); placed[r] = fs
 
 # --- the rest at its given position ---------------------------------------------

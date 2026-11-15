@@ -45,14 +45,19 @@ if BOARD == "discant":
     def x_left(y):  return -120 - MARGIN_X + STAIR[0] * y / D
     def x_right(y): return 120 + MARGIN_X - STAIR[0] * y / D
     # SCREWS on a regular grid [given 2026-11-14: regular, stiff enough]: in each gap between
-    # two rows every GRID mm, half way between a key of each row (9.5 from both axes; the
-    # tubes' shrouds end at 5.1), so the lines step 10 per row as the staircase does; a line
-    # in front of row 0 and one behind row 3, half way between their keys. The ADCs sit
-    # between the screws (ADC_SLOTS).
+    # two rows every GRID mm, in the middle of three keys [given 2026-11-15: not half way
+    # between two, which left 9.5 to their axes]: two of row g and the one of row g+1
+    # between them, equally far from all three (TRI_Y up from row g, 11.2 from each axis;
+    # the tubes' shrouds end at 5.1), so the lines step 10 per row as the staircase does;
+    # a line in front of row 0 and one behind row 3, half way between their keys (11.2 as
+    # well). The ADCs sit between the screws (ADC_SLOTS), on the gaps' middle lines.
     GRID = 40
+    TRI_Y = (D * D - (PITCH / 2) ** 2) / (2 * D)     # 5.07: the three keys' circumcentre
+    FRONT_Y = 3.5        # the front line in front of row 0 [given 2026-11-15: at 5 the thumb bar
+                         # stood 0.9 into a 3 mm screwdriver's way; 10.6 from the keys' axes]
     def _line(y, x0):
         return [(x0 + GRID * j, y) for j in range(-8, 9) if x_left(y) + 6 <= x0 + GRID * j <= x_right(y) - 6]
-    HOLES = (_line(-5.0, -110) + [h for g in range(ROWS - 1) for h in _line((g + 0.5) * D, -115 + 10 * g)]
+    HOLES = (_line(-FRONT_Y, -110) + [h for g in range(ROWS - 1) for h in _line(g * D + TRI_Y, -110 + 10 * g)]
              + _line(3 * D + 5.0, -60))
     ADC_SLOTS = {g: [x + GRID / 2 for x, y in _line((g + 0.5) * D, -115 + 10 * g)] for g in range(ROWS - 1)}
     TITLE = "Discant Hall-sensor board"
@@ -75,14 +80,17 @@ else:
     Y_FRONT, Y_BACK = -MARGIN_Y, (ROWS - 1) * D + MARGIN_Y
     def x_left(y):  return -80 - MARGIN_X + STAIR[0] * y / D
     def x_right(y): return 80 + MARGIN_X + STAIR[0] * y / D
-    # SCREWS on a regular grid, as the discant's: in the gap every GRID mm half way between a
-    # key of each row, a line in front of the front row and one behind the back row, half
-    # way between their keys (J1 sits between the front keys at -80 and -60). The back line
-    # also carries the stored discant's sockets (../bass/link.scad, at x -20 and 30).
+    # SCREWS on a regular grid, as the discant's: in the gap every GRID mm in the middle of
+    # three keys [given 2026-11-15], two of the front row and the back row's key between
+    # them (TRI_Y up from the front row, 11.3 from each axis); a line in front of the front
+    # row and one behind the back row, half way between their keys (J1 sits between the
+    # front keys at -80 and -60). The back line also carries the stored discant's sockets
+    # (../bass/link.scad, at x -20 and 30). The ADCs stay on the gap's middle line.
     GRID = 40
+    TRI_Y = (D * D - (PITCH / 2) ** 2) / (2 * D)     # 4.88: the three keys' circumcentre
     def _line(y, x0):
         return [(x0 + GRID * j, y) for j in range(-8, 9) if x_left(y) + 6 <= x0 + GRID * j <= x_right(y) - 6]
-    HOLES = _line(-5.0, -50) + _line(0.5 * D, -75) + _line(D + 5.0, -40)
+    HOLES = _line(-5.0, -50) + _line(TRI_Y, -70) + _line(D + 5.0, -40)
     ADC_SLOTS = {0: [x + GRID / 2 for x, y in _line(0.5 * D, -75)]}
     TITLE = "Bass Hall-sensor board"
     BUS_TITLE = "Second I2C bus of the ESP32 (inside the bass box)"
@@ -166,7 +174,13 @@ for a, g in enumerate(GROUPS):
 GROUP_OF = {q: a for a, g in enumerate(GROUPS) for q in g}
 
 # small parts round each ADC: (ref suffix, pin it serves), placed by gen_pcb.py
-ADC_SMALL = [("C{}1", "7"), ("C{}2", "8"), ("C{}3", "10"), ("R{}", "11")]
+# and, where given, where it sits along the chip's side: at pin a's place moved by f times
+# the pitch towards pin b (default: the pin's own place spread 2.6 times from the middle).
+# The DVDD cap goes out past pin 9 and the address resistor in front of pins 10/11, so
+# ALERT (pin 12, the corner) has a straight way out; in front of it the resistor and
+# its ADDR track boxed it in together with SCL coming round the corner.
+ADC_SMALL = [("C{}1", "7", None), ("C{}2", "8", None), ("C{}3", "10", ("9", "10", -0.8)),
+             ("R{}", "11", ("11", "10", 0.7))]
 
 # connector: JST SH 5 pins, vertical, underside, as on the switch boards (../switch/ioexp.scad):
 # pins along X from -X: INT, 3V3, SDA, SCL, GND
@@ -196,3 +210,24 @@ else:
 
 
 POWER = {"+3V3"}
+
+# The bus on the top [chosen 2026-11-14]: SDA, SCL, INT and +3V3 run from ADC to ADC, and each
+# ADC's key lines fan out all round it, so on the underside alone the bus crosses every fan.
+# In these lanes (X0, X1, Y0, Y1, board frame) the top costs the bus no more than the
+# underside: the bus runs along each row of ADCs on the top and drops to the pins through
+# vias. Elsewhere the top stays the ground plane (route.py, F_COST). The lanes form a tree,
+# so the plane stays one piece round their ends.
+BUS = {"SDA", "SCL", "INT", "+3V3"}
+LANE_H = 3.6                         # half width: four tracks past a screw hole on the row's line
+if BOARD == "discant":
+    _lo, _up = 0.5 * D, 2.5 * D
+    BUS_LANES = [(-101, 71, _lo - LANE_H, _lo + LANE_H),          # lower ADCs
+                 (-81, 91, _up - LANE_H, _up + LANE_H),           # upper ADCs
+                 (-92, -84, _lo - LANE_H, CONN_XY[1] + 3),        # between them, left of the keys' fans
+                 (-92, -74, CONN_XY[1] - 3, CONN_XY[1] + 3)]      # to the connector
+else:
+    BUS_LANES = [(-61, 71, 0.5 * D - LANE_H, 0.5 * D + LANE_H),
+                 (-76, -64, CONN_XY[1] - 2.5, 0.5 * D + LANE_H)]  # from the connector up to the row
+# the ADCs' turn on the board (degrees); 45 points a corner along the row, so the four sides
+# face the four diagonal directions in which the keys lie (HALL_ADC_ROT to try others)
+ADC_ROT = float(os.environ.get("HALL_ADC_ROT", 45))

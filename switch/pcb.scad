@@ -10,7 +10,16 @@
 // on the -y side. The gap has parallel sides, so it is the same width at the
 // bore and at the outside of the ring.
 //
-// FFC CONNECTOR. A GCT FFC3A20-14-G (14 contacts, 1.0 mm pitch, vertical SMT,
+// I2C EXPANDER [given: an I2C chip on every key board] (ioexp = true, the default): the
+// board carries its own NXP PCAL9555A (HWQFN24, 4 x 4 mm) at the -x end, on the bottom
+// face, where the FFC connector was: every key on its own input, the common to ground.
+// A JST SH connector (5 pins, 1.0 pitch, vertical: BM05B-SRSS-TB) beside the chip takes
+// the bus (INT, 3.3 V, SDA, SCL, GND); its plug comes in from below and the cable goes
+// down. Three solder jumpers set the address (20h..27h). Layout, nets and the
+// clearance check: ioexp_layout.py, which writes ioexp.scad. The outline (and the tab)
+// stays as it was for the connector. ioexp = false gives the FFC version below.
+//
+// FFC CONNECTOR (ioexp = false). A GCT FFC3A20-14-G (14 contacts, 1.0 mm pitch, vertical SMT,
 // ZIF slide lock, single-sided contact, for 0.30 mm FFC) sits on the bottom
 // face at the -x end of the board, turned by con_rot from y towards -x: its long
 // side runs exactly along the normal of the housing's slanted -x face, which
@@ -154,6 +163,7 @@ cut_holes = 0;   // holes sawn off at the +x end: 0 = 13 holes, 1 = 12, 2 = 11, 
 
 /* [Output] */
 part    = "all"; // "all", "board", "copper", "copper_top", "drill", "mask" or "connector"
+ioexp   = true;  // the I2C expander at the -x end instead of the FFC connector (ioexp.scad)
 flat    = false; // true: 2D outline only, for DXF/SVG export
 
 $fa = 2; $fs = 0.2;
@@ -324,12 +334,24 @@ module tracks() {
 module via_pads()
     for (v = vias) translate(v) circle(d = via_d);
 
+include <ioexp.scad>
+module ioexp_track(w, pts)
+    for (i = [0 : len(pts) - 2]) hull() for (q = [pts[i], pts[i + 1]]) translate(q) circle(d = w, $fn = 12);
+module ioexp_pads() for (p = ioexp_pads) translate([p[0], p[1]]) square([p[2] - p[0], p[3] - p[1]]);
+module ioexp_via_pads() for (v = ioexp_vias) translate(v) circle(d = via_d, $fn = 16);
+
 module copper() intersection() {
     union() {
         rings();
-        connector_pads();
-        tracks();
-        via_pads();
+        if (ioexp) {
+            for (t = ioexp_tracks_B) ioexp_track(t[0], t[1]);
+            ioexp_pads();
+            ioexp_via_pads();
+        } else {
+            connector_pads();
+            tracks();
+            via_pads();
+        }
     }
     keep();
 }
@@ -337,15 +359,20 @@ module copper() intersection() {
 // top copper: the common bus, over the -y halves to contact 1
 module copper_top() intersection() {
     union() {
-        track([[hole_x(n), -ring_in], bus_turn, via_c]);
-        via_pads();
+        if (ioexp) {
+            for (t = ioexp_tracks_T) ioexp_track(t[0], t[1]);
+            ioexp_via_pads();
+        } else {
+            track([[hole_x(n), -ring_in], bus_turn, via_c]);
+            via_pads();
+        }
     }
     keep();
 }
 
 module drill() intersection() {
     union() {
-        for (v = vias) translate(v) circle(d = via_drill);
+        for (v = ioexp ? ioexp_vias : vias) translate(v) circle(d = via_drill);
         for (x = screw_xs) translate([x, mid_y]) circle(d = mid_d);
     }
     keep();
@@ -354,9 +381,19 @@ module drill() intersection() {
 // openings in the solder mask: everything but the tracks is left bare
 module mask_openings() {
     rings();
-    connector_pads();
+    if (ioexp) ioexp_pads(); else connector_pads();
 }
 
+// the expander and its capacitor, below the bottom copper
+module ioexp_bodies() translate([0, 0, -pcb_t / 2 - cu_t]) mirror([0, 0, 1]) {
+    translate([ioexp_chip[0] - 2, ioexp_chip[1] - 2, 0]) cube([4, 4, 0.75]);
+    translate([ioexp_cap[0] - 0.5, ioexp_cap[1] - 0.25, 0]) cube([1.0, 0.5, 0.5]);
+    // the bus connector, JST SH BM05B-SRSS-TB, vertical: header 7.1 x 3.0 x 4.25, and the
+    // plug (SHR-05V-S) in it reaching 1.6 further, where the wires leave
+    translate([ioexp_con[0] - 3.55, ioexp_con[1] - 1.9, 0]) cube([7.1, 3.01, con_h]);
+    translate([ioexp_con[0] - 3.0, ioexp_con[1] - 1.7, 0]) cube([6.0, 2.6, con_h + plug_out]);
+}
+con_h = 4.25; plug_out = 1.6;   // the bus connector's header, and its plug beyond it
 // simplified body: one block hanging below the bottom copper
 module connector_body()
     translate([0, 0, -pcb_t / 2 - cu_t - body_h]) at_con()
@@ -378,12 +415,13 @@ if (flat) {
         // via barrels, plated through the laminate
         translate([0, 0, -pcb_t / 2]) linear_extrude(pcb_t) intersection() {
             difference() {
-                for (v = vias) translate(v) circle(d = via_drill);
-                for (v = vias) translate(v) circle(d = via_drill - 2 * cu_t);
+                for (v = ioexp ? ioexp_vias : vias) translate(v) circle(d = via_drill);
+                for (v = ioexp ? ioexp_vias : vias) translate(v) circle(d = via_drill - 2 * cu_t);
             }
             keep();
         }
     }
-    if (part == "connector")
-        connector_body();
+    if (part == "connector") {
+        if (ioexp) ioexp_bodies(); else connector_body();
+    }
 }

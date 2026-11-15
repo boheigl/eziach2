@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Routes main_pcb.kicad_pcb: GND plane on In1, the 13 column lines as a straight
-bus on In2, everything else with a grid maze router (A*, 45 degree, three signal
-layers) with rip-up and reroute: a connection that finds no free path takes the
-cheapest path through other nets' tracks, those nets are torn up and routed again.
-No autorouter is installed; KiCad's DRC judges the result.
+"""Routes main_pcb.kicad_pcb: GND plane on In1, everything else with a grid maze
+router (A*, 45 degree, three signal layers: top, In2, bottom) with rip-up and
+reroute: a connection that finds no free path takes the cheapest path through other
+nets' tracks, those nets are torn up and routed again. Every GND pad first gets its
+via to the plane. No copper under the module's antenna or under the screws' heads
+(on the top). No autorouter is installed; KiCad's DRC judges the result. From the
+discant's old main board (git history: discant/main_pcb).
 usage: route.py [first,nets,...]"""
 import sys, heapq, math, time, json
 import numpy as np, pcbnew
@@ -13,15 +15,16 @@ import design as d
 mm = pcbnew.FromMM; IU = 1e6
 RES = 0.05
 OX, OY = 100.0, 100.0
-X_MIN, Y_MIN = OX + d.X0 - 0.5, OY - d.Y1 - 0.5
-NX = int((d.X1 - d.X0 + 1) / RES) + 1
-NY = int((d.Y1 + 13.2 + 1) / RES) + 1
+X_MIN, Y_MIN = OX - 3.0, OY - d.H - 0.5
+NX = int((d.W + 3.5) / RES) + 1
+NY = int((d.H + 1) / RES) + 1
 CLR = 0.127
-W_SIG, W_PWR = 0.127, 0.2
+W_SIG, W_PWR = 0.127, 0.4
 VIA_D, VIA_DR = 0.45, 0.2
 LAYERS = [pcbnew.F_Cu, pcbnew.In2_Cu, pcbnew.B_Cu]        # In1 is the GND plane
 LI = {pcbnew.F_Cu: 0, pcbnew.In2_Cu: 1, pcbnew.B_Cu: 2}
-POWER = {"+3V3", "+3V3A", "+1V8", "VIN", "VBUS", "VBAT"}
+# 0.4 mm where it fits: the charger's and the regulator's currents (up to about 1 A)
+POWER = {"+3V3", "+3V3A", "+3V3_D", "VSYS", "VBUS", "VBAT", "BATP", "L1", "L2"}
 VIA_COST = 30
 WGT = 1.4                      # weighted A*
 EDGE = 0.3
@@ -29,7 +32,8 @@ RIP_PEN = 25                   # per cell through another net's track, when look
 RIP_BUDGET = 25 * 60           # seconds of tearing up; after that the rest is routed greedily
 MAX_RIPS = 4                   # a net torn up this often is left alone
 
-b = pcbnew.LoadBoard("main_pcb.kicad_pcb")
+BOARD = "main_pcb.kicad_pcb"
+b = pcbnew.LoadBoard(BOARD)
 netid = {}
 def nid_of(name):
     return netid.setdefault(name, len(netid) + 1) if name else 0
@@ -83,6 +87,9 @@ for f in b.GetFootprints():
         pos = p.GetPosition(); x, y = pos.x / IU, pos.y / IU
         sz = p.GetSize(); w, h = sz.x / IU, sz.y / IU
         ang = -math.radians(p.GetOrientationDegrees())
+        if p.GetShape() == pcbnew.PAD_SHAPE_CUSTOM:     # e.g. an exposed pad: its whole extent, not its anchor
+            q = p.GetBoundingBox(); w, h = q.GetWidth() / IU, q.GetHeight() / IU
+            x, y = q.GetCenter().x / IU, q.GetCenter().y / IU; ang = 0
         n = nid_of(p.GetNetname())
         stamp_rect(cu, x, y, w, h, ang, n if n else -1)
         if p.GetDrillSizeX() > 0:
@@ -106,10 +113,17 @@ for k in range(len(pts)):
     dx, dy = x2 - x1, y2 - y1; L2 = dx * dx + dy * dy
     t = np.clip(((Xw - x1) * dx + (Yw - y1) * dy) / L2, 0, 1)
     dist = np.minimum(dist, np.hypot(Xw - x1 - t * dx, Yw - y1 - t * dy))
-for hx, hy in d.PINS:
-    dist = np.minimum(dist, np.hypot(Xw - OX - hx, Yw - OY + hy) - 1.1)
+for hx, hy in d.HOLES:
+    dist = np.minimum(dist, np.hypot(Xw - OX - hx, Yw - OY + hy) - d.HOLE_D / 2)
+head = np.zeros((NY, NX), bool)
+for hx, hy in d.HOLES:
+    head |= np.hypot(Xw - OX - hx, Yw - OY + hy) < d.HEAD_D / 2
+ax0, ax1, ay0, ay1 = d.ANTENNA_KEEPOUT
+ant = (Xw >= OX + ax0) & (Xw <= OX + ax1) & (Yw >= OY - ay1) & (Yw <= OY - ay0)
 for r, o in hard.items():
     o[:, ~ins | (dist < EDGE + (r - CLR))] = -1
+    o[0, head] = -1
+    o[:, ant & (o[0] == 0)] = -1
 
 # routes[net]: list of node paths [(L, j, i), ...] (a layer change at one cell is a via),
 # plus vias standing alone (GND to the plane)
@@ -311,18 +325,7 @@ def route_gnd_pad(t):
 
 t0 = time.time()
 T_START = t0
-# the column bus: a straight line on In2 through every ZIF row
 bus_paths = {}
-for h in range(1, 14):
-    net = f"COL{h}"
-    y = [t for t in terms[f"KEY0_{h}"] if t["ref"] == "J1"][0]["y"]
-    i0, i1, j = gx(OX + 18.6), gx(OX + 48.2), gy(y)
-    bus_paths[net] = [[(1, j, i) for i in range(i0, i1 + 1)]]
-    width_of[net] = W_SIG
-    routes[net] = list(bus_paths[net]); stamp_path(netid[net], bus_paths[net][0], W_SIG)
-    for r_, o in hard.items():
-        m = disc(W_SIG / 2 + r_); hh, ww = m.shape
-        for L_, j_, i_ in bus_paths[net][0][::2]: stamp(o, 1, i_ - ww // 2, j_ - hh // 2, m, netid[net])
 
 # GND fan-out before any signal: each GND pad gets its via to the plane while there is room.
 # GND is never torn up (it is not routed again as a net), so mark it as ripped out.
@@ -331,8 +334,8 @@ gnd_early = [t for t in terms["GND"] if not route_gnd_pad(t)]
 print("GND fan-out:", len(terms["GND"]) - len(gnd_early), "of", len(terms["GND"]), flush=True)
 
 pri = sys.argv[1].split(",") if len(sys.argv) > 1 and sys.argv[1] else []
-first = [f"COL{h}" for h in range(1, 14)] + sorted(k for k in terms if k.startswith("KEY"))
-others = [n for n in terms if n != "GND" and not n.startswith(("KEY", "COL"))]
+first = []
+others = [n for n in terms if n != "GND"]
 others.sort(key=lambda n: (n in POWER, len(terms[n])))
 queue = list(first) + [n for n in pri if n in terms and n not in first and n != "GND"]
 queue += [n for n in others if n not in queue]
@@ -365,7 +368,16 @@ print("open:", still, flush=True)
 json.dump(still, open("route_failed.json", "w"))
 
 # write the copper
+padbox = {}
+for f in b.GetFootprints():
+    for q in f.Pads():
+        if q.GetNetname():
+            bb = q.GetBoundingBox()
+            padbox.setdefault(q.GetNetname(), []).append((bb.GetLeft() / IU, bb.GetTop() / IU, bb.GetRight() / IU, bb.GetBottom() / IU))
+def in_pad(net, p):
+    return any(x0 <= p[0] <= x1 and y0 <= p[1] <= y1 for x0, y0, x1, y1 in padbox.get(net, []))
 def add_seg(net, L, a, c, w):
+    if w > W_SIG and in_pad(net, a) and in_pad(net, c): w = W_SIG     # inside its pad: the pad is the copper; wide, it reaches the neighbours
     t = pcbnew.PCB_TRACK(b); t.SetStart(pcbnew.VECTOR2I(mm(a[0]), mm(a[1]))); t.SetEnd(pcbnew.VECTOR2I(mm(c[0]), mm(c[1])))
     t.SetWidth(mm(w)); t.SetLayer(LAYERS[L]); t.SetNet(b.GetNetsByName()[net]); b.Add(t)
 def add_via(net, p):
@@ -395,12 +407,16 @@ for net, vs in gvias.items():
         if (net, j, i) not in placed_vias:
             placed_vias.add((net, j, i)); add_via(net, (wx(i), wy(j)))
 
-z = pcbnew.ZONE(b); z.SetLayer(pcbnew.In1_Cu); z.SetNet(b.GetNetsByName()["GND"])
-ol = z.Outline(); ol.NewOutline()
-for x, y in pts: ol.Append(mm(x), mm(y))
-z.SetLocalClearance(mm(0.127)); z.SetMinThickness(mm(0.1)); z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)
-b.Add(z)
+# the plane on In1, and ground poured round everything else on the other three layers
+for k, layer in enumerate((pcbnew.In1_Cu, pcbnew.F_Cu, pcbnew.In2_Cu, pcbnew.B_Cu)):
+    z = pcbnew.ZONE(b); z.SetLayer(layer); z.SetNet(b.GetNetsByName()["GND"])
+    ol = z.Outline(); ol.NewOutline()
+    for x, y in pts: ol.Append(mm(x), mm(y))
+    z.SetLocalClearance(mm(0.2 if k else 0.127)); z.SetMinThickness(mm(0.15 if k else 0.1))
+    z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL if k == 0 else pcbnew.ZONE_CONNECTION_THERMAL)
+    z.SetAssignedPriority(0)
+    b.Add(z)
 pcbnew.ZONE_FILLER(b).Fill(b.Zones())
 b.BuildConnectivity()
-pcbnew.SaveBoard("main_pcb.kicad_pcb", b)
+pcbnew.SaveBoard(BOARD, b)
 print("done", round(time.time() - t0, 1), "open", len(still))

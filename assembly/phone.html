@@ -22,9 +22,9 @@
   .eyebrow { margin: 0; font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
   h1 { margin: 4px 0 0; font-size: clamp(22px, 5vw, 30px); line-height: 1.1; text-wrap: balance; }
   #view { position: relative; width: 100%; max-width: 100%; aspect-ratio: 4 / 3; max-height: 72vh; border: 1px solid var(--line);
-          border-radius: 6px; overflow: hidden; background: var(--panel); }
+          border-radius: 6px; overflow: hidden; background: var(--panel);
+          touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
   #view canvas { display: block; width: 100%; height: 100%; }
-  #view.live { touch-action: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
   #hint { position: absolute; right: 10px; top: 8px; margin: 0; font: 12px/1.3 var(--mono); color: var(--muted); }
   #status { position: absolute; left: 10px; bottom: 8px; margin: 0; font: 12px/1.3 var(--mono); color: var(--muted); }
   #status.bad { color: var(--bad); }
@@ -44,8 +44,7 @@
     <p class="eyebrow">discant and bass, joined at the gauges</p>
     <h1>Discant and bass</h1>
   </header>
-  <div id="view"><p id="hint" hidden>1 finger: turn · 2 fingers: zoom and move</p><p id="status">Tap “Load assembly” to start.</p></div>
-  <div class="row"><button type="button" id="load">Load assembly</button></div>
+  <div id="view"><p id="hint">1 finger: turn · 2: zoom, move · double tap: centre</p><p id="status">Loading …</p></div>
   <div class="row" hidden>
     <button type="button" id="press">Press all keys</button>
     <button type="button" id="hold" aria-pressed="false">Hold down</button>
@@ -77,14 +76,14 @@
     <button type="button" id="down" aria-label="Look from lower">▼</button>
     <button type="button" id="zin" aria-label="Zoom in">＋</button>
     <button type="button" id="zout" aria-label="Zoom out">－</button>
-    <button type="button" id="interact" aria-pressed="false">Interact</button>
     <button type="button" id="reset">Reset view</button>
   </div>
-  <p class="note">Tap Interact, then turn with one finger and zoom or move with two (mouse: drag, right-drag, wheel); tap it again to scroll the page. The arrow and ＋/－ buttons work too. The bass on top, a closed box with its battery inside; the discant turned and behind it below: the gauges' plates sit in the discant's outer holders and the bass's inner holders, pointing along the bass's y. Both halves carry one Hall-sensor board each; the keys are drawn simply (cap, skirt, pin; no springs). Press all keys moves all 64 by 3 mm and back, Hold down keeps them down; the discant's move along their own axis, tilted with the slope. Stored shows them for carrying: the discant turned and plugged into the short socket under the bass's deck, tilted by its slope so that its keys lie flat against the bass's box, which covers all but the outer ones: 271 × 38 × 158 mm. The thumb bar stays whole, the bass's box is long enough for it to slide past the mount. All parts come from the OpenSCAD build (switch_hall/, hall_pcb/, discant/, bass/, assembly/).</p>
+  <p class="note">In the view: turn with one finger, zoom or move with two (mouse: drag, right-drag or Shift-drag, wheel); double-tap (double-click) a surface to make that point the centre of turning and zooming. Scroll the page outside the view. The arrow and ＋/－ buttons work too; Reset view goes back to the start. The bass on top, a closed box with its battery inside; the discant turned and behind it below: the gauges' plates sit in the discant's outer holders and the bass's inner holders, pointing along the bass's y. Both halves carry one Hall-sensor board each; the keys are drawn simply (cap, skirt, pin; no springs). Press all keys moves all 64 by 3 mm and back, Hold down keeps them down; the discant's move along their own axis, tilted with the slope. Stored shows them for carrying: the discant turned and plugged into the short socket under the bass's deck, tilted by its slope so that its keys lie flat against the bass's box, which covers all but the outer ones: 271 × 38 × 158 mm. The thumb bar stays whole, the bass's box is long enough for it to slide past the mount. All parts come from the OpenSCAD build (switch_hall/, hall_pcb/, discant/, bass/, assembly/).</p>
 </main>
 
 <!-- parts: filled in by embed_parts.py -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="../discant/viewer_nav.js"></script>
 <script>
 (function () {
   var statusEl = document.getElementById('status');
@@ -164,13 +163,6 @@
   ];
   scene.add(buttonGrp);
 
-  // camera orbits a target
-  var target = new THREE.Vector3(0, -60, -40), azim = -0.95, elev = 0.4, dist = 820;
-  function place() {
-    camera.position.set(target.x + dist * Math.cos(elev) * Math.sin(azim), target.y + dist * Math.sin(elev),
-                        target.z + dist * Math.cos(elev) * Math.cos(azim));
-    camera.lookAt(target);
-  }
   function size() {
     var r = view.getBoundingClientRect();
     renderer.setSize(r.width, r.height, false);
@@ -180,73 +172,17 @@
   function draw() { dirty = true; }
   window.addEventListener('resize', function () { size(); draw(); });
 
-  // orbit and zoom with buttons (no touch handlers on the view)
-  function orbit(da, de, dz) {
-    azim += da; elev = Math.max(-1.5, Math.min(1.5, elev + de));
-    dist = Math.max(20, Math.min(1500, dist * dz)); place(); draw();
-  }
+  // turning, zooming, moving, the centre by double tap: ../discant/viewer_nav.js
+  var HOME = { target: [0, -60, -40], azim: -0.95, elev: 0.4, dist: 820 };
+  var nav = viewerNav({ view: view, canvas: renderer.domElement, camera: camera, scene: scene, draw: draw, home: HOME,
+                        ok: function (p) { return !clipped || cutPlane.distanceToPoint(p) >= 0; } });
   [['left', 0.25, 0, 1], ['right', -0.25, 0, 1], ['up', 0, 0.15, 1], ['down', 0, -0.15, 1],
    ['zin', 0, 0, 1 / 1.25], ['zout', 0, 0, 1.25]].forEach(function (b) {
-    document.getElementById(b[0]).addEventListener('click', function () { orbit(b[1], b[2], b[3]); });
+    document.getElementById(b[0]).addEventListener('click', function () { nav.orbit(b[1], b[2], b[3]); });
   });
-  // gestures in the view, while Interact is on: one pointer turns (mouse: left
-  // button; right button or Shift pans), two pointers pinch to zoom and move
-  // together to pan; the wheel zooms
-  var live = false, pts = {}, prevMid = null, prevDist = 0;
-  function setLive(on) {
-    live = on; pts = {}; prevMid = null; prevDist = 0;
-    view.classList.toggle('live', on);
-    document.getElementById('hint').hidden = !on;
-    document.getElementById('interact').setAttribute('aria-pressed', on ? 'true' : 'false');
-  }
-  document.getElementById('interact').addEventListener('click', function () { setLive(!live); });
-  function pan(dx, dy) {   // move the target in the view plane by screen pixels
-    var h = view.getBoundingClientRect().height || 1;
-    var k = 2 * dist * Math.tan(camera.fov * Math.PI / 360) / h;
-    var right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
-    var up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
-    target.addScaledVector(right, -dx * k).addScaledVector(up, dy * k);
-  }
-  function midDist() {
-    var a = Object.keys(pts).map(function (id) { return pts[id]; });
-    return [[(a[0][0] + a[1][0]) / 2, (a[0][1] + a[1][1]) / 2], Math.hypot(a[0][0] - a[1][0], a[0][1] - a[1][1])];
-  }
-  view.addEventListener('pointerdown', function (e) {
-    if (!live) return;
-    e.preventDefault();
-    try { view.setPointerCapture(e.pointerId); } catch (err) {}
-    pts[e.pointerId] = [e.clientX, e.clientY, e.button === 2 || e.shiftKey];
-    if (Object.keys(pts).length === 2) { var md = midDist(); prevMid = md[0]; prevDist = md[1]; }
+  document.getElementById('reset').addEventListener('click', function () {
+    if (packedOn) nav.look(PACK_C, 620); else nav.home();
   });
-  view.addEventListener('pointermove', function (e) {
-    if (!live || !pts[e.pointerId]) return;
-    var n = Object.keys(pts).length, q = pts[e.pointerId];
-    var dx = e.clientX - q[0], dy = e.clientY - q[1];
-    pts[e.pointerId] = [e.clientX, e.clientY, q[2]];
-    if (n === 1) {
-      if (q[2]) pan(dx, dy);
-      else { azim -= dx * 0.008; elev = Math.max(-1.5, Math.min(1.5, elev + dy * 0.008)); }
-    } else if (n === 2) {
-      var md = midDist();
-      if (prevMid) pan(md[0][0] - prevMid[0], md[0][1] - prevMid[1]);
-      if (prevDist > 0 && md[1] > 0) dist = Math.max(20, Math.min(1500, dist * prevDist / md[1]));
-      prevMid = md[0]; prevDist = md[1];
-    }
-    place(); draw();
-  });
-  function lift(e) {
-    delete pts[e.pointerId]; prevMid = null; prevDist = 0;
-    if (Object.keys(pts).length === 2) { var md = midDist(); prevMid = md[0]; prevDist = md[1]; }
-  }
-  view.addEventListener('pointerup', lift);
-  view.addEventListener('pointercancel', lift);
-  view.addEventListener('contextmenu', function (e) { if (live) e.preventDefault(); });
-  view.addEventListener('wheel', function (e) {
-    if (!live) return;
-    e.preventDefault();
-    dist = Math.max(20, Math.min(1500, dist * (1 + Math.sign(e.deltaY) * 0.09))); place(); draw();
-  }, { passive: false });
-  document.getElementById('reset').addEventListener('click', function () { target.set(0, -60, -40); azim = -0.95; elev = 0.4; dist = 820; place(); draw(); });
 
   // travel: the moving parts go down, the spring is squeezed towards its floor
   var travel = 0, anim = null;
@@ -310,6 +246,7 @@
       setTravel(STROKE * Math.sin(Math.PI * Math.min(anim, 1)));
       if (anim >= 1) { anim = null; setTravel(0); }
     }
+    if (nav.step(dt)) dirty = true;
     if (dirty) { renderer.render(scene, camera); dirty = false; }
     requestAnimationFrame(loop);
   }
@@ -327,8 +264,8 @@
       i++; draw(); setTimeout(next, 30);
     }, 30);
   }
-  size(); place(); requestAnimationFrame(loop);
-  document.getElementById('load').addEventListener('click', function () { this.disabled = true; next(); });
+  size(); nav.home(); requestAnimationFrame(loop);
+  next();                                         // the parts load at once, one after the other
 
   // STORED: the discant off the playing mount, turned 90 deg about x, its plates in the
   // short socket under the bass's deck, its keys toward the box's back wall
@@ -354,8 +291,7 @@
     var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on ? 'true' : 'false');
     if (!packedBuilt) packedView();
     packedOn = on; showParts();
-    if (on) { target.set(PACK_C[0], PACK_C[1], PACK_C[2]); dist = 620; } else { target.set(0, -60, -40); dist = 820; }
-    place(); draw();
+    if (on) nav.look(PACK_C, 620); else nav.look(HOME.target, HOME.dist);
   });
 })();
 </script>

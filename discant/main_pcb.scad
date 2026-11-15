@@ -1,29 +1,17 @@
-// Main PCB in the hole behind the slanted -x face, and the boards' FFCs to it
+// The hole behind the slanted -x face: the key boards' bus wires
 //
-// One board lying parallel to the hole's floor, so to the bottom plane, under
-// the four connectors. It replaces the four long cables to the old back outlet;
-// what leaves the hole now are six wires to the link board (gauge_link.scad),
-// USB-C and the earphone jack (slanted wall).
+// [given: an I2C expander on every key board] Each board carries its own PCAL9555A at
+// its -x end (../switch/pcb.scad, ioexp.scad). The board in the hole and the FFCs are
+// gone: from each board's five wire pads (3.3 V, GND, SDA, SCL, INT) a bundle runs
+// down the old cable's centre line into the hole, and the four meet at a splice where
+// the board's wire pads were; from there one bundle runs on to the link board
+// (gauge_link.scad: bundle()). The housing has a pocket under each board's -x end for
+// the chip, its capacitor, the jumpers and the solder joints (housing.scad).
 //
-// Every cable drops every staircase step along the band, so the 25.5 mm module
-// cannot lie between two of them: it hangs under the board, in a pocket in the
-// floor. A 14-way ZIF, about 20 mm wide on its cable's line, fits in only three
-// places, since the hole-1 tubes bite into the band. So cables 0-2 bend towards
-// the back, the same bend as before, into ZIFs on the board's top; cable 3
-// bends the other way, past the board's end, into a ZIF on the underside.
+// (The cable geometry below is the old FFC's, kept for the wires' way.)
 //
-// ASSEMBLY, on the bench, with the boards in the upside-down cover (cover.scad):
-// plug the four cables into this board, turn it over, feed them into the board
-// connectors from above and close those. The board then rides on the cables
-// into the hole as the unit goes onto the housing, where four pins in the floor
-// locate it. Nothing is reached from below.
-//
-// Frame: the band frame, band(): origin on the hole's floor under board 0's
-// connector centre, X up the staircase, Y towards the slanted wall, Z square
-// to the floor. Connector k lies at X = k * pitch.
-//
-// make builds   openscad -o ../build/discant/main_pcb.stl main_pcb.scad    (board and parts)
-//               openscad -o ../build/discant/pcb_cable.stl -D 'show="cables"' main_pcb.scad
+// make builds   openscad -o ../build/discant/main_pcb.stl main_pcb.scad    (the splice)
+//               openscad -o ../build/discant/pcb_cable.stl -D 'show="cables"' main_pcb.scad   (the wires)
 // housing.scad uses main_pcb_cuts() and main_pcb_pads().
 
 show = "board";                  // "board" (laminate, parts, jack), "laminate", "parts", "copper" or "cables"
@@ -192,35 +180,25 @@ module usb_body()    box(usb_x, usb_y, [pcb_z + pcb_t, pcb_z + pcb_t + usb_h]);
 module jack_body()   translate([jack_x, wall_y - 0.5 - jack_l, jack_z]) rotate([-90, 0, 0])
                          cylinder(d = jack_d, h = jack_l);
 
-// the routed board from KiCad (main_pcb/): laminate, copper and the parts' bodies,
-// already in the band frame. The boxes above remain the housing's cuts.
-module main_pcb() band() { import(str(kicad, "kicad_board.stl")); import(str(kicad, "kicad_parts.stl")); jack_body(); }
+// the bus wires: from board k's connector plug (board frame, below its bottom face) to the
+// old cable's centre line, down it, then across the hole to the splice
+wire_d   = 1.8;                  // five wires, AWG 30 [assumed]
+plug_at  = [-137.9, -3.2, -0.835 - 5.85 - 1.0];   // where the wires leave the plug (../switch/ioexp.scad, housing.scad)
+splice   = from_band([50, 11.7, 4.6]);   // where the hole board's wire pads were: the link bundle's start
+module wire_seg(a, b) hull() { translate(a) sphere(d = wire_d, $fn = 10); translate(b) sphere(d = wire_d, $fn = 10); }
+function wire_pts(k) = let(p = cable_path(k))
+    concat([plug_at + k * step],
+           [for (i = [1 : len(p) - 1]) if (to_band(at(k, p[i]))[2] > 1.2) at(k, p[i])], [splice]);   // kept 1.2 over the hole's floor
+module bus_wires() for (k = [0 : 3]) let(w = wire_pts(k)) for (i = [0 : len(w) - 2]) wire_seg(w[i], w[i + 1]);
+module splice_sleeve() translate(splice) sphere(d = 4.0, $fn = 16);   // heat shrink over the joints
 
-// cut from the housing: floor pockets, USB-C and jack openings
-module main_pcb_cuts() band() {
-    g = 0.3;
-    box([mod_x[0] - g, mod_x[1] + g], [mod_y[0] - g, mod_y[1] + g], [-pocket_mod, 1]);
-    box(low_x, low_y, [-pocket_low, 1]);
-    e = end_of(3);
-    // on past the mouth: the film still twists there and would scrape the floor
-    box([e[0] + zif_in - zif_d - g, e[0] + zif_in + 3], [e[1] - zif_w / 2 - g, e[1] + zif_w / 2 + g], [-pocket_mod, 1]);
-    box([usb_x[0] - 0.3, usb_x[1] + 0.3], [12, wall_y + 1], [pcb_z + pcb_t - 0.3, pcb_z + pcb_t + usb_h + 0.3]);
-    translate([jack_x, 10, jack_z]) rotate([-90, 0, 0]) cylinder(d = jack_d + 0.2, h = 10);
-}
-
-// added to the housing: a pad under the board and a locating pin, at each pin
-module main_pcb_pads() band()
-    for (p = pins) translate([p[0], p[1], 0]) {
-        translate([0, 0, -pocket_mod - 0.2]) cylinder(d = pad_d, h = pcb_z + pocket_mod + 0.2);   // from the floor below the pockets
-        cylinder(d = pin_d, h = pcb_z + pin_h);
-    }
+// nothing is cut from or added to the housing for the hole any more
+module main_pcb_cuts() { }
+module main_pcb_pads() { }
 
 for (k = [0 : 3]) echo(str("cable ", k, ": ends on the band frame at ", end_of(k), ", lead ",
                            k < 3 ? lead_of(1, zc_top) : lead_of(-1, zc_bot)));
 echo(str("board ", pcb_x[1] - pcb_x[0], " x ", pcb_y[1] - pcb_y[0], " x ", pcb_t));
 
-if (show == "cables") cables();
-else if (show == "laminate") band() import(str(kicad, "kicad_board.stl"));
-else if (show == "parts") band() { import(str(kicad, "kicad_parts.stl")); jack_body(); }
-else if (show == "copper") band() import(str(kicad, "kicad_copper.stl"));
-else main_pcb();
+if (show == "cables") bus_wires();
+else splice_sleeve();

@@ -41,25 +41,55 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   **265 mm** apart [given: widened so that the box covers the stored discant's keys;
   replaces the earlier taper towards the −z end]; from z −90.7 up they slant in, parallel
   to the stored discant's stepped ends [given], 10 in x per 16.28 (31.6°), 5 mm off the
-  rows' end caps; from z −46.9 up they stand straight, flush with the deck (211 mm), so
+  rows' end caps; from z −46.8 up they stand straight, flush with the deck (211 mm) (built from two hulls:
+  one hull alone bridged the inward turn and made the sides 19.6° instead of parallel), so
   that the bass boards' 15 mm FFCs can drop from the deck into the box. (A box narrowing
   to 172 mm under the deck, tried first, left the FFCs no way: the jog along the front
-  wall it needed was 3.9 × 3.5 mm.) It reaches 5.3 mm below the hand plate (z −128.5) [given: room for the
-  stored discant's travel, then for the socket's latch]. Vertical edges rounded (r 4); the cover follows them. The
-  front wall is 3 mm thick; the hand plate is a 1 mm recess in it with rounded corners
-  (r 6); the front caps keep 2 mm from its inner face [given: ≥ 2 mm].
+  wall it needed was 3.9 × 3.5 mm.) It reaches 7.6 mm below the hand plate (z −130.8) [given: room for the stored discant's travel, then for the socket's latch, then for the inner holders' thicker walls]. Vertical edges rounded (r 4); the cover follows them. The
+  front wall is 3 mm thick; the hand plate is its flat face [given 2026-11-15: no
+  recess; it was 1 mm deep with rounded corners (r 6)]; the front caps keep 2 mm from
+  the wall's inner face [given: ≥ 2 mm].
 - **Stiffness** [given: the plate must not bend; very important]: the hand bends the
   front wall locally, between its edges, as the cavity is empty; the box section does
   not help there. (Corrected: the earlier 0.05 mm took the box as a beam and missed that;
   a plain 3 mm wall between clamped edges gives about 0.5 mm at 50 N mid-plate.) So the
   front wall carries **ribs** inside, 1.6 thick, across the cavity to 0.2 short of the
-  back cover: upright at x −90, −50.75, 47.25, 90 (beside the battery and outside), across
+  back cover: upright at 83 mm either side of the middle (x −84.75, 81.25) and beside the battery
+  (x −50.75, 47.25), across
   over the battery (z −56.5), at z −36 right of the key board, at z −90 and −110 left of
   the battery and at z −88 over the power board; notches leave the wires' way along the
   bottom and up left of the battery. The largest field left is over the battery, 91 × 62
   mm: about **0.15 mm** at 50 N there, less elsewhere and under a palm [estimate: clamped
   plate, point load, PLA, E = 3500 MPa]. The front wall stays one piece with sides, bottom
   and deck [given: the cover on the side away from the hand, for stiffness].
+- **Hand strap** [given: the heel of the hand presses about 11 cm below the bass keys;
+  the strap at least 40 mm wide]: a strap across the back of the hand, level with its
+  middle (z −67; the heel at about z −105, the knuckles just below the deck). Each end
+  goes through a pair of upright slots in the front wall, as far out as the front face
+  allows over their height (4 × 42 mm, inner edges 87 mm from the middle, the outer slot
+  ending 100 mm out, 1.5 mm inside the face's rounded edge where the box is narrowest; a
+  5 mm bar between) [given: further out, so the hand slides far enough along the rows]: in through the
+  inner one, round the bar inside the box, out through the outer one, folded back and
+  buckled [assumed: 40 × 2–3 mm leather, buckle on the strap]. It lies flat on the front
+  face, untwisted (slots and strap stand upright), adds nothing to the package, and is
+  threaded with the back cover off; about 174 mm between the inner slots (the hand plate
+  is 131.5 wide), so the hand can slide along the rows. The bar is the front wall between the slots and a block behind
+  it, 5 × 6.5 mm; a 100 N pull on each end puts 200 N round it: about 30 MPa [estimate,
+  PETG]. The outer upright ribs stand at 83 mm from the middle, inside the slots; the back
+  cover's tongues sit between the ribs. (Bars on the slanted side
+  walls, tried first, would have twisted a level strap by 31.6° and took only 25 mm.)
+  `strap.stl` shows it on the page.
+- **Strength under a strong push** [given: statically stable] (estimates, 100 N; PLA/PETG
+  about 50 MPa; not FEA): the push's moment at the gauges is F × 64 mm (plate's middle)
+  to F × 125 mm (its top). It reaches them through the mount at the box's bottom. A thin
+  floor and back wall would carry it in bending (about 100 MPa), so behind the mount the
+  box is a solid **foot** from the battery's shelf down to 2.65 mm above the floor (x
+  −51.6 … 48.1), joined to front and back wall, with the wires' slot under it; the ribs
+  reach the back wall in the mount's strip. The moment goes into the walls as tension
+  and compression: a few MPa. The inner holders' walls are 4.5 mm [given: thicker], their
+  bending stress about 44 % of before (15–25 MPa). Hand plate about 8 MPa at 200 N under a
+  palm. **Not covered:** the gauge plates themselves: 100 N is 2.3–4.5 × their range and
+  bends ordinary steel permanently; an overload stop is open (`../discant/spec.md` §7).
 - **Deck:** the discant's housing for two rows, each board resting on it 0.1 above its
   underside, a guide for every key (⌀9.4, ⌀8.6 spring pocket, floor 1.5 under it,
   z = −15.1), M2 pilots for the cover's screws; the back block begins at y = 11, behind the
@@ -69,15 +99,24 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   the box. (The first bass's board-1 tunnel cut into the side of a front key's spring
   pocket at x −80; that is gone.)
 - **Stored discant** (../assembly/spec.md): a pocket in the deck's underside takes the
-  stored discant's gauge ends (x −46.4 … 42.9, y 13.1 … 24.7, up to z −6.4), with a
+  stored discant's gauge ends (x −46.4 … 42.9, y 13.1 … 24.7, up to z −5.2), with a
   short socket (the inner holder's last 8.3 mm and its bridge, with the latch as a
-  detent) for each plate, printed with the case; 2.7 mm of deck stays under the back row's springs over it.
+  detent) for each plate, printed with the case; 1.5 mm of deck stays under the back
+  row's springs over it. [given: higher, thumb bar flatter in the middle] The stored
+  discant sits 1.2 mm higher than before the thumb bar (link.scad `front_d`): as high as
+  the socket can rise, 0.4 under the back row's middle guide floors (z −3.6).
 - **Back cover** [given: inside, on the side away from the hand]: the back wall from
   z −116 up to the deck, with the side walls' last 1.6 mm, one 1.6 mm plate following the
   box's outline. Two tongues at its bottom edge hook in behind the mount's strip (which
-  stays with the case: the gauges' and contacts' load never passes the cover); three M2
-  pan-head screws at z −21 (x −45, 0, 45), above the stored discant's caps, into pillars
-  from the front wall. It rests on the side walls' ends, the ribs and the pillars.
+  stays with the case: the gauges' and contacts' load never passes the cover): 24 mm
+  wide left of the battery, 7 mm wide and 3.2 thick (2 mm more, inwards [given
+  2026-11-15]) between the battery's rib and the main board
+  [given 2026-11-15: over the board it sat 0.6 mm above the ESP32 module, and tilting
+  the cover to hook it in swung it onto the module beyond about 9°]. Checked: both
+  tongues swing clear of board, wires and battery up to 20° of tilt; three M2 × 6
+  countersunk screws (DIN 965, modelled: `cover_screws.stl`) at z −21 (x −45, 0, 45),
+  above the stored discant's caps, flush in 90° countersinks (⌀4.0, 0.9 deep, 0.7 of the
+  plate left under them), 4.4 mm into ⌀1.6 pilots in pillars from the front wall. It rests on the side walls' ends, the ribs and the pillars.
   Assembly with it off: battery, both boards (screwed from the back into the front
   wall's pilots; the power board goes in 2 mm to the left and slides right into the
   port), the FFCs from the deck and the contacts' wires, all in reach. [unverified: screw
@@ -87,27 +126,48 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   between front wall and back cover, 0.3 clear each side: a shelf under it, stops at its ends, a lip
   over its top.
 - **Electronics** (`elec.scad`) [given: charging in the bass by its own USB socket; the
-  contacts switch the battery on]: a power board at the bottom on the +x side (USB-C
-  in the side wall at z −104.5 with a charge LED beside it, charger with power path,
-  protection and fuse, the P-FET switched by DET, a 3.3 V LDO) and a key board at the top
-  on the −x side, where the FFCs come down (their two connectors, a 24-input I2C port
-  expander: one input per key, no matrix, no diodes). Both lie on the front wall's
-  inside on two pads with M2 pilots, outside the hand plate's recess. The key board
-  (x −104.5 … −76.5) sits under the FFCs' drop and carries its own 3.3 V LDO.
+  contacts switch the system on; the electronics moved from the discant to the bass]:
+  - **Main board**, 45.5 × 33 mm at the bottom on the +x side, between the outer rib and
+    the side wall, under the strap's bar: the ESP32-S3-WROOM-1 (antenna at the board's
+    bottom edge, away from the battery), the DAC TLV320DAC3100, the charger BQ24074
+    with power path and a fuse (the cell brings its own protection), the system switch
+    (DET) and the 3.3 V supply (TPS63001) for both halves; four layers, parts on the
+    side towards the back cover (`../main_pcb/`, whose `board.scad` this file reads).
+    In the side wall: USB-C (z −104.5; charging, firmware, MIDI), the charge light (red charging or battery low, green full) and
+    the earphone jack [given 2026-11-15: a panel jack in the case, a bulge in the back
+    cover allowed]: Switchcraft 35PRM3, from inside through the side wall (⌀6.2, the
+    wall 1.5 at a ⌀10.5 counterbore for its knurled nut), its body over the main board
+    and wired to it. 1.0 mm over the board. The back cover bulges 5.7 mm round it (⌀13.3 about the jack's axis,
+    from the side wall 24 mm inwards); the bulge is the cover's, down past z_split,
+    but the side wall round the hole stays the case's, so the cover comes off with
+    the jack in place. Checked: clear of case, cover, board, battery and wires, and
+    of the discant both played and stored (stored, it stays 10 mm above the bulge).
+  - **No key board in the box** [given: an I2C expander on every key board]: the two
+    bass boards carry their own (24h, 25h). Under each board's −x end the deck has a
+    pocket 3 mm deep for it, deepened to 6.85 mm for its bus connector (JST SH, the plug
+    from below), and a ⌀3 shaft from the plug down into the tunnel.
+  The main board lies on the front wall's inside on three pads with M2 pilots,
+  screwed from the back with the back cover off. Its lowest screw lies below the cover's
+  bottom edge, behind the case's strip: the strip's piece in front of it (7 × 7 mm) is
+  the cover's, so a screwdriver reaches it [given 2026-11-15: all screws reachable].
+  Checked with a 3 mm shaft and a 16 mm handle: all three main board screws, the bass's
+  12 and the discant's 27 key board screws are reachable (the keys in place).
 - **Wires** (`elec.scad`: `wires()`, `wires.stl`): the nine pins' wires leave the mount's
-  cavity through the back wall's ⌀2.6 bore as one bundle and part inside the box along
-  the bottom, under the battery's shelf, through notches in the ribs: right to the power
-  board VBAT × 2, GND × 2, DET; left and up beside the battery (x −55.5) to the key board
-  SDA, SCL, INT, GND and a second wire on a VBAT pin (the switched battery). No bundle
-  crosses another. The FFCs, 15 × 0.3 mm, each one piece from connector to connector:
-  down out of the board's connector (turned 58° in plan), twisted and folded flat into
-  the tunnel, forward, down the drop and into the key board's connectors, 1 mm into each.
-  Board 1's runs in the tunnel's lower layer, under the place where board 0's comes
-  down, and down the drop behind it, so they never cross. Their way is cut from the deck
-  with 0.75 mm round them; the wall between tunnel and the front key's guide at x −80 is
-  0.6 mm. [unverified: the twist and folds, about 15–20 mm long each]
-  `../assembly/spec.md`, Contacts.
-- **Size:** 211.1 × 40.3 mm at the deck; below it 11.2 mm deep and 265 mm wide, 149.5 mm
+  cavity through the back wall's ⌀2.6 bore as one bundle and run along the bottom, under
+  the battery's shelf, through notches in the ribs, right to the main board. The
+  notches are 3 deep at the ribs' back edges, open to the back cover (the wires go in
+  from there), so 3.4 mm of every rib stays whole along the front wall [given
+  2026-11-15: the wires' way cut the ribs through, the cross ribs beside the battery
+  and the upright ribs at the floor]; at a notch the rib with its share of the front
+  wall would keep about 40 % of its bending stiffness, cut through it kept 16 %; so at
+  each notch the rib is 6 mm thick instead of 1.6, 3 mm beyond the notch on either side
+  [given 2026-11-15], and keeps about 84 % [estimated: T-section, 20 mm of wall]. The bundles run 1.2 mm under the back cover (`wire_y`). The two
+  bass boards' bus wires (3.3 V, GND, SDA, SCL, INT) go down their shafts into the deck's
+  tunnel, forward, down its drop, along the box's top over the left strap bar's block,
+  down beside the battery (x −55.5) and join the first bundle at the bottom. Checked:
+  clear of case, back cover, battery, boards and electronics. Lengths, wire and plugs: the Wiring section of `../assembly/spec.md`
+  (runs #4 to #7).
+- **Size:** 211.1 × 40.3 mm at the deck; below it 11.2 mm deep and 265 mm wide, 151.8 mm
   high in all; the gauges' mount and holders stand in the step (y −1.3 … 25.9).
 - **Cover: one piece** [given]: a slab on each board, the board in a pocket underneath
   (0.3 round it), a ⌀8 opening over each key (the stem's second guide). The front slab
@@ -120,7 +180,7 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   connector end, the back board's saw cut), 0.3 fit and a 1.2 end wall, x = −107.3 … 103.8.
   The keys alone would need less: the boards reach 25.8 beyond their first hole for the
   connector.
-- **Size:** 211.1 × 40.3 mm at the deck (x −107.3 … 103.8, y −12.5 … 27.8, z −128.5 … 15.04);
+- **Size:** 211.1 × 40.3 mm at the deck (x −107.3 … 103.8, y −12.5 … 27.8, z −130.8 … 15.04);
   beside the plate the deck's front face stands 2 mm behind the plate's.
 
 ## 4. Gauges: the bass's inner holders (`link.scad`)

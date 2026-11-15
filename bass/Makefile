@@ -61,7 +61,7 @@ PHONE_PARTS := CASE_TRIS=$(B)/case.stl COVER_TRIS=$(B)/cover.stl BOARDS_TRIS=$(B
                CONN_TRIS=$(B)/connectors.stl ELEC_TRIS=$(B)/elec.stl WIRES_TRIS=$(B)/wires.stl STRAP_TRIS=$(B)/strap.stl \
                $(foreach r,0 1,$(foreach p,CAP PLUNGER MAGNET ORING STOP,$(p)$(r)_TRIS=$(KEY)/bass$(r)_$(shell echo $(p) | tr A-Z a-z).stl)) \
                LINK_TRIS=$(B)/discant_link.stl LID_TRIS=$(B)/back_cover.stl CSCREW_TRIS=$(B)/cover_screws.stl BATTERY_TRIS=$(B)/battery.stl
-$(B)/phone.html: phone.html ../discant/embed_parts.py $(B)/case.stl $(B)/cover.stl $(B)/boards.stl \
+$(B)/phone.html: phone.html ../discant/embed_parts.py ../discant/viewer_nav.js $(B)/case.stl $(B)/cover.stl $(B)/boards.stl \
                  $(B)/connectors.stl $(B)/elec.stl $(B)/wires.stl $(B)/strap.stl $(B)/discant_link.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(KEY_STL)
 	@echo "  EMBED    $@"
 	@$(PYTHON) ../discant/embed_parts.py $< $@ $(PHONE_PARTS)

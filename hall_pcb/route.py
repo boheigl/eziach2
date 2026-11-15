@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Routes <board>/<board>.kicad_pcb (two layers; board from HALL_BOARD): every part sits on the underside
 (B), which carries the tracks; the top (F) is a ground plane that tracks cross only
-briefly (they cost F_COST times as much there). Grid maze router (A*, 45 degree) with
+briefly (they cost F_COST times as much there), except the bus (design.BUS) in its lanes
+(design.BUS_LANES), where the top is its main road. Grid maze router (A*, 45 degree) with
 rip-up and reroute, from ../discant/main_pcb (git history). GND pads get a via to
 the top plane first; afterwards both faces are filled with ground. KiCad's DRC
 judges the result.
@@ -33,6 +34,8 @@ WGT = 1.3
 EDGE = 0.3
 RIP_PEN = 25
 RIP_BUDGET = 25 * 60
+TIME_LIMIT = 40 * 60          # then only quick searches, so the board is written before build.sh's timeout
+QUICK = 150000
 MAX_RIPS = 4
 
 b = pcbnew.LoadBoard(BOARD)
@@ -116,6 +119,12 @@ for hx, hy in d.HOLES:
     dist = np.minimum(dist, np.hypot(Xw - OX - hx, Yw - OY + hy) - d.HOLE_D / 2)
 for r, o in hard.items():
     o[:, ~ins | (dist < EDGE + (r - CLR))] = -1
+# the bus's lanes on the top
+lane = np.zeros((NY, NX), bool)
+for x0, x1, y0, y1 in d.BUS_LANES:
+    lane |= (Xw >= OX + x0) & (Xw <= OX + x1) & (Yw >= OY - y1) & (Yw <= OY - y0)
+BUS_IDS = {netid[n] for n in d.BUS if n in netid}
+BUS_BOT = 1.6                  # the bus on the underside, per cell: the lanes are its way
 
 # routes[net]: list of node paths [(L, j, i), ...] (a layer change at one cell is a via),
 # plus vias standing alone (GND to the plane)
@@ -173,6 +182,7 @@ def astar(n, sources, targets, tx, ty, width, rip=False, limit=700000):
     R = R_PWR if width > W_SIG else R_SIG
     ho, so = hard[R], soft[R]; hv, sv = hard[R_VIA], soft[R_VIA]
     best, prev, pq = {}, {}, []
+    bus = n in BUS_IDS
     def h(i, j):
         dx, dy = abs(i - tx), abs(j - ty); return max(dx, dy) + 0.414 * min(dx, dy)
     for s in sources:
@@ -193,10 +203,12 @@ def astar(n, sources, targets, tx, ty, width, rip=False, limit=700000):
             if not (0 <= i2 < NX and 0 <= j2 < NY): continue
             hv_ = ho[L, j2, i2]
             if hv_ != 0 and hv_ != n: continue
-            sv_ = so[L, j2, i2]; cost = c * (F_COST if L == 0 else 1.0)
+            sv_ = so[L, j2, i2]
+            if L == 0: cost = c * (1.0 if bus and lane[j2, i2] else F_COST)
+            else: cost = c * (BUS_BOT if bus else 1.0)
             if sv_ != 0 and sv_ != n:
-                if not rip or sv_ == -1 or rips.get(sv_, 0) >= MAX_RIPS: continue
-                cost += RIP_PEN
+                if not rip or rips.get(sv_, 0) >= MAX_RIPS: continue
+                cost += RIP_PEN * (2 if sv_ == -1 else 1)
             w = (L, j2, i2); g2 = g + cost
             if g2 < best.get(w, 1e18):
                 best[w] = g2; prev[w] = u; heapq.heappush(pq, (g2 + WGT * h(i2, j2), g2, w))
@@ -215,8 +227,8 @@ def astar(n, sources, targets, tx, ty, width, rip=False, limit=700000):
             if hv[l, j, i] not in (0, n): ok = False; break
             s_ = sv[l, j, i]
             if s_ not in (0, n):
-                if not rip or s_ == -1 or rips.get(s_, 0) >= MAX_RIPS: ok = False; break
-                pen += RIP_PEN
+                if not rip or rips.get(s_, 0) >= MAX_RIPS: ok = False; break
+                pen += RIP_PEN * (2 if s_ == -1 else 1)
         if ok:
             for L2 in range(NL):
                 if L2 != L:
@@ -226,17 +238,33 @@ def astar(n, sources, targets, tx, ty, width, rip=False, limit=700000):
     return None
 
 def victims(n, path, width):
+    """the nets whose clearance the path enters; a cell in two nets' clearance (-1)
+    gives every net with copper near it"""
     R = R_PWR if width > W_SIG else R_SIG
-    v = set()
+    v, shared = set(), []
     for a, c in zip(path, path[1:]):
         if a[1:] == c[1:]:
             for l in range(NL):
                 s_ = soft[R_VIA][l, a[1], a[2]]
                 if s_ > 0 and s_ != n: v.add(s_)
+                elif s_ == -1: shared.append((a[1], a[2]))
     for L, j, i in path:
         s_ = soft[R][L, j, i]
         if s_ > 0 and s_ != n: v.add(s_)
-    return v
+        elif s_ == -1: shared.append((j, i))
+    if shared:
+        k = int(math.ceil((VIA_D / 2 + W_PWR / 2 + R_VIA) / RES)) + 1
+        near = {}
+        for net, ps in routes.items():
+            m_ = netid[net]
+            if m_ == n or rips.get(m_, 0) >= MAX_RIPS: continue
+            for p in ps:
+                for c in p: near.setdefault(c[1:], set()).add(m_)
+        for j, i in set(shared):
+            for jj in range(j - k, j + k + 1):
+                for ii in range(i - k, i + k + 1):
+                    v |= near.get((jj, ii), set())
+    return {m_ for m_ in v if rips.get(m_, 0) < MAX_RIPS}
 
 def stamp_path(n, path, width):
     for a, c in zip(path, path[1:]):
@@ -272,19 +300,30 @@ def route_net(net, rip_ok=True):
         t = rest.pop(0); tc = term_cells(t)
         if tc & tree: continue
         w_used = width
-        path = astar(n, tree, tc, gx(t["x"]), gy(t["y"]), width)
+        lim = QUICK if time.time() - T_START > TIME_LIMIT else 700000
+        path = astar(n, tree, tc, gx(t["x"]), gy(t["y"]), width, limit=lim)
         if path is None and width > W_SIG:
-            w_used = W_SIG; path = astar(n, tree, tc, gx(t["x"]), gy(t["y"]), W_SIG)
+            w_used = W_SIG; path = astar(n, tree, tc, gx(t["x"]), gy(t["y"]), W_SIG, limit=lim)
         if path is None and rip_ok and time.time() - T_START < RIP_BUDGET:
             w_used = W_SIG
-            p2 = astar(n, tree, tc, gx(t["x"]), gy(t["y"]), W_SIG, rip=True, limit=1200000)
-            if p2 is not None:
+            # up to three rounds: a shared cell (-1) may hide a net that only shows once
+            # its neighbour is gone
+            # searched backwards, from the terminal to the tree: a terminal shut in costs
+            # its rip penalties at the start, instead of the search flooding the board
+            # from the tree with everything cheaper than the way into the pocket
+            ti, tj = gx(t["x"]), gy(t["y"])
+            near_ = min(tree, key=lambda c: (c[2] - ti) ** 2 + (c[1] - tj) ** 2)
+            for _ in range(3):
+                p2 = astar(n, tc, tree, near_[2], near_[1], W_SIG, rip=True, limit=500000)
+                if p2 is None: break
+                p2 = p2[::-1]
                 v = victims(n, p2, W_SIG)
                 for m_ in v:
                     vn = name_of[m_]; rips[m_] = rips.get(m_, 0) + 1
                     routes.pop(vn, None); stubs.pop(vn, None); gvias.pop(vn, None); torn.add(vn)
                 rebuild_soft()
-                path = astar(n, tree, tc, gx(t["x"]), gy(t["y"]), W_SIG, limit=1200000)
+                path = astar(n, tree, tc, gx(t["x"]), gy(t["y"]), W_SIG, limit=700000)
+                if path is not None or not v: break
         if path is None:
             failed.append((net, t["ref"], t["num"])); print("  FAILED", net, t["ref"], t["num"], flush=True); continue
         routes[net].append(path); stamp_path(n, path, w_used)
@@ -326,11 +365,16 @@ gnd_early = [t for t in terms["GND"] if not route_gnd_pad(t)]
 print("GND fan-out:", len(terms["GND"]) - len(gnd_early), "of", len(terms["GND"]), flush=True)
 
 pri = sys.argv[2].split(",") if len(sys.argv) > 2 and sys.argv[2] else []
-first = sorted((k for k in terms if k.startswith("KEY")), key=lambda n: -len(terms[n]))
-others = [n for n in terms if n != "GND" and not n.startswith("KEY")]
-others.sort(key=lambda n: (n in POWER, len(terms[n])))
-queue = list(first) + [n for n in pri if n in terms and n not in first and n != "GND"]
-queue += [n for n in others if n not in queue]
+# order: the short nets local to each ADC (DECAP, ADDR) first, then the given nets (the bus
+# and whatever failed last try), then power, the key lines last: routed earlier, the key
+# lines fill the ADCs' surroundings and leave no way in for the bus and +3V3
+keys = sorted((k for k in terms if k.startswith("KEY")), key=lambda n: -len(terms[n]))
+others = [n for n in terms if n != "GND" and not n.startswith("KEY") and n not in POWER]
+local = sorted((n for n in others if n not in pri), key=lambda n: len(terms[n]))
+queue = [n for n in local if len(terms[n]) <= 3]
+queue += [n for n in pri if n in terms and n != "GND" and n not in queue]
+queue += [n for n in sorted(POWER) if n in terms and n not in queue]
+queue += [n for n in local + keys if n not in queue]
 done_ = 0
 while queue:
     net = queue.pop(0)

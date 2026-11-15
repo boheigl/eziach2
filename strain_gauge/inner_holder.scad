@@ -29,7 +29,8 @@ web_tip    = 3.5;    // top of the two web prongs
 slot_top   = 6.5;    // where the open slots close at the U-turn
 
 /* [Holder] */
-wall       = 3;      // thickness above and below the plate
+wall       = 4.5;    // thickness above and below the plate [given: thicker walls for strength;
+                     //   was 3: bending stress in them about (3/4.5)^2 = 0.44 as much]
 fit        = 0.3;    // clearance on the plate thickness, total (0.15 per face)
 w_clear    = 0.2;    // clearance to the W — this is the sliding fit.
                      //   0.05  precision machined

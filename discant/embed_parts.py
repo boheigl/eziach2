@@ -5,7 +5,8 @@
 # its "parts: filled in by embed_parts.py" comment.
 #   python3 embed_parts.py phone.html ../build/discant/phone.html [--keys board.scad] NAME=part.stl ...
 # --keys fills the page's /*KEYS*/[] with [row, key, x] of every key (hall_keys in the
-# board's data, ../hall_pcb/<board>/board.scad).
+# board's data, ../hall_pcb/<board>/board.scad). A <script src="x.js"> with a relative
+# path (viewer_nav.js) is put into the page inline.
 import base64, re, struct, sys
 
 MARK = '<!-- parts: filled in by embed_parts.py -->'
@@ -29,6 +30,11 @@ if args[:1] == ['--keys']:
     keys = [[k[0], k[1], k[2]] for k in eval(m.group(1))]
     s = s.replace('/*KEYS*/[]', repr(keys))
     args = args[2:]
+# scripts of this project the page loads by a relative src (viewer_nav.js) go in inline
+import os
+def _inline(m):
+    return '<script>\n' + open(os.path.join(os.path.dirname(os.path.abspath(page)), m.group(1))).read() + '</script>'
+s = re.sub(r'<script src="([^":]+\.js)"></script>', _inline, s)
 assert s.count(MARK) == 1, 'the page needs exactly one parts comment'
 blocks = []
 for arg in args:
