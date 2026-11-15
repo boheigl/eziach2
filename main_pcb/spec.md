@@ -167,7 +167,8 @@ track, D2 to the regulator.
   VINA through 100 Ω); 10 µF in (≥ 4.7 µF), 3 × 22 µF out (15 µF nominal) are within
   its advice. L1 is 2.2 µH as in all the datasheet's examples [chosen 2026-11-15; was
   1.5 µH], 1008, Isat 2 A (peak about 0.82 A at 3.0 V, by Equation 4).
-- **Routing** [2026-11-15, with the charge light, the low-battery switch and the panel
+- **Routing** [2026-11-16, with the battery's NTC on P17 (R5 gone), R8 68k and R14
+  100k; before 2026-11-15 with the charge light, the low-battery switch and the panel
   jack's pads]: all nets routed (four tries, the best kept); KiCad's DRC finds no
   clearance errors, shorts or open connections. The try before left EN_SYS and TXD0
   open; R16 beside D2 and the TX/RX pads nearer the module (§4) fixed that. What it

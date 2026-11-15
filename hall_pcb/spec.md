@@ -208,6 +208,10 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   items, no clearance errors or shorts; left are silkscreen, 7 starved thermals and
   nothing else. **A new `build.sh discant` routes from scratch and loses these
   edits**: the routed board in git is the reference.
+- **Bass finished by hand** [2026-11-16]: four more tries (KEY1_9 and +3V3 first) gave
+  2 open again, now +3V3 pin 7 of U1 and U2; closed the same way (pin 6's key line on
+  its own lane; at U2 KEY1_4 and KEY1_5 re-laid). DRC: no unconnected items, no
+  clearance errors; 3 starved thermals.
 
 ## 6. Bass board [given: from the same description]
 

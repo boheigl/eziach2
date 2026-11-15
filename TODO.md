@@ -10,27 +10,16 @@ Cell found: a 606090 LiPo of 4000 mAh, e.g. DNK606090 ([datasheet](https://www.d
 over-discharge, 3–5 A overcurrent, and on a short. 3-wire variants carry a 10k NTC on
 JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-lithium-polymer-606090-3-pin)).
 
-1. **Cradle 90 → 93 mm**: `bass/case.scad`, `bat = [90, 6, 60]` → `[93, 6, 60]`. A
-   93 mm cell is clear of case, elec and wires with the longer cradle; the control
-   (93 mm cell against the present cradle) overlaps by 255 mm³. Then update the
-   battery in `bass/spec.md`, `main_pcb/spec.md` and `BOM.md`. Not modelled yet: where
-   the cell's leads leave the PCM and how they run to the main board.
-2. **R8 (TMR) 75k → 68k**: `main_pcb/design.py`, with its LCSC number. The BQ24074
-   specifies TMR only for 18–72 kΩ ([datasheet](https://www.ti.com/lit/ds/symlink/bq24074.pdf), K_TMR 36/48/60 s/kΩ).
-   68k gives t_MAXCHG = 10 × 68 × 48 s ≈ 9.1 h (6.8–11.3 h), against about 5–6 h for a
-   full charge at 0.89 A. Fix the "about 10 h" in `main_pcb/spec.md` too.
-3. **NTC on TS**: choose a 3-wire cell (10k NTC), add a third battery pad to TS and
-   remove R5 (the fixed 10k): `main_pcb/design.py`, `main_pcb/spec.md` (the
-   "[unverified] no thermistor in the cell"), `assembly/spec.md` Wiring run 6 (3 wires).
-   The charger then stops outside 0–50 °C (the cell allows 0–45).
-   Unchanged: ISET 1k ≈ 0.89 A (0.22 C) and ILIM 1.5k ≈ 1.0 A both fit.
+1. ~~**Cradle 90 → 93 mm**~~ done 2026-11-15 (`bass/case.scad`, specs, BOM).
+2. ~~**R8 (TMR) 75k → 68k**~~ done (C36871); routed 2026-11-16.
+3. ~~**NTC on TS**~~ done: P17 = TS, R5 gone, P16 the NTC's return for a taped-on NTC;
+   main board routed 2026-11-16, all nets, no clearance errors.
 
 ## Electronics
 
 4. ~~**Discant Hall board routing**~~ done 2026-11-15: finished by hand, 0 open, no copper
    errors (`hall_pcb/spec.md` §5). A new `build.sh discant` would lose the hand edits.
-5. **Bass Hall board routing**: 2 open, both stubs of 0.02 and 0.06 mm (+3V3 at U1,
-   KEY1_9 at U3). `hall_pcb/bass`.
+5. ~~**Bass Hall board routing**~~ done 2026-11-16: finished by hand, 0 open.
 6. ~~**The discant's 3.3 V ramp after DET**~~ done 2026-11-15: R14 10k → 100k, Q3 on
    3–7 ms after DET, fully after about 12 ms (`main_pcb/spec.md` §3). In the main board's
    routing run with the NTC changes.

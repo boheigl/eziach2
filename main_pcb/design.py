@@ -217,7 +217,7 @@ WIRES = [("+3V3_D", "contacts 3.3 V"), ("+3V3_D", "contacts 3.3 V"), ("GND", "co
          ("GND", "contacts GND"), ("SDA1", "contacts SDA"), ("SCL1", "contacts SCL"), ("INT1", "contacts INT"),
          ("GND", "battery -"),
          ("DET", "contacts DET"), ("+3V3", "bass keys 3.3 V"), ("GND", "bass keys GND"), ("SDA2", "bass keys SDA"),
-         ("SCL2", "bass keys SCL"), ("INT2", "bass keys INT"), ("GND", "spare GND"), ("TS", "battery NTC"),
+         ("SCL2", "bass keys SCL"), ("INT2", "bass keys INT"), ("GND", "spare GND / NTC return"), ("TS", "battery NTC"),
          ("BATP", "battery +")]
 for i, (net, name) in enumerate(WIRES):
     part(f"P{i + 1}", name, PAD, {"1": net}, (1.2 + 2.0 * (i % 9), 1.0 + 1.85 * (i // 9), 0), group="wires",
