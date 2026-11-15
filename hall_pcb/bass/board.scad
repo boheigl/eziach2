@@ -68,3 +68,4 @@ hall_parts = [
 hall_conn = [-70.0, -4.5];   // J1: the pins' middle (X), its centre (Y)
 hall_conn_side = false;   // side entry, opening to +Y
 hall_conn_front = -5.0;   // its opening (Y)
+hall_wires = [];   // wire pad rows: ref, X of the row's middle, Y, X span

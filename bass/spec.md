@@ -45,7 +45,7 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   one hull alone bridged the inward turn and made the sides 19.6° instead of parallel), so
   that the bass boards' 15 mm FFCs can drop from the deck into the box. (A box narrowing
   to 172 mm under the deck, tried first, left the FFCs no way: the jog along the front
-  wall it needed was 3.9 × 3.5 mm.) It reaches 7.6 mm below the hand plate (z −130.8) [given: room for the stored discant's travel, then for the socket's latch, then for the inner holders' thicker walls]. Vertical edges rounded (r 4); the cover follows them. The
+  wall it needed was 3.9 × 3.5 mm.) It reaches 9.8 mm below the hand plate (z −141.0) [given: room for the stored discant's travel, then for the socket's latch, then for the inner holders' thicker walls; then 2.1 mm for the latches' lugs and rod, 2026-11-15]. Vertical edges rounded (r 4); the cover follows them. The
   front wall is 3 mm thick; the hand plate is its flat face [given 2026-11-15: no
   recess; it was 1 mm deep with rounded corners (r 6)]; the front caps keep 2 mm from
   the wall's inner face [given: ≥ 2 mm].
@@ -195,9 +195,11 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   bass's z; the plates stand in the step behind the thin box; the gauges reach 11 mm past the
   deck's back line, which a thinner battery would shorten.
 - **Joining:** the bass goes on by sliding its inner holders onto the plates' W, as the
-  holder is meant to, and comes off the same way. [open: what keeps them on; the holder
-  only grips the W across z] [unverified: the holder's 0.15 mm fits, printed as part of
-  the large case, not standing on its bridge as `../strain_gauge` recommends]
+  holder is meant to, and comes off the same way. Latches keep them on: locked for playing, released by
+  one steel rod through all four lugs; a detent when stored (`../assembly/spec.md`,
+  Latches). Printed with the bass standing on its hand face [given 2026-11-15], so the
+  holders stand on their bridges as `../strain_gauge` recommends. [unverified: the
+  holder's fits, printed as part of the large case]
 - **Contacts:** nine spring pins in a block on the mount between the inner holders,
   against the discant's contact board; a cavity behind them and a ⌀2.6 bore through
   the back wall take the wires into the box (`link.scad`, `../assembly/spec.md`).

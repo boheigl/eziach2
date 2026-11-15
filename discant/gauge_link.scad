@@ -25,15 +25,15 @@
 // gauge_untilt(), the inverse, so the bass's side follows by itself; only where the
 // discant's body lies relative to the bass changes (../assembly/).
 //
-// LINK BOARD [given: housed, no screws]: the bridges' ADC (NAU7802) on a small board,
-// lying flat in a pocket in a block beside the pad, flush with the board's top; the
-// discant's cover reaches out over the block and closes it [given 2026-11-14: cover and
-// lid one part] (gauge_cover_tongue(), cover.scad). Corner ledges carry the board. Five wires come from
-// the Hall-sensor board's bus connector J1 (../hall_pcb/): 3.3 V, ground, SDA, SCL, INT;
-// J1 is a side-entry JST at the board's back edge, just in front of the pocket, and the
-// plug's wires run straight in (housing.scad, plug_cavity()). The gauges' leads leave the
-// plates towards the pad and run along a groove in it into the pocket. Where a plate's
-// edge lands the groove runs under a 1 mm strip, which is the plate's stop.
+// THE BRIDGES' ADC [chosen 2026-11-15: on the Hall-sensor board, no link board]: the
+// NAU7802 sits on the Hall-sensor board's underside at its back edge, between the gauges
+// (../hall_pcb/design.py). The gauges' leads leave the plates towards the pad, run along
+// a groove in it to a channel each, and through the channel, under the board's back edge,
+// up through its wire pads J2 / J3 (soldered from the top; the cover has a recess over
+// them, cover.scad). Where a plate's edge lands the groove runs under a 1 mm strip, which
+// is the plate's stop. The gauge plane lies at the height of the gap under the board
+// (w_mid, hall.scad), so the channels run straight in. The wire pads' places come from
+// the board (hall_wires, board.scad).
 //
 // CONTACTS [given: power and I2C cross by contacts that close when the bass slides on]:
 // a boss between the outer holders carries a small board with nine gold pads, 3 x 3 at
@@ -44,8 +44,7 @@
 // Part bodies are boxes; sizes [unverified] until the parts are chosen.
 //
 // make builds   openscad -o ../build/discant/gauge_link.stl gauge_link.scad   (part "link")
-// housing.scad uses gauge_housing_pads(), gauge_holders() and gauge_housing_cuts();
-// cover.scad gauge_cover_tongue().
+// housing.scad uses gauge_housing_pads(), gauge_holders() and gauge_housing_cuts().
 
 include <hall.scad>
 
@@ -58,7 +57,7 @@ gauge_x  = 0;                    // the row's middle key
 gauge_dx = 25;                   // each gauge's centre from gauge_x: 11.6 between the holders
 half_h   = 5.4;                  // the holders' half thickness
 pad_t    = 3;                    // the gauge pad on the back face
-pad_x    = [-50, 46];            // from the pocket's block to past the far holder
+pad_x    = [-46, 46];            // past both holders
 groove_h = 1.6;                  // lead groove in the pad: half height
 groove_d = 1.5;                  //   and depth, behind the strips
 strip_t  = 1;                    // the plate's stop in front of the groove
@@ -72,18 +71,6 @@ plate_y0 = back_y + pad_t + plate_top;   // the plate frame's origin on local y;
 gauge_tilt = atan(3 / 16);               // the slope's plane [given]
 pivot_y  = back_y + pad_t;               // the tilt's axis: the pad face's middle, at gz
 
-/* [Link board, lying flat in its pocket beside the pad (local)] */
-board_w  = 20.5;                 // along x
-board_d  = 13.5;                 // along y
-board_t  = 3;                    // board and parts
-blk_x    = [-86.5, pad_x[0] + 0.5];   // the pocket's block, from past J1's plug to the pad
-pk_x     = [-84.5, -51.2];       // the pocket: J1's plug (x -83.8 .. -76.2) and the board
-pk_y     = [back_y, back_y + 16.5];
-blk_y1   = back_y + 18;          // the block's back: 1.5 behind the pocket
-pk_floor = 1.0;                  // under the pocket
-ledge    = 1;                    // floor to the board: room for the wires' joints
-pk_head  = 0.3;                  // the board's parts to the cover over them
-
 /* [Contacts to the bass, between the outer holders (local)] */
 contact_y  = 84;                 // the pads' face (the outer holders' tips: 89.6)
 contact_t  = 0.8;
@@ -93,8 +80,9 @@ contact_p  = 2.54;
 contact_bore = 2.2;
 contact_wire_d = 1.4;            // five AWG 30 PTFE (⌀0.55 each) bundled (../assembly/spec.md, Wiring)
 
-/* [The bus wires from J1] */
-bundle_d = 1.8;
+/* [Wires into the tray: a channel each from the groove under the board's back edge] */
+lead_d   = 1.2;                  // a gauge's three leads, AWG 30 PTFE, bundled
+chan_w   = 3.0;                  // the channels' width (x)
 
 $fa = 2; $fs = 0.2;
 
@@ -125,29 +113,10 @@ module gauge_holders() {
     for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/outer_holder.stl");
     gauge_contact_boss();
 }
-// the pocket: its top at the board's top (W 0), where the cover lies; the board under it
-pk_top   = gz + (0 - w_mid);
-pk_z     = [pk_top - pk_head - board_t - ledge, pk_top];
-blk_z    = [pk_z[0] - pk_floor, pk_top];
-bd_x     = [pk_x[1] - 1.5 - board_w, pk_x[1] - 1.5];        // the board, at the pocket's +x end
-bd_y     = [pk_y[0] + 1.5, pk_y[0] + 1.5 + board_d];
-bd_z     = pk_z[0] + ledge;
-link_y   = plate_y0 + inner_end_abs;   // the inner holders' backs: where the bass's mount begins
-module link_board() gauge_tilt_frame() box(bd_x, bd_y, [bd_z, bd_z + board_t]);
-// part of the cover: the plate over the pocket's block, cover_t thick, flush with the
-// cover's top (W 0 .. cover_t), out to the block's back
-module gauge_cover_tongue() gauge_tilt_frame() box([blk_x[0], gauge_x + pad_x[0]], [back_y - 1, blk_y1], [pk_top, pk_top + cover_t]);   // up to the pad, which stands higher
-
-// the bus wires: from the plug's end in J1 straight into the pocket, to the board's -x end
-function bundle_pts() = let(e = slab_local([hall_conn[0], hall_conn_front + 4.4, -hall_t - 1.6]))
-    [e - [0, 1, 0], e + [0, 1.5, 0], [bd_x[0] - 1.2, bd_y[0] + 3, bd_z + 1.5], [bd_x[0] - 0.2, bd_y[0] + 3, bd_z + 1.5]];
-module bundle() gauge_tilt_frame() {
-    p = bundle_pts();
-    for (i = [0 : len(p) - 2]) hull() {
-        translate(p[i]) sphere(d = bundle_d, $fn = 12);
-        translate(p[i + 1]) sphere(d = bundle_d, $fn = 12);
-    }
-}
+// a point under the board, in local coordinates: X, Y of the board, W in the gap under it
+function under_board(x, y) = slab_local([x, y, (-hall_t + w_ft) / 2]);
+// the board's wire pads: [ref, X of the row's middle, Y], from board.scad
+function wires(r) = [for (w = hall_wires) if (w[0] == r) w][0];
 
 // the contact board; pads as thin discs on its face
 module contact_board() gauge_tilt_frame() {
@@ -161,47 +130,49 @@ module gauge_contact_boss() gauge_tilt_frame() difference() {
     translate([0, back_y + pad_t - 1, gz]) rotate([-90, 0, 0]) cylinder(d = contact_bore, h = contact_y - back_y);
 }
 g_y = back_y + pad_t - strip_t;                 // the groove's front, behind the strips
+// a wire's way from the groove at x0 along it to the board's pad row r, through its
+// channel under the board, to below the pads (they go up through them)
+function to_pads(x0, r) = let(w = wires(r), u = under_board(w[1], w[2] - 0.4))
+    [[x0, g_y - groove_d / 2, gz], [w[1], g_y - groove_d / 2, gz], [w[1], g_y - groove_d / 2, u[2]], u];
 // the contacts' wires (3.3 V, GND, SDA, SCL, INT; DET stays on the board): down the boss's
-// bore, along the pad's groove into the pocket, to the link board's +x end
-function contact_pts() = [[0, contact_y - contact_t - 0.2, gz], [0, g_y - groove_d / 2, gz], [pk_x[1] - 0.6, g_y - groove_d / 2, gz],
-                           [bd_x[1] + 0.6, bd_y[0] + 3, bd_z + 1.5]];
-module contact_wires() gauge_tilt_frame() {
-    p = contact_pts();
-    for (i = [0 : len(p) - 2]) hull() { translate(p[i]) sphere(d = contact_wire_d, $fn = 12); translate(p[i + 1]) sphere(d = contact_wire_d, $fn = 12); }
-}
+// bore into the groove, to J1, the board's bus pads
+function contact_pts() = concat([[0, contact_y - contact_t - 0.2, gz]], to_pads(0, "J1"));
+// a gauge's three leads (E+, E-, middle): from the plate's middle at the pad, to J2 / J3
+function lead_pts(d) = to_pads(gauge_x + d * gauge_dx, d < 0 ? "J2" : "J3");
+module wire(p, dw) for (i = [0 : len(p) - 2]) hull() { translate(p[i]) sphere(d = dw, $fn = 12); translate(p[i + 1]) sphere(d = dw, $fn = 12); }
+module contact_wires() gauge_tilt_frame() wire(contact_pts(), contact_wire_d);
+module lead_wires() gauge_tilt_frame() for (d = [-1, 1]) wire(lead_pts(d), lead_d);
 // the cable list (../assembly/spec.md, Wiring) takes its lengths from the point lists
 function path_len(p) = len(p) < 2 ? 0 : norm(p[1] - p[0]) + path_len([for (i = [1 : len(p) - 1]) p[i]]);
-echo(str("wire lengths: J1 to link board ", path_len(bundle_pts()), ", contacts to link board ", path_len(contact_pts()),
-         "; gauge leads along the groove to the pocket: near ", (gauge_x - gauge_dx) - pk_x[1], ", far ", (gauge_x + gauge_dx) - pk_x[1]));
+echo(str("wire lengths: contacts to J1 ", path_len(contact_pts()), "; gauge leads to J2 ", path_len(lead_pts(-1)),
+         ", to J3 ", path_len(lead_pts(1))));
 
-module gauge_link() { gauge(); link_board(); bundle(); contact_board(); contact_wires(); }
+module gauge_link() { gauge(); contact_board(); contact_wires(); lead_wires(); }
 part = "link";   // "link": the gauges, boards and wires
 
-// added to the housing: the gauge pad on the back face, and the pocket's block beside it
-module gauge_housing_pads() gauge_tilt_frame() {
+// added to the housing: the gauge pad on the back face
+module gauge_housing_pads() gauge_tilt_frame()
     box([gauge_x + pad_x[0], gauge_x + pad_x[1]], [back_y - 1, back_y + pad_t], [gz - half_h, gz + half_h]);
-    box(blk_x, [back_y - 1, blk_y1], blk_z);
-}
 
-// cut from the housing: the pocket, the groove
+// cut from the housing: the groove, and the channels from it under the board
 module gauge_housing_cuts() gauge_tilt_frame() {
-    difference() {
-        box(pk_x, pk_y, [pk_z[0], pk_z[1] + 0.01]);
-        // corner ledges under the board
-        for (x = [bd_x[0], bd_x[1] - 3], y = [bd_y[0], bd_y[1] - 3]) box([x, x + 3], [y, y + 3], [pk_z[0] - 1, bd_z]);
-    }
-    // groove and strips along the pad's face, from the pocket to past the far gauge
-    g_x = [pk_x[1] - 0.1, gauge_x + gauge_dx + strip_in];
+    // groove and strips along the pad's face, past both gauges
+    g_x = [gauge_x - gauge_dx - strip_in, gauge_x + gauge_dx + strip_in];
     box(g_x, [g_y - groove_d, g_y + 0.01], [gz - groove_h, gz + groove_h]);
-    // open to the pad's face between the strips: to the block, between and inside the plates
-    for (o = [[g_x[0], -gauge_dx - strip_out], [-gauge_dx - strip_in, -gauge_dx + strip_in],
-              [-gauge_dx + strip_out, gauge_dx - strip_out], [gauge_dx - strip_in, gauge_dx + strip_in]])
+    // open to the pad's face between the strips: between and inside the plates
+    for (o = [[-gauge_dx - strip_in, -gauge_dx + strip_in], [-gauge_dx + strip_out, gauge_dx - strip_out],
+              [gauge_dx - strip_in, gauge_dx + strip_in]])
         box([o[0], o[1]], [g_y, back_y + pad_t + 1.2], [gz - groove_h, gz + groove_h]);
     // the contacts' wires: from the boss's bore through the pad into the groove
     translate([0, g_y - groove_d, gz]) rotate([-90, 0, 0]) cylinder(d = contact_bore, h = pad_t + 2);
+    // a channel from the groove through pad and back wall under the board, below each pad row:
+    // from 0.3 into the floor up to 0.05 under the board's underside
+    for (r = ["J1", "J2", "J3"]) let(w = wires(r), u = under_board(w[1], w[2] - 1.2),
+                                     z0 = slab_local([0, 0, w_ft - 0.3])[2], z1 = slab_local([0, 0, -hall_t - 0.05])[2])
+        box([w[1] - chan_w / 2, w[1] + chan_w / 2], [u[1], g_y - groove_d / 2], [z0, z1]);
 }
 
 echo(str("gauge frame on the tray's back face: pad face's middle at ", pivot_new, " (was [0, ", pivot_y, ", ", gz,
-         "]), moved by ", gauge_shift, "; link board pocket x = ", pk_x, ", local y = ", pk_y));
+         "]), moved by ", gauge_shift));
 
 if (part == "link") gauge_link();

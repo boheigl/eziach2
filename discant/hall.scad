@@ -29,15 +29,19 @@ function key_x(i) = hall_keys[i][2];
 function key_row(i) = hall_keys[i][0];
 
 // THE CASE ROUND THE BOARD (housing.scad, cover.scad, gauge_link.scad): a tray under
-// the board in the slab frame, its floor part_gap under the tallest part (the plug's
-// J1 aside), a rim case_fit round the board, the cover plate on top
+// the board in the slab frame, its floor part_gap under the tallest part (the
+// deep parts aside), a rim case_fit round the board, the cover plate on top
 case_fit   = 0.3;
 case_wall  = 1.2;
 case_rim   = case_fit + case_wall;   // board edge to the outer faces
 part_gap   = 0.3;
 case_floor = 1.2;
 cover_t    = 2.4;                    // [given 2026-11-14: thicker, 1.2 before]
-h_max = max([for (p = hall_parts) if (p[0] != "J1") p[6]]);
+// parts deeper than the rest stand into the floor (housing.scad cuts round them): the
+// bass board's J1, the discant board's NAU7802
+deep_parts = ["J1", "U7"];
+function is_deep(r) = len([for (d = deep_parts) if (d == r) 1]) > 0;
+h_max = max([for (p = hall_parts) if (!is_deep(p[0])) p[6]]);
 w_ft  = -hall_t - h_max - part_gap;  // the floor's top (W)
 w_b   = w_ft - case_floor;           // the tray's bottom
 w_mid = (w_b + 1.2) / 2;             // the gauges' plane: the middle of the case as it was with the 1.2 cover,

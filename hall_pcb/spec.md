@@ -18,6 +18,9 @@ files to `<board>/fab/` and a browser view (`export_view.py`, `<board>/viewer.ht
 - **No controller on the board.** ADS7128 ADCs on I²C; the ESP32 in the bass
   reads them over the existing 5-wire bus (INT, 3V3, SDA, SCL, GND) through the
   bellows. The calibration lives in the ESP32.
+- **The gauges' ADC on the discant board** [chosen 2026-11-15]: the NAU7802 that reads
+  the two strain gauges sits on this board at its back edge, between the gauges; the
+  separate link board in a pocket beside them is gone (§3a).
 - Sensors **always powered** (no group switching, since nothing on the board
   could switch them).
 
@@ -60,8 +63,8 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
 | ADS7128IRTER, WQFN-16 3 × 3 | 6 | 8 channels, 12 bit, I²C [datasheet SBAS868A] |
 | 1 µF 0402 | 18 | AVDD, DVDD and DECAP of every ADC [datasheet] |
 | address resistors 0402 | 5 | 11h/12h/13h: 11k/33k/100k to GND; 14h/15h: 100k/33k to DECAP; 10h: none |
-| JST SH SM05B-SRSS-TB (discant, side entry) / BM05B-SRSS-TB (bass, vertical) | 1 | bus, pins as on the switch boards: INT, 3V3, SDA, SCL, GND |
-| 10 µF 0805 | 1 | at the connector |
+| discant: J1, a row of 5 wire pads (2 mm, plated holes) / bass: JST SH BM05B-SRSS-TB (vertical) | 1 | bus: INT, 3V3, SDA, SCL, GND; on the discant the contacts' wires, soldered from the top |
+| 10 µF 0805 | 1 | on +3V3 by the bus's way in |
 | 10k, 4k7, 4k7 0402 | 3 | pull-ups INT, SDA, SCL |
 
 - **ADCs:** AVDD is also the ADC's reference. Sensors and ADCs share 3.3 V, so the
@@ -93,6 +96,54 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
 - **Current:** 46 × 2–4 mA = 92 … 184 mA for the sensors, plus well under 1 mA for
   the ADCs. [datasheet: SBAS640C, SBAS868A]
 
+## 3a. The gauges' ADC (discant) [chosen 2026-11-15]
+
+| Part | Count | What for |
+|---|---|---|
+| NAU7802SGI, SOP-16 (C2614351) | 1 | U7: both half bridges, 24 bit, I²C 2Ah [datasheet: Nuvoton NAU7802 Rev 2.6] |
+| J2, J3: 3 wire pads each (2 mm, plated holes) | 2 | the gauges' leads E+, middle, E− |
+| 10k 0.1 % 25 ppm/K 0402 (C190095) | 4 | a divider of AVDD for each half bridge's other side, the two side by side |
+| 47R 0402, 100 nF 0402 | 4 + 2 | the input filter per channel, as the datasheet's application circuit |
+| ferrite 600 Ω, 10 µF + 100 nF | 1 + 2 | AVDD from +3V3 (the LDO stays off, the power-on default) |
+| 100 nF, 1 µF + 100 nF, 100 nF | | REFP/GREF, DVDD, VBG |
+
+- **Where:** underside, middle of the back edge (X 0, Y 49.4), pins 1–8 (the analog
+  side) towards the edge. J1 (bus) at X 0, J2/J3 at X ∓12, all 1.8 inside the back
+  edge, straight in front of the channels that bring the wires under the board
+  (`../discant/gauge_link.scad`): gauge leads about 19 mm, contacts 28 mm [model].
+- **Ratiometric:** REFP and the bridges' excitation are both AVDD, so supply noise and
+  drift cancel to first order. With AVDD at 3.3 V the bridge middles sit at 1.65 V,
+  inside the PGA's common-mode window at gain 128 (AVSS + 1.5 … AVDD − 1.5 V, given at
+  5 V) [datasheet]; the LDO at 3.0 V would have left none. The ferrite keeps the Hall
+  sensors' and ADCs' ripple off AVDD.
+- **Analog beside digital, checked 2026-11-15:**
+  - Signal: about 3.6 mV full scale per half bridge (1100 µε, GF 2, 3.3 V,
+    `../strain_gauge/spec.md`); the NAU7802's noise is 50 nV at 10 SPS, 150 nV at
+    80 SPS [datasheet]. Disturbances under about 1 µV do not matter.
+  - I²C (400 kHz, SDA/SCL beside and over the chip): coupled through about 0.02 pF
+    into an input that carries 100 nF, 3.3 V edges give under 1 nV; the input filter
+    (47 R + 47 R, 100 nF: about 17 kHz) and the sinc filter at 2.3 / 18 Hz bandwidth
+    take the rest. The bus traffic is the same wherever the chip sits; the link board
+    had it too.
+  - Hall sensors and ADS7128: no switching supply on the board; their current comes
+    and goes slowly and returns through the ground plane on the top, not through the
+    gauges' E− wires, which go to the chip's own ground pins.
+  - Leads: 19 mm each in the groove, away from the bus wires; before, the far gauge's
+    76 mm ran beside SDA/SCL in the same groove. Better than before.
+  - The other way round, the gauges' currents against the Hall sensors [estimate
+    2026-11-15]: the bridges' excitation (DC, 9 mA at 350 Ω, 28 mA at 120 Ω) is the
+    only current worth a look; 14 mA 1 mm from a sensor gives 2.8 µT, 0.04 mV at
+    15 mV/mT, a twentieth of the ADS7128's 0.8 mV step, constant (the calibration takes
+    it), mostly cancelled by its return beside it and lying in the board's plane, which
+    the DRV5055 does not sense. The ferrite FB1 sits 5 mm beside U141, off the
+    magnet's axis. The sensors' own 90–180 mA on +3V3 were there before.
+  - Heat: the board's 0.3–0.6 W warms the dividers slowly and both resistors alike;
+    their ratio drifts with their 25 ppm/K mismatch at most, which taring at start
+    takes out.
+- **Open:** the gauges' resistance (120 or 350 Ω) is not chosen: 2 × 350 Ω half bridges
+  draw about 9.4 mA, 120 Ω about 28 mA from AVDD through the ferrite (300 mA), both
+  fine. DRDY is unused (the ESP32 polls, `../assembly/spec.md`).
+
 ## 4. Which ADC reads which key
 
 - **Lower three ADCs** (between rows 0 and 1, Y = 8.1): all of row 0 and row 1
@@ -116,7 +167,8 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   to ADC, and every ADC's key lines fan out all round it, so on the underside alone
   the bus has to cross a fan at every chip (bus first: 23 open on the discant, 15 on
   the bass, nearly all of them bus and +3V3). In lanes along each row of ADCs, and
-  from there to the connector (`BUS_LANES` in `design.py`), the top costs the bus no
+  from there to the connector (on the discant to J1 and the NAU7802 in the middle of the
+  back edge) (`BUS_LANES` in `design.py`), the top costs the bus no
   more than the underside, and the underside costs it 1.6; it drops to the pins
   through vias. The lanes form a tree, so the ground plane stays one piece round
   their ends; the bus's 400 kHz and the slow sensor signals do not mind the slot.

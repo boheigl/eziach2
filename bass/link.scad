@@ -15,6 +15,7 @@
 
 include <layout.scad>
 use <../discant/gauge_link.scad>
+use <../strain_gauge/inner_holder.scad>
 
 // --- as gauge_link.scad (discant frame)
 gauge_x = 0;
@@ -22,9 +23,18 @@ gz      = 1.6;
 link_y  = 91.5;                  // the inner holders' backs
 half_h  = 5.4;
 // the inner holder (../strain_gauge/inner_holder.scad, walls 4.5): below the plate's middle
-// 5.9, above it 6.89 with the latch's lug
+// 5.9, above it the latches' lugs to latch_top() (9.0), which carry the rod (below)
 hold_lo = 5.9;
-hold_hi = 6.89;
+hold_hi = latch_top();
+// --- THE ROD [chosen 2026-11-15: all four lugs at once; the bass prints standing on its
+// hand face]: a stock steel rod (rod_d, 68 mm) pressed through the four latches' lugs
+// (../strain_gauge/inner_holder.scad, latch = "lock"): one finger lifts it between the
+// holders, and so all four tongues, while the other hand slides the bass off. The four
+// tongues share their root line and length and both holders sit on the one mount, so
+// their ends move alike and the rod bends none of them; each lug's ear ends the lift.
+// The rod runs rod_gap over the holders' top faces and the contacts' block (5.0), the
+// discant's boss and outer holders (5.0, 5.4).
+rod_l = 68;
 
 // --- the mount
 mount_x = 38;                    // half width, over both inner holders
@@ -70,11 +80,23 @@ module mount() to_bass() {
     }
     for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/inner_holder.stl");
 }
+// the rod, along x through the lugs: in each holder's frame (latch_rod(): y, z of its axis, d)
+module latch_rod_body() let(r = latch_rod()) hull() for (d = [-1, 1]) at_gauge(d)
+    translate([-(rod_l / 2 - 25), r[0], r[1]]) rotate([0, 90, 0]) cylinder(d = r[2], h = rod_l - 50, $fn = 24);
 // cut from the case: the wires' bore through the back wall
 module mount_cuts() to_bass() gauge_tilt_frame() contact_chan();
-// the pins' plungers, mated: 1 mm out of the block, on the pads (elec.scad)
-module contact_plungers() to_bass() gauge_tilt_frame()
-    for (i = [-1 : 1], j = [-1 : 1]) translate([i * pin_p, 84.02, gz + j * pin_p]) rotate([-90, 0, 0]) cylinder(d = 1.0, h = blk_y[0] - 84.02 + 0.5, $fn = 12);
+// the nine spring pins, mated (for the page and the checks): the barrel in its hole from the
+// block's face back into the cavity, a solder tail in the cavity, the plunger 1 mm out of
+// the block onto the pads, its tip round [unverified: sizes, as a Mill-Max 0906 type]
+pin_barrel = 1.5;
+pin_plunger = 0.9;
+module contact_pins() to_bass() gauge_tilt_frame()
+    for (i = [-1 : 1], j = [-1 : 1]) translate([i * pin_p, 0, gz + j * pin_p]) rotate([-90, 0, 0]) {
+        translate([0, 0, blk_y[0]]) cylinder(d = pin_barrel, h = cav[0] + 0.8 - blk_y[0], $fn = 16);       // barrel
+        translate([0, 0, cav[0] + 0.8]) cylinder(d = 0.8, h = 1.2, $fn = 12);                               // tail
+        translate([0, 0, 84.02 + pin_plunger / 2]) cylinder(d = pin_plunger, h = blk_y[0] - 84.02 - pin_plunger / 2 + 0.01, $fn = 12);
+        translate([0, 0, 84.02 + pin_plunger / 2]) sphere(d = pin_plunger, $fn = 12);                       // tip
+    }
 // the discant's side, for checks and the page: plates with their dowel pins, and the
 // outer holders, which are the discant housing's
 module discant_side() to_bass() {
@@ -132,8 +154,10 @@ module store_pocket() to_store() difference() {
 
 echo(str("gauge mount on the plate at ", at, "; stored discant at ", store_at));
 
-part = "mount";                   // "mount", "discant", "socket" or "pocket"
+part = "mount";                   // "mount", "discant", "socket", "pocket", "rod" or "pins"
 if (part == "mount") mount();
+if (part == "pins") contact_pins();
+if (part == "rod") to_bass() latch_rod_body();
 if (part == "discant") discant_side();
 if (part == "socket") store_socket();
 if (part == "pocket") store_pocket();

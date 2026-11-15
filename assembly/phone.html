@@ -150,7 +150,7 @@
     });
   });
   var LOAD = [
-    ['bass boards', function () { grp('pcb').add(mesh('B_BOARD', 0x2f7a4f), mesh('B_CONN', 0x2b2f33), mesh('B_ELEC', 0x2f7a4f)); }],
+    ['bass boards', function () { grp('pcb').add(mesh('B_BOARD', 0x2f7a4f), mesh('B_CONN', 0x2b2f33), mesh('B_ELEC', 0x2f7a4f), mesh('B_PINS', 0xd4af37)); }],
     ['discant board', function () { grp('pcb').add(mesh('D_BOARDS', 0x2f7a4f), mesh('D_PARTS', 0x2b2f33)); }],
     ['bass case', function () { grp('bcase').add(mesh('B_CASE', 0xd9a441)); }],
     ['bass back cover', function () { grp('blid').add(mesh('B_LID', 0xc99430), mesh('B_CSCREW', 0x5d6166)); }],
@@ -159,7 +159,7 @@
     ['bass cover', function () { grp('bcover').add(mesh('B_COVER', 0x5b6f86)); }],
     ['discant cover', function () { grp('dcover').add(mesh('D_COVER', 0x5b6f86)); }],
     ['keys', function () { keysB = mesh('KEYS_B', 0x4a6fa5); keysD = mesh('KEYS_D', 0x4a6fa5); grp('keys').add(keysB, keysD); }],
-    ['cables and gauges', function () { grp('cables').add(mesh('D_CABLES', 0xd8c08a), mesh('B_WIRES', 0xd8c08a), mesh('B_STRAP', 0x6b4a32)); }]
+    ['cables and gauges', function () { grp('cables').add(mesh('D_CABLES', 0xd8c08a), mesh('B_WIRES', 0xd8c08a), mesh('B_STRAP', 0x6b4a32), mesh('B_ROD', 0xb8bcc2)); }]
   ];
   scene.add(buttonGrp);
 

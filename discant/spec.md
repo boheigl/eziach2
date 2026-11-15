@@ -229,7 +229,7 @@ the key's parts that `array.scad` imports from `build/switch/`.
 | `housing.scad`, `housing.stl`, `housing.js` | printed body with 46 guides, a bottom parallel to the steps, the hole behind the slanted −x face, the main PCB's pockets and the wires' bore |
 | `cover.scad`, `cover.stl`, `cover.js` | printed cover holding the four boards down, with the thumb bar on its front (§3.2; profile from `../thumb-bar/profile.scad`) |
 | `main_pcb.scad`, `main_pcb.stl`, `pcb_cable.stl`, `.js` | main PCB with part bodies, the four FFCs to it, floor pockets, openings and pins for the housing |
-| `gauge_link.scad`, `gauge_link.stl`, `.js`, `gauge_lid.stl` | two strain gauges (plates) with their pins, link board and the five wires from the key board; the printed lid on its own (`part="lid"`, `gauge_lid.stl`); the outer holders, pad and pocket are in the housing (§7) |
+| `gauge_link.scad`, `gauge_link.stl` | two strain gauges (plates) with their pins, the contact board, and the wires from contacts and gauges to the key board's pads; the outer holders, pad, groove and channels are in the housing (§7) |
 | `array.html` | 3D viewer of the four boards with connectors, housing, cover and cables; X/Z section plane. Loads the `.js` geometry |
 | `Makefile`, `stl2js.py` | `make` builds the files above into `build/discant/`; `stl2js.py` turns an STL into the `.js` geometry for `array.html` |
 | `phone.html`, `embed_parts.py` | phone view of the assembly: boards, connectors, housing, cover, cables and one button, with Press, a section and gestures (Interact). `make` writes `build/discant/phone.html` with every part embedded by `embed_parts.py`, one file that loads nothing else, so it also works in the claude.ai viewer on a phone |
@@ -242,12 +242,12 @@ expanders (PCAL9555A, 20h…23h) are gone; their last state is in the git histor
 longer part of the build's design).
 
 - **The Hall-sensor board** (`../hall_pcb/discant/`) reads all keys with six ADS7128 at
-  10h…15h and has one bus connector J1, a side-entry JST SH (INT, 3V3, SDA, SCL, GND)
-  at its back edge, just in front of the link board's pocket (`housing.scad`:
-  `plug_cavity()`).
-- **Wires:** five, from J1's plug straight into the pocket to the link board's −x end,
-  about 10 mm (`gauge_link.scad`: `bundle_pts()`). Wire, plug and cut lengths: the
-  Wiring section of `../assembly/spec.md`.
+  10h…15h, and the gauges with a NAU7802 at 2Ah [chosen 2026-11-15]. No connector: at
+  the middle of its back edge three rows of wire pads, J1 (bus: INT, 3V3, SDA, SCL,
+  GND) at X 0, J2 and J3 (each gauge's E+, middle, E−) at X ∓12.
+- **Wires:** from the contacts and the gauges, through channels under the board's back
+  edge and up through the pads, soldered on the top (`gauge_link.scad`: `contact_pts()`,
+  `lead_pts()`). Lengths: the Wiring section of `../assembly/spec.md`.
 
 ## 7. Gauge and link to the bass module
 
@@ -278,32 +278,33 @@ longer part of the build's design).
   designed; on the bass the hand's push acts about 56 mm away, `../bass/spec.md` §4). The sum follows the force, the difference the twist. Arm and the bass
   module's weight therefore enter the reading. [estimated: with two gauges full
   scale is about 2 × 1400 N·mm, so about 35 N at an 81 mm arm]
-- **Link board** [chosen]: beside the gauges: NAU7802 for
-  both half bridges; it passes the contacts on (`../assembly/spec.md`). Five wires reach
-  it from the Hall board's J1 just in front of the pocket: 3.3 V, ground, SDA, SCL, INT;
-  five more from the contact board, down the boss's bore and along the pad's groove
-  (`contact_pts()`); run lengths in `../assembly/spec.md`, Wiring.
-- **Pocket** [given: the readout housed, in the housing, no screws]: the board, 20.5
-  × 13.5 mm, lies in a pocket in the back wall, x = −75.7 … −51.2, z = −6.85 … 7.25,
-  y = 54 … 59.3, so nothing stands out of the back face. Walls left: 1.3 mm to the
-  guides' line, 0.8 mm under board 3, 0.9 mm over the bottom plane, 1.2 mm to the
-  pad's end. Corner ledges carry the board, ribs at its ends locate it, and a
-  1.2 mm lid flush with the back face snaps in with a hook at each end and keeps
-  it there. [chosen] [unverified: the hooks, printed] The gauges' leads leave the
-  plates towards the pad and run in a 3.2 × 1.5 mm groove in it, into the pocket
-  through a notch in its +x wall, which the wires to the connector leave by too.
-  Under the plates' edges the groove runs behind a 1 mm
-  strip, the plates' stop; elsewhere it is open to the pad's face or the holders.
+- **Readout** [given: housed, in the housing, no screws; chosen 2026-11-15: on the
+  Hall-sensor board]: the NAU7802 for both half bridges sits on the key board's
+  underside at the middle of its back edge (`../hall_pcb/spec.md` §3a); the link board
+  in a pocket beside the pad, its lid and the plug from J1 are gone. Analog beside the
+  board's digital parts is checked there. The pad now runs x = −46 … 46.
+- **Wire ways:** the gauges' leads leave the plates towards the pad and run in a
+  3.2 × 1.5 mm groove in it, from each plate's middle to a channel at x = ∓12 (about
+  19 mm each). Each channel (3 mm wide) runs from the groove through pad and back wall
+  under the board's back edge, from 0.3 into the floor to just under the board: the
+  gauge plane lies at the gap under the board, so the channels run straight in, and
+  the wires go up through the pads J2 / J3 and are soldered on the top. Under the
+  plates' edges the groove runs behind a 1 mm strip, the plates' stop; elsewhere it
+  is open to the pad's face or the holders. The cover has a 0.8 mm recess over the
+  pad rows for the joints. The NAU7802 (1.75 high) stands 0.4 into the tray's floor
+  (0.8 left under it; `hall.scad` `deep_parts`).
 - **Contacts** [given: closing as the bass slides on]: a boss on the pad between the
   outer holders (10.4 × 10 mm, to y = 83.2 in the gauge frame) carries a 0.8 mm board
   with nine gold pads, 3 × 3 at 2.54, facing the bass's spring pins: VBAT × 2, GND × 3,
   SDA, SCL, INT, DET (tied to GND on the board: switches the bass's battery on). A ⌀2.2
   bore down the boss leads the wires (VBAT, GND, SDA, SCL, INT: a 1.3 mm bundle) into the
-  pad's groove and through its notch, 2 mm below the lid, to the link board's +x end.
+  pad's groove and straight on through the channel at x = 0 to the key board's J1
+  (28 mm).
   The latches in the inner holders carry the load, not the contacts.
   `../assembly/spec.md`, Contacts.
 - **Open:** overload stop.
 
-Checked by solid intersection: wires, plates, pins,
-link board and lid touch nothing but what they are fixed to, and the paths of
-plates and inner holders into the outer holders are free.
+Checked by solid intersection (2026-11-15, with the NAU7802 on the board; control pair
+overlapping): the wires touch only the pads they end at; housing, board, its parts and
+cover are clear of each other. The paths of plates and inner holders into the outer
+holders were checked before and are unchanged.

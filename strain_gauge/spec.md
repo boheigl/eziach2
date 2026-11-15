@@ -106,11 +106,35 @@ the plate's thickness) at x = 4.2 … 5.2 in the inner slot between web and colu
 retaining face at y = −6.28, just ahead of the slot's closed end (−6.33 … −6.47 across
 the tooth). Sliding on, a ramp lifts it over the bottom block; at the end it drops into
 the slot. It touches only the W (1.0 mm clear of the column), so the measured path is
-unchanged. Variants (`latch`): `"lock"`, square face and a lug 1 mm above the top face
-to lift it (the bass's playing mount); `"detent"`, 45° face, no lug (the stored
+unchanged. Variants (`latch`): `"lock"`, square face and a lug for a rod (below; the bass's playing
+mount); `"detent"`, 45° face, no lug (the stored
 position's socket, `../build/strain_gauge/inner_holder_detent.stl`); `"none"`.
 Checked: seated, clear of the plate; 0.3 mm towards pull-off, the teeth meet the plate.
-[estimate: bending strain 0.7 %, PETG advised]
+**Material: PETG** [given 2026-11-15]. **Root and stop** [chosen 2026-11-15]: the bridge
+used to stand solid under the tongue's first 2.8 mm, so it bent only from the pocket's
+edge (8.5 mm, about 1.25 % at the root, at a sharp corner on the tension side). A 0.4 mm
+slot under the root now frees all 11.3 mm; the slot ends round and the corner above the
+root has an R0.5 fillet. Root strains [estimate: cantilever loaded where it is lifted,
+the tooth 9.2 mm from the root; PETG takes about 2–3 % repeated; corrected 2026-11-15,
+earlier figures took the tip's 11.3 mm and came out about 1.5 times too low]:
+- **Detent:** tongue 1.2 mm thick; 1.3 % at the tooth's 0.6 mm lift, 1.8 % at its stop,
+  a bar across the slot 0.85 mm over the tongue. Four hold the stored discant with about
+  15 N [estimate: 2.0 N spring force per tooth, 45°, friction 0.3] against its 3.5 N
+  weight [chosen 2026-11-15: 1.2, the 1.0 tongue gave half].
+- **Lock** [chosen 2026-11-15: one rod lifts all four lugs of the bass's mount; the bass
+  prints standing on its hand face, so the holder stands on its bridge and grows in +y]:
+  tongue 1.0 mm. Its lug rises from the tongue at 45° from y −7.4, runs on past the tip
+  in the slot (lengthened to y 2.3) and carries a ⌀2.0 cross hole at y 0, z 7.2 for a
+  stock ⌀2 steel rod through all four lugs (`../bass/link.scad`), pressed in; its top is
+  at z 9.0. The tongue bends over its first 8.1 mm, rigid past the lug's foot: 1.1 % at
+  the tooth's 0.6 mm lift. The stop is an ear on the lug's outer side (1.2 mm, 0.7 into
+  the wall) in a pocket of the slot's wall, 1.6 mm under the wall's ledge: the rod lifts
+  1.8 mm and the tooth 0.85 before it stops, 1.3 % at the root. No bar over the tongue,
+  so the lug can grow at 45°; everything prints without support standing on the bridge
+  (overhangs at most 0.7 mm, bridges at most 4 mm). Checked again 2026-11-15: seated clear, 0.3 mm towards pull-off the teeth
+meet the plate (lock and detent), the bass's case clear of plates and outer holders;
+the lock's tongue with lug and ear clear of the holder at rest and lifted 1.5 mm, the
+ear meeting its ledge at 2.0 mm (control).
 
 ## 6. Outer holder — `outer_holder.scad`
 

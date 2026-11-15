@@ -69,7 +69,8 @@ tmpl = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "viewer_tmp
 out = os.path.join(os.path.dirname(BOARD), "viewer.html")
 if d.BOARD == "discant":
     lede = ("One board under all 46 discant keys, in the staircase's slope plane. A DRV5055 sensor under every key, "
-            "six ADS7128 ADCs reading them, and the 5-wire bus through the bellows to the ESP32 in the bass. "
+            "six ADS7128 ADCs reading them, and a NAU7802 reading the two strain gauges. Five wire pads (J1) take the bus "
+            "from the spring contacts to the ESP32 in the bass, two rows of three (J2, J3) the gauges' leads. "
             "All parts sit on the underside, so the view starts from below.")
 else:
     lede = ("One flat board under both rows of the 18 bass keys (the back row's tubes and pins are 10 mm longer). "

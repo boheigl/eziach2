@@ -33,7 +33,6 @@
 
 include <hall.scad>
 use <../switch_hall/key.scad>
-use <gauge_link.scad>              // gauge_cover_tongue(): the cover closes the link board's pocket
 use <../thumb-bar/profile.scad>   // thumb_profile(): the thumb bar's section
 
 /* [As in housing.scad: hall.scad's case dimensions] */
@@ -43,7 +42,8 @@ wall     = case_wall;
 /* [Cover] */
 screw_d  = 2.2;      // M2 clearance
 csk_d    = 4.0;      // 90 deg countersink for the flush heads (d3.8)
-bore_lo  = 4.8;      // key.scad: the collar's bore, run down through the plate
+bore_lo  = key_bore_lo();   // key.scad: the bushing's way in, run down through the plate
+wire_rec = 0.8;      // over the wire pads' solder joints
 
 /* [Thumb bar, as before] */
 tb_len = 21.7;  tb_angle = 86.1;  tb_r = 1.2;  tb_R = 20.6;   // thumb_profile()'s parameters
@@ -82,7 +82,6 @@ module thumb_bar() difference() {
 module cover() difference() {
     union() {
         slab_solid(0, cover_t, fit + wall);
-        gauge_cover_tongue();
         difference() {
             for (i = [0 : len(hall_keys) - 1]) at_key(key_row(i), key_x(i)) tube_body();
             below_top();
@@ -93,6 +92,9 @@ module cover() difference() {
         tube_cut();
         translate([0, 0, -3]) cylinder(d = bore_lo, h = 4);      // the collar's bore down to the board
     }
+    // over the wire pads (J1 .. J3: the wires come up through them from below and are
+    // soldered on the top): a recess for the joints
+    on_slab() for (w = hall_wires) translate([w[1] - w[3] / 2 - 1.2, w[2] - 1.2, -0.01]) cube([w[3] + 2.4, 2.4, wire_rec + 0.01]);
     on_slab() for (h = hall_holes) translate([h[0], h[1], 0]) {
         translate([0, 0, -1]) cylinder(d = screw_d, h = cover_t + 2);
         translate([0, 0, cover_t - (csk_d - screw_d) / 2]) cylinder(d1 = screw_d, d2 = csk_d + 0.2, h = (csk_d - screw_d) / 2 + 0.1);

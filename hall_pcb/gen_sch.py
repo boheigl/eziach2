@@ -56,7 +56,7 @@ def symbol(key, pins, two):
 missing = set()
 def lcsc(c):
     """JLCPCB / LCSC part number from design.LCSC; none for pads"""
-    if c["fp"].startswith("TestPoint"): return ""
+    if c["fp"].startswith("TestPoint") or "PinHeader" in c["fp"]: return ""
     n = d.LCSC.get((c["value"], c["fp"]))
     if n is None: missing.add((c["value"], c["fp"]))
     return n or ""
@@ -70,7 +70,7 @@ def instance(c, x, y):
     pos, box = symbol(key, pins, two)
     u = U(c["ref"])
     pin_s = "".join(f'(pin {q(p[0])} (uuid {U(c["ref"] + "/" + p[0])}))\n' for p in pins)
-    items.append(f'(symbol (lib_id {q("hall:" + key)}) (at {x:.2f} {y:.2f} 0) (unit 1) (exclude_from_sim no) (in_bom {"no" if c["fp"].startswith("TestPoint") else "yes"}) (on_board yes) (dnp no) (uuid {u})\n'
+    items.append(f'(symbol (lib_id {q("hall:" + key)}) (at {x:.2f} {y:.2f} 0) (unit 1) (exclude_from_sim no) (in_bom {"no" if c["fp"].startswith("TestPoint") or "PinHeader" in c["fp"] else "yes"}) (on_board yes) (dnp no) (uuid {u})\n'
                  f'(property "Reference" {q(c["ref"])} (at {x:.2f} {y + box[1] * -1 - 1.27:.2f} 0) {font()})\n'
                  f'(property "Value" {q(c["value"])} (at {x:.2f} {y - box[3] * -1 + 1.27 + 1.27:.2f} 0) {font()})\n'
                  f'(property "Footprint" {q(c["fp"])} (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
@@ -93,8 +93,10 @@ def text(s, x, y, size=3):
 
 TITLES = {"sensors": "Hall sensors DRV5055A3 under every key, 100 nF each (title: row, key)",
           "adc": f"ADS7128: 8-channel 12-bit ADCs on I2C, addresses 10h..{0x10 + len(d.GROUPS) - 1:02X}h; ALERTs wired together to INT",
-          "bus": d.BUS_TITLE + ": JST SH, as on the switch boards"}
-LAY = {"bus": (30, 40, 120), "adc": (30, 200, 400), "sensors": (220, 40, 560)}
+          "bus": d.BUS_TITLE + (": wire pads" if d.BOARD == "discant" else ": JST SH, as on the switch boards"),
+          "gauge": "Strain gauges: NAU7802 reads both half bridges, against a 10k/10k divider each"}
+LAY = {"bus": (30, 40, 120), "adc": (30, 200, 400), "sensors": (220, 40, 560), "gauge": (30, 640, 160)}
+LAY = {g: v for g, v in LAY.items() if any(c["group"] == g for c in d.C)}
 for g, (x0, y0, _h) in LAY.items():
     text(TITLES[g], x0, y0 - 12)
     x, y = snap(x0 + 25), snap(y0)

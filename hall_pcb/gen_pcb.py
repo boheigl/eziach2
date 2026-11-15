@@ -128,6 +128,9 @@ for a, g in enumerate(d.GROUPS):
 for c in d.C:
     if c["ref"] in placed: continue
     f = load(c); place(f, *c["pos"], c["side"], c["rot"])
+    if "PinHeader" in c["fp"]:
+        # wire pads, nothing fitted: neither in the BOM nor in the placement file
+        f.SetAttributes(f.GetAttributes() | pcbnew.FP_EXCLUDE_FROM_POS_FILES | pcbnew.FP_EXCLUDE_FROM_BOM)
     if "Horizontal" in c["fp"]:
         # side entry: turn it so that its opening (the mounting pads' side) faces +Y
         for rot in (0, 90, 180, 270):

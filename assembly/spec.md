@@ -33,7 +33,7 @@ With the gauges in the slope plane, the playing position too has the discant's s
 plane level (the plates still along the bass's y): the discant hangs 3.3 mm below the
 bass's bottom instead of 16.6.
 
-Below the stored discant's front edge (the cover's, 1.2 mm under it the thumb bar where it is cut back over the playing mount; discant/spec.md §3.2) stays 9.6 mm (the socket's 8.3 mm, 1 mm and 0.3 mm) above the playing holders' tops, the travel to slide it on and off; for that the box is 7.6 mm longer than the hand plate [given: +3 mm, then the latch's 2.3, then the holders' thicker walls 2.3]. The bass's box below the deck is 11.2 thin [given: 4.8 thinner,
+Below the stored discant's front edge (the cover's, 1.2 mm under it the thumb bar where it is cut back over the playing mount; discant/spec.md §3.2) stays 9.6 mm (the socket's 8.3 mm, 1 mm and 0.3 mm) above the playing mount's top (the latches' lugs), the travel to slide it on and off; for that the box is 9.8 mm longer than the hand plate [given: +3 mm, then the latch's 2.3, then the holders' thicker walls 2.3; then the lugs for the rod 2.1, 2026-11-15]. The bass's box below the deck is 11.2 thin [given: 4.8 thinner,
 with a 6 mm battery], so the stored discant lies 4.8 closer; the deck's back face
 (27.8) is then the package's back. Checked:
 clear of case, back cover, battery, wires and the bass's keys both seated and 9.6 mm lower; 2.7 mm of deck
@@ -50,10 +50,25 @@ block and drops into the slot. It touches only the W, never the column or the fi
 arms, so the force still runs through the gauges' columns.
 
 - **Playing** (mount on the box's back wall): square tooth, a positive lock that holds
-  the strap's pull. To take the bass off, lift the lug on each tongue's tip (four in
-  all, from above, between box and discant) and slide.
-- **Stored** (socket under the deck): 45° tooth, a detent; four of them hold about 9 N
-  [estimate: tongue 3 × 1 × 11 mm, PLA, E 3500 MPa, 0.6 mm deflection, friction 0.3]
+  the strap's pull. To take the bass off, lift the rod with one finger and slide the
+  bass off with the other hand. **Rod** [chosen 2026-11-15: the four lugs could not be
+  lifted at once by hand; the bass prints standing on its hand face (y −12.5)]: a stock
+  steel rod ⌀2 × 68 mm (stainless or silver steel, cut to length) pressed through the
+  four latches' lugs after printing (`../bass/link.scad`, `latch_rod_body()`), 0.3 mm
+  over the holders' top faces. The four tongues share their root line and length and
+  both holders stand on the one mount, so their ends move alike and the rod bends none
+  of them. Each lug rises from its tongue at 45° and carries an ear in a pocket of the
+  slot's wall, which ends the lift (`../strain_gauge/spec.md`, Latch), so all of it
+  prints in the bass's orientation without support. Lifting takes a few newtons; the
+  rod bends about 0.03 mm under it [estimate]. Checked 2026-11-15 against the discant as
+  played and the case: the rod is clear of the contacts' block, the discant's boss,
+  outer holders and pad; rod and lugs lifted 2 mm (more than the stop's 1.8) are clear
+  of everything; controls (rod moved against the lugs) overlap. Printed
+  in PETG [given 2026-11-15].
+- **Stored** (socket under the deck): 45° tooth, a detent; four of them hold about 15 N
+  [estimate: tongue 3 × 1.2 mm, its tooth 9.2 mm from the root, PETG E 2000 MPa, 0.6 mm
+  deflection, friction 0.3; the 1.0 mm tongue gave about half, so the detent's is 1.2
+  (2026-11-15)]
   against the discant's weight (about 3.5 N [estimate]); a firm pull down releases it.
 
 Checked: seated, teeth and plates clear; moved 0.3 mm in the pull-off direction, the
@@ -70,7 +85,8 @@ teeth of both positions meet the slots' ends.
   discant's (ADCs 10h…15h, with the NAU7802) through the contacts, the bass's (10h…12h,
   with the DAC) inside the bass box. [superseded: a PCAL9555A expander on each of six
   switch boards, one bus]
-- **Discant:** only the key boards and the link board with the NAU7802 at the gauges.
+- **Discant:** only the key board, which also carries the NAU7802 for the gauges
+  [chosen 2026-11-15; the link board beside the gauges is gone].
 - **Contacts:** nine spring pins, 3 × 3 at 2.54 mm, in a block on the bass's playing mount
   between the inner holders (`../bass/link.scad`), reaching between the discant's outer
   holders (5.8 mm clear either side of the middle); against them a small board with
@@ -98,17 +114,17 @@ limit for PLA; the parts' choice. The wires are listed under Wiring.
 
 ## Wiring [chosen 2026-11-15: loose stranded wire, no FFC; the halves meet only at the spring pins]
 
-Every run is loose wire, bundled and lightly twisted, soldered to pads except at the two
-Hall boards' J1 (JST SH, 1.0 mm, 5 pins: INT, 3V3, SDA, SCL, GND). Model lengths are
+Every run is loose wire, bundled and lightly twisted, soldered to pads except at the bass
+Hall board's J1 (JST SH, 1.0 mm, 5 pins: INT, 3V3, SDA, SCL, GND). Model lengths are
 echoed by `../bass/elec.scad` (`wires()`, `path_len()`) and `../discant/gauge_link.scad`
-(`bundle_pts()`, `contact_pts()`), so they follow the geometry. Cut length = model length
+(`contact_pts()`, `lead_pts()`), so they follow the geometry. Cut length = model length
 + 20 mm per end (stripping, strain relief), rounded up to 10 mm.
 
 | # | Half | From → to | Wires | Ends | Model | Cut |
 |---|---|---|---|---|---|---|
-| 1 | discant | Hall board J1 → link board's −x end | 5: 3V3, GND, SDA, SCL, INT | SH plug / pads | 10 mm | 50 mm |
-| 2 | discant | contact board → link board's +x end, down the boss, along the pad's groove | 5: 3V3, GND, SDA, SCL, INT (DET tied to GND on the contact board) | pads / pads | 78 mm | 120 mm |
-| 3 | discant | gauge plates → link board (NAU7802), along the pad's groove | 2 half bridges, 3 each | pads / pads | 26 mm (near), 76 mm (far) to the pocket [estimate: plate middle to the pocket's +x end] | 70, 120 mm |
+| 1 | discant | — (gone 2026-11-15 with the link board) | | | | |
+| 2 | discant | contact board → down the boss, through the channel at x = 0 → Hall board's J1, up through its pads | 5: 3V3, GND, SDA, SCL, INT (DET tied to GND on the contact board) | pads / pads | 28 mm | 70 mm |
+| 3 | discant | gauge plates → along the pad's groove, through the channels at x = ∓12 → Hall board's J2 / J3 (NAU7802) | 2 half bridges, 3 each | pads / pads | 19 mm each | 60 mm each |
 | 4 | bass | spring-pin block → main board's pads, out of the mount's bore, along the bottom | 9: 3V3 × 2, GND × 3, SDA, SCL, INT, DET | pin tails / pads | 94 mm | 140 mm |
 | 5 | bass | bass Hall board J1 → down its shaft, over the strap bar's block, beside the battery → joins #4 → main board's pads | 5: 3V3, GND, SDA, SCL, INT | SH plug / pads | 279 mm (82 shared with #4) | 320 mm |
 | 6 | bass | battery → main board (+ through the PTC, −) | 2 | the cell's leads / pads | about 50 mm [estimate, not modelled] | the cell's own leads, cut to fit |
@@ -124,23 +140,25 @@ echoed by `../bass/elec.scad` (`wires()`, `path_len()`) and `../discant/gauge_li
   ⌀≈0.45 instead of 0.55) but breaks more easily at the joints and is harder to strip;
   electrically both would do. Run #2 fits AWG 30: the boss's bore is ⌀2.2, the pad's
   groove 1.5 deep × 3.2 high (`contact_bore`, `groove_d`, `groove_h`), the bundle is
-  modelled ⌀1.4 (`contact_wire_d`). From the near gauge to the pocket the groove carries
-  run #2 and both gauges' leads, 11 wires, about 3.2 mm² packed in 4.8 mm², two thirds
-  full [estimate]: the gauges' leads should be no thicker than AWG 30 [open: the
-  gauges' leads].
-- **J1 plugs:** JST SHR-05V-S housing with SSH-003T-P0.2-H crimps (AWG 32–28
+  modelled ⌀1.4 (`contact_wire_d`). The groove carries each gauge's three leads only from
+  the plate to its channel, apart from run #2, which goes straight through the channel
+  at x = 0; the channels are 3 mm wide, about 1.9 high.
+- **J1 plug (bass):** JST SHR-05V-S housing with SSH-003T-P0.2-H crimps (AWG 32–28
   [datasheet]); crimping needs the JST tool, so pre-crimped SH cables (5 pins, plug at
   one end or both, cut) are simpler. Their wire is often PVC AWG 28 (⌀≈0.8): cut the
   pigtail back to about 15 mm behind the plug and splice to the PTFE wire under heat
-  shrink, so only the splice is thick (#1: within the pocket; #5: in the deck's tunnel
+  shrink, so only the splice is thick (#5: in the deck's tunnel
   [unverified: room for a ⌀2.5 splice there]).
+- **Discant key board:** runs #2 and #3 come up from under the board through plated
+  holes (J1 bus, J2/J3 gauges) and are soldered on the top after the board is screwed
+  in; the cover has a recess over the joints.
 - **Colours** [chosen]: 3V3 red, GND black, SDA blue, SCL yellow, INT white, DET green;
   the contacts' second 3V3 and the extra GNDs the same colours.
-- **Electrically:** I²C at 400 kHz over at most about 0.4 m per bus (bus 1: #1 + #2 + #4,
-  about 0.2 m; bus 2: #5) with 2k2 pull-ups is well inside the 400 pF limit; 3V3 at about
+- **Electrically:** I²C at 400 kHz over at most about 0.4 m per bus (bus 1: #2 + #4,
+  about 0.13 m; bus 2: #5) with 2k2 pull-ups is well inside the 400 pF limit; 3V3 at about
   150 mA per half drops about 10 mV over 0.3 m of AWG 30 (0.34 Ω/m) [estimate]. No
   shielding, no twisted pairs needed.
 
 **Order list** [estimate: quantities with spare]: AWG 30 PTFE stranded, 2 m each of red,
-black, blue, yellow, white, 1 m green; 2 pre-crimped JST SH 5-pin cables (or SHR-05V-S + SSH-003T-P0.2-H
+black, blue, yellow, white, 1 m green; 1 pre-crimped JST SH 5-pin cable (or SHR-05V-S + SSH-003T-P0.2-H
 and the crimp tool); heat shrink ⌀1.5 and ⌀3 (2:1).

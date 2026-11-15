@@ -79,14 +79,14 @@ function box_x_at(z) = box_x;
 // to_store()'s origin, measured from the build); the discant below it, and under its
 // lowest point over the playing mount (store_front_d: the thumb bar, whole [given
 // 2026-11-14: never cut, the bass is longer instead]) the travel to slide it on and off
-// plus 0.3 over the mount's holders (hold_lo + hold_hi), which sit at the box's bottom.
-// That fixes the bottom: 14.1 below the hand plate (it was 7.6 with the old discant, whose
-// thick deck took the socket and whose bar was cut back over the mount). As link.scad:
+// plus 0.3 over the mount's holders and their latches' lugs (hold_lo + hold_hi), which sit at the box's bottom.
+// That fixes the bottom: 9.8 below the hand plate (7.7 before the latches' lugs for the
+// rod raised the mount's top by 2.1, 2026-11-15). As link.scad:
 // hold_lo, hold_hi, travel, front_d.
 store_socket_top = 90.69;
 store_front_d    = -16.47;
 store_z  = z_floor + 0.5 - store_socket_top;             // to_store()'s z: the socket 0.5 into the deck's floor, one body with it
-z_bot    = store_z - (5.9 + 6.89 + 0.3 + (8.3 + 1) - store_front_d);
+z_bot    = store_z - (5.9 + 9.0 + 0.3 + (8.3 + 1) - store_front_d);
 box_ext  = plate_z[0] - z_bot;
 assert(box_ext >= 2, "the box's bottom must stay under the hand plate");
 // what was placed by hand in the box's lower part on the old bottom (z -130.84) moves with it

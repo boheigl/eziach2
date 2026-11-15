@@ -98,7 +98,7 @@ module elec_cuts() {
         offset(r = 1.2) offset(delta = -1.2) square([usb[1] + 0.5, usb[2] + 0.5], center = true);
     translate([box_x[1] - 3, brd_y[1] + led_h / 2, led_z]) rotate([0, 90, 0]) cylinder(d = 1.6, h = 4, $fn = 16);
     jack_cuts();
-    for (p = pilots) translate([p[0], plate_y[1] - 2.0, p[1]]) rotate([-90, 0, 0]) cylinder(d = 1.6, h = 3, $fn = 16);
+    for (p = pilots) translate([p[0], plate_y[1] - 2.0, p[1]]) rotate([-90, 0, 0]) cylinder(d = 1.7, h = 3, $fn = 16);
 }
 // the jack: lugs, body, flange inside; thread through the wall; the nut outside
 module jack() translate([0, jack_yc, jack_z]) rotate([0, 90, 0]) {
@@ -139,10 +139,10 @@ module main_board_room() translate([pwr_x[0] - 1, plate_y[1] - 1, pwr_z[0] - 1])
 // added to the case: the boards' pads
 module elec_pads() for (p = pilots) difference() {
     translate([p[0], plate_y[1] - 0.01, p[1]]) rotate([-90, 0, 0]) cylinder(d = pad_d, h = 0.48, $fn = 24);
-    translate([p[0], plate_y[1] - 2.0, p[1]]) rotate([-90, 0, 0]) cylinder(d = 1.6, h = 3, $fn = 16);
+    translate([p[0], plate_y[1] - 2.0, p[1]]) rotate([-90, 0, 0]) cylinder(d = 1.7, h = 3, $fn = 16);
 }
 
-module elec() { power_board(); contact_plungers(); }
+module elec() { power_board(); }   // the contacts' spring pins: link.scad, contact_pins()
 
 // a round bundle through points
 module bundle(p, d) for (i = [0 : len(p) - 2]) hull() {

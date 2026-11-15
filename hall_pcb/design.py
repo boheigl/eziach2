@@ -185,19 +185,60 @@ ADC_SMALL = [("C{}1", "7", None), ("C{}2", "8", None), ("C{}3", "10", ("9", "10"
 
 # connector: JST SH 5 pins, vertical, underside, as on the switch boards (../switch/ioexp.scad):
 # pins along X from -X: INT, 3V3, SDA, SCL, GND
-# discant: side entry at the back edge between keys 1 and 2 of row 3, its opening to
-#   the back, straight in front of the link board's pocket in the housing's back wall
-#   (../discant/gauge_link.scad), so the plug's wires run straight into it;
+# discant [chosen 2026-11-15]: no connector. The bus comes from the bass through the gauges'
+#   contacts, whose five wires come down the contact boss into a channel under the board's
+#   back edge (../discant/gauge_link.scad) and up through J1, a row of wire pads in the
+#   middle of the back edge, soldered on the top. J2 and J3 take the gauges' leads the same
+#   way, and U7, a NAU7802, reads them: the link board beside the gauges is gone.
+WIRE3 = "Connector_PinHeader_2.00mm:PinHeader_1x03_P2.00mm_Vertical"   # wire pads, no header fitted
+WIRE5 = "Connector_PinHeader_2.00mm:PinHeader_1x05_P2.00mm_Vertical"
+SOIC16 = "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"
+L0402 = "Inductor_SMD:L_0402_1005Metric"
 if BOARD == "discant":
-    CONN_XY = (-80.0, Y_BACK - 3.0 - 2.575)   # opening 3 inside the back edge: room for the plug
-    part("J1", "SM05B-SRSS-TB", JST5_SIDE, {"1": "INT", "2": "+3V3", "3": "SDA", "4": "SCL", "5": "GND", "MP": "GND"},
-         CONN_XY, group="bus", title=BUS_TITLE,
-         pinfo={"1": "INT", "2": "3V3", "3": "SDA", "4": "SCL", "5": "GND", "MP": "MP"})
-    part("C1", "10u", C0805, {"1": "+3V3", "2": "GND"}, (CONN_XY[0] + 5.6, CONN_XY[1]), rot=90, group="bus")
+    WIRE_Y = Y_BACK - 1.8                      # the pad rows' line, 1.8 inside the back edge
+    NAU_ROT = float(os.environ.get("HALL_NAU_ROT", 270))   # pins 1-8 (analog) towards the back edge
+    CONN_XY = (0.0, WIRE_Y)
+    # a pad row's footprint has its origin at pin 1; turned 90 deg on the underside the row
+    # runs from there towards -X: pin 1 sits half the row's length on +X of its middle
+    part("J1", "contacts", WIRE5, {"1": "INT", "2": "+3V3", "3": "SDA", "4": "SCL", "5": "GND"},
+         (CONN_XY[0] + 4.0, WIRE_Y), rot=90, group="bus", title=BUS_TITLE,
+         pinfo={"1": "INT", "2": "3V3", "3": "SDA", "4": "SCL", "5": "GND"})
+    part("C1", "10u", C0805, {"1": "+3V3", "2": "GND"}, (-10.5, 43.6), rot=0, group="bus")
     # pull-ups: INT here (the ALERTs are open drain); SDA/SCL fitted as well, parallel to the
     # main board's 2k2: 1k5 together, see spec.md
     for i, (r, v, n) in enumerate([("R11", "10k", "INT"), ("R12", "4k7", "SDA"), ("R13", "4k7", "SCL")]):
-        part(r, v, R0402, {"1": n, "2": "+3V3"}, (CONN_XY[0] - 6.0, CONN_XY[1] + 1.3 - 1.3 * i), group="bus")
+        part(r, v, R0402, {"1": n, "2": "+3V3"}, (-2.2 + 1.2 * i, 40.8), rot=90, group="bus")
+    # --- the gauges' ADC: NAU7802SGI (SOP-16) [datasheet: Nuvoton NAU7802 Rev 2.6] --------
+    # AVDD from +3V3 through a ferrite (its LDO stays off, the power-on default): the
+    # half bridges' excitation (J2/J3 E+) and REFP are AVDD, so the reading is ratiometric.
+    # Each gauge is a half bridge (../strain_gauge/spec.md): its middle against a 10k/10k
+    # divider of AVDD (0.1 %, 25 ppm/K, the two side by side), through 47R each into the
+    # channel, 100 nF across (the datasheet's input filter). XIN/XOUT open (internal RC
+    # oscillator); DRDY open (the ESP32 polls it). Address 2Ah, fixed.
+    NAU = {"1": "AVDD", "2": "VIN1N", "3": "VIN1P", "4": "VIN2N", "5": "VIN2P", "6": "VBG", "7": "GND",
+           "8": "GND", "9": "GND", "10": None, "11": None, "12": None, "13": "SCL", "14": "SDA",
+           "15": "+3V3", "16": "AVDD"}
+    part("U7", "NAU7802SGI", SOIC16, NAU, (0.0, 49.4), rot=NAU_ROT,
+         group="gauge", title="Gauges' ADC NAU7802, address 2Ah",
+         pinfo={"1": "REFP", "2": "VIN1N", "3": "VIN1P", "4": "VIN2N", "5": "VIN2P", "6": "VBG", "7": "REFN",
+                "8": "AVSS", "9": "DVSS", "10": "XIN", "11": "XOUT", "12": "DRDY", "13": "SCLK", "14": "SDIO",
+                "15": "DVDD", "16": "AVDD"})
+    part("FB1", "600R @ 100 MHz", L0402, {"1": "+3V3", "2": "AVDD"}, (-7.0, 43.6), rot=0, group="gauge")
+    part("C2", "10u", C0402, {"1": "AVDD", "2": "GND"}, (-7.0, 44.8), rot=0, group="gauge")
+    part("C3", "100n", C0402, {"1": "AVDD", "2": "GND"}, (-6.4, 46.3), rot=0, group="gauge")
+    part("C4", "1u", C0402, {"1": "+3V3", "2": "GND"}, (-3.6, 44.6), rot=0, group="gauge")
+    part("C5", "100n", C0402, {"1": "+3V3", "2": "GND"}, (-1.5, 44.6), rot=0, group="gauge")
+    part("C6", "100n", C0402, {"1": "VBG", "2": "GND"}, (6.6, 48.6), rot=90, group="gauge")
+    for k, (gx, s) in enumerate([(-12.0, -1), (12.0, 1)]):
+        n = k + 1
+        part(f"J{n + 1}", f"gauge {'AB'[k]}", WIRE3, {"1": "AVDD", "2": f"G{n}", "3": "GND"}, (gx + 2.0, WIRE_Y), rot=90,
+             group="gauge", pinfo={"1": "E+", "2": "MID", "3": "E-"})
+        part(f"R{20 + 6 * k + 1}", "10k 0.1%", R0402, {"1": "AVDD", "2": f"GREF{n}"}, (s * 16.0, 51.2), group="gauge")
+        part(f"R{20 + 6 * k + 2}", "10k 0.1%", R0402, {"1": f"GREF{n}", "2": "GND"}, (s * 16.0, 52.5), group="gauge")
+        part(f"C{70 + k}", "100n", C0402, {"1": f"GREF{n}", "2": "GND"}, (s * 13.4, 51.85), rot=90, group="gauge")
+        part(f"R{20 + 6 * k + 3}", "47R", R0402, {"1": f"G{n}", "2": f"VIN{n}P"}, (s * 9.6, 51.2), group="gauge")
+        part(f"R{20 + 6 * k + 4}", "47R", R0402, {"1": f"GREF{n}", "2": f"VIN{n}N"}, (s * 9.6, 52.5), group="gauge")
+        part(f"C{72 + k}", "100n", C0402, {"1": f"VIN{n}P", "2": f"VIN{n}N"}, (s * 6.6, 51.85), rot=90, group="gauge")
 else:
     # bass: vertical, between keys 1 and 2 of the front row, in front of them: the plug comes
     # from below and its wires drop straight into the thin box under the deck (../bass/)
@@ -217,7 +258,11 @@ POWER = {"+3V3"}
 LCSC = {
     ("DRV5055A3QDBZR", SOT23): "C266128",
     ("ADS7128IRTER", WQFN16): "C2867992",
-    ("SM05B-SRSS-TB", JST5_SIDE): "C136657",      # SM05B-SRSS-TB(LF)(SN)
+    ("NAU7802SGI", SOIC16): "C2614351",
+    ("10k 0.1%", R0402): "C190095",               # Yageo RT0402BRD0710KL, thin film, 25 ppm/K
+    ("47R", R0402): "C25118",
+    ("600R @ 100 MHz", L0402): "C76884",          # Murata BLM15AG601SN1D
+    ("10u", C0402): "C15525",                     # basic, 6.3 V
     ("BM05B-SRSS-TB", JST5): "C160391",           # BM05B-SRSS-TB(LF)(SN)
     ("100n", C0402): "C1525",                     # basic, 16 V X7R
     ("1u", C0402): "C52923",                      # basic, 25 V X5R
@@ -241,8 +286,8 @@ if BOARD == "discant":
     _lo, _up = 0.5 * D, 2.5 * D
     BUS_LANES = [(-101, 71, _lo - LANE_H, _lo + LANE_H),          # lower ADCs
                  (-81, 91, _up - LANE_H, _up + LANE_H),           # upper ADCs
-                 (-92, -84, _lo - LANE_H, CONN_XY[1] + 3),        # between them, left of the keys' fans
-                 (-92, -74, CONN_XY[1] - 3, CONN_XY[1] + 3)]      # to the connector
+                 (-92, -80, _lo - LANE_H, _up + LANE_H),          # between them, left of the keys' fans
+                 (-6, 6, _up - LANE_H, CONN_XY[1] + 1.5)]         # up to J1 and the NAU7802, in the middle
 else:
     BUS_LANES = [(-61, 71, 0.5 * D - LANE_H, 0.5 * D + LANE_H),
                  (-76, -64, CONN_XY[1] - 2.5, 0.5 * D + LANE_H)]  # from the connector up to the row
