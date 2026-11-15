@@ -12,8 +12,9 @@
 // power path, a fuse (the cell carries its own protection), and the 3.3 V supply for
 // both halves. The system runs when the contacts' DET pin is tied to ground by the
 // discant's contact board (plugged for playing) or when USB is plugged in; 3.3 V goes to
-// the discant over the contacts only with DET. DET's pin is the shortest, so it closes
-// last and opens first. The USB socket and the jack are in the +x side wall, in its
+// the discant over the contacts only with DET. The nine spring pins are alike, so DET
+// may close before the others: the 3.3 V to the discant ramps up after DET (main board,
+// Q3's gate) [open: about 10 ms, more than the 1 ms now, to cover the pins' spread]. The USB socket and the jack are in the +x side wall, in its
 // straight part, free both stored (the discant covers only the box's back) and played; a
 // side-emitting LED beside them shows charging (red) and full (green) through a hole in the wall. The jack is a
 // panel jack held by the side wall, over the board in a 5.7 mm bulge of the back cover.

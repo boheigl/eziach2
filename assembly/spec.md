@@ -87,30 +87,46 @@ teeth of both positions meet the slots' ends.
   switch boards, one bus]
 - **Discant:** only the key board, which also carries the NAU7802 for the gauges
   [chosen 2026-11-15; the link board beside the gauges is gone].
-- **Contacts:** nine spring pins, 3 × 3 at 2.54 mm, in a block on the bass's playing mount
-  between the inner holders (`../bass/link.scad`), reaching between the discant's outer
-  holders (5.8 mm clear either side of the middle); against them a small board with
-  nine gold pads on a boss on the discant's pad (`../discant/gauge_link.scad`). They
-  meet head on as the bass slides on, 1 mm compression when latched [unverified: pin
-  type, e.g. Mill-Max 0906]. Pads: 3.3 V × 2, GND × 3, SDA, SCL, INT (the discant's
-  expanders, open drain, wired), DET. The NAU7802 is polled over I2C.
+- **Contacts** [chosen 2026-11-15: spring pins on a small board; blade and card-edge
+  contacts were looked at and set aside, below]: two small boards, one panel
+  (`../contact_pcb/`). The bass's carries three PG2541-03-003P strips (CHIN-BAN, LCSC
+  C49451741: 3 spring pins each at 2.54 mm, SMD, gold, 1.2 N at the working height, 1 mm
+  travel, 10 000 cycles [datasheet]), the strips 3.0 mm apart: nine pins. It sits in a
+  pocket of a block on the bass's playing mount between the inner holders
+  (`../bass/link.scad`), reaching between the discant's outer holders (5.8 mm off the
+  middle; the block 5.5 there, wider behind their tips, where its walls locate the
+  board); the pins press it onto the pocket's ledge. The discant's board carries nine
+  gold pads ⌀2.2 on the same grid, on a boss on the discant's pad
+  (`../discant/gauge_link.scad`, face at gauge y 85). They meet head on as the bass
+  slides on, the pins at their working height when latched. Pads: 3.3 V × 2, GND × 3,
+  SDA, SCL, INT (the discant's ADCs, open drain, wired), DET. The NAU7802 is polled over
+  I2C.
+- **Not chosen** [2026-11-15]: blade contacts (a flat tab between two spring leaves,
+  e.g. SAMZO 23E3/23E4, Kinghelm KH-A01M/F) wipe themselves, but their leaves press
+  along the contact row, so the row would have to run along z to keep friction out of
+  the measuring direction, and 6 contacts do not fit the 10.8 mm there; a card-edge
+  socket's rigid slot would be the stiff second force path.
 - **Why spring pins:** their few newtons act beside the gauges but stay constant (the
   latch fixes the position), so taring removes them; the plates move only micrometres.
   A cable or a rigid connector would be a second, stiff force path.
 - **Power switched by plugging:** DET, pulled to ground by the discant's contact board,
   switches the bass's system supply on (ESP32, both halves' 3.3 V). Apart or stored only
-  the charger works: the pins carry nothing, the battery is not drained. DET's pin is
-  the shortest, so it closes last and opens first.
+  the charger works: the pins carry nothing, the battery is not drained. The nine pins
+  are alike, so DET may close before the others: the discant's 3.3 V ramps up after DET
+  (Q3's gate on the main board, now about 1 ms) [open: about 10 ms, to cover the pins'
+  spread as the bass slides on].
 - **Charging and data:** one USB-C in the bass's +x side wall, free both stored and
   played, with a charge LED and the earphone jack beside it; the charger has a power
   path, so it also runs the system while charging. Firmware goes in by this socket.
 
-Checked: the block clears the discant's outer holders, plates and contact board when
-mated (pins 0.02 mm off the pads in the model), the stored discant's contact boss fits
-the deck's pocket, the boards clear case, battery, back cover and covers.
+Checked (2026-11-15, the spring-pin boards): the block clears the discant's outer
+holders, plates and pad board when mated, the pins 0.02 mm off the pads in the model
+(control: the pad board 0.1 mm closer overlaps); the pin board sits in its pocket
+(control: 0.2 mm larger overlaps); the stored discant's contact boss fits the deck's
+pocket; the boards clear case, battery, back cover and covers.
 
-Open: the tongue's strain on bending is about 0.7 % [estimate], fine for PETG, at the
-limit for PLA; the parts' choice. The wires are listed under Wiring.
+Open: the latch tongue's root strain is 1.1–1.3 % [estimate, `../strain_gauge/spec.md`],
+fine for PETG, too much for PLA. The wires are listed under Wiring.
 
 ## Wiring [chosen 2026-11-15: loose stranded wire, no FFC; the halves meet only at the spring pins]
 
@@ -123,9 +139,9 @@ echoed by `../bass/elec.scad` (`wires()`, `path_len()`) and `../discant/gauge_li
 | # | Half | From → to | Wires | Ends | Model | Cut |
 |---|---|---|---|---|---|---|
 | 1 | discant | — (gone 2026-11-15 with the link board) | | | | |
-| 2 | discant | contact board → down the boss, through the channel at x = 0 → Hall board's J1, up through its pads | 5: 3V3, GND, SDA, SCL, INT (DET tied to GND on the contact board) | pads / pads | 28 mm | 70 mm |
+| 2 | discant | pad board's back pads → down the boss, through the channel at x = 0 → Hall board's J1, up through its pads | 5: 3V3, GND, SDA, SCL, INT (DET tied to GND on the pad board) | pads / pads | 28 mm | 70 mm |
 | 3 | discant | gauge plates → along the pad's groove, through the channels at x = ∓12 → Hall board's J2 / J3 (NAU7802) | 2 half bridges, 3 each | pads / pads | 19 mm each | 60 mm each |
-| 4 | bass | spring-pin block → main board's pads, out of the mount's bore, along the bottom | 9: 3V3 × 2, GND × 3, SDA, SCL, INT, DET | pin tails / pads | 94 mm | 140 mm |
+| 4 | bass | spring-pin board's back pads → main board's pads, out of the mount's cavity and bore, along the bottom | 9: 3V3 × 2, GND × 3, SDA, SCL, INT, DET | pads / pads | 94 mm | 140 mm |
 | 5 | bass | bass Hall board J1 → down its shaft, over the strap bar's block, beside the battery → joins #4 → main board's pads | 5: 3V3, GND, SDA, SCL, INT | SH plug / pads | 279 mm (82 shared with #4) | 320 mm |
 | 6 | bass | battery → main board (+ through the PTC, −) | 2 | the cell's leads / pads | about 50 mm [estimate, not modelled] | the cell's own leads, cut to fit |
 | 7 | bass | earphone jack's lugs → P19–P21 | 3: tip, ring, sleeve | lugs / pads | about 15 mm [estimate: the jack lies over the board] | 50 mm |

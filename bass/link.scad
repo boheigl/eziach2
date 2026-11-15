@@ -53,16 +53,28 @@ module to_bass()
 module box(x, y, z) translate([x[0], y[0], z[0]]) cube([x[1] - x[0], y[1] - y[0], z[1] - z[0]]);
 
 // --- CONTACTS [given: power and I2C cross by contacts closing as the bass slides on;
-// the bass's battery switched on by them]: a block on the mount between the inner holders,
-// reaching between the discant's outer holders, with nine spring pins (3 x 3 at 2.54)
-// against the discant's contact board (../discant/gauge_link.scad, face at gauge y 84).
-// Pins pressed in from the front, wires soldered on before, through a cavity behind
-// them and a bore through the back wall into the box (elec.scad).
-pin_p    = 2.54;
-pin_hole = 1.6;                  // the pins' barrels [unverified: pin type, e.g. Mill-Max 0906]
-blk_y    = [85, link_y];         // the block's face, 1 mm off the contact board, to the mount
-blk_hw   = 5.2;  blk_hh = 5.0;   // as the discant's boss
-cav      = [88.5, 3.6];          // cavity behind the barrels: from y, half size
+// the bass's battery switched on by them; chosen 2026-11-15: spring pins on a small board]:
+// a block on the mount between the inner holders, reaching between the discant's outer
+// holders, holds the pin half of ../contact_pcb: three PG2541-03-003P strips (3 spring
+// pins each, 2.54 apart, strips 3.0 apart: nine pins) against the discant's pad board
+// (../discant/gauge_link.scad, face at gauge y 84). The board sits in a pocket open to the
+// front; the pins' force (9 x 1.2 N) presses it onto the pocket's ledge. Its nine wires
+// are soldered to its back before, and run through the cavity behind it and a bore through
+// the back wall into the box (elec.scad).
+pin_px   = 2.54;  pin_pz = 3.0;  // as ../contact_pcb/gen_pcb.py (PX, PZ)
+pcb      = [5.0, 4.5, 1.6];      // the board: half width (x), half height (z), thickness
+pin_work = 4.5;                  // the pins' working height over the board, 1.0 short of free [datasheet]
+pad_y    = 85;                   // the discant's pads (../discant/gauge_link.scad, contact_y)
+pcb_y    = pad_y + pin_work;     // the board's front: the pins on the pads, at their working height
+pcb_c    = 0.1;                  // the pocket's clearance round the board
+blk_y    = [pad_y + 1, link_y];  // the block's face, 1 mm off the pad board, to the mount
+// between the discant's outer holders (5.8 off the middle, their tips at 89.6) the block is
+// 0.3 narrower; behind their tips, from tip_y, it is wider, and its walls there locate the board
+tip_y    = 89.6 + 0.3;
+blk_hw   = 5.5;                  // between the outer holders
+blk_hw2  = pcb[0] + pcb_c + 1.0; // behind them: walls 1.0 round the board
+blk_hh   = pcb[1] + pcb_c + 0.9; //   0.9 above and below: 5.5, under the latches' rod (6.2)
+cav      = [pcb_y + pcb[2], 3.6];  // the cavity behind the board, for the wires' joints: from y, half size; the ledge round it carries the board
 chan_d   = 2.6;  chan_dz = -2.6; // the wires' bore through mount and back wall: at z_bot + 3.3, the middle of the slot under the case's foot
 module contact_chan() translate([0, cav[0] + 2, gz + chan_dz]) rotate([-90, 0, 0]) cylinder(d = chan_d, h = 14);
 
@@ -71,9 +83,10 @@ module mount() to_bass() {
         gauge_tilt_frame() union() {
             box([gauge_x - mount_x, gauge_x + mount_x], [link_y - 0.01, link_y + mount_t], [gz - half_h, gz + half_h]);
             box([-blk_hw, blk_hw], [blk_y[0], blk_y[1] + 0.01], [gz - blk_hh, gz + blk_hh]);
+            box([-blk_hw2, blk_hw2], [tip_y, blk_y[1] + 0.01], [gz - blk_hh, gz + blk_hh]);
         }
         gauge_tilt_frame() {
-            for (i = [-1 : 1], j = [-1 : 1]) translate([i * pin_p, blk_y[0] - 1, gz + j * pin_p]) rotate([-90, 0, 0]) cylinder(d = pin_hole, h = cav[0] - blk_y[0] + 1.01, $fn = 16);
+            box([-pcb[0] - pcb_c, pcb[0] + pcb_c], [blk_y[0] - 1, cav[0] + 0.01], [gz - pcb[1] - pcb_c, gz + pcb[1] + pcb_c]);   // the pocket
             box([-cav[1], cav[1]], [cav[0], link_y + mount_t - 1.5], [gz - cav[1], gz + cav[1]]);
             contact_chan();
         }
@@ -85,18 +98,22 @@ module latch_rod_body() let(r = latch_rod()) hull() for (d = [-1, 1]) at_gauge(d
     translate([-(rod_l / 2 - 25), r[0], r[1]]) rotate([0, 90, 0]) cylinder(d = r[2], h = rod_l - 50, $fn = 24);
 // cut from the case: the wires' bore through the back wall
 module mount_cuts() to_bass() gauge_tilt_frame() contact_chan();
-// the nine spring pins, mated (for the page and the checks): the barrel in its hole from the
-// block's face back into the cavity, a solder tail in the cavity, the plunger 1 mm out of
-// the block onto the pads, its tip round [unverified: sizes, as a Mill-Max 0906 type]
+// the pin board with its three strips, mated (for the page and the checks): the strip's
+// housing, the barrels to 4.0 and the plungers to the pads, their tips round [datasheet:
+// PG2541-03-003P, plunger 0.9, barrel 1.5; the housing's height estimated]
 pin_barrel = 1.5;
 pin_plunger = 0.9;
-module contact_pins() to_bass() gauge_tilt_frame()
-    for (i = [-1 : 1], j = [-1 : 1]) translate([i * pin_p, 0, gz + j * pin_p]) rotate([-90, 0, 0]) {
-        translate([0, 0, blk_y[0]]) cylinder(d = pin_barrel, h = cav[0] + 0.8 - blk_y[0], $fn = 16);       // barrel
-        translate([0, 0, cav[0] + 0.8]) cylinder(d = 0.8, h = 1.2, $fn = 12);                               // tail
-        translate([0, 0, 84.02 + pin_plunger / 2]) cylinder(d = pin_plunger, h = blk_y[0] - 84.02 - pin_plunger / 2 + 0.01, $fn = 12);
-        translate([0, 0, 84.02 + pin_plunger / 2]) sphere(d = pin_plunger, $fn = 12);                       // tip
+module contact_pins() to_bass() gauge_tilt_frame() {
+    box([-pcb[0], pcb[0]], [pcb_y, pcb_y + pcb[2]], [gz - pcb[1], gz + pcb[1]]);                     // the board
+    for (j = [-1 : 1]) {
+        box([-3.8, 3.8], [pcb_y - 1.5, pcb_y], [gz + j * pin_pz - 1.25, gz + j * pin_pz + 1.25]);    // a strip's housing
+        for (i = [-1 : 1]) translate([i * pin_px, 0, gz + j * pin_pz]) rotate([-90, 0, 0]) {
+            translate([0, 0, pcb_y - 4.0]) cylinder(d = pin_barrel, h = 2.5, $fn = 16);                 // barrel
+            translate([0, 0, (pad_y + 0.02) + pin_plunger / 2]) cylinder(d = pin_plunger, h = pcb_y - 4.0 - (pad_y + 0.02) - pin_plunger / 2 + 0.01, $fn = 12);
+            translate([0, 0, (pad_y + 0.02) + pin_plunger / 2]) sphere(d = pin_plunger, $fn = 12);           // tip
+        }
     }
+}
 // the discant's side, for checks and the page: plates with their dowel pins, and the
 // outer holders, which are the discant housing's
 module discant_side() to_bass() {

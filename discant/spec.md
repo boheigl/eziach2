@@ -293,11 +293,13 @@ longer part of the build's design).
   is open to the pad's face or the holders. The cover has a 0.8 mm recess over the
   pad rows for the joints. The NAU7802 (1.75 high) stands 0.4 into the tray's floor
   (0.8 left under it; `hall.scad` `deep_parts`).
-- **Contacts** [given: closing as the bass slides on]: a boss on the pad between the
-  outer holders (10.4 × 10 mm, to y = 83.2 in the gauge frame) carries a 0.8 mm board
-  with nine gold pads, 3 × 3 at 2.54, facing the bass's spring pins: VBAT × 2, GND × 3,
-  SDA, SCL, INT, DET (tied to GND on the board: switches the bass's battery on). A ⌀2.2
-  bore down the boss leads the wires (VBAT, GND, SDA, SCL, INT: a 1.3 mm bundle) into the
+- **Contacts** [given: closing as the bass slides on; chosen 2026-11-15: the pad half of
+  `../contact_pcb/`]: a boss on the pad between the outer holders (10 × 9 mm, to y = 83.4
+  in the gauge frame) carries a 1.6 mm board, 10 × 9 mm, with nine gold pads ⌀2.2, 3 × 3
+  at 2.54 across and 3.0 up, facing the bass's spring pins: 3.3 V × 2, GND × 3, SDA, SCL,
+  INT, DET (tied to GND on the board: switches the bass's system on). Five wires (3V3,
+  GND, SDA, SCL, INT) are soldered to its back pads, in a 7.2 × 7.2 × 1.5 mm recess of the
+  boss, and a ⌀2.2 bore down the boss leads them (a 1.3 mm bundle) into the
   pad's groove and straight on through the channel at x = 0 to the key board's J1
   (28 mm).
   The latches in the inner holders carry the load, not the contacts.

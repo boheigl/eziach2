@@ -22,9 +22,15 @@ The earlier case, `../../shape/OrderOnShape20260107/BassCase - Part BassCase.ste
 
 ## 2. Keys [given: the discant's mechanism]
 
-The discant's button unchanged (`../switch/button.scad`): cap ⌀15, felt ring, stem ⌀7.6,
-two washers on the board's copper rings, spacer sleeve, M3 screw, spring in a guide.
-Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
+The discant's Hall key (`../switch_hall/`, `key.scad` and spec): a ground stainless rod
+⌀3 in a sintered bronze bushing in the cover's tube, the cap on top, a printed collar
+with the magnet (⌀3 × 1.5 N52) below, a stock stainless spring (Misumi C-UY8-25) round
+the tube, an O-ring as the bottom stop and a punched washer as the rest stop; the
+board's DRV5055 senses the magnet on the key's axis. The board lies flat under both
+rows, and the back row stands 10 mm higher on a 10 mm longer rod (23.8 instead of 13.8);
+spring, stops and field are the same in both rows (`bass0_*`, `bass1_*`). Parts for all
+keys: `../BOM.md`. (This section used to describe the old discant button of
+`../switch/button.scad`: felt ring, M3 screw, spring in a guide.)
 
 ## 3. Case, cover, boards (`case.scad`, `cover.scad`)
 
@@ -200,9 +206,13 @@ Closed at rest. The felt lands on the 1.2 mm cover after 2.965 mm.
   Latches). Printed with the bass standing on its hand face [given 2026-11-15], so the
   holders stand on their bridges as `../strain_gauge` recommends. [unverified: the
   holder's fits, printed as part of the large case]
-- **Contacts:** nine spring pins in a block on the mount between the inner holders,
-  against the discant's contact board; a cavity behind them and a ⌀2.6 bore through
-  the back wall take the wires into the box (`link.scad`, `../assembly/spec.md`).
+- **Contacts** [chosen 2026-11-15]: the pin half of `../contact_pcb/` (three strips of
+  three spring pins) in a pocket of a block on the mount between the inner holders,
+  against the discant's pad board. Its nine wires are soldered to its back first and
+  threaded through the cavity behind it and the ⌀2.6 bore through the back wall into
+  the box; then the board goes into the pocket from the front, where the pins' force
+  (about 11 N) holds it on the ledge round the cavity [open: a drop of glue at two
+  corners against falling out while apart] (`link.scad`, `../assembly/spec.md`).
 - **Reading** [given: the gauges are bent by the push, which works]: the hand pushes the
   plate along y, above the gauges, so the push bends their flexure plates as a force
   along z would; each bridge reads the moment at its column, push × arm. Pressed at the
@@ -226,8 +236,8 @@ touch nothing at rest and pressed 2.9 mm.
 |---|---|
 | `layout.scad` | key arrangement, heights, boards, plate: shared by all |
 | `case.scad` → `case.stl`, `back_cover.stl`, `battery.stl` | the box: deck, hand plate with its ribs, battery cradle, cable tunnels, the gauges' inner holders and the contacts' block; the back cover; the battery |
-| `elec.scad` → `elec.stl` | the power and key boards, the charging port, the contacts' plungers (placeholders) |
-| `link.scad` | the gauges' inner holders on their mount, and the discant's side (plates, pins, outer holders: `discant_link.stl`) |
+| `elec.scad` → `elec.stl` | the power and key boards, the charging port |
+| `link.scad` | the gauges' inner holders on their mount with the contacts' block, the latches' rod (`latch_rod.stl`), the spring-pin board (`contact_pins.stl`), and the discant's side (plates, pins, outer holders: `discant_link.stl`) |
 | `cover.scad` → `cover.stl` | the cover, one piece |
 | `keys.scad` → `keys.stl` | the 18 keys at rest |
 | `array.scad`, `lam.scad` | the boards, their copper and connectors |
