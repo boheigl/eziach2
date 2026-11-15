@@ -6,3 +6,6 @@
 # stray exports made by hand
 *.stl
 *.dxf
+
+# KiCad: local footprint cache
+fp-info-cache
