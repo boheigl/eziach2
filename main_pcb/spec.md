@@ -124,7 +124,10 @@ I²S drops straight from pins 18–21 to the DAC above them.
 **Solder pads** along the bottom edge, two rows of nine at 2 mm, where the wires
 arrive (elec.scad `wires()`): the contacts' nine (3.3 V × 2, GND × 3, SDA, SCL, INT,
 DET), the bass key board's five (3.3 V, GND, SDA, SCL, INT), the battery (+ via the
-fuse, −), a spare GND and 3.3 V. The wires and their lengths: `../assembly/spec.md`, Wiring. Test pads for boot, reset, TX, RX and GND at the top.
+fuse, −), a spare GND and 3.3 V. The wires and their lengths: `../assembly/spec.md`, Wiring. Test pads for boot, reset and GND at the top; TX and RX
+at (10.4, 11.4 / 13.5), halfway to the module's pins 36/37 (no room beside them), so
+their tracks stay short. EN_SYS's pull-down R16 sits beside D2, so that net needs one
+track, D2 to the regulator.
 
 ## 5. Open
 

@@ -65,8 +65,12 @@ Cc("C2", "100n", "+3V3", "GND", (25.1, 12.4, 90), "mcu")
 R("R1", "10k", "EN", "+3V3", (25.1, 22.4, 90), "mcu")
 Cc("C3", "1u", "EN", "GND", (25.1, 20.3, 90), "mcu")
 R("R2", "10k", "BOOT", "+3V3", (25.1, 24.5, 90), "mcu")
-for i, (net, name) in enumerate([("BOOT", "boot"), ("EN", "reset"), ("TXD0", "tx"), ("RXD0", "rx"), ("GND", "ground")]):
-    part(f"TP{i + 1}", name, TP, {"1": net}, (7.8 + 2.1 * i, 31.9, 0), group="mcu", title="Test pads")
+# boot, reset and ground at the top edge; tx and rx nearer the module's pins 36/37 (the
+# board has no room beside them), so their tracks stay short
+for i, (net, name, pos) in enumerate([("BOOT", "boot", (7.8, 31.9)), ("EN", "reset", (9.9, 31.9)),
+                                      ("TXD0", "tx", (10.4, 11.35)), ("RXD0", "rx", (10.4, 13.45)),
+                                      ("GND", "ground", (16.2, 31.9))]):
+    part(f"TP{i + 1}", name, TP, {"1": net}, (*pos, 0), group="mcu", title="Test pads")
 
 # --- USB-C: charging, firmware, MIDI ---------------------------------------------
 usb = {"A4": "VBUS", "A9": "VBUS", "B4": "VBUS", "B9": "VBUS", "A1": "GND", "A12": "GND", "B1": "GND", "B12": "GND",
@@ -139,7 +143,7 @@ part("Q2", "AO3401A", SOT23, {"1": "DET_G", "2": "VSYS", "3": "EN_DET"}, (12.9, 
      pinfo={"1": "G", "2": "S", "3": "D"}, group="power")
 part("D2", "BAT54C", SOT23, {"1": "EN_DET", "2": "VBUS", "3": "EN_SYS"}, (8.7, 28.8, 0),
      pinfo={"1": "A1", "2": "A2", "3": "K"}, group="power")
-R("R16", "1M", "EN_SYS", "GND", (21.2, 31.9, 90), "power")
+R("R16", "1M", "EN_SYS", "GND", (12.0, 31.9, 90), "power")   # beside D2: EN_SYS needs one track, D2 to U5
 # TPS63001: buck-boost, fixed 3.3 V, from the system rail (3.0 .. 4.4 V); PS/SYNC high:
 # fixed frequency, no power-save bursts near the audio
 part("U5", "TPS63001DRCR", "Package_SON:Texas_DRC0010J", {"1": "+3V3", "2": "L2", "3": "GND", "4": "L1",
