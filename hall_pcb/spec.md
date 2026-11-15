@@ -15,7 +15,7 @@ files to `<board>/fab/` and a browser view (`export_view.py`, `<board>/viewer.ht
 
 - **One board for the whole discant**, in the staircase's slope plane. A board
   for the bass will follow from the same description.
-- **No controller on the board.** ADS7138 ADCs on I²C; the ESP32 in the bass
+- **No controller on the board.** ADS7128 ADCs on I²C; the ESP32 in the bass
   reads them over the existing 5-wire bus (INT, 3V3, SDA, SCL, GND) through the
   bellows. The calibration lives in the ESP32.
 - Sensors **always powered** (no group switching, since nothing on the board
@@ -50,11 +50,14 @@ files to `<board>/fab/` and a browser view (`export_view.py`, `<board>/viewer.ht
 
 ## 3. Circuit
 
+JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
+(`fab/<board>-bom.csv`, JLCPCB's columns) [all in stock, checked 2026-11-15].
+
 | Part | Count | What for |
 |---|---|---|
 | DRV5055A3QDBZR, SOT-23 | 46 | linear Hall sensor, 15 mV/mT and ±88 mT at 3.3 V, ratiometric; pins 1 VCC, 2 OUT, 3 GND [datasheet: SBAS640C, checked 2026-11-15] |
 | 100 nF 0402 | 46 | one beside every sensor (datasheet: at least 10 nF) |
-| ADS7138IRTER, WQFN-16 3 × 3 | 6 | 8 channels, 12 bit, I²C [datasheet SBAS976A] |
+| ADS7128IRTER, WQFN-16 3 × 3 | 6 | 8 channels, 12 bit, I²C [datasheet SBAS868A] |
 | 1 µF 0402 | 18 | AVDD, DVDD and DECAP of every ADC [datasheet] |
 | address resistors 0402 | 5 | 11h/12h/13h: 11k/33k/100k to GND; 14h/15h: 100k/33k to DECAP; 10h: none |
 | JST SH SM05B-SRSS-TB (discant, side entry) / BM05B-SRSS-TB (bass, vertical) | 1 | bus, pins as on the switch boards: INT, 3V3, SDA, SCL, GND |
@@ -63,20 +66,26 @@ files to `<board>/fab/` and a browser view (`export_view.py`, `<board>/viewer.ht
 
 - **ADCs:** AVDD is also the ADC's reference. Sensors and ADCs share 3.3 V, so the
   reading is ratiometric and supply drift cancels. [datasheet]
-- **ALERT** is its own pin on the ADS7138, so all 8 channels are inputs: 6 ADCs
+- **ALERT** is its own pin on the ADS7128, so all 8 channels are inputs: 6 ADCs
   give 48 channels for 46 keys. The six ALERTs (open drain) are wired together to
   INT. Each channel's digital window comparator takes the calibrated actuation
   point with hysteresis, and the ESP32 reads the flags when INT falls. ALERT is
-  open drain by default [datasheet: SBAS976A]; the firmware must not set it to
+  open drain by default [datasheet: SBAS868A]; the firmware must not set it to
   push-pull (ALERT_PIN_CFG), or the six outputs fight.
-- **Pinout and addresses checked** against SBAS976A (2026-11-15): pins as in
+- **Pinout and addresses checked** against SBAS868A (2026-11-15): pins as in
   `design.py`, Table 2's resistors (R1 to DECAP, R2 to GND) give 10h … 15h as planned.
+- **ADS7128, not ADS7138** [chosen 2026-11-15]: the ADS7138 was the first choice, but
+  JLCPCB had 39 at 7–9.5 $ each (9 per instrument). The ADS7128 (C2867992, about 2–3 $)
+  is its superset: same pins and address table, and all of the ADS7138's 110 registers
+  at the same addresses; it adds only the RMS and zero-crossing modules (registers 0Fh, C0h–C2h,
+  E3h–E7h) [datasheets SBAS868A, SBAS976A compared 2026-11-15]. Firmware written for
+  the ADS7138 runs unchanged. The TLA2528 (cheaper still) has no ALERT pin (pin 12 NC).
 - **Addresses 10h … 15h** do not collide with the PCAL9555A expanders (20h–27h).
 - **Pull-ups:** INT here. SDA and SCL are fitted here as well, marked "DNP?":
   leave them out if the host's pull-ups suffice on the cable through the bellows.
   [unverified]
 - **Current:** 46 × 2–4 mA = 92 … 184 mA for the sensors, plus well under 1 mA for
-  the ADCs. [datasheet: SBAS640C, SBAS976A]
+  the ADCs. [datasheet: SBAS640C, SBAS868A]
 
 ## 4. Which ADC reads which key
 
@@ -136,9 +145,9 @@ files to `<board>/fab/` and a browser view (`export_view.py`, `<board>/viewer.ht
   stay the same, so all keys behave alike (`riser` in ../switch_hall/key.scad).
 - **Outline:** a parallelogram 176 × 32 mm, both ends slanting with the rows'
   10 mm offset, 8 mm beyond the outer keys.
-- **Three ADS7138**, between the rows at x = −55 / 5 / 65, six keys each, by X;
+- **Three ADS7128**, between the rows at x = −55 / 5 / 65, six keys each, by X;
   addresses 10h, 11h, 12h.
-- **Own I²C bus:** the discant already uses 10h–15h, and the ADS7138 has only
+- **Own I²C bus:** the discant already uses 10h–15h, and the ADS7128 has only
   eight addresses, so the bass board goes to the ESP32's second I²C controller
   inside the bass box. Same 5-pin JST SH, at the −x end between the rows, where
   the bass boards' wires drop into the box today.

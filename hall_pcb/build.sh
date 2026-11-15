@@ -34,12 +34,12 @@ mv $B/best.kicad_pcb $B/$B.kicad_pcb; mv $B/best_pins.json $B/pins.json; mv $B/b
 rm -f $B/drc_try.json
 python3 gen_sch.py $B
 echo "best: $best"
-# fabrication: gerbers, drill, positions, BOM
+# fabrication: gerbers, drill, positions, BOM (JLCPCB's columns: Comment, Designator, Footprint, LCSC)
 mkdir -p $B/fab
 kicad-cli pcb export gerbers -o $B/fab/ $B/$B.kicad_pcb > /dev/null
 kicad-cli pcb export drill -o $B/fab/ $B/$B.kicad_pcb > /dev/null
 kicad-cli pcb export pos --side back --units mm --format csv -o $B/fab/$B-pos.csv $B/$B.kicad_pcb > /dev/null
-kicad-cli sch export bom -o $B/fab/$B-bom.csv --group-by Value,Footprint --fields 'Reference,Value,Footprint,${QUANTITY}' $B/$B.kicad_sch > /dev/null
+kicad-cli sch export bom -o $B/fab/$B-bom.csv --group-by Value,Footprint --fields 'Value,Reference,Footprint,LCSC,${QUANTITY}' --labels 'Comment,Designator,Footprint,LCSC,Quantity' --exclude-dnp $B/$B.kicad_sch > /dev/null
 kicad-cli pcb drc --format json -o $B/drc.json $B/$B.kicad_pcb > /dev/null 2>&1 || true
 python3 export_view.py $B/$B.kicad_pcb $B/drc.json
 python3 export_scad.py $B/$B.kicad_pcb

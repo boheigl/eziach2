@@ -53,6 +53,14 @@ def symbol(key, pins, two):
                     f'(symbol {q(key + "_1_1")} {pin_s}))\n')
     return pos, box
 
+missing = set()
+def lcsc(c):
+    """JLCPCB / LCSC part number from design.LCSC; none for pads"""
+    if c["fp"].startswith("TestPoint"): return ""
+    n = d.LCSC.get((c["value"], c["fp"]))
+    if n is None: missing.add((c["value"], c["fp"]))
+    return n or ""
+
 def snap(v): return round(v / G) * G
 
 def instance(c, x, y):
@@ -68,6 +76,7 @@ def instance(c, x, y):
                  f'(property "Footprint" {q(c["fp"])} (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
                  f'(property "Datasheet" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
                  f'(property "Description" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
+                 f'(property "LCSC" {q(lcsc(c))} (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))\n'
                  f'{pin_s}(instances (project {q(d.BOARD)} (path {q("/" + ROOT)} (reference {q(c["ref"])}) (unit 1)))))\n')
     for num, name, net in pins:
         px, py, a = pos[num]
@@ -83,7 +92,7 @@ def text(s, x, y, size=3):
     items.append(f'(text {q(s)} (exclude_from_sim no) (at {x:.2f} {y:.2f} 0) (effects (font (size {size} {size})) (justify left)) (uuid {U("t" + s)}))\n')
 
 TITLES = {"sensors": "Hall sensors DRV5055A3 under every key, 100 nF each (title: row, key)",
-          "adc": f"ADS7138: 8-channel 12-bit ADCs on I2C, addresses 10h..{0x10 + len(d.GROUPS) - 1:02X}h; ALERTs wired together to INT",
+          "adc": f"ADS7128: 8-channel 12-bit ADCs on I2C, addresses 10h..{0x10 + len(d.GROUPS) - 1:02X}h; ALERTs wired together to INT",
           "bus": d.BUS_TITLE + ": JST SH, as on the switch boards"}
 LAY = {"bus": (30, 40, 120), "adc": (30, 200, 400), "sensors": (220, 40, 560)}
 for g, (x0, y0, _h) in LAY.items():
@@ -132,3 +141,4 @@ s = (f'(kicad_sch (version 20250114) (generator "eziach") (generator_version "9.
      f'(lib_symbols\n{"".join(lib.values())})\n{"".join(items)}\n(sheet_instances (path "/" (page "1"))) (embedded_fonts no))\n')
 open(os.path.join(DIR, d.BOARD + ".kicad_sch"), "w").write(s)
 print(len(d.C), "parts", len(items), "items")
+for m in sorted(missing): print("no LCSC number:", *m)

@@ -241,7 +241,7 @@ expanders (PCAL9555A, 20h…23h) are gone; their last state is in the git histor
 (`main_pcb.scad`'s `bus_wires()`, four bundles to a splice, is that old way and no
 longer part of the build's design).
 
-- **The Hall-sensor board** (`../hall_pcb/discant/`) reads all keys with six ADS7138 at
+- **The Hall-sensor board** (`../hall_pcb/discant/`) reads all keys with six ADS7128 at
   10h…15h and has one bus connector J1, a side-entry JST SH (INT, 3V3, SDA, SCL, GND)
   at its back edge, just in front of the link board's pocket (`housing.scad`:
   `plug_cavity()`).

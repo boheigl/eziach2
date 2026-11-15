@@ -152,7 +152,7 @@ or install this one 1.2 mm longer, which adds 1.2 mm of height.
   [datasheet: SBAS640C, 5.5]: 64 sensors 130 … 260 mA, budgeted on the main board
   (`../main_pcb/spec.md`).
 - **Noise:** 0.2 mT peak to peak at 3.3 V [datasheet], about 4 ADC steps or 60 µm of
-  travel at rest; switch on the ADS7138's averaging (OSR) to trigger near rest.
+  travel at rest; switch on the ADS7128's averaging (OSR) to trigger near rest.
 - **Electronics:** each board needs 13 analog inputs, from an MCU or ADCs on the
   I²C bus, in place of the PCAL9555A. Still open.
 

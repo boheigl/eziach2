@@ -19,7 +19,7 @@
 // panel jack held by the side wall, over the board in a 5.7 mm bulge of the back cover.
 //
 // KEY BOARD [given 2026-11-13]: one Hall-sensor board under both rows (../hall_pcb/bass/):
-// three ADS7138 ADCs at 10h..12h on the ESP32's second I2C bus (the discant's six use
+// three ADS7128 ADCs at 10h..12h on the ESP32's second I2C bus (the discant's six use
 // 10h..15h on the first, through the contacts).
 //
 // WIRES (wires()): the nine pins' wires leave the mount's cavity through the back wall's

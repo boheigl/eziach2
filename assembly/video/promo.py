@@ -158,7 +158,7 @@ anim(5, wave, e=False); st.DK = [0.0] * 46; st.BK = [0.0] * 18
 
 # 5 inside: the cases fade, then go, and the parts are named
 st.title = "Inside"
-st.text = "One sensor board per side: ADS7138 ADCs on I²C. In the bass: ESP32-S3, audio DAC\nwith headphone jack, USB-C for charging and MIDI, and the Li-ion battery."
+st.text = "One sensor board per side: ADS7128 ADCs on I²C. In the bass: ESP32-S3, audio DAC\nwith headphone jack, USB-C for charging and MIDI, and the Li-ion battery."
 IN_CAM = [0, 30, -70, 70, 0, 230, 600]
 anim(1.5, lambda u: setattr(st, "xray", u))
 anim(1.5, cam_anim(IN_CAM))

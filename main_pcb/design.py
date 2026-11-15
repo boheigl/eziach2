@@ -214,3 +214,34 @@ WIRES = [("+3V3_D", "contacts 3.3 V"), ("+3V3_D", "contacts 3.3 V"), ("GND", "co
 for i, (net, name) in enumerate(WIRES):
     part(f"P{i + 1}", name, PAD, {"1": net}, (1.2 + 2.0 * (i % 9), 1.0 + 1.85 * (i // 9), 0), group="wires",
          title="Wires")
+
+# JLCPCB / LCSC part numbers for the BOM, by (value, footprint) [checked 2026-11-15 at jlcpcb.com:
+# all in stock; "basic" parts need no extended-part fee]. The test and wire pads have none.
+LCSC = {
+    ("ESP32-S3-WROOM-1-N16R8", "RF_Module:ESP32-S3-WROOM-1"): "C2913202",
+    ("USB4105-GF-A", "Connector_USB:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal"): "C3020560",
+    ("USBLC6-2SC6", SOT236): "C7519",
+    ("BQ24074RGTR", "Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm"): "C54313",
+    ("TPS63001DRCR", "Package_SON:Texas_DRC0010J"): "C28060",
+    ("TLV320DAC3100IRHBR", "Package_DFN_QFN:VQFN-32-1EP_5x5mm_P0.5mm_EP3.1x3.1mm"): "C179677",
+    ("TLV75518PDBVR", "Package_TO_SOT_SMD:SOT-23-5"): "C2877863",
+    ("SRV05-4", SOT236): "C85364",                     # ProTek SRV05-4-P-T7
+    ("AO3401A", SOT23): "C15127",                      # basic
+    ("BAT54C", SOT23): "C37704",                       # Nexperia BAT54C,215
+    ("DMG1012T", "Package_TO_SOT_SMD:SOT-523"): "C20512",   # DMG1012T-7
+    ("LTST-S326KGJRKT", "LED_SMD:LED_LiteOn_LTST-S326"): "C125116",
+    ("2.2u, Isat 2 A", "Inductor_SMD:L_1008_2520Metric"): "C23894",   # Sunlord SWPA252012S2R2MT, Isat 2.07 A
+    ("PTC 1.5 A hold", "Fuse:Fuse_1206_3216Metric"): "C20802",        # SMD1206P150TF, 6 V
+    ("600R @ 100 MHz", "Inductor_SMD:L_0402_1005Metric"): "C76884",   # Murata BLM15AG601SN1D, 300 mA
+    ("100u", C0805): "C141660",                        # Murata GRM21BR60J107ME15L, 6.3 V
+    ("22u", C0805): "C45783",                          # basic, 25 V
+    ("10u", C0805): "C15850",                          # basic, 25 V
+    ("10u", C0603): "C19702",                          # basic, 10 V
+    ("10u", C0402): "C15525",                          # basic, 6.3 V
+    ("4u7", C0603): "C19666",                          # basic, 16 V
+    ("1u", C0402): "C52923",                           # basic, 25 V
+    ("100n", C0402): "C1525",                          # basic, 16 V
+    ("100R", R0402): "C25076", ("1k", R0402): "C11702", ("1k5", R0402): "C25867", ("2k2", R0402): "C25879",
+    ("5k1", R0402): "C25905", ("10k", R0402): "C25744", ("100k", R0402): "C25741", ("1M", R0402): "C26083",
+    ("75k", R0402): "C25798",                          # extended; the rest basic
+}

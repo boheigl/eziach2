@@ -2,7 +2,7 @@
 
 One board per side of the instrument [given]: the environment variable
 HALL_BOARD picks "discant" (default) or "bass". Every key of ../switch_hall/ has
-a linear Hall sensor on the board's underside, exactly under its axis; ADS7138
+a linear Hall sensor on the board's underside, exactly under its axis; ADS7128
 8-channel I2C ADCs digitise them; no controller on the board [given]. The ESP32
 in the bass reads them: the discant over the existing 5-wire bus through the
 bellows, the bass on the ESP32's second I2C bus inside the bass box (the ADCs'
@@ -125,7 +125,8 @@ for n, (k, h) in enumerate(KEYS):
     part(f"C{100 + n + 1}", "100n", C0402, {"1": "+3V3", "2": "GND"}, (x + 2.7, y + SENS_DY), rot=90,
          group="sensors")
 
-# ADCs: ADS7138IRTER [datasheet SBAS976A]; pins: AIN2..AIN5 1..4, AIN6 5, AIN7 6,
+# ADCs: ADS7128IRTER [datasheet SBAS868A] (chosen 2026-11-15 over the ADS7138: same pins,
+# address table and registers, plus RMS/ZCD; JLCPCB stocks it at a third of the price); pins: AIN2..AIN5 1..4, AIN6 5, AIN7 6,
 # AVDD 7, DECAP 8, GND 9, DVDD 10, ADDR 11, ALERT 12, SCL 13, SDA 14, AIN0 15,
 # AIN1 16, thermal pad to GND. ALERT is its own pin, so all 8 channels are inputs.
 ADC_AIN = {"15": 0, "16": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 6, "6": 7}
@@ -158,7 +159,7 @@ for a, g in enumerate(GROUPS):
     # channels: gen_pcb.py assigns the keys to the AIN pins by angle round the chip, so
     # the tracks fan out without crossing; it writes the table to <board>/channels.json
     for p in ADC_AIN: pins[p] = None
-    part(f"U{a + 1}", "ADS7138IRTER", WQFN16, pins, (x, ADC_Y[a]), group="adc",
+    part(f"U{a + 1}", "ADS7128IRTER", WQFN16, pins, (x, ADC_Y[a]), group="adc",
          title=f"ADC {a}, address {0x10 + a:02X}h",
          pinfo={**{p: f"AIN{c}" for p, c in ADC_AIN.items()}, "7": "AVDD", "8": "DECAP", "9": "GND",
                 "10": "DVDD", "11": "ADDR", "12": "ALERT", "13": "SCL", "14": "SDA", "17": "EP"})
@@ -210,6 +211,23 @@ else:
 
 
 POWER = {"+3V3"}
+
+# JLCPCB / LCSC part numbers for the BOM, by (value, footprint) [checked 2026-11-15 at jlcpcb.com:
+# all in stock; "basic" parts need no extended-part fee]
+LCSC = {
+    ("DRV5055A3QDBZR", SOT23): "C266128",
+    ("ADS7128IRTER", WQFN16): "C2867992",
+    ("SM05B-SRSS-TB", JST5_SIDE): "C136657",      # SM05B-SRSS-TB(LF)(SN)
+    ("BM05B-SRSS-TB", JST5): "C160391",           # BM05B-SRSS-TB(LF)(SN)
+    ("100n", C0402): "C1525",                     # basic, 16 V X7R
+    ("1u", C0402): "C52923",                      # basic, 25 V X5R
+    ("10u", C0805): "C15850",                     # basic, 25 V X5R
+    ("10k", R0402): "C25744",                     # basic
+    ("4k7 (DNP?)", R0402): "C25900",              # basic
+    ("11k", R0402): "C25749",
+    ("33k", R0402): "C25779",                     # basic
+    ("100k", R0402): "C25741",                    # basic
+}
 
 # The bus on the top [chosen 2026-11-14]: SDA, SCL, INT and +3V3 run from ADC to ADC, and each
 # ADC's key lines fan out all round it, so on the underside alone the bus crosses every fan.

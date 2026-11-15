@@ -65,7 +65,7 @@ teeth of both positions meet the slots' ends.
   audio DAC and the earphone jack, one USB-C (charging, firmware, MIDI), the battery
   with charger (the cell's own protection board, a fuse on the main board), the 3.3 V
   supply for both halves (`../main_pcb/spec.md`).
-- **Key boards** (`../hall_pcb/`): one Hall-sensor board per half, read by ADS7138 ADCs
+- **Key boards** (`../hall_pcb/`): one Hall-sensor board per half, read by ADS7128 ADCs
   on I²C, no controller. Two buses, 5 wires each (3.3 V, GND, SDA, SCL, INT): the
   discant's (ADCs 10h…15h, with the NAU7802) through the contacts, the bass's (10h…12h,
   with the DAC) inside the bass box. [superseded: a PCAL9555A expander on each of six

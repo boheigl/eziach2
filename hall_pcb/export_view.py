@@ -69,11 +69,11 @@ tmpl = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "viewer_tmp
 out = os.path.join(os.path.dirname(BOARD), "viewer.html")
 if d.BOARD == "discant":
     lede = ("One board under all 46 discant keys, in the staircase's slope plane. A DRV5055 sensor under every key, "
-            "six ADS7138 ADCs reading them, and the 5-wire bus through the bellows to the ESP32 in the bass. "
+            "six ADS7128 ADCs reading them, and the 5-wire bus through the bellows to the ESP32 in the bass. "
             "All parts sit on the underside, so the view starts from below.")
 else:
     lede = ("One flat board under both rows of the 18 bass keys (the back row's tubes and pins are 10 mm longer). "
-            "A DRV5055 sensor under every key, three ADS7138 ADCs reading them, and a 5-wire bus to the ESP32's "
+            "A DRV5055 sensor under every key, three ADS7128 ADCs reading them, and a 5-wire bus to the ESP32's "
             "second I2C port in the bass box. All parts sit on the underside, so the view starts from below.")
 for k, v in (("__TITLE__", d.BOARD.capitalize() + " Hall Board"), ("__BOARD__", d.BOARD), ("__H1__", d.TITLE), ("__LEDE__", lede)):
     tmpl = tmpl.replace(k, v)

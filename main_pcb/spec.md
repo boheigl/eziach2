@@ -35,6 +35,10 @@ includes. The scripts come from `../hall_pcb/` and from the discant's old main b
 
 ## 2. Circuit
 
+JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
+(`fab/main_pcb-bom.csv`, JLCPCB's columns) [all in stock, checked 2026-11-15]; L1 is
+Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BLM15AG601SN1D.
+
 | Part | What for |
 |---|---|
 | ESP32-S3-WROOM-1-N16R8 | the controller; USB on its own pins (firmware, MIDI) |
