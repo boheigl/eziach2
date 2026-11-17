@@ -34,3 +34,13 @@ $(B)/test_sf2: test_sf2.c ../components/tinysoundfont/tsf.h $(GEN)/keymap.c $(GE
 	$(CC) -std=c11 -O2 -Wall -I../components/tinysoundfont -I$(GEN) -o $@ test_sf2.c $(GEN)/keymap.c -lm
 
 .PHONY: sf2
+
+# chords to listen to: each tempered, then with the thirds low -> build/chords.wav
+chords: $(B)/chords_wav
+	./$(B)/chords_wav $(SF2) $(B)/chords.wav
+
+$(B)/chords_wav: chords_wav.c ../components/tinysoundfont/tsf.h $(GEN)/keymap.c $(GEN)/config.h
+	@mkdir -p $(B)
+	$(CC) -std=c11 -O2 -Wall -I../components/tinysoundfont -I$(GEN) -o $@ chords_wav.c $(GEN)/keymap.c -lm
+
+.PHONY: chords
