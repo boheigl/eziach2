@@ -6,7 +6,7 @@
 // parts' bodies: the tray follows the board in the slope plane (hall.scad), a floor
 // under the parts, a rim round the board up to its top face, and under the board a
 // ledge along its edge and a boss at every screw hole, which carry it. The cover
-// (cover.scad) lies on board and rim; seven M2 countersunk screws go through cover
+// (cover.scad) lies on board and rim; 27 M2 countersunk screws go through cover
 // and board into the bosses.
 //
 // The previous housing (four stepped boards with 46 guides, the hole behind the

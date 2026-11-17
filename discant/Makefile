@@ -10,10 +10,6 @@
 # the board's data from ../hall_pcb/discant/board.scad (written by its build.sh).
 # OpenSCAD writes the files each output reads (use <...>, import()) to
 # ../build/discant/.deps/, so those dependencies are tracked without listing them here.
-#
-# Still in this folder from the four-board staircase, not built any more and kept for
-# the bass and the assembly until they are moved over: array.scad, array.html,
-# main_pcb.scad, stl2js.py.
 
 OPENSCAD ?= openscad
 PYTHON   ?= python3

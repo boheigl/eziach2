@@ -183,7 +183,7 @@ GROUP_OF = {q: a for a, g in enumerate(GROUPS) for q in g}
 ADC_SMALL = [("C{}1", "7", None), ("C{}2", "8", None), ("C{}3", "10", ("9", "10", -0.8)),
              ("R{}", "11", ("11", "10", 0.7))]
 
-# connector: JST SH 5 pins, vertical, underside, as on the switch boards (../switch/ioexp.scad):
+# connector: JST SH 5 pins, vertical, underside, as on the earlier contact-key boards:
 # pins along X from -X: INT, 3V3, SDA, SCL, GND
 # discant [chosen 2026-11-15]: no connector. The bus comes from the bass through the gauges'
 #   contacts, whose five wires come down the contact boss into a channel under the board's

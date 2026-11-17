@@ -22,8 +22,8 @@
 // tubes from below; the plungers go in from below onto the pins, the springs from above
 // over the tubes, and the caps are pressed onto the pins while the jig carries the
 // collars. Off the jig the springs hold every plunger against its step: the cover is one
-// unit with all 46 keys. It goes onto the board in the housing, and seven M2 countersunk
-// screws (ISO 7046 / DIN 965, flush) go through cover and board into the housing's bosses.
+// unit with all 46 keys. It goes onto the board in the housing, and 27 M2 countersunk
+// brass screws (DIN 965, flush) go through cover and board into the housing's bosses.
 //
 // The previous cover (four stepped boxes, dents round the caps) is in the git history.
 //

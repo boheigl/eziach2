@@ -29,29 +29,24 @@ the tube, an O-ring as the bottom stop and a punched washer as the rest stop; th
 board's DRV5055 senses the magnet on the key's axis. The board lies flat under both
 rows, and the back row stands 10 mm higher on a 10 mm longer rod (23.8 instead of 13.8);
 spring, stops and field are the same in both rows (`bass0_*`, `bass1_*`). Parts for all
-keys: `../BOM.md`. (This section used to describe the old discant button of
-`../switch/button.scad`: felt ring, M3 screw, spring in a guide.)
+keys: `../BOM.md`.
 
 ## 3. Case, cover, boards (`case.scad`, `cover.scad`)
 
-- **Boards:** the discant's board sawn to 9 holes (`../switch/pcb.scad`, `cut_holes = 4`),
-  one per row: front board moved x + 40, back board x + 50, y + 16. The back row stands
-  **10 mm higher**, so that its caps reach the example's 21 mm with the standard button:
-  board tops at z = 3.835 and 13.835. Neighbouring boards stand 1.3 mm apart in plan.
+- **Board** [given 2026-11-13]: one Hall-sensor board under both rows (`../hall_pcb/bass/`,
+  its data from the routed KiCad board), lying flat. The back row's keys stand **10 mm
+  higher** on the same board (`key.scad` `riser`), so that their caps reach the example's
+  21 mm. Its bus connector J1 hangs in front of the front row, over the box: the plug
+  comes from below and the wires drop straight into the box.
 - **Case** [given: nicer and closed]: a closed box, one print, open only at the back
   (behind the battery and boards), which the back cover closes; the bottom is closed.
   On top the key deck, its full depth (y −12.5 … 27.8). Below it the box is **11.2 mm thin**
   [given: thinner; then 4.8 thinner still, so that the stored discant comes closer]
   (y −12.5 … −1.3): front wall 3, back wall 1.6, a 6 mm battery between, so that under the deck, behind the box, a step opens
-  where the gauges sit [given: integrated]. At the bottom its sides are
-  **265 mm** apart [given: widened so that the box covers the stored discant's keys;
-  replaces the earlier taper towards the −z end]; from z −90.7 up they slant in, parallel
-  to the stored discant's stepped ends [given], 10 in x per 16.28 (31.6°), 5 mm off the
-  rows' end caps; from z −46.8 up they stand straight, flush with the deck (211 mm) (built from two hulls:
-  one hull alone bridged the inward turn and made the sides 19.6° instead of parallel), so
-  that the bass boards' 15 mm FFCs can drop from the deck into the box. (A box narrowing
-  to 172 mm under the deck, tried first, left the FFCs no way: the jog along the front
-  wall it needed was 3.9 × 3.5 mm.) It reaches 9.8 mm below the hand plate (z −141.0) [given: room for the stored discant's travel, then for the socket's latch, then for the inner holders' thicker walls; then 2.1 mm for the latches' lugs and rod, 2026-11-15]. Vertical edges rounded (r 4); the cover follows them. The
+  where the gauges sit [given: integrated]. Its sides are
+  straight and flush with the deck's ends: deck and box are **one rectangular block,
+  211 mm wide** [given 2026-11-14: a rectangular footprint, replacing the sides that
+  slanted in along the stored discant's ends], set by the strap's slots. It reaches 9.8 mm below the hand plate (z −141.0) [given: room for the stored discant's travel, then for the socket's latch, then for the inner holders' thicker walls; then 2.1 mm for the latches' lugs and rod, 2026-11-15]. Vertical edges rounded (r 4); the cover follows them. The
   front wall is 3 mm thick; the hand plate is its flat face [given 2026-11-15: no
   recess; it was 1 mm deep with rounded corners (r 6)]; the front caps keep 2 mm from
   the wall's inner face [given: ≥ 2 mm].
@@ -96,14 +91,13 @@ keys: `../BOM.md`. (This section used to describe the old discant button of
   bending stress about 44 % of before (15–25 MPa). Hand plate about 8 MPa at 200 N under a
   palm. **Not covered:** the gauge plates themselves: 100 N is 2.3–4.5 × their range and
   bends ordinary steel permanently; an overload stop is open (`../discant/spec.md` §7).
-- **Deck:** the discant's housing for two rows, each board resting on it 0.1 above its
-  underside, a guide for every key (⌀9.4, ⌀8.6 spring pocket, floor 1.5 under it,
-  z = −15.1), M2 pilots for the cover's screws; the back block begins at y = 11, behind the
-  cover's wall up the step. Both boards' FFC connectors stand partly over the step: their
-  pockets have a 1.5 mm floor, and one tunnel inside the deck (18 × 3.5 mm, x −103.3 … −85.3, left
-  of the front keys' guides) leads both cables, stacked, forward and straight down into
-  the box. (The first bass's board-1 tunnel cut into the side of a front key's spring
-  pocket at x −80; that is gone.)
+- **Deck** [given 2026-11-13: one Hall-sensor board, the cases as small as possible]: a
+  thin tray round the flat board, as the discant's (`../discant/spec.md` §2): a rim up to
+  the board's top, a floor 0.3 under the parts, a ledge along the board's edge and a boss
+  at each screw hole under it, M2 pilots for the cover's screws. The keys stand entirely
+  above the board, in the cover (`cover.scad`). J1 and its plug go straight down through
+  the tray's floor into the box. The front wall ends at the board's top; the cover
+  reaches over it to the hand's face, flush with the hand plate's top.
 - **Stored discant** (../assembly/spec.md): a pocket in the deck's underside takes the
   stored discant's gauge ends (x −46.4 … 42.9, y 13.1 … 24.7, up to z −5.2), with a
   short socket (the inner holder's last 8.3 mm and its bridge, with the latch as a
@@ -123,9 +117,9 @@ keys: `../BOM.md`. (This section used to describe the old discant button of
   countersunk screws (DIN 965, modelled: `cover_screws.stl`) at z −21 (x −45, 0, 45),
   above the stored discant's caps, flush in 90° countersinks (⌀4.0, 0.9 deep, 0.7 of the
   plate left under them), 4.4 mm into ⌀1.7 pilots in pillars from the front wall. It rests on the side walls' ends, the ribs and the pillars.
-  Assembly with it off: battery, both boards (screwed from the back into the front
-  wall's pilots; the power board goes in 2 mm to the left and slides right into the
-  port), the FFCs from the deck and the contacts' wires, all in reach. Screws
+  Assembly with it off: battery, the main board (screwed from the back into the front
+  wall's pilots; it goes in 2 mm to the left and slides right into the
+  port), the key board's bus wires from J1 and the contacts' wires, all in reach. Screws
   [chosen 2026-11-15]: main board 3 × M2 × 3 pan head (ISO 7045, A2): through board
   (1.0) and pad (0.47), 2.0 mm into the 2 mm pilots in the 3 mm front wall, 1 mm left to
   the hand's face; the key board 12 × M2 × 6 countersunk brass (DIN 965), 1.9 mm into
@@ -164,10 +158,9 @@ keys: `../BOM.md`. (This section used to describe the old discant button of
     but the side wall round the hole stays the case's, so the cover comes off with
     the jack in place. Checked: clear of case, cover, board, battery and wires, and
     of the discant both played and stored (stored, it stays 10 mm above the bulge).
-  - **No key board in the box** [given: an I2C expander on every key board]: the two
-    bass boards carry their own (24h, 25h). Under each board's −x end the deck has a
-    pocket 3 mm deep for it, deepened to 6.85 mm for its bus connector (JST SH, the plug
-    from below), and a ⌀3 shaft from the plug down into the tunnel.
+  - **No key electronics in the box:** the bass's Hall-sensor board reads its own keys
+    (`../hall_pcb/bass/`); only its bus comes down, from J1 (JST SH, the plug from below)
+    straight into the box to the main board.
   The main board lies on the front wall's inside on three pads with M2 pilots,
   screwed from the back with the back cover off. Its lowest screw lies below the cover's
   bottom edge, behind the case's strip: the strip's piece in front of it (7 × 7 mm) is

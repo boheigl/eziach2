@@ -33,7 +33,7 @@ With the gauges in the slope plane, the playing position too has the discant's s
 plane level (the plates still along the bass's y): the discant hangs 3.3 mm below the
 bass's bottom instead of 16.6.
 
-Below the stored discant's front edge (the cover's, 1.2 mm under it the thumb bar where it is cut back over the playing mount; discant/spec.md §3.2) stays 9.6 mm (the socket's 8.3 mm, 1 mm and 0.3 mm) above the playing mount's top (the latches' lugs), the travel to slide it on and off; for that the box is 9.8 mm longer than the hand plate [given: +3 mm, then the latch's 2.3, then the holders' thicker walls 2.3; then the lugs for the rod 2.1, 2026-11-15]. The bass's box below the deck is 11.2 thin [given: 4.8 thinner,
+Below the stored discant's front edge (the cover's, with the thumb bar whole; discant/spec.md §3.2) stays 9.6 mm (the socket's 8.3 mm, 1 mm and 0.3 mm) above the playing mount's top (the latches' lugs), the travel to slide it on and off; for that the box is 9.8 mm longer than the hand plate [given: +3 mm, then the latch's 2.3, then the holders' thicker walls 2.3; then the lugs for the rod 2.1, 2026-11-15]. The bass's box below the deck is 11.2 thin [given: 4.8 thinner,
 with a 6 mm battery], so the stored discant lies 4.8 closer; the deck's back face
 (27.8) is then the package's back. Checked:
 clear of case, back cover, battery, wires and the bass's keys both seated and 9.6 mm lower; 2.7 mm of deck

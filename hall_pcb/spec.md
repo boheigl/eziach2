@@ -1,7 +1,7 @@
 # Hall-sensor boards — design record
 
-The key boards for the Hall-sensor keys of `../switch_hall/`. Tags as in
-`../switch/spec.md`: **[given]**, **[datasheet]**, **[chosen]**, **[estimated]**,
+The key boards for the Hall-sensor keys of `../switch_hall/`. Tags:
+**[given]**, **[datasheet]**, **[chosen]**, **[estimated]**,
 **[unverified]**.
 
 `design.py` is the one source (parts, nets, placement) for both boards; the

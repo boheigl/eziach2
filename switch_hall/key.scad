@@ -1,5 +1,5 @@
-// Hall-sensor key with the spring under the cap: a low alternative to the
-// switch key (../switch/)
+// Hall-sensor key with the spring under the cap: the key of discant and bass, lower
+// than the earlier contact key (in the git history)
 //
 // Everything that moves is above the board, which has no key holes. The key
 // works like a linear Hall-effect keyboard switch:
@@ -36,13 +36,13 @@
 // face. Rest and bottom readings are calibrated per key; the actuation point
 // and hysteresis are set as fractions of the stroke in firmware.
 //
-// Coordinates as in ../switch/pcb.scad: origin on the key's axis in the
+// Coordinates (the key frame): origin on the key's axis in the
 // board's mid-plane, x along the row, y across it (+y towards the next higher
 // board), z up. All parts at rest unless travel is set.
 //
 // make builds the parts into ../build/switch_hall/ (see Makefile).
 
-/* [Board and staircase — as in ../switch/pcb.scad and ../discant/] */
+/* [Board and staircase — as in ../discant/] */
 pcb_t    = 1.6;
 cu_t     = 0.035;    // copper and mask on each face
 pitch    = 20;
@@ -64,7 +64,7 @@ board_tilt = atan(3 / 16);
 // collar, magnet and step keep their place at the board [chosen].
 riser = 0;
 
-/* [Cap — as in ../switch/button.scad] */
+/* [Cap — as the earlier contact key's] */
 cap_d    = 15;
 cap_h    = 3;        // deep enough for the rod's socket
 cap_r    = 0.5;

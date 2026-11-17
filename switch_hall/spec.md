@@ -1,7 +1,8 @@
 # Hall-sensor key — design record
 
-An alternative to the contact key in `../switch/`, with a lower build height.
-Tags as in `../switch/spec.md`: **[given]**, **[datasheet]**, **[chosen]**,
+The key of discant and bass. It replaced the earlier contact key (felt ring, washers on
+copper half-rings; in the git history) and builds lower.
+Tags: **[given]**, **[datasheet]**, **[chosen]**,
 **[estimated]**, **[unverified]**.
 
 `key.scad` is the source and asserts every check below; `viewer.html` (three.js)
@@ -91,7 +92,7 @@ is above the board, and **the board has no key holes**.
     little lower. The firmware should keep tracking each key's rest reading
     while the key is not pressed.
 
-## 3. Geometry (key frame as in ../switch/pcb.scad, at rest)
+## 3. Geometry (key frame, at rest)
 
 **One sensor board for the discant** [given, 2026-11-13]: `../hall_pcb/` lies in
 the staircase's slope plane, tilted against every row by atan(3/16) = 10.6°.

@@ -43,8 +43,8 @@
 // 211, deck and box alike, set by the strap's slots (layout.scad).
 //
 // ASSEMBLY: back cover off (three screws, then lift it out of the tongues' slot): the
-// battery, both boards (screwed from the back into the front wall's pilots; the power
-// board goes in 2 mm to the left and slides right into the port), the FFCs from the deck
+// battery, the main board (screwed from the back into the front wall's pilots; it goes
+// in 2 mm to the left and slides right into the port), the key board's bus wires from J1
 // and the contacts' wires are all in reach. The bottom is closed.
 //
 // make builds   openscad -o ../build/bass/case.stl case.scad

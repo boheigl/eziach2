@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Writes the phone page with its parts embedded: each STL becomes an inactive
 # <script type="text/plain" id="d-NAME"> block of base64 little-endian float32
-# x,y,z, three vertices per triangle (as stl2js.py), put where the page has
+# x,y,z, three vertices per triangle, put where the page has
 # its "parts: filled in by embed_parts.py" comment.
 #   python3 embed_parts.py phone.html ../build/discant/phone.html [--keys board.scad] NAME=part.stl ...
 # --keys fills the page's /*KEYS*/[] with [row, key, x] of every key (hall_keys in the

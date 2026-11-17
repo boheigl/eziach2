@@ -2,8 +2,8 @@
 
 The board with everything that is not key reading: the ESP32-S3, the audio DAC and
 the earphone jack, USB-C, the charger, and the 3.3 V supply for both halves. It sits at
-the bottom of the bass box on the +x side (`../bass/elec.scad`). Tags as in
-`../switch/spec.md`: **[given]**, **[datasheet]**, **[chosen]**, **[estimated]**,
+the bottom of the bass box on the +x side (`../bass/elec.scad`). Tags:
+**[given]**, **[datasheet]**, **[chosen]**, **[estimated]**,
 **[unverified]**.
 
 `design.py` is the one source (parts, nets, placement). `build.sh` runs `gen_pcb.py`
