@@ -114,6 +114,46 @@ int main(int argc, char **argv) {
 	}
 	printf("%d tones of the key table: all sound and hold; worst tuning %.0f cents (note %d)\n", checked, worst, worst_note);
 
+	// every note starts exactly one stereo pair: no two zones overlap (they did at 85-86 in
+	// ../ctrl's original; the copy in sound/ has the "D3" zones ending at 84)
+	for(int note = 0; note < 128; note++) {
+		tsf_note_off_all(f);
+		for(int i = 0; i < 40; i++) tsf_render_short(f, t, RATE / 20, 0);   // releases end
+		tsf_channel_note_on(f, 0, note, 0.4f);
+		tsf_render_short(f, t, 64, 0);
+		int v = tsf_active_voice_count(f);
+		if(v != 2) { printf("FAIL note %d starts %d voices\n", note, v); failures++; }
+	}
+	printf("notes 0-127: each starts one stereo pair\n");
+
+	// a tuned note (a chord's third, [tuning] in the config): its voices play exactly that much lower
+	{
+		double tc[2];
+		for(int pass = 0; pass < 2; pass++) {
+			tsf_note_off_all(f);
+			for(int i = 0; i < 40; i++) tsf_render_short(f, t, RATE / 20, 0);
+			if(pass) tsf_channel_note_on_tuned(f, 0, 71, 0.4f, CONF_THIRD_CENTS);
+			else tsf_channel_note_on(f, 0, 71, 0.4f);
+			tsf_render_short(f, t, 64, 0);
+			tc[pass] = 0;
+			for(int v = 0; v < f->voiceNum; v++)
+				if(f->voices[v].playingPreset != -1 && f->voices[v].ampenv.segment < TSF_SEGMENT_RELEASE) { tc[pass] = f->voices[v].pitchInputTimecents; break; }
+		}
+		double d = tc[1] - tc[0];
+		printf("note 71 tuned %+.1f cents: its voices play %+.2f cents\n", (double)CONF_THIRD_CENTS, d);
+		if(fabs(d - CONF_THIRD_CENTS) > 0.01) { printf("FAIL the tuning does not reach the voice\n"); failures++; }
+		// and the next untuned note is back at tempered
+		tsf_note_off_all(f);
+		for(int i = 0; i < 40; i++) tsf_render_short(f, t, RATE / 20, 0);
+		tsf_channel_note_on(f, 0, 71, 0.4f);
+		tsf_render_short(f, t, 64, 0);
+		for(int v = 0; v < f->voiceNum; v++)
+			if(f->voices[v].playingPreset != -1 && f->voices[v].ampenv.segment < TSF_SEGMENT_RELEASE) {
+				if(fabs(f->voices[v].pitchInputTimecents - tc[0]) > 0.01) { printf("FAIL the tuning sticks to later notes\n"); failures++; }
+				break;
+			}
+	}
+
 	// a full chord: six melody tones, a bass tone and a three-note chord at full volume
 	int chord[] = {67, 71, 74, 79, 83, 86};
 	tsf_note_off_all(f); tsf_render_short(f, t, RATE / 2, 0);

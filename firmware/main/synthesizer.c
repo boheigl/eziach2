@@ -39,6 +39,7 @@ typedef enum { EV_NOTE, EV_VOLUME, EV_ALL_OFF } ev_type_t;
 typedef struct ev_t {
 	uint8_t type, channel, key, velocity;
 	bool on;
+	float cents;
 } ev_t;
 
 static tsf *sf = NULL;
@@ -53,7 +54,7 @@ static void apply(const ev_t *e) {
 	switch(e->type) {
 	case EV_NOTE:
 		if(e->on)
-			tsf_channel_note_on(sf, e->channel, e->key, e->velocity / 127.0f);
+			tsf_channel_note_on_tuned(sf, e->channel, e->key, e->velocity / 127.0f, e->cents);
 		else
 			tsf_channel_note_off(sf, e->channel, e->key);
 		break;
@@ -144,8 +145,8 @@ static void post(ev_t e) {
 		ESP_LOGW(TAG, "event queue full");
 }
 
-void synthesizer_note_update(uint8_t channel, uint8_t key, uint8_t velocity, bool on_off) {
-	post((ev_t){EV_NOTE, channel, key, velocity, on_off});
+void synthesizer_note_update(uint8_t channel, uint8_t key, uint8_t velocity, bool on_off, float cents) {
+	post((ev_t){EV_NOTE, channel, key, velocity, on_off, cents});
 }
 
 void synthesizer_change_volume(uint8_t volume) {
@@ -153,11 +154,11 @@ void synthesizer_change_volume(uint8_t volume) {
 	if(volume == last)
 		return;
 	last = volume;
-	post((ev_t){EV_VOLUME, 0, 0, volume, false});
+	post((ev_t){EV_VOLUME, 0, 0, volume, false, 0.0f});
 }
 
 void synthesizer_all_notes_off(void) {
-	post((ev_t){EV_ALL_OFF, 0, 0, 0, false});
+	post((ev_t){EV_ALL_OFF, 0, 0, 0, false, 0.0f});
 }
 
 void synthesizer_load(float *avg, float *peak) {

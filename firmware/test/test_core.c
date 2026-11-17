@@ -14,10 +14,10 @@ static int failures = 0;
 #define CHECK(X) do { if(!(X)) { printf("FAIL %s:%d  %s\n", __FILE__, __LINE__, #X); failures++; } } while(0)
 
 // ---- a recorder for the instrument's output
-typedef struct { uint8_t ch, note; bool on; } ev_t;
+typedef struct { uint8_t ch, note; bool on; float cents; } ev_t;
 static ev_t evs[256];
 static int nev = 0, n_all_off = 0, last_volume = -1;
-static void rec_note(uint8_t ch, uint8_t n, uint8_t vel, bool on) { (void)vel; evs[nev++] = (ev_t){ch, n, on}; }
+static void rec_note(uint8_t ch, uint8_t n, uint8_t vel, bool on, float cents) { (void)vel; evs[nev++] = (ev_t){ch, n, on, cents}; }
 static void rec_volume(uint8_t v) { last_volume = v; }
 static void rec_all_off(void) { n_all_off++; }
 static const instrument_out_t rec = {rec_note, rec_volume, rec_all_off};
@@ -123,9 +123,11 @@ static void test_instrument(void) {
 	int k = mapping_find(0, 0, 3);                    // push 47, pull 50; transpose 2
 	clear_rec(); press(k); instrument_step(10.0f);
 	CHECK(nev == 1 && has(0, 47 + CONF_TRANSPOSE, true));
+	CHECK(evs[0].cents == CONF_THIRD_CENTS);            // H on G-row push: the third of G
 	// pull while held: all off, the same key again with its pull tone
 	clear_rec(); settle(-10.0f);
 	CHECK(!instrument_is_push() && n_all_off == 1 && has(0, 50 + CONF_TRANSPOSE, true));
+	CHECK(evs[nev - 1].cents == 0.0f);                  // D on pull: the root of D
 	clear_rec(); release(k); instrument_step(-10.0f);
 	CHECK(has(0, 50 + CONF_TRANSPOSE, false));
 	// two bass chords sharing a tone: it goes off only with the last

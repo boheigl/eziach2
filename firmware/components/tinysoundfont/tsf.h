@@ -226,6 +226,8 @@ TSFDEF int tsf_channel_set_sustain(tsf* f, int channel, int flag_sustain);
 //   vel: velocity as a float between 0.0 (equal to note off) and 1.0 (full)
 //   (tsf_channel_note_on returns 0 on allocation failure of new voice, otherwise 1)
 TSFDEF int tsf_channel_note_on(tsf* f, int channel, int key, float vel);
+// eziach: as tsf_channel_note_on, the note detuned by `cents` (a just third: about -14)
+TSFDEF int tsf_channel_note_on_tuned(tsf* f, int channel, int key, float vel, float cents);
 TSFDEF void tsf_channel_note_off(tsf* f, int channel, int key);
 TSFDEF void tsf_channel_note_off_all(tsf* f, int channel); //end with sustain and release
 TSFDEF void tsf_channel_sounds_off_all(tsf* f, int channel); //end immediately
@@ -342,6 +344,7 @@ struct tsf
 	enum TSFOutputMode outputmode;
 	float outSampleRate;
 	float globalGainDB;
+	float noteDetune; // eziach: semitones for the voices of the next note on
 	int* refCount;
 };
 
@@ -454,6 +457,7 @@ struct tsf_voice
 	struct tsf_region* region;
 	double pitchInputTimecents, pitchOutputFactor;
 	double sourceSamplePosition;
+	float detune; // eziach: this voice's detuning in semitones
 	float  noteGainDB, panFactorLeft, panFactorRight;
 	unsigned int playIndex, loopStart, loopEnd;
 	struct tsf_voice_envelope ampenv, modenv;
@@ -1210,7 +1214,7 @@ static void tsf_voice_endquick(tsf* f, struct tsf_voice* v)
 
 static void tsf_voice_calcpitchratio(struct tsf_voice* v, float pitchShift, float outSampleRate)
 {
-	double note = v->playingKey + v->region->transpose + v->region->tune / 100.0;
+	double note = v->playingKey + v->detune + v->region->transpose + v->region->tune / 100.0;
 	double adjustedPitch = v->region->pitch_keycenter + (note - v->region->pitch_keycenter) * (v->region->pitch_keytrack / 100.0);
 	if (pitchShift) adjustedPitch += pitchShift;
 	v->pitchInputTimecents = adjustedPitch * 100.0;
@@ -1614,6 +1618,7 @@ TSFDEF int tsf_note_on(tsf* f, int preset_index, int key, float vel)
 		voice->region = region;
 		voice->playingPreset = preset_index;
 		voice->playingKey = key;
+		voice->detune = f->noteDetune;
 		voice->playIndex = voicePlayIndex;
 		voice->heldSustain = 0;
 		voice->noteGainDB = f->globalGainDB - region->attenuation - tsf_gainToDecibels(1.0f / vel);
@@ -1938,6 +1943,15 @@ TSFDEF int tsf_channel_note_on(tsf* f, int channel, int key, float vel)
 		return 1;
 	}
 	return tsf_note_on(f, f->channels->channels[channel].presetIndex, key, vel);
+}
+
+TSFDEF int tsf_channel_note_on_tuned(tsf* f, int channel, int key, float vel, float cents)
+{
+	int r;
+	f->noteDetune = cents / 100.0f;
+	r = tsf_channel_note_on(f, channel, key, vel);
+	f->noteDetune = 0.0f;
+	return r;
 }
 
 TSFDEF void tsf_channel_note_off(tsf* f, int channel, int key)

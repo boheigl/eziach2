@@ -33,7 +33,8 @@ static bool adjusting = false;
 static float old_force = 0.0f;
 static int8_t transpose = CONF_TRANSPOSE;
 // how many held keys sound each note: chords share tones (bass), so a note goes off
-// only when the last key that sounds it is released (../ctrl switched it off at once)
+// only when the last key that sounds it is released (../ctrl switched it off at once).
+// A second key sounding the same note keeps the first one's tuning.
 static uint8_t sounding[16][128];
 
 static void all_notes_off(void) {
@@ -41,16 +42,16 @@ static void all_notes_off(void) {
 	out->all_notes_off();
 }
 
-static void note(uint8_t channel, int n, bool on) {
+static void note(uint8_t channel, int n, bool on, float cents) {
 	if(n < 0 || n > 127 || channel > 15)
 		return;
 	uint8_t *c = &sounding[channel][n];
 	if(on) {
 		if((*c)++ == 0)
-			out->note(channel, n, CONF_VELOCITY, true);
+			out->note(channel, n, CONF_VELOCITY, true, cents);
 	} else if(*c > 0) {
 		if(--(*c) == 0)
-			out->note(channel, n, 0, false);
+			out->note(channel, n, 0, false, 0.0f);
 	}
 }
 
@@ -58,7 +59,7 @@ static void note(uint8_t channel, int n, bool on) {
 static void update_key(int key_index, key_state_t state) {
 	mapping_entry_t e = mapping_map(is_push, key_index);
 	for(int i = 0; i < e.nkeys; i++)
-		note(e.channel, e.keys[i] + transpose, state == ON);
+		note(e.channel, e.keys[i] + transpose, state == ON, e.cents[i]);
 }
 
 static bool is_quit_keys_pressed(void) {

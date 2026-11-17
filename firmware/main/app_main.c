@@ -53,11 +53,11 @@ static int32_t cells[2];
 
 // ---- the instrument's output: synthesizer and USB-MIDI alike
 
-static void out_note(uint8_t ch, uint8_t note, uint8_t vel, bool on) {
-	synthesizer_note_update(ch, note, vel, on);
-	midi_note(ch, note, vel, on);
+static void out_note(uint8_t ch, uint8_t note, uint8_t vel, bool on, float cents) {
+	synthesizer_note_update(ch, note, vel, on, cents);
+	midi_note(ch, note, vel, on);           // USB-MIDI stays tempered
 	if(log_notes)
-		printf("note %s ch %d %3d\n", on ? "on " : "off", ch, note);
+		printf("note %s ch %d %3d %+.0f ct\n", on ? "on " : "off", ch, note, on ? cents : 0.0f);
 }
 
 static void out_volume(uint8_t v) {
@@ -213,9 +213,9 @@ static int cmd_play(int argc, char **argv) {
 	if(i < 0) { printf("no such key\n"); return 0; }
 	mapping_entry_t e = mapping_map(instrument_is_push(), i);
 	out_volume(100);
-	for(int n = 0; n < e.nkeys; n++) out_note(e.channel, e.keys[n] + instrument_transpose(), CONF_VELOCITY, true);
+	for(int n = 0; n < e.nkeys; n++) out_note(e.channel, e.keys[n] + instrument_transpose(), CONF_VELOCITY, true, e.cents[n]);
 	vTaskDelay(pdMS_TO_TICKS(700));
-	for(int n = 0; n < e.nkeys; n++) out_note(e.channel, e.keys[n] + instrument_transpose(), 0, false);
+	for(int n = 0; n < e.nkeys; n++) out_note(e.channel, e.keys[n] + instrument_transpose(), 0, false, 0.0f);
 	return 0;
 }
 

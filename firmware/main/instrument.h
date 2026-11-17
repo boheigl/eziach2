@@ -28,7 +28,8 @@
 #include <stdint.h>
 
 typedef struct instrument_out_t {
-	void (*note)(uint8_t channel, uint8_t note, uint8_t velocity, bool on);
+	// cents: the tone's tuning against tempered (a chord's third low); only for note on
+	void (*note)(uint8_t channel, uint8_t note, uint8_t velocity, bool on, float cents);
 	void (*volume)(uint8_t volume);   // 0..127, every channel (MIDI CC 7)
 	void (*all_notes_off)(void);
 } instrument_out_t;

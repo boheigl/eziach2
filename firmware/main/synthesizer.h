@@ -30,7 +30,8 @@
 
 esp_err_t synthesizer_init(void);
 
-void synthesizer_note_update(uint8_t channel, uint8_t key, uint8_t velocity, bool on_off);
+// cents: the tone's tuning against tempered (note on only)
+void synthesizer_note_update(uint8_t channel, uint8_t key, uint8_t velocity, bool on_off, float cents);
 
 // 0..127 on every channel, scaled by its channel volume (../ctrl: MIDI CC 7)
 void synthesizer_change_volume(uint8_t volume);

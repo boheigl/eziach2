@@ -31,6 +31,7 @@
 typedef struct mapping_entry_t {
 	int nkeys;                         // tones of this key (a chord: up to 3)
 	uint8_t keys[MAPPING_MAX_KEYS];    // MIDI note numbers
+	float cents[MAPPING_MAX_KEYS];     // each tone's tuning against tempered ([tuning] in the config)
 	uint8_t channel;                   // MIDI channel
 } mapping_entry_t;
 

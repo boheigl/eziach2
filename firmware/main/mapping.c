@@ -23,8 +23,10 @@ mapping_entry_t mapping_map(bool is_push, int key_index) {
 	const keymap_key_t *k = &keymap_keys[key_index];
 	mapping_entry_t e = {0};
 	e.nkeys = is_push ? k->n_push : k->n_pull;
-	for(int i = 0; i < e.nkeys; i++)
+	for(int i = 0; i < e.nkeys; i++) {
 		e.keys[i] = is_push ? k->push[i] : k->pull[i];
+		e.cents[i] = is_push ? k->push_cents[i] : k->pull_cents[i];
+	}
 	e.channel = k->channel;
 	return e;
 }

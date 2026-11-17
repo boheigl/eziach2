@@ -23,6 +23,14 @@ map_channels = [
 # whose row runs the other way (checked on the instrument, bring-up mode).
 mirror = [false, false]
 
+[tuning]
+# A Steirische is not tuned equal-tempered: it plays in few keys, so a chord's third is tuned
+# low, towards the just third (5:4 = 386.3 cents, 13.7 under the tempered 400) [given
+# 2026-11-18: start with the rule, thirds -14 cents, adjustable]. Which tone is a third is
+# taken from the table: per discant row and direction the chord its tones belong to (push:
+# the row's tonic, pull: its dominant), and every bass chord on its own. Bass notes stay.
+third_cents = -14.0
+
 [main_loop]
 # keys held together to enter / leave adjustment mode: [board, row, key]
 # (../ctrl: matrix 0, row 0, columns 0-2 = discant row 0, keys 1-3)

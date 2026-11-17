@@ -40,6 +40,24 @@ key after the other; `mirror` in `config/eziach.toml` turns a board's rows round
 push and pull tones) and `config.h`. It stops if a key of the table is not on a board, a
 board's key has no tone, or two keys share an input: 46 discant + 18 bass, checked.
 
+## 2a. Tuning: low thirds [given 2026-11-18: thirds -14 cents, adjustable]
+
+A Steirische plays in few keys and is not tuned equal-tempered: a chord's third is tuned
+low, towards the just third (5:4, 386.3 cents, 13.7 under the tempered 400). Every reed
+belongs to one key and one direction, so the tuner knows its chord; the table here does too.
+
+- `third_cents` in `config/eziach.toml` [tuning], −14.
+- `tools/gen_config.py` finds the chord per discant row and direction from the table's tones
+  (the major triad that is complete and covers most tones): push G, C, F, B (B♭), pull D, G,
+  C, F, the rows' tonics and dominants. Each bass chord (three tones) is analysed on its own;
+  single bass notes are roots and stay. 39 tones of the table are thirds.
+- The cents go with every tone into `keymap.c`, through `mapping` and `instrument` to the
+  synthesizer: TinySoundFont, changed here by `tsf_channel_note_on_tuned()`, detunes the
+  voices of that one note (`tsf.h`, marked `eziach:`). Checked on the host: the voice plays
+  exactly −14.00 cents, later notes tempered again.
+- USB-MIDI stays tempered (per-note tuning would need the MIDI Tuning Standard).
+- A note held by two keys keeps the first key's tuning (one voice per note and channel).
+
 ## 3. Keys [../switch_hall/spec.md §6]
 
 Travel = (reading − rest) / span, the span signed by the magnet's pole. A key goes on at
@@ -104,6 +122,12 @@ chords.
   14 cents; a full chord of 10 tones clipped at 0 dB, so the synth runs at -12 dB (peak
   -2.7 dBFS) and the DAC at 0 dB; all drivers; builds with ESP-IDF v5.5.6 without warnings
   (app 404 KB of 3 MB).
+- `sound/ZiachMini.sf2` differs from ../ctrl's in two bytes [given 2026-11-18: fix the
+  overlap in the copy]: the "D3" sample's zones (root 74) covered keys 73-86 and overlapped
+  the "D4" zones (85-127), so notes 85 and 86 (the table's 83 and 84 at transposition 2)
+  sounded both samples, louder and beating. They end at 84 now. Loops checked: inside the
+  rules, seams without jumps (waveform match 0.87-0.998); the "D2" loop ends 2.3 dB louder
+  than it starts [to judge by ear].
 - The bass's lowest tones lie up to 13 half tones under the lowest sample (39): played
   slower, so darker than the sampled range [to judge by ear].
 - Not yet run on hardware. Open: the register values (§5), the synth's load at full
