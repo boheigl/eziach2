@@ -158,7 +158,7 @@ anim(2.5, move(["cap", "oring"], [0, 0], cam=[0, 8, 64, 20, 76])); hold(1.5)
 st.hl = set()
 
 # 5 working
-st.title = "Pressed"; st.text = "3 mm travel: the magnet comes 3 mm closer to the sensor\n7.6 mT at rest, 39.9 mT at the bottom; 106 g -> 128 g"
+st.title = "Pressed"; st.text = "3 mm travel: the magnet comes 3 mm closer to the sensor\n7.6 mT at rest, 39.9 mT at the bottom; 119 g -> 149 g"
 anim(1.0, cam_to([0, 7, 74, 10, 86]))
 for _ in range(2):
     anim(1.2, lambda u: setattr(st, "T", G["stroke"] * u)); hold(0.6)
