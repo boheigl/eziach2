@@ -1,0 +1,7 @@
+# logs and intermediate files of build.sh
+gen.log
+build.log
+drc.json
+*.kicad_prl
+fp-info-cache
+__pycache__/
