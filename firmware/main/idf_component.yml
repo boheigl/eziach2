@@ -1,0 +1,5 @@
+## IDF Component Manager: TinyUSB for USB-MIDI (as ESP-IDF's tusb_midi example)
+dependencies:
+  espressif/esp_tinyusb:
+    version: "^2.0.0"
+  idf: ">=5.5"

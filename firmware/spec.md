@@ -54,10 +54,58 @@ Newtons = sign × (counts − zero) / 2190 [estimated: 6.73 µV/N per cell at 3.
 zero tared at start and followed while no key is pressed; the sign set once by a push.
 Level for the volume as ../ctrl: dead band 0.3 N, then 3.2 per newton (127 at about 40 N).
 
-## 5. Status (2026-11-17)
+## 5. Hardware
 
-- Done: configuration, generator, `mapping`, `keys`, `force`, `instrument`, with host tests
-  (`make -C test`: key table against ../ctrl's tones, hysteresis, calibration with either
-  pole, re-trigger on reversal, shared chord tones, adjustment mode).
-- Open: the ESP-IDF project and the hardware drivers (ADS7128, NAU7802, TLV320DAC3100, I²S,
-  TinySoundFont, USB-MIDI, power), and bring-up on the instrument. ESP-IDF is not installed yet.
+| Module | Part | Notes |
+|---|---|---|
+| `bus.c` | two I²C buses, 400 kHz | bus 1 through the contacts (discant), bus 2 in the bass; pins in `pins.h` from ../main_pcb/spec.md |
+| `keyio.c` | ADS7128 × 6 + 3 | auto-sequence over all 8 inputs, the channel ID appended, one 16-byte read per ADC (about 0.4 ms); ALERT left open drain |
+| `nau7802.c` | NAU7802, bus 1, 2Ah | gain 128, 320/s, both cells in turn, 3 conversions dropped after each switch: about 45 force readings/s |
+| `dac.c` | TLV320DAC3100, bus 2, 18h | I²S slave, MCLK 256 fs, NDAC 1, MDAC 2, DOSR 128; headphones, −6 dB digital |
+| `synthesizer.c` | I²S 48 kHz, 64-frame blocks (1.3 ms) | TinySoundFont on the mapped `soundfont` partition, 32 voices, its own task on core 1, notes through a queue |
+| `midi.c` | USB (TinyUSB) | USB-MIDI device "eziach": notes, CC 7, CC 123 |
+| `power.c` | IO40, IO41, IO1, IO42 | discant plugged, USB, battery (1M/1M), low-battery light below 3.4 V without USB |
+| `settings.c` | NVS | key spans, force sign |
+| `app_main.c` | | control loop on core 0 every 1 ms; the discant's ADCs and gauges re-initialised when it is plugged in; console |
+
+The register values of the ADS7128, the NAU7802 and the TLV320DAC3100 follow their
+datasheets (SBAS868A, NAU7802 Rev 2.6, SLAS671) as known without the PDFs at hand
+[unverified: to check against the datasheets and at bring-up].
+
+## 6. Building, flashing, bring-up
+
+```sh
+. ~/esp/esp-idf-v5.5.6/export.sh
+idf.py build                       # generates the key table, fetches esp_tinyusb
+idf.py -p /dev/ttyUSB0 flash monitor   # app and soundfont (sound/ZiachMini.sf2, partition at 0x310000)
+make -C test                       # host tests of the core
+make -C test sf2                   # the soundfont through TinySoundFont on the host
+```
+
+USB belongs to MIDI; flashing and the console go through UART0 (the main board's TX / RX
+test pads, a USB-serial adapter; boot pad to GND for the download mode).
+
+Console commands (`help`): `status`, `keys` (every key's place, ADC input, raw reading,
+span, travel), `cal begin` / `cal end` (each key once to the bottom; saved), `sign` (while
+pushing; saved), `tare`, `log on|off` (notes), `play <board> <row> <key>`.
+
+Bring-up order: `status` (boards, gauges, DAC); `keys`, pressing keys one after the other:
+does each move its own line (the place assumption of §1)?; `cal`; `sign`; `play` and
+`log on` against the old instrument's tones; `status` for the synth's load while playing
+chords.
+
+## 7. Status (2026-11-17)
+
+- Done: configuration and generator; the core with host tests (`make -C test`: key table
+  against ../ctrl's tones, hysteresis, calibration for either pole, re-trigger on reversal,
+  shared chord tones, adjustment mode); the soundfont checked on the host (`make -C test
+  sf2`): one preset "Diskant", 8 looped samples at 44.1 kHz (roots 39-86) over keys
+  0-127; every one of the table's 64 tones sounds, holds while held and is in tune within
+  14 cents; a full chord of 10 tones clipped at 0 dB, so the synth runs at -12 dB (peak
+  -2.7 dBFS) and the DAC at 0 dB; all drivers; builds with ESP-IDF v5.5.6 without warnings
+  (app 404 KB of 3 MB).
+- The bass's lowest tones lie up to 13 half tones under the lowest sample (39): played
+  slower, so darker than the sampled range [to judge by ear].
+- Not yet run on hardware. Open: the register values (§5), the synth's load at full
+  polyphony (TinySoundFont keeps the samples as float in PSRAM), the force's scale
+  (2190 counts/N estimated), the actuation points.

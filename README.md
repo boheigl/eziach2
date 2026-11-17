@@ -33,6 +33,7 @@ halves together and packing away (1 min). Click the preview for the full video.
 | [`strain_gauge/`](strain_gauge/spec.md) | the load cells and their holders, the force path between the halves |
 | [`hall_pcb/`](hall_pcb/spec.md) | the two key boards (DRV5055 per key, ADS7128 ADCs, NAU7802 for the gauges) |
 | [`main_pcb/`](main_pcb/spec.md) | the main board: ESP32-S3, audio DAC, charger, 3.3 V supply |
+| [`firmware/`](firmware/spec.md) | the ESP32-S3's firmware (ESP-IDF): Hall keys, load cells, the tuning table from the first eziach, TinySoundFont on the recorded Steirische to the earphone jack, USB-MIDI |
 | [`contact_pcb/`](contact_pcb/spec.md) | spring-pin contacts that join power and I²C as the halves slide together |
 | [`key_proto/`](key_proto/spec.md) | a test print: 2 rows of 4 keys on a board stand-in in the discant's tray, with the plate for a Bambu Lab X2D |
 | [`thumb-bar/`](thumb-bar/profile.scad) | the discant's thumb bar profile |
@@ -46,6 +47,7 @@ make                    # switch_hall, discant, strain_gauge and key_proto into 
 make -C bass            # the bass and its phone page
 make -C assembly        # both halves together, build/assembly/phone.html
 make -C key_proto       # the 8-key test print, build/key_proto/plate.3mf
+make -C firmware/test   # the firmware's host tests (the firmware itself: idf.py build in firmware/)
 make -C switch_hall video   # the key video (about half an hour)
 make -C assembly promo      # the promo video (about an hour)
 ```

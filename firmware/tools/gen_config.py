@@ -162,13 +162,14 @@ extern const uint8_t keymap_num_adc[KEYMAP_NUM_BOARDS];
 #define CONF_CHANNEL_VOLUMES {%s}
 #define CONF_SAMPLE_RATE %d
 #define CONF_PERIOD_SIZE %d
+#define CONF_SYNTH_GAIN_DB %s
 
 #endif
 """ % (len(qidx), ", ".join(map(str, qidx)), ml["transpose_row"], ml["transpose"], fl(ml["new_force_portion"]),
        ml["velocity"], fl(fo["counts_per_newton"]), fl(fo["threshold"]), fl(fo["offset"]), fl(fo["push_gain"]),
        fl(fo["pull_gain"]), fo["sign"], fl(ke["actuate"]), fl(ke["release"]), ke["default_span"], fl(ke["rest_follow"]),
        sy["soundfont_name"],
-       len(vols), ", ".join(fl(v) for v in vols), sy["sample_rate"], sy["period_size"]))
+       len(vols), ", ".join(fl(v) for v in vols), sy["sample_rate"], sy["period_size"], fl(sy["gain_db"])))
     print("gen_config: %d keys (%s)" % (len(keys), ", ".join(
         "%s %d" % (n, sum(1 for k in keys if k["board"] == b)) for b, (n, _) in enumerate(BOARDS))))
 

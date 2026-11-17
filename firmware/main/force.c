@@ -22,9 +22,19 @@
 #include <math.h>
 
 static float zero = 0.0f;   // counts at no force
+static int sign = CONF_FORCE_SIGN;
 
 void force_init(void) {
 	zero = 0.0f;
+	sign = CONF_FORCE_SIGN;
+}
+
+void force_set_sign(int s) {
+	sign = s < 0 ? -1 : 1;
+}
+
+int force_get_sign(void) {
+	return sign;
 }
 
 void force_tare(int32_t counts) {
@@ -36,7 +46,7 @@ void force_track_zero(int32_t counts, float portion) {
 }
 
 float force_newtons(int32_t counts) {
-	return CONF_FORCE_SIGN * ((float)counts - zero) / CONF_FORCE_COUNTS_PER_NEWTON;
+	return sign * ((float)counts - zero) / CONF_FORCE_COUNTS_PER_NEWTON;
 }
 
 float force_level(float newtons) {

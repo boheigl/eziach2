@@ -36,6 +36,10 @@ void force_tare(int32_t counts);
 // while no key is pressed); `portion` of the difference per call
 void force_track_zero(int32_t counts, float portion);
 
+// which way is push: +1 or -1 (CONF_FORCE_SIGN at start; set once by a push, kept in NVS)
+void force_set_sign(int sign);
+int force_get_sign(void);
+
 // the force in newtons, signed: positive = push
 float force_newtons(int32_t counts);
 

@@ -23,3 +23,14 @@ clean:
 	rm -rf $(B)
 
 .PHONY: run clean
+
+# the soundfont through TinySoundFont, as the synthesizer plays it
+SF2 ?= ../sound/ZiachMini.sf2
+sf2: $(B)/test_sf2
+	./$(B)/test_sf2 $(SF2)
+
+$(B)/test_sf2: test_sf2.c ../components/tinysoundfont/tsf.h $(GEN)/keymap.c $(GEN)/config.h
+	@mkdir -p $(B)
+	$(CC) -std=c11 -O2 -Wall -I../components/tinysoundfont -I$(GEN) -o $@ test_sf2.c $(GEN)/keymap.c -lm
+
+.PHONY: sf2

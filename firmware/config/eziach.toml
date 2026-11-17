@@ -58,4 +58,7 @@ rest_follow = 0.01        # portion of a new reading taken into the rest value w
 soundfont_name = "ZiachMini.sf2"
 channel_volumes = [1.0, 1.0, 0.6]   # per MIDI channel (../ctrl)
 sample_rate = 48000
+# overall gain: a full chord (6 melody tones, a bass tone and a 3-note chord) then peaks at
+# about -2.7 dBFS; at -9 dB it clips (test/test_sf2.c). ../ctrl ran FluidSynth at gain 0.5.
+gain_db = -12.0
 period_size = 64
