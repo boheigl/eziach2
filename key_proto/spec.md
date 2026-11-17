@@ -91,6 +91,14 @@ Settings [chosen; values the printer's profile does not fix]:
 - **No supports.** Seam aligned or at the back. Brim only if the collars come loose
   (4.4 mm footprint).
 
+**Bambu Studio projects:** `make bambu` (needs the Bambu Studio AppImage, `BAMBU=`) turns both
+into projects for the X2D, `plate_x2d.3mf` and `fit_test_x2d.3mf`: printer "Bambu Lab X2D
+0.4 nozzle", filament "Bambu PETG HF @BBL X2D 0.4 nozzle", process "0.16mm Standard @BBL
+X2D" with the settings above laid over it (`bambu.py`), textured PEI plate, the layout kept,
+sliced. Bambu Studio 2.09 estimates 14 min and 2.2 g for the fit test, 1 h 30 min and 34.5 g
+for the plate. Press "Slice plate" once more before sending: the command line leaves the
+plate's printer model id empty, which the GUI fills.
+
 **Fit test first** (`fit_test.3mf`, a few minutes): the press fits are the bushing's seat
 ⌀4.95 (bushing D5), the rod's socket in the cap ⌀2.95 (rod ⌀3) and the magnet's pocket
 ⌀3.05 (magnet ⌀3); the bushing slides in from below through ⌀5.1, and the rim over the

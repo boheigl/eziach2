@@ -44,5 +44,11 @@ key:
 clean:
 	rm -rf $(B)
 
-.PHONY: all clean key
+# Bambu Studio projects for the X2D in PETG, sliced (bambu.py; needs the AppImage, not part of all)
+BAMBU ?= $(HOME)/Applications/BambuStudio.AppImage
+bambu: $(B)/plate_x2d.3mf
+$(B)/plate_x2d.3mf: bambu.py $(B)/plate.3mf
+	@python3 bambu.py $(BAMBU) $(B)
+
+.PHONY: all clean key bambu
 .DELETE_ON_ERROR:
