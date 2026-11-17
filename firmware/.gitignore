@@ -1,0 +1,5 @@
+# ESP-IDF build output, host test build
+build/
+test/build/
+sdkconfig
+sdkconfig.old

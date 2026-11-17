@@ -1,0 +1,61 @@
+# Settings of the firmware, read at build time by tools/gen_config.py.
+# Taken over from ../ctrl/eziach.toml where they still apply; the old matrix pins,
+# the AS5048 and the FluidSynth/ALSA settings are gone with the Raspberry Pi.
+
+[mapping]
+# push/pull tones per key, as ../ctrl: map_push / map_pull, [board][row][key - 1]
+map_name = "GCFB_Michlbauer_versetzt.toml"
+# MIDI channel per key, [board][row][key - 1]: discant 0, bass notes 1, bass chords 2 (as ../ctrl)
+map_channels = [
+ [
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+ ],
+ [
+  [1, 2, 1, 2, 1, 2, 1, 2, 1],
+  [1, 2, 1, 2, 1, 2, 1, 2, 1]
+ ]
+]
+# The table's key order along a row against the board's (key 1 at the lowest X,
+# ../hall_pcb/<board>/board.scad). false: table column c = key c + 1. Set true for a board
+# whose row runs the other way (checked on the instrument, bring-up mode).
+mirror = [false, false]
+
+[main_loop]
+# keys held together to enter / leave adjustment mode: [board, row, key]
+# (../ctrl: matrix 0, row 0, columns 0-2 = discant row 0, keys 1-3)
+quit_keys = [[0, 0, 1], [0, 0, 2], [0, 0, 3]]
+# in adjustment mode a key of this discant row sets the transposition to key - 1 half tones
+transpose_row = 1
+transpose = 2             # half tones at start (../ctrl)
+new_force_portion = 0.2   # exponential smoothing of the force (../ctrl)
+velocity = 50             # note-on velocity; loudness follows the force through CC7 (../ctrl)
+
+[force]
+# The bellows' force from the two load cells (NAU7802, ../strain_gauge/spec.md):
+# 1 mV/V at 490 N, so at 3.3 V excitation 6.73 uV/N per cell; gain 128, 24 bit over
+# 3.3 V: 3.07 nV per count, about 2190 counts per newton per cell [estimated].
+counts_per_newton = 2190.0
+threshold = 0.5           # N: below it the direction is not changed (../ctrl force_threshold)
+offset = 0.3              # N: dead band round zero (../ctrl offset)
+push_gain = 3.2           # volume (0..127) per newton beyond the dead band: 127 at about 40 N
+pull_gain = 3.2
+sign = 1                  # +1 or -1: which way is push, set once by pressing (strain_gauge/spec.md)
+
+[keys]
+# Hall keys (../switch_hall/spec.md §6): actuation and release as fractions of the
+# calibrated travel, rest tracked while a key is released.
+actuate = 0.20
+release = 0.10
+# rest-to-bottom change in ADC counts before a key is calibrated: 32 mT x 15 mV/mT
+# over 0.806 mV per count [estimated]; the sign follows the magnets' pole
+default_span = 600
+rest_follow = 0.01        # portion of a new reading taken into the rest value while released
+
+[synthesizer]
+soundfont_name = "ZiachMini.sf2"
+channel_volumes = [1.0, 1.0, 0.6]   # per MIDI channel (../ctrl)
+sample_rate = 48000
+period_size = 64
