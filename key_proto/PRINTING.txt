@@ -1,0 +1,40 @@
+KEY PROTOTYPE - PRINTING ON A BAMBU LAB X2D
+===========================================
+
+A test piece of 8 button keys for an electronic button accordion (a Steirische
+Harmonika without bellows): a tray, a thin board and a cover with the keys' guide tubes,
+plus 8 key caps and 8 small collars. Everything is PETG.
+
+FILE
+----
+  plate_x2d.3mf      all parts for one prototype, one plate     about 1 h 30 min, 35 g PETG
+
+A finished Bambu Studio project: printer, filament and settings are set, the parts
+already lie the right way up and are placed on the plate.
+
+HOW TO PRINT
+------------
+1. Open the file in Bambu Studio (File > Open Project, or drag it in).
+2. Check the top left: printer "Bambu Lab X2D 0.4 nozzle", filament "Bambu PETG HF"
+   (another PETG is fine: pick its profile), plate "Textured PEI Plate".
+3. Press "Slice plate", then "Print plate" (or export to SD card).
+   Always slice again before printing: the files were made by Bambu Studio's command
+   line, and slicing in the program completes them.
+4. Plate: textured PEI. PETG sticks too well to smooth PEI and can tear it.
+
+Settings already in the files (in case you need to redo them):
+  0.16 mm layers, 3 walls, 5 top and 5 bottom layers, 25 % gyroid infill,
+  no support, no brim (add a brim only if the small collars come loose).
+
+Do not rotate or turn the parts: each one lies on the face it must be printed on.
+The tubes on the cover lean slightly on purpose.
+
+WHAT TO EXPECT
+--------------
+  1 tray       103 x 37 mm, 4.5 mm high, open on top, with small posts inside
+  1 board      100 x 34 mm, 1.6 mm thin plate with 5 holes
+  1 cover      103 x 37 mm plate with 8 tubes about 13 mm high
+  8 caps       15 mm across, 9.5 mm high, printed upside down (flat top on the plate)
+  8 collars    4.4 mm across, 3 mm high, very small - don't lose them
+
+Thank you!

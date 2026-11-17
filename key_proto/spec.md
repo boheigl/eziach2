@@ -99,6 +99,9 @@ sliced. Bambu Studio 2.09 estimates 14 min and 2.2 g for the fit test, 1 h 30 mi
 for the plate. Press "Slice plate" once more before sending: the command line leaves the
 plate's printer model id empty, which the GUI fills.
 
+**For someone else printing on an X2D:** `make zip` packs the plate's project
+(`plate_x2d.3mf`, not the fit test) with `PRINTING.txt`, the instructions, into `build/key_proto/key_proto_x2d.zip`.
+
 **Fit test first** (`fit_test.3mf`, a few minutes): the press fits are the bushing's seat
 ⌀4.95 (bushing D5), the rod's socket in the cap ⌀2.95 (rod ⌀3) and the magnet's pocket
 ⌀3.05 (magnet ⌀3); the bushing slides in from below through ⌀5.1, and the rim over the

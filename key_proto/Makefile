@@ -50,5 +50,10 @@ bambu: $(B)/plate_x2d.3mf
 $(B)/plate_x2d.3mf: bambu.py $(B)/plate.3mf
 	@python3 bambu.py $(BAMBU) $(B)
 
-.PHONY: all clean key bambu
+# the plate's project and PRINTING.txt in one zip, for someone printing on an X2D
+zip: $(B)/key_proto_x2d.zip
+$(B)/key_proto_x2d.zip: PRINTING.txt $(B)/plate_x2d.3mf
+	@echo "  ZIP      $@" && zip -j -q -FS $@ PRINTING.txt $(B)/plate_x2d.3mf
+
+.PHONY: all clean key bambu zip
 .DELETE_ON_ERROR:
