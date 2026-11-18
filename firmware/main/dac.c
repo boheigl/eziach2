@@ -27,8 +27,8 @@
 
 static const char *TAG = "dac";
 
-// TLV320DAC3100 [datasheet SLAS671; the sequence follows its typical programming example,
-// to check at bring-up]. Registers are (page, register).
+// TLV320DAC3100 [datasheet SLAS671, checked 2026-11-18 field by field: P0 R4, R11-14, R27,
+// R60, R63-66; P1 R31, R33, R35-37, R40-41]. Registers are (page, register).
 #define ADDR 0x18
 
 static i2c_master_dev_handle_t dev;

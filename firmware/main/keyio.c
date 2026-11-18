@@ -27,7 +27,9 @@
 
 static const char *TAG = "keyio";
 
-// ADS7128 (= ADS7138's register map) [datasheet SBAS868A; to check at bring-up]
+// ADS7128 (= ADS7138's register map) [datasheet SBAS868A, checked 2026-11-18: Table 9 opcodes,
+// Table 10 register map, GENERAL_CFG RST/CAL, DATA_CFG APPEND_STATUS 01 = channel ID,
+// SEQUENCE_CFG SEQ_MODE 01 / SEQ_START, 8.4.3: read frames start the conversions]
 #define OP_READ  0x10   // single register read: opcode, register, then read
 #define OP_WRITE 0x08   // single register write: opcode, register, data
 #define OP_SET   0x18   // set bits

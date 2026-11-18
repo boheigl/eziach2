@@ -86,9 +86,9 @@ Level for the volume as ../ctrl: dead band 0.3 N, then 3.2 per newton (127 at ab
 | `settings.c` | NVS | key spans, force sign |
 | `app_main.c` | | control loop on core 0 every 1 ms; the discant's ADCs and gauges re-initialised when it is plugged in; console |
 
-The register values of the ADS7128, the NAU7802 and the TLV320DAC3100 follow their
-datasheets (SBAS868A, NAU7802 Rev 2.6, SLAS671) as known without the PDFs at hand
-[unverified: to check against the datasheets and at bring-up].
+Register values: the ADS7128's and the TLV320DAC3100's checked against their datasheets
+(SBAS868A, SLAS671) on 2026-11-18, every field the firmware writes; the NAU7802's from its
+datasheet as known, without the PDF at hand [unverified: to check against Rev 2.6].
 
 ## 6. Building, flashing, bring-up
 
@@ -130,6 +130,6 @@ chords.
   than it starts [to judge by ear].
 - The bass's lowest tones lie up to 13 half tones under the lowest sample (39): played
   slower, so darker than the sampled range [to judge by ear].
-- Not yet run on hardware. Open: the register values (§5), the synth's load at full
+- Not yet run on hardware. Open: the NAU7802's register values (§5), the synth's load at full
   polyphony (TinySoundFont keeps the samples as float in PSRAM), the force's scale
   (2190 counts/N estimated), the actuation points.
