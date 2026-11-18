@@ -80,9 +80,16 @@ pad_d   = 4.5;
 
 module bx(x, y, z) translate([x[0], y[0], z[0]]) cube([x[1] - x[0], y[1] - y[0], z[1] - z[0]]);
 
+// the tab under the USB socket (../main_pcb/design.py USB_TAB), into a pocket of the side wall
+tab_x  = [pwr_x[1], mx(main_usb_tab[0])];
+tab_z  = [mz(main_usb_tab[1]), mz(main_usb_tab[2])];
+
 module power_board() {
     difference() {
-        bx(pwr_x, brd_y, pwr_z);
+        union() {
+            bx(pwr_x, brd_y, pwr_z);
+            bx(tab_x, brd_y, tab_z);
+        }
         for (p = pilots) translate([p[0], brd_y[0] - 1, p[1]]) rotate([-90, 0, 0]) cylinder(d = 2.2, h = 3, $fn = 16);
     }
     // its parts, from KiCad (../main_pcb/board.scad); the socket and the jack drawn below
@@ -97,6 +104,9 @@ module power_board() {
 module elec_cuts() {
     translate([box_x[1] - 3, usb_yc, usb_z]) rotate([0, 90, 0]) linear_extrude(4)
         offset(r = 1.2) offset(delta = -1.2) square([usb[1] + 0.5, usb[2] + 0.5], center = true);
+    // the pocket for the board's tab [given 2026-11-18: way B]: fit all round; the board slides
+    // into it with the socket into its port (back cover off, the board 2 mm off the wall first)
+    bx([pwr_x[1] - 1, tab_x[1] + fit], [brd_y[0] - fit, brd_y[1] + fit], [tab_z[0] - fit, tab_z[1] + fit]);
     translate([box_x[1] - 3, brd_y[1] + led_h / 2, led_z]) rotate([0, 90, 0]) cylinder(d = 1.6, h = 4, $fn = 16);
     jack_cuts();
     for (p = pilots) translate([p[0], plate_y[1] - 2.0, p[1]]) rotate([-90, 0, 0]) cylinder(d = 1.7, h = 3, $fn = 16);

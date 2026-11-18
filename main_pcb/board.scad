@@ -2,6 +2,7 @@
 // board frame: X from the side wall's edge of the board, Y up, seen from the parts; W up from the top face
 main_w = 45.5; main_h = 33.0; main_t = 1.0;
 main_holes = [[4.4, 30.6], [25.0, 30.6], [22.4, 2.6]];
+main_usb_tab = [-0.8, 15.8, 26.8];          // X of its end, Y from .. to: the tab under the USB socket
 main_hole_d = 2.2; main_head_d = 4.4;
 main_jack_y = 9.8;          // the earphone jack's axis (Y), over the board
 main_led_y = 29.0;           // the charge light's lens (Y), at the edge

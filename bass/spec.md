@@ -149,7 +149,9 @@ keys: `../BOM.md`.
     with power path and a fuse (the cell brings its own protection), the system switch
     (DET) and the 3.3 V supply (TPS63001) for both halves; four layers, parts on the
     side towards the back cover (`../main_pcb/`, whose `board.scad` this file reads).
-    In the side wall: USB-C (z −104.5; charging, firmware, MIDI), the charge light (red charging or battery low, green full) and
+    In the side wall: USB-C (z −104.5; charging, firmware, MIDI; the board's tab under
+    the socket in a 0.65 mm pocket of the wall, 1.35 mm of wall left, see
+    `../main_pcb/spec.md`), the charge light (red charging or battery low, green full) and
     the earphone jack [given 2026-11-15: a panel jack in the case, a bulge in the back
     cover allowed]: Switchcraft 35PRM3, from inside through the side wall (⌀6.2, the
     wall 1.5 at a ⌀10.5 counterbore for its knurled nut), its body over the main board

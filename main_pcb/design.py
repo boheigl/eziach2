@@ -15,7 +15,14 @@ the top; the underside lies 0.47 mm over the front wall.
 
 W, H = 45.5, 33.0                 # board outline [given: elec.scad]
 PCB_T = 1.0                       # [given: elec.scad pcb_tk]
-OUTLINE = [(0, 0), (W, 0), (W, H), (0, H)]
+# a tab under the USB socket, into a pocket of the side wall [given 2026-11-18: way B]: the
+# socket stands 1.95 beyond the board's edge, so its front shell legs (slots to X -0.05,
+# copper to X -0.25) lay on the edge, cut by the router. With the tab to X -0.8 their copper
+# keeps 0.55 from the edge, the slots 0.75. The board's edge lies 0.45 inside the wall, so
+# the tab stands 0.35 into it (the pocket: ../bass/elec.scad elec_cuts()).
+USB_TAB = (-0.8, 15.8, 26.8)      # X of its end, Y from .. to (the socket's legs: Y 16.48 .. 26.12)
+OUTLINE = [(0, 0), (W, 0), (W, H), (0, H),
+           (0, USB_TAB[2]), (USB_TAB[0], USB_TAB[2]), (USB_TAB[0], USB_TAB[1]), (0, USB_TAB[1])]
 # M2 screws from the parts' side into pilots in the front wall; head clearance d 4.4
 # placed clear of the hand plate's former 1 mm recess (gone since 2026-11-15)
 HOLES = [(4.4, 30.6), (25.0, 30.6), (22.4, 2.6)]

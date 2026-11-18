@@ -22,6 +22,12 @@ includes. The scripts come from `../hall_pcb/` and from the discant's old main b
   bass's z), seen from the parts. USB-C and charge light sit at X = 0, in the side
   wall: USB-C at Y 21.3 (z −104.5), light at Y 29.0. The earphone jack is the case's
   (§2), its axis over the board at Y 9.8.
+- **USB tab** [given 2026-11-18: way B]: the board reaches 0.8 mm past X = 0 from Y 15.8
+  to 26.8, under the USB socket, so the socket's front shell legs and their slots sit
+  inside the board (copper 0.55 mm, slots 0.75 mm from the tab's edge) instead of at
+  the edge. The tab lies in a pocket of the side wall (`../bass/elec.scad`): 0.35 mm
+  into the wall, the pocket 0.3 mm larger all round, 1.35 mm of wall left outside it.
+  The board goes in with the back cover off, slid sideways into the pocket.
 - **Four layers** [chosen]: top, ground plane, signals, bottom. The bottom carries no
   parts, so it routes freely; all four are filled with ground where nothing else runs.
   Tracks 0.127 mm, power 0.4 mm where it fits; vias 0.45 / 0.2.
@@ -167,13 +173,14 @@ track, D2 to the regulator.
   VINA through 100 Ω); 10 µF in (≥ 4.7 µF), 3 × 22 µF out (15 µF nominal) are within
   its advice. L1 is 2.2 µH as in all the datasheet's examples [chosen 2026-11-15; was
   1.5 µH], 1008, Isat 2 A (peak about 0.82 A at 3.0 V, by Equation 4).
-- **Routing** [2026-11-16, with the battery's NTC on P17 (R5 gone), R8 68k and R14
-  100k; before 2026-11-15 with the charge light, the low-battery switch and the panel
-  jack's pads]: all nets routed (four tries, the best kept); KiCad's DRC finds no
-  clearance errors, shorts or open connections. The try before left EN_SYS and TXD0
-  open; R16 beside D2 and the TX/RX pads nearer the module (§4) fixed that. What it
-  still lists: the USB socket's shell pads at the board's edge (they reach past it by
-  design), courtyards (wire pads, module antenna keepout), silkscreen, and three GND
-  pads with fewer thermal spokes. In the bass: no clash with case, back cover, wires or
-  battery.
+- **Routing** [2026-11-18, with the USB tab; before 2026-11-16 with the battery's NTC on
+  P17 (R5 gone), R8 68k and R14 100k, and 2026-11-15 with the charge light, the
+  low-battery switch and the panel jack's pads]: all nets routed (the fifth of six tries,
+  `MAIN_TRIES=6`; a run of three got no further than 1.6 µm short of clearance between
+  L2 and DET); KiCad's DRC finds no clearance or edge errors, shorts or open
+  connections. The USB socket's shell pads, which reached past the edge before, are now
+  inside the tab. What it still lists: courtyards (wire pads, module antenna keepout),
+  silkscreen, and U6's GND pad with one thermal spoke. In the bass: no clash with the
+  case (the tab in its pocket checked against the case, with shifted controls that
+  overlap).
 - The DAC's speaker outputs are left open (earphones only).
