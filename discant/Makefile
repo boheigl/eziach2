@@ -63,10 +63,22 @@ $(B)/phone.html: phone.html embed_parts.py viewer_nav.js $(BODY_STL) $(B)/board.
 	@echo "  EMBED    $@"
 	@$(PYTHON) embed_parts.py $< $@ --keys ../hall_pcb/discant/board.scad $(PHONE_PARTS)
 
+# --- printing (print.scad, spec.md Printing): the holder's test piece as printed, on the plate
+# (plate.py), and as a sliced Bambu Studio project for the X2D in PETG (../key_proto/bambu.py;
+# needs the AppImage, not part of all)
+$(B)/print_holder_test.stl: print.scad $(B)/housing.stl
+	$(call scad,$<,-D 'part="holder_test"')
+$(B)/holder_test.3mf: plate.py ../key_proto/plate.py $(B)/print_holder_test.stl
+	@echo "  PLATE    $@" && $(PYTHON) plate.py $(B)
+BAMBU ?= $(HOME)/Applications/BambuStudio.AppImage
+bambu: $(B)/holder_test_x2d.3mf
+$(B)/holder_test_x2d.3mf: ../key_proto/bambu.py $(B)/holder_test.3mf
+	@$(PYTHON) ../key_proto/bambu.py $(BAMBU) $(B) holder_test
+
 clean:
 	rm -rf $(B)
 
-.PHONY: all clean key gauge
+.PHONY: all clean key gauge bambu
 .DELETE_ON_ERROR:
 
 -include $(wildcard $(B)/.deps/*.d)

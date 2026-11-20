@@ -117,8 +117,8 @@ Checked (2026-11-20, solids, controls overlapping): played, the tongues are clea
 bass's slots (shifted 0.85 in z they touch, from both sides) and of case, back cover,
 boards, electronics, battery, wires, rod, pins and strap; the screws as set clear of tongue and roof
 (0.05 off; shifted 0.2 they touch); stored, the discant is clear of all of them too.
-Printing: the tongue's underside is an overhang like the holders' lower halves, where
-the housing's printing orientation is still open (`../discant/spec.md` §4).
+Printing: the housing prints standing, holders up (`../discant/spec.md`, Printing); there
+the tongue stands out sideways and has a 45° gusset under it, in front of the bass's block.
 
 ## Electronics split, contacts and power [given: power and I2C cross by contacts that close as the bass slides on; plugging for playing switches the system on; the bass charges by its own USB socket, also stored; the electronics moved from the discant to the bass]
 

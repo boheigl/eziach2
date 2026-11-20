@@ -124,10 +124,38 @@ z −19 (the old foot below, which held the old cover, left out): 0.2 mm rms, 0.
 ## 4. Open points
 
 1. **Plate fit** in the outer holders, 0.15 mm, printed in the housing (§7) [unverified].
+   Print the test piece first (Printing): `make bambu` writes `holder_test_x2d.3mf`,
+   one gauge's corner of the housing standing as in the whole print (outer holder with
+   its slot, dowel pin holes, the stop's tongue, cut level in the pad), 47 × 11 × 30 mm,
+   about 31 min and 6.6 g [Bambu Studio's estimate]. The bought plate should slide in to
+   the pad with no play to feel and no force; the pin then goes through.
 2. **Thumb bar lobes:** supports when printing the cover (§3.2) [unverified].
-3. **Housing's printing orientation:** the outer holders stand out above and below the
-   tray, and the overload stops' tongues (§7) overhang on their undersides: supports, or
-   another orientation [open].
+3. **Standing print's stability** (below) [unverified]: 101 mm tall on a narrow edge.
+
+## Printing [given 2026-11-20: standing, on a 256 × 256 bed (Bambu Lab X2D, PETG)]
+
+- **Housing: standing on its front edge, the outer holders up, diagonal on the bed.**
+  271 × 100 × 27 mm, too long for the bed lying straight; standing it takes 271 × 11 mm,
+  about 200 mm along the diagonal, 101 mm high.
+  - Why [computed from `housing.stl`]: lying flat, the holders stand 2.5 mm below the
+    tray's bottom, so the whole bottom (about 17 500 mm² of overhang) would print on
+    supports, and the plate's fit (0.15 mm a face) would lie in the layer height with the
+    slots' roofs as bridges. Standing, both fitted sizes of the plate's slots lie in the
+    plane of the layers (`../strain_gauge/spec.md` §8), holders and bottom grow without
+    overhang, about 2 500 mm² of small overhangs are left (bosses, ledges), and the bottom
+    stays flat and smooth. The overload stops' tongues stand out sideways there, so each
+    has a 45° gusset under it (`gauge_link.scad`). On the holders' tips it would be top-heavy (the
+    tray 100 mm up on two small feet).
+  - Moving the plates' plane 2.5 mm so the holders are flush with the bottom (to print
+    it flat) was weighed and not done: the measurement would not suffer (a few % of
+    arm, set by calibration), but the plate's fit would then lie in the layer height,
+    and the wire channels, pad, boss and the stored position would all change.
+  - Against wobbling at the top, where the holders are: a wide brim (8–10 mm), slower
+    outer walls in the top third, and a few break-off ribs at the sides, added in the
+    slicer.
+- **Cover: flat, top down, diagonal** (271 × 73 × 29 mm, about 214 mm along the
+  diagonal): the plate on the bed, the tubes up; supports only under the thumb bar's lobes
+  if needed (point 2).
 
 ## 5. Files
 
@@ -145,7 +173,8 @@ rebuilding only what changed; it first has `../switch_hall/` build the key's par
 | `keys.scad`, `keys.stl`, `keys_down.stl` | the 46 keys in place, at rest and pressed (springs left out) |
 | `gauge_link.scad`, `gauge_link.stl` | two strain gauges (plates) with their pins, the contact board, and the wires from contacts and gauges to the board's pads; the outer holders, pad, groove and channels are in the housing (§7) |
 | `phone.html`, `embed_parts.py`, `viewer_nav.js` | phone view of the discant: board, parts, housing, cover, link and the keys, with Press, a section and gestures. `make` writes `build/discant/phone.html` with every part embedded by `embed_parts.py`, one file that loads nothing else, so it also works in the claude.ai viewer on a phone |
-| `Makefile` | builds the files above |
+| `print.scad`, `plate.py` | the housing as printed (standing, holders up) and its test piece `print_holder_test.stl` (Printing); `plate.py` puts the test piece on the X2D's plate, `holder_test.3mf` |
+| `Makefile` | builds the files above; `make bambu` also the sliced Bambu Studio project `holder_test_x2d.3mf` (X2D, PETG, 0.2 mm; `../key_proto/bambu.py`, needs the AppImage) |
 
 ## 6. The key board's bus [given 2026-11-13: one Hall-sensor board for all 46 keys; the electronics in the bass]
 

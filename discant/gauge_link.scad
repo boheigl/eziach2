@@ -140,8 +140,16 @@ module gauge_holders() {
     gauge_stop_tongues();
 }
 // part of the housing: the overload stops' tongues, with the upper screw's insert hole
+// Under it a 45° gusset down the holder's face: the housing prints standing, holders up
+// (spec.md, Printing), where the tongue's -y face would hang out flat; the gusset lies in
+// front of the bass's block (its front at stop_y[0] + 1.5).
 module gauge_stop_tongues() gauge_tilt_frame() for (d = [-1, 1]) mirror([d < 0 ? 1 : 0, 0, 0]) difference() {
-    box([gauge_x + stop_x[0], gauge_x + stop_x[1]], stop_y, stop_z);
+    union() {
+        box([gauge_x + stop_x[0], gauge_x + stop_x[1]], stop_y, stop_z);
+        translate([0, 0, stop_z[0]]) linear_extrude(stop_z[1] - stop_z[0])
+            polygon([[gauge_x + stop_x[0], stop_y[0] + 0.01], [gauge_x + stop_x[1], stop_y[0] + 0.01],
+                     [gauge_x + stop_x[0], stop_y[0] - (stop_x[1] - stop_x[0])]]);
+    }
     translate([gauge_x + stop_sx, stop_s2, stop_z[0] - 0.01]) cylinder(d = stop_ins[0], h = stop_z[1] - stop_z[0] + 0.02);
 }
 // a point under the board, in local coordinates: X, Y of the board, W in the gap under it

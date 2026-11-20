@@ -2,12 +2,13 @@
 """Turns plate.3mf and fit_test.3mf into Bambu Studio projects for the Bambu Lab X2D in
 PETG, sliced, so they open without the "not from Bambu Lab" note and print as they are.
 
-    python3 bambu.py APPIMAGE BUILD_DIR
+    python3 bambu.py APPIMAGE BUILD_DIR [NAME ...]
 
 Takes the system profiles out of the Bambu Studio AppImage (its profiles inherit from one
 another; the command line wants them whole), lays the spec's settings over the process
 (spec.md, Printing), and has Bambu Studio's command line load each 3MF, keep its layout,
-slice it and save it as a project: BUILD_DIR/plate_x2d.3mf, BUILD_DIR/fit_test_x2d.3mf.
+slice it and save it as a project: BUILD_DIR/<NAME>_x2d.3mf for each BUILD_DIR/<NAME>.3mf
+(default plate and fit_test; ../discant/Makefile passes holder_test).
 
 The command line leaves the plate's printer_model_id empty (the G-code itself names the
 X2D); pressing "Slice plate" in Bambu Studio before sending fills it, as for any project.
@@ -52,7 +53,7 @@ def flat(idx, name):
     return out
 
 
-def main(appimage, build):
+def main(appimage, build, names=("plate", "fit_test")):
     work = os.path.join(build, ".bambu")          # the extracted profiles and the whole presets
     os.makedirs(work, exist_ok=True)
     subprocess.run([appimage, "--appimage-extract", "resources/profiles/BBL/*"], cwd=work,
@@ -64,7 +65,7 @@ def main(appimage, build):
     filament = flat(idx, FILAMENT)
     process.update(PROCESS_SET)
     # whole presets, marked as the user's own based on the system ones
-    for p, name, base in ((machine, MACHINE, MACHINE), (process, PROCESS + " - key proto", PROCESS),
+    for p, name, base in ((machine, MACHINE, MACHINE), (process, PROCESS + " - " + os.path.basename(build).replace("_", " "), PROCESS),
                           (filament, FILAMENT, FILAMENT)):
         p["name"] = name
         p["from"] = "User" if p is process else "system"
@@ -76,7 +77,7 @@ def main(appimage, build):
         paths[key] = os.path.join(work, key + ".json")
         json.dump(p, open(paths[key], "w"), indent=1)
 
-    for src, dst in (("plate.3mf", "plate_x2d.3mf"), ("fit_test.3mf", "fit_test_x2d.3mf")):
+    for src, dst in ((n + ".3mf", n + "_x2d.3mf") for n in names):
         cmd = [appimage, "--debug", "2",
                "--load-settings", paths["machine"] + ";" + paths["process"],
                "--load-filaments", paths["filament"],
@@ -92,4 +93,5 @@ def main(appimage, build):
 
 
 if __name__ == "__main__":
-    main(os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2] if len(sys.argv) > 2 else "../build/key_proto"))
+    main(os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2] if len(sys.argv) > 2 else "../build/key_proto"),
+         sys.argv[3:] or ("plate", "fit_test"))
