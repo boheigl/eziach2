@@ -89,8 +89,9 @@ keys: `../BOM.md`.
   reach the back wall in the mount's strip. The moment goes into the walls as tension
   and compression: a few MPa. The inner holders' walls are 4.5 mm [given: thicker], their
   bending stress about 44 % of before (15–25 MPa). Hand plate about 8 MPa at 200 N under a
-  palm. **Not covered:** the gauge plates themselves: 100 N is 2.3–4.5 × their range and
-  bends ordinary steel permanently; an overload stop is open (`../discant/spec.md` §7).
+  palm. The gauge plates: 100 N is 0.9–1.8 × the bought cells' rated moment (2 × 3430 N·mm), up
+  to 1.2 × their 150 %, more on one cell off centre; **overload stops** beside the mount
+  take what passes a set force (`../assembly/spec.md`, Overload stops).
 - **Deck** [given 2026-11-13: one Hall-sensor board, the cases as small as possible]: a
   thin tray round the flat board, as the discant's (`../discant/spec.md` §2): a rim up to
   the board's top, a floor 0.3 under the parts, a ledge along the board's edge and a boss
@@ -206,7 +207,9 @@ keys: `../BOM.md`.
   discant's housing; the flexure plate; and the inner holder, printed with the bass.
   Both inner holders stand on one mount (76 × 6 × 10.8 mm, where the discant's link plate
   was) on the back of the hand plate at the bass's −z end, flush with its lower edge and
-  centred on it, one print with the case.
+  centred on it, one print with the case. Beside it, outboard of each inner holder, a
+  block with the overload stop's slot reaches forward round the discant's tongue
+  (`../assembly/spec.md`, Overload stops).
 - **Orientation** [given: the gauges point along the bass's y and sense along its z]: the
   discant is turned 180° about z, its y pointing back into the bass and its z staying the
   bass's z; the plates stand in the step behind the thin box; the gauges reach 11 mm past the

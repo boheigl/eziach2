@@ -74,6 +74,52 @@ arms, so the force still runs through the gauges' columns.
 Checked: seated, teeth and plates clear; moved 0.3 mm in the pull-off direction, the
 teeth of both positions meet the slots' ends.
 
+## Overload stops [given 2026-11-20: adjustable screw stops]
+
+Why: the cells take 3430 N·mm each at their rating, 150 % (5145 N·mm) without harm
+[seller, `../strain_gauge/spec.md` §4a]. Playing hard is about 30–60 N on the hand plate
+at 56 mm, 1700–3400 N·mm on the two [estimate]; a hard push, 100 N at 64–125 mm, is
+6400–12 500 N·mm, and an off-centre one puts most of it on one cell.
+
+What: beside each gauge, outboard, a tongue 8.4 × 9.6 × 5 mm stands out from the outer
+holder's outboard face (the discant's housing, `../discant/gauge_link.scad`); the bass's
+mount reaches forward round it with a slot 0.8 mm wider than the tongue above and below,
+open to the holder (`../bass/link.scad`). The tongue stays within the holder's length, so
+the stored discant's pocket in the deck keeps its depth. Per side:
+- **S1:** grub screw M3 × 4 (ISO 4026, flat point) in a heat-set insert M3 (hole ⌀4.0,
+  4 long) in the slot's floor, from below; its tip stops the tongue going down.
+- **S2:** grub screw M3 × 6 in a heat-set insert in the tongue, from below through a slot
+  in the bass's floor open to the front (the screw's foot slides in with the tongue); its
+  tip against the slot's roof stops the tongue going up.
+So 4 grub screws (2 × M3 × 4, 2 × M3 × 6), 4 inserts M3 [unverified: the insert bought,
+hole and length to match]. Both screws are turned from below with a 1.5 mm key.
+
+Setting, by load, once per side and direction (two people, or the console's `status`
+called again and again):
+1. Both screws backed off (tips under the surfaces); `tare` with nothing touched.
+2. Load the bass the way it will be played, to the set force: **about 40 N at the hand
+   plate's top edge** (push, through a kitchen scale under the palm), and **about 70 N on
+   the strap** (pull, a luggage scale on the strap's middle); about 5000 N·mm, 1.5 × the
+   hardest playing and half the cells' 150 % [chosen].
+3. Holding it, turn one screw of the side in: the one whose turning makes that side's cell
+   reading (`status`, cells) drop is the stop for this direction. Turn it until the
+   reading has dropped a little, then back until it just stops changing; unloaded, the
+   tip then stands its share of the gap off.
+4. Secure the screw: a drop of medium threadlocker on the screw, kept off the plastic
+   (anaerobic threadlockers crack PETG), or a second grub screw on top in the same insert
+   as a lock.
+5. Repeat for the other direction and the other side; then `tare` again.
+
+Up to the set force the cells carry it all and read true; past it the screws take the
+rest. A check: pressing harder than the set force, the reading stays nearly flat.
+
+Checked (2026-11-20, solids, controls overlapping): played, the tongues are clear of the
+bass's slots (shifted 0.85 in z they touch, from both sides) and of case, back cover,
+boards, electronics, battery, wires, rod, pins and strap; the screws as set clear of tongue and roof
+(0.05 off; shifted 0.2 they touch); stored, the discant is clear of all of them too.
+Printing: the tongue's underside is an overhang like the holders' lower halves, where
+the housing's printing orientation is still open (`../discant/spec.md` §4).
+
 ## Electronics split, contacts and power [given: power and I2C cross by contacts that close as the bass slides on; plugging for playing switches the system on; the bass charges by its own USB socket, also stored; the electronics moved from the discant to the bass]
 
 - **Bass** (`../bass/elec.scad`): everything that is not key reading: the ESP32-S3, the

@@ -125,6 +125,9 @@ z −19 (the old foot below, which held the old cover, left out): 0.2 mm rms, 0.
 
 1. **Plate fit** in the outer holders, 0.15 mm, printed in the housing (§7) [unverified].
 2. **Thumb bar lobes:** supports when printing the cover (§3.2) [unverified].
+3. **Housing's printing orientation:** the outer holders stand out above and below the
+   tray, and the overload stops' tongues (§7) overhang on their undersides: supports, or
+   another orientation [open].
 
 ## 5. Files
 
@@ -215,7 +218,10 @@ git history.
   to ±0.65 mm [given 2026-11-20: glue only; review/contact_pcb.md MINOR 5].
   The latches in the inner holders carry the load, not the contacts.
   `../assembly/spec.md`, Contacts.
-- **Overload:** no stop needed [2026-11-15]: the bought load cells are rated 490 N with 150 % overload; 100 N is a fifth of that (`../strain_gauge/spec.md` §4a).
+- **Overload stops** [given 2026-11-20: adjustable screw stops; replaces "no stop needed" of
+  2026-11-15, which compared the push with the cells' 490 N and left out the arm]: a tongue
+  on each outer holder's outboard face, in a slot of the bass's mount, with two grub
+  screws set by load (`../assembly/spec.md`, Overload stops).
 
 Checked by solid intersection (2026-11-15, with the NAU7802 on the board; control pair
 overlapping): the wires touch only the pads they end at; housing, board, its parts and

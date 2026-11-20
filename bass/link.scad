@@ -84,17 +84,53 @@ cav      = [pcb_y + pcb[2], 3.6];  // the cavity behind the board, for the wires
 chan_d   = 2.6;  chan_dz = -2.6; // the wires' bore through mount and back wall: at z_bot + 3.3, the middle of the slot under the case's foot
 module contact_chan() translate([0, cav[0] + 2, gz + chan_dz]) rotate([-90, 0, 0]) cylinder(d = chan_d, h = 14);
 
+// --- OVERLOAD STOPS [given 2026-11-20: adjustable screw stops; ../discant/gauge_link.scad]:
+// beside each inner holder, outboard, a block on the mount reaches forward past the outer
+// holder's tip, round the discant's tongue, with a slot open to the holder. The slot is
+// stop_gap wider than the tongue above and below; the screws close it: S1, a grub screw
+// M3 x 4 in an insert in the slot's floor, tip up against the tongue; S2, M3 x 6 in the
+// tongue's insert, tip up against the slot's roof, turned through a slot in the floor open
+// to the front (the screw's foot slides in with the tongue). Both from below. The blocks
+// reach from the box's bottom (the holders' bottoms) to stop_top.
+st       = gauge_stop();         // [x, y, z, screws' x, S1 y, S2 y, insert]
+stop_gap = 0.8;                  // the slot round the tongue, above and below, before the screws are set
+stop_c   = 0.4;                  // clearances: to the outer holder, and round the tongue's end and edge
+stop_out = 3.4;                  // the block's outer wall beyond the tongue's edge (with stop_c)
+stop_bx  = 36.9;                 // behind the holder's tip the block reaches in to the mount's end (the inner holder ends at 36.5)
+stop_top = st[2][1] + stop_gap + 4;
+stop_key = 3.4;                  // the floor's slot for S2: wide enough for the screw and its key
+stop_fy  = st[1][0] + 1.5;       // the block's front
+hold_out = 25 + 19.2;            // the outer holder's outboard face: gauge_dx + its half width (../strain_gauge/outer_holder.scad)
+module stop_blocks() for (d = [-1, 1]) mirror([d < 0 ? 1 : 0, 0, 0]) {
+    box([gauge_x + stop_bx, gauge_x + st[0][1] + stop_out], [tip_y + 0.1, link_y + mount_t], [gz - hold_lo, stop_top]);
+    box([gauge_x + hold_out + stop_c, gauge_x + st[0][1] + stop_out], [stop_fy, tip_y + 0.2], [gz - hold_lo, stop_top]);
+}
+module stop_cuts() for (d = [-1, 1]) mirror([d < 0 ? 1 : 0, 0, 0]) {
+    box([gauge_x + hold_out, gauge_x + st[0][1] + stop_c], [stop_fy - 1, st[1][1] + stop_c],
+        [st[2][0] - stop_gap, st[2][1] + stop_gap]);                                                    // the slot
+    translate([gauge_x + st[3], st[4], gz - hold_lo - 0.01]) cylinder(d = st[6][0], h = st[2][0] - stop_gap - (gz - hold_lo) + 0.02);   // S1's insert
+    box([gauge_x + st[3] - stop_key / 2, gauge_x + st[3] + stop_key / 2], [stop_fy - 1, st[5] + stop_key / 2],
+        [gz - hold_lo - 0.01, st[2][0] - stop_gap + 0.01]);                                              // S2's way through the floor
+}
+// the four grub screws as set (tips at the tongue and the roof), for the page and the checks
+module stop_screws() to_bass() gauge_tilt_frame() for (d = [-1, 1]) mirror([d < 0 ? 1 : 0, 0, 0]) {
+    translate([gauge_x + st[3], st[4], st[2][0] - 0.05 - 4]) cylinder(d = 3, h = 4, $fn = 16);       // S1, M3 x 4
+    translate([gauge_x + st[3], st[5], st[2][1] + stop_gap - 0.05 - 6]) cylinder(d = 3, h = 6, $fn = 16);   // S2, M3 x 6
+}
+
 module mount() to_bass() {
     difference() {
         gauge_tilt_frame() union() {
             box([gauge_x - mount_x, gauge_x + mount_x], [link_y - 0.01, link_y + mount_t], [gz - half_h, gz + half_h]);
             box([-blk_hw, blk_hw], [blk_y[0], blk_y[1] + 0.01], [gz - blk_hh, gz + blk_hh]);
             box([-blk_hw2, blk_hw2], [tip_y, blk_y[1] + 0.01], [gz - blk_hh, gz + blk_hh]);
+            stop_blocks();
         }
         gauge_tilt_frame() {
             box([-pcb[0] - pcb_c, pcb[0] + pcb_c], [blk_y[0] - 1, cav[0] + 0.01], [gz - pcb[1] - pcb_c, gz + pcb[1] + pcb_c]);   // the pocket
             box([-cav[1], cav[1]], [cav[0], link_y + mount_t - 1.5], [gz - cav[1], gz + cav[1]]);
             contact_chan();
+            stop_cuts();
         }
     }
     for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/inner_holder.stl");
@@ -125,6 +161,7 @@ module contact_pins() to_bass() gauge_tilt_frame() {
 module discant_side() to_bass() {
     gauge();
     for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/outer_holder.stl");
+    gauge_stop_tongues();
 }
 
 // --- STORED [given: plugged, not hinged; in the other plug position the bass covers the
@@ -165,9 +202,10 @@ module store_socket() to_store() for (d = [-1, 1]) at_gauge(d)
         translate([-50, -30, -50]) cube([100, 30 - 12.5 + socket_e, 100]);
     }
 // the room the discant's gauge ends need: their outline seen along the plates, from the
-// outer holders' tips (discant y 89.6) and 0.5 more, down past the deck's underside
+// ends of the overload stops' tongues (discant y 96.5; the outer holders' tips 89.6) and 0.5
+// more, down past the deck's underside
 module store_pocket() to_store() difference() {
-    gauge_tilt_frame() translate([0, 40, 0]) rotate([-90, 0, 0]) linear_extrude(89.6 + 0.5 - 40)
+    gauge_tilt_frame() translate([0, 40, 0]) rotate([-90, 0, 0]) linear_extrude(st[1][1] + 0.5 - 40)
         offset(delta = 0.4) projection() rotate([90, 0, 0]) intersection() {
             gauge_untilt() union() { gauge(); gauge_holders(); contact_board(); }
             translate([-200, 80, -50]) cube([400, 30, 100]);
@@ -177,9 +215,10 @@ module store_pocket() to_store() difference() {
 
 echo(str("gauge mount on the plate at ", at, "; stored discant at ", store_at));
 
-part = "mount";                   // "mount", "discant", "socket", "pocket", "rod" or "pins"
+part = "mount";                   // "mount", "discant", "socket", "pocket", "rod", "pins" or "stops" (the grub screws)
 if (part == "mount") mount();
 if (part == "pins") contact_pins();
+if (part == "stops") stop_screws();
 if (part == "rod") to_bass() latch_rod_body();
 if (part == "discant") discant_side();
 if (part == "socket") store_socket();

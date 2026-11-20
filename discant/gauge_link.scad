@@ -84,6 +84,27 @@ contact_rec = [3.6, 1.5];        // the recess behind the board for the wires' j
 contact_bore = 2.2;
 contact_wire_d = 1.4;            // five AWG 30 PTFE (⌀0.55 each) bundled (../assembly/spec.md, Wiring)
 
+/* [Overload stops (local) [given 2026-11-20: adjustable screw stops]] */
+// The bought cells take 490 N at their 7 mm arm, 3430 N·mm, 150 % (5145 N·mm) without
+// harm [seller]; a hard push on the bass's hand plate puts 6400-12500 N·mm on the two
+// (100 N at 64-125 mm), more on one when the push is off centre (../strain_gauge/spec.md
+// §4a). So each gauge gets two stops beside it: a tongue, 5 thick in z (the sensing
+// direction), stands out from its outer holder's outboard face, and the bass's mount
+// reaches forward round it with a slot open to the holder (../bass/link.scad); a grub
+// screw in the slot's floor stops the tongue going down, one in an insert in the tongue,
+// its tip against the slot's roof, stops it going up. Both are set from below, by load
+// (../assembly/spec.md, Overload stops): up to the set force the cells carry it all, past
+// it the screws take the rest. The tongue stays within the holder's length (to its tip,
+// 89.6), so the stored discant's pocket in the deck keeps its depth.
+stop_x   = [43.7, 52.6];         // the tongue across: 0.5 into the holder's outboard wall (to 44.2), 8.4 out
+stop_y   = [80, 89.6];           // along: to the holder's tip
+stop_z   = [gauge_z - 1.0, gauge_z + 4.0];
+stop_sx  = 48.6;                 // both screws' x
+stop_s2  = 83.4;                 // the screw in the tongue (up against the slot's roof): y
+stop_s1  = 87.4;                 // the screw in the slot's floor (up against the tongue): y
+stop_ins = [4.0, 4.0];           // heat-set insert M3: hole diameter, length [unverified: the insert bought]
+function gauge_stop() = [stop_x, stop_y, stop_z, stop_sx, stop_s1, stop_s2, stop_ins];
+
 /* [Wires into the tray: a channel each from the groove under the board's back edge] */
 lead_d   = 1.2;                  // a gauge's three leads, AWG 30 PTFE, bundled
 chan_w   = 3.0;                  // the channels' width (x)
@@ -116,6 +137,12 @@ module gauge() for (d = [-1, 1]) at_gauge(d) {
 module gauge_holders() {
     for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/outer_holder.stl");
     gauge_contact_boss();
+    gauge_stop_tongues();
+}
+// part of the housing: the overload stops' tongues, with the upper screw's insert hole
+module gauge_stop_tongues() gauge_tilt_frame() for (d = [-1, 1]) mirror([d < 0 ? 1 : 0, 0, 0]) difference() {
+    box([gauge_x + stop_x[0], gauge_x + stop_x[1]], stop_y, stop_z);
+    translate([gauge_x + stop_sx, stop_s2, stop_z[0] - 0.01]) cylinder(d = stop_ins[0], h = stop_z[1] - stop_z[0] + 0.02);
 }
 // a point under the board, in local coordinates: X, Y of the board, W in the gap under it
 function under_board(x, y) = slab_local([x, y, (-hall_t + w_ft) / 2]);

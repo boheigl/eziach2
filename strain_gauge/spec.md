@@ -101,8 +101,11 @@ What follows from it:
   Playing forces of 20–40 N give 0.13–0.27 mV; the NAU7802's 150 nV at 80 SPS
   resolves about 0.02 N, over a thousand steps in 30 N. Below the seller's 5 V, but a
   bridge has no lower limit; only the signal scales.
-- **Overload:** 100 N is a fifth of the range, the cell's 150 % is 735 N. The cell
-  needs no stop; the printed holders and latches are the weaker parts.
+- **Overload:** the rating is a moment: 490 N at the cell's 7 mm arm, 3430 N·mm, and
+  150 % is 5145 N·mm. On the instrument the hand acts 56–125 mm away: 100 N there is
+  6400–12 500 N·mm on the two cells, past the 150 % at the top of the hand plate and on
+  one cell off centre. [2026-11-20; it read "a fifth of the range, no stop" before,
+  comparing forces.] Hence the overload stops (`../assembly/spec.md`).
 - **Current:** 3.3 mA per cell at 1000 Ω (1.65 mA if the 1000 Ω is per gauge
   [unverified: measure E+ to E−]).
 - **Drift is the weak point:** 0.3 % F.S. per 10 °C is 1.5 N per 10 °C, as much as a
