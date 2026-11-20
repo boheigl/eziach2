@@ -47,11 +47,14 @@ WIRES_DISCANT = {"3V3": (-1, 1), "SDA": (0, 1), "SCL": (1, 1), "GND": (0, 0), "I
 
 # the panel: the boards 1 mm apart (GAP, milled), a frame round them (RAIL wide, GAP
 # off), each board held by one tab on either side (x edges, TAB long, its middle TAB_Z
-# from the board's middle towards the panel's end, clear of the vias at the middle row);
-# mouse bites: BITE_N holes BITE_D on the tab's board side, touching the board's edge
+# from the board's middle towards the panel's end); mouse bites: BITE_N holes BITE_D on
+# the tab's board side, touching the board's edge, across the whole tab.
+# [2026-11-18, review/contact_pcb.md MAJOR 2] JLCPCB asks for tabs of 5 mm with mouse
+# bites (was 2 mm): seven holes at 0.75 fill them; TAB_Z keeps the nearest hole 0.45 mm
+# from the copper of the via at the middle row (x 4.4, z 0)
 GAP, RAIL = 1.0, 2.0
-TAB, TAB_Z = 2.0, 2.25
-BITE_D, BITE_P, BITE_N = 0.5, 0.75, 3
+TAB, TAB_Z = 5.0, 1.875
+BITE_D, BITE_P, BITE_N = 0.5, 0.75, 7
 BOARDS = {"pins": dict(vc=+(H + GAP) / 2, mirror=+1, prefix="B_"),      # bass, upper half of the panel
           "pads": dict(vc=-(H + GAP) / 2, mirror=-1, prefix="D_")}      # discant, lower half
 

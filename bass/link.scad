@@ -58,14 +58,20 @@ module box(x, y, z) translate([x[0], y[0], z[0]]) cube([x[1] - x[0], y[1] - y[0]
 // holders, holds the pin half of ../contact_pcb: three PG2541-03-003P strips (3 spring
 // pins each, 2.54 apart, strips 3.0 apart: nine pins) against the discant's pad board
 // (../discant/gauge_link.scad, face at gauge y 84). The board sits in a pocket open to the
-// front; the pins' force (9 x 1.2 N) presses it onto the pocket's ledge. Its nine wires
+// front; the pins' force (9 x about 1 N) presses it onto the pocket's ledge. Its nine wires
 // are soldered to its back before, and run through the cavity behind it and a bore through
 // the back wall into the box (elec.scad).
 pin_px   = 2.54;  pin_pz = 3.0;  // as ../contact_pcb/gen_pcb.py (PX, PZ)
 pcb      = [5.0, 4.5, 1.6];      // the board: half width (x), half height (z), thickness
-pin_work = 4.5;                  // the pins' working height over the board, 1.0 short of free [datasheet]
+pin_work = 4.5;                  // the pins' working height, 1.0 short of free 5.5; limit 4.2 [datasheet]
+// [chosen 2026-11-18, review/contact_pcb.md MAJOR 1]: 4.7, 0.8 pressed, not the working
+// height: the stack's tolerances (both boards' thickness ±0.16, the printed ledge and boss)
+// come to about ±0.35, which then stays within 0 .. 1.3 of travel instead of bottoming
+// out (a stiff second force path past the gauges). The force is about 100 g a pin there.
+pin_h    = 4.7;
+pin_base = 0.1;                  // copper and solder under the pins (not drawn)
 pad_y    = 85;                   // the discant's pads (../discant/gauge_link.scad, contact_y)
-pcb_y    = pad_y + pin_work;     // the board's front: the pins on the pads, at their working height
+pcb_y    = pad_y + pin_h + pin_base;   // the board's front
 pcb_c    = 0.1;                  // the pocket's clearance round the board
 blk_y    = [pad_y + 1, link_y];  // the block's face, 1 mm off the pad board, to the mount
 // between the discant's outer holders (5.8 off the middle, their tips at 89.6) the block is

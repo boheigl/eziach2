@@ -222,7 +222,7 @@ keys: `../BOM.md`.
   against the discant's pad board. Its nine wires are soldered to its back first and
   threaded through the cavity behind it and the ⌀2.6 bore through the back wall into
   the box; then the board goes into the pocket from the front, where the pins' force
-  (about 11 N) holds it on the ledge round the cavity [open: a drop of glue at two
+  (about 8.5 N, 0.8 mm pressed) holds it on the ledge round the cavity [open: a drop of glue at two
   corners against falling out while apart] (`link.scad`, `../assembly/spec.md`).
 - **Reading** [given: the gauges are bent by the push, which works]: the hand pushes the
   plate along y, above the gauges, so the push bends their flexure plates as a force

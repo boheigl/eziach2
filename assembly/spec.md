@@ -98,7 +98,9 @@ teeth of both positions meet the slots' ends.
   board); the pins press it onto the pocket's ledge. The discant's board carries nine
   gold pads ⌀2.2 on the same grid, on a boss on the discant's pad
   (`../discant/gauge_link.scad`, face at gauge y 85). They meet head on as the bass
-  slides on, the pins at their working height when latched. Pads: 3.3 V × 2, GND × 3,
+  slides on, the pins 4.7 high when latched (0.8 pressed, not the working height 4.5:
+  the tolerances of the stack, about ±0.35, then stay within the travel to the limit 4.2;
+  bottomed out they would be a stiff force path past the gauges) [chosen 2026-11-18]. Pads: 3.3 V × 2, GND × 3,
   SDA, SCL, INT (the discant's ADCs, open drain, wired), DET. The NAU7802 is polled over
   I2C.
 - **Not chosen** [2026-11-15]: blade contacts (a flat tab between two spring leaves,

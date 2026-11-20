@@ -9,7 +9,7 @@ not blade or card-edge contacts: `../assembly/spec.md`, Contacts.
 
 | | |
 |---|---|
-| Panel | 16 × 25 mm, 2 layers, 1.6 mm, **ENIG** (the pads are contacts): both boards in a 2 mm frame, 1 mm milled gaps round them, each held by a 2 mm tab on either side with three ⌀0.5 mouse-bite holes at the board's edge [given 2026-11-15: tabs, not V-cut] |
+| Panel | 16 × 25 mm, 2 layers, 1.6 mm, **ENIG** (the pads are contacts): both boards in a 2 mm frame, 1 mm milled gaps round them, each held by a 5 mm tab on either side (JLCPCB's minimum with mouse bites; 2 mm before 2026-11-18, review/contact_pcb.md) with seven ⌀0.5 mouse-bite holes at 0.75 along the board's edge, the nearest 0.45 mm from a via's copper [given 2026-11-15: tabs, not V-cut] |
 | Each board | 10.0 × 9.0 mm |
 | Grid | 3 × 3: 2.54 mm across (x), 3.0 mm up (z); the strips are 2.5 wide, so 3.0 leaves them 0.5 apart |
 | Pads | ⌀2.2 on both boards (the strip's recommended pad) |
@@ -21,7 +21,7 @@ not blade or card-edge contacts: `../assembly/spec.md`, Contacts.
 
 | Part | Count | |
 |---|---|---|
-| PG2541-03-003P (CHIN-BAN), LCSC **C49451741** | 3 (J1–J3) | 3 spring pins each at 2.54, SMD; plunger ⌀0.9, barrel ⌀1.5; free height 5.5, working height 4.5 (1.0 travel); 120 ± 20 gf there; gold over nickel; 10 000 cycles; 1 A [datasheet]. 50 in stock 2026-11-15, $0.53 each |
+| PG2541-03-003P (CHIN-BAN), LCSC **C49451741** | 3 (J1–J3) | 3 spring pins each at 2.54, SMD; plunger ⌀0.9, barrel ⌀1.5; free height 5.5, working height 4.5 (1.0 travel), limit 4.2; 120 ± 20 gf there; used at 4.7 (0.8 pressed, about 100 gf), so the stack's tolerances stay clear of the limit (`../bass/link.scad`, pin_h) [2026-11-18]; gold over nickel; 10 000 cycles; 1 A [datasheet]. 50 in stock 2026-11-15, $0.53 each |
 
 Nine wire pads on the back, one per pin, because the main board takes nine wires
 (`../main_pcb/design.py`, WIRES).
