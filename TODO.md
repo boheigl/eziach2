@@ -1,4 +1,4 @@
-# Open items (2026-11-15)
+# Open items (2026-11-15, updated 2026-11-21)
 
 Collected from the specs and the battery check. Each item names the files it touches.
 
@@ -29,7 +29,9 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
 ## Mechanics
 
 8. ~~**Flexure plates**~~ done: the load cell's own plate.
-9. ~~**Overload stop**~~ done: not needed, 100 N is a fifth of the cells' 490 N.
+9. ~~**Overload stop**~~ done 2026-11-20: the cells are rated by moment (490 N × 7 mm),
+   a hand's 100 N far out exceeds it, so adjustable M3 grub screw stops beside the gauges
+   (`assembly/spec.md`, Overload stops; `discant/spec.md` §7). Set on the instrument.
 10. ~~**Gauge polarity**~~ done: a firmware sign, set once by pressing.
 
 ## Parts and ordering
@@ -48,11 +50,15 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
 ## To check on the printed parts
 
 15. Plate fits: 0.15 mm in the discant housing, and the inner holders in the large
-    bass print.
+    bass print. Print the discant's test piece first (`discant/`: `make bambu`,
+    `holder_test_x2d.3mf`, about 31 min).
 16. Stiffness of the PETG inner holders: if they yield, the calibration shifts.
 17. Latches: root strain (1.1–1.3 %, estimated) and the stored hold (about 15 N,
     estimated).
 18. Room for the JST cable's splice in the bass's tunnel.
+18a. Standing print of the discant housing: stable at 101 mm on its front edge
+     (`discant/spec.md`, Printing).
+18b. Supports under the thumb bar's lobes when printing the cover (`discant/spec.md` §3.2).
 
 ## To measure on the bought parts
 
@@ -70,3 +76,17 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
 24. **Discant 3.3 V on plugging**: with a scope on DET and the contacts' 3.3 V, check that
     Q3 comes on only after all pins touch (expected 3–7 ms after DET, fully at about
     12 ms). `main_pcb/spec.md` §3.
+
+## On the instrument
+
+25. **Overload stops**: set S1/S2 at about 40 N on the hand plate's top edge (kitchen
+    scale) and about 70 N on the strap (luggage scale). `assembly/spec.md`.
+26. **Firmware bring-up**: builds, never run on hardware. Check the key direction old →
+    new, the force sign, the synth's load at full polyphony and the latency.
+    `firmware/spec.md`.
+
+## Ordering
+
+27. Main board, Hall boards and contact panel at JLCPCB; buy PG2541-03-003P ahead.
+    Unverified: whether the contact panel's second design costs extra.
+    `contact_pcb/spec.md`.
