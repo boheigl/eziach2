@@ -196,7 +196,13 @@ module foot() {
 // folded back and buckled. Flat on the front face: no twist (the slots stand upright, the
 // strap's width too), nothing standing out, the package unchanged; threaded with the back
 // cover off. The bar: the front wall between the slots and a block behind it, 5 x 6.5;
-// a 100 N pull on each end puts 200 N round the bar: about 30 MPa [estimate].
+// a 100 N pull on each end puts 200 N round the bar: about 30 MPa [estimate]. That is the
+// extreme case (200 N on the strap, the gauges' full scale); playing hard pulls about
+// 30-60 N [estimate, not measured], about 5-9 MPa, against PETG's 45-50 MPa along the
+// layers (the bending runs along them: the bass prints on its hand face). Kept as is
+// [given 2026-11-20]: the block cannot get deeper (6.6 inside, 3.1 of it the strap's way
+// behind the bar), nor the bar wider without narrower slots (thinner strap). The slots'
+// ends are fully round already.
 strap_z  = -67;
 strap_w  = 40;
 slot_w   = 4;                    // for a strap up to 3 thick
