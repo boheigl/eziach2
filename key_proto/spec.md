@@ -84,8 +84,10 @@ Settings [chosen; values the printer's profile does not fix]:
 
 - **Profile:** the slicer's system PETG profile for the X2D, 0.4 mm nozzle; temperatures,
   cooling and speeds from it. Textured PEI plate (PETG bonds too hard to smooth PEI).
-- **Layers 0.16 mm** for the whole plate: the board's 1.67 comes out 1.6 (10 layers; the
-  collar's gap then 0.37 instead of 0.3, the screw 0.07 deeper, both harmless).
+- **Layers 0.2 mm** for the whole plate [given 2026-11-20, was 0.16]: the board's 1.67
+  comes out 1.6 either way (8 layers; the collar's gap then 0.37 instead of 0.3, the
+  screw 0.07 deeper, both harmless). Heights land within 0.1 instead of 0.08; the fits
+  lie in the plate's plane, and the firmware takes each key's rest as it finds it.
 - **Walls 3**, top and bottom 5 layers; infill 25 % gyroid (tray and cover; the bosses,
   tubes and caps are solid from the walls alone).
 - **No supports.** Seam aligned or at the back. Brim only if the collars come loose
@@ -93,9 +95,9 @@ Settings [chosen; values the printer's profile does not fix]:
 
 **Bambu Studio projects:** `make bambu` (needs the Bambu Studio AppImage, `BAMBU=`) turns both
 into projects for the X2D, `plate_x2d.3mf` and `fit_test_x2d.3mf`: printer "Bambu Lab X2D
-0.4 nozzle", filament "Bambu PETG HF @BBL X2D 0.4 nozzle", process "0.16mm Standard @BBL
+0.4 nozzle", filament "Bambu PETG HF @BBL X2D 0.4 nozzle", process "0.20mm Standard @BBL
 X2D" with the settings above laid over it (`bambu.py`), textured PEI plate, the layout kept,
-sliced. Bambu Studio 2.09 estimates 14 min and 2.2 g for the fit test, 1 h 30 min and 34.5 g
+sliced. Bambu Studio 2.09 estimates 11 min and 2.1 g for the fit test, 1 h 12 min and 33.9 g
 for the plate. Press "Slice plate" once more before sending: the command line leaves the
 plate's printer model id empty, which the GUI fills.
 

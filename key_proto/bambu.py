@@ -15,7 +15,7 @@ X2D); pressing "Slice plate" in Bambu Studio before sending fills it, as for any
 import glob, json, os, subprocess, sys
 
 MACHINE  = "Bambu Lab X2D 0.4 nozzle"
-PROCESS  = "0.16mm Standard @BBL X2D"
+PROCESS  = "0.20mm Standard @BBL X2D"
 FILAMENT = "Bambu PETG HF @BBL X2D 0.4 nozzle"
 # the spec's settings over the system process [chosen, spec.md]
 PROCESS_SET = {
