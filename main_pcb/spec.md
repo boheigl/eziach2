@@ -31,6 +31,21 @@ includes. The scripts come from `../hall_pcb/` and from the discant's old main b
 - **Four layers** [chosen]: top, ground plane, signals, bottom. The bottom carries no
   parts, so it routes freely; all four are filled with ground where nothing else runs.
   Tracks 0.127 mm, power 0.4 mm where it fits; vias 0.45 / 0.2.
+- **Routing rules** [2026-11-18/19, review/main_pcb.md]:
+  - **Power width per connection:** a power net's connection runs 0.4 mm, within 0.8 mm
+    of its own pads 0.127 (a neck: fine-pitch neighbours leave no room at the pin), and
+    0.127 at both ends of a wide path (it may start on a narrow part of its net). Before,
+    one narrow connection made the whole net narrow, so every power net was 0.127 but
+    BATP. Power keeps off the inner signal layer (3 × the cost there).
+  - **No via in a pad:** a via's drill keeps 0.15 mm from any SMD pad's copper (the vias
+    are tented); thermal pads are exempt (as `../hall_pcb/spec.md`). Before, 135 drills
+    stood in SMD pads.
+  - **QFN fan-out:** the DAC (U7) and the charger (U3) have their signal pins fanned out
+    first, to vias on a square ring round the chip (3.3 and 2.3 mm from its middle),
+    except nets that only reach pads within 4 mm (the I2S lines to the module beside
+    the DAC run there directly). Without, the last nets found the pins shut in.
+  - The router keeps 0.005 mm more than the clearance: its grid's discs fell short on
+    diagonals (KiCad measured 0.1254 for 0.127).
 - **Screws:** three M2 × 3 pan head (ISO 7045, A2 [chosen 2026-11-15]; head ⌀4 × 1.6) from
   the parts' side through the board and the 0.47 pads, 2.0 mm into ⌀1.7 pilots 2 mm deep
   in the front wall (1 mm of wall left to the hand's face; M2 × 4 would go too deep),
@@ -107,7 +122,11 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
   - [unverified: no current into an unpowered charger's ~CHG from VSYS through red and
     R9; the BQ24074's ~CHG and ~PGOOD sink current for the LED, datasheet]
 - **3.3 V:** TPS63001, PS/SYNC high: fixed frequency, no power-save bursts near the
-  audio. It carries the ESP32 (up to about 350 mA in bursts), both key boards' sensors
+  audio. Its power loop as SLVS520C 8.2.2.3 asks [2026-11-18, review/main_pcb.md: the
+  output caps were 5 mm off on the far side, the input cap 4.5 mm, L2 through two vias]:
+  U5 turned so its power pins face +X, the inductor upright beside L1/L2, the input cap
+  C10 at VIN above, the output caps C12/C13 at VOUT below (2 mm), their GND ends at the
+  exposed pad; the VINA filter (R17, C11) on the other side at pin 8. It carries the ESP32 (up to about 350 mA in bursts), both key boards' sensors
   (46 + 18 × 2–4 mA [datasheet], up to about 260 mA) and the ADCs. [estimated]
 - **Measuring:** VBAT through 1M/1M to IO1 (ADC); VBUS through 100k/100k to IO41;
   the discant's 3.3 V through 10k (100k down) to IO40, so the firmware knows whether
@@ -141,9 +160,9 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 
 | | ESP32 | |
 |---|---|---|
-| bus 1, through the contacts | IO9 SDA1, IO14 SCL1, IO21 INT1 | discant's ADCs 10h–15h, the gauges' NAU7802 (2Ah); pull-ups 2k2 to the discant's 3.3 V, so the pins carry nothing apart |
+| bus 1, through the contacts | IO13 SDA1, IO14 SCL1, IO21 INT1 | discant's ADCs 10h–15h, the gauges' NAU7802 (2Ah); pull-ups 2k2 to the discant's 3.3 V, so the pins carry nothing apart |
 | bus 2, in the bass | IO47 SDA2, IO48 SCL2, IO38 INT2 | bass's ADCs 10h–12h, the DAC (18h); pull-ups 2k2 to 3.3 V |
-| I²S | IO10 MCLK, IO11 BCLK, IO12 WCLK, IO13 DOUT | DAC |
+| I²S | IO9 MCLK, IO10 BCLK, IO11 WCLK, IO12 DOUT | DAC [2026-11-19: in the DAC's pin order on module pins 17–20, so the lines run straight down to it; before IO10–IO13, and DOUT had to cross under the DAC's other pins to pin 21] |
 | others | IO39 DAC reset, IO40 discant on, IO41 VBUS, IO1 VBAT, IO42 low-battery light, IO0 boot | |
 
 The module's pins face the parts on its long side (27–40) and its top end (15–26);
@@ -173,14 +192,18 @@ track, D2 to the regulator.
   VINA through 100 Ω); 10 µF in (≥ 4.7 µF), 3 × 22 µF out (15 µF nominal) are within
   its advice. L1 is 2.2 µH as in all the datasheet's examples [chosen 2026-11-15; was
   1.5 µH], 1008, Isat 2 A (peak about 0.82 A at 3.0 V, by Equation 4).
-- **Routing** [2026-11-18, with the USB tab; before 2026-11-16 with the battery's NTC on
-  P17 (R5 gone), R8 68k and R14 100k, and 2026-11-15 with the charge light, the
-  low-battery switch and the panel jack's pads]: all nets routed (the fifth of six tries,
-  `MAIN_TRIES=6`; a run of three got no further than 1.6 µm short of clearance between
-  L2 and DET); KiCad's DRC finds no clearance or edge errors, shorts or open
-  connections. The USB socket's shell pads, which reached past the edge before, are now
-  inside the tab. What it still lists: courtyards (wire pads, module antenna keepout),
-  silkscreen, and U6's GND pad with one thermal spoke. In the bass: no clash with the
-  case (the tab in its pocket checked against the case, with shifted controls that
-  overlap).
+- **Routing** [2026-11-19, after review/main_pcb.md: no vias in pads, power 0.4 mm per
+  connection, the regulator's new layout, the QFN fan-out; FB1, C19, C21 0.6 further from
+  the DAC (SDA2 and SCL2 leave between); I²S on IO9–IO12 in the DAC's pin order (§4)]:
+  all nets routed in the first try; KiCad's DRC finds no clearance or edge errors,
+  shorts or open connections. Before the I²S move, about twenty tries ended with 1 to 15
+  open, I2S_DOUT always among them: it had to cross under the DAC's +1V8 and WCLK in the
+  0.7 mm between the DAC's pins and the module's. Checked with pcbnew scripts: 208 vias,
+  no drill in or within 0.15 mm of an SMD pad (5 in thermal pads); power nets wide on
+  40–72 % of their length (VBAT 72 %, VSYS 61 %, +3V3 52 %), the rest the necks at
+  fine-pitch pads; only +3V3 (15 mm) and VBUS (6 mm) on the inner layer; L1/L2 2.2 mm
+  each (were 4.1 and 6.1 with two vias). What the DRC still lists: courtyards (wire pads,
+  module antenna keepout), silkscreen, two GND pads with one thermal spoke (C4, P21) and
+  five fan-out vias left unused. In the bass: no clash with case, back cover, battery or
+  wires (shifted controls overlap).
 - The DAC's speaker outputs are left open (earphones only).

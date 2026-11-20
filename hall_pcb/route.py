@@ -6,8 +6,9 @@ briefly (they cost F_COST times as much there), except the bus (design.BUS) in i
 rip-up and reroute, from ../discant/main_pcb (git history). GND pads get a via to
 the top plane first; afterwards both faces are filled with ground. KiCad's DRC
 judges the result.
-usage: route.py [BOARD] [first,nets,...]"""
-import sys, heapq, math, time, json, os
+usage: route.py [BOARD] [first,nets,...]
+       ROUTE_COMPLETE=NET:REF:PAD route.py BOARD   (a routed board: join that pad, see below)"""
+import sys, heapq, math, time, json, os, collections
 import numpy as np, pcbnew
 from scipy import ndimage
 import design as d
@@ -67,17 +68,37 @@ def stamp(o, layer, x0, y0, m, n):
     s[mm_ & free] = n
     s[mm_ & ~free & (s != n)] = -1
 
-def stamp_rect(layers, cx, cy, w, h, ang, n):
+def rect_mask(cx, cy, w, h, ang, r):
+    """the cells within r of a w x h rectangle turned by ang: (i0, j0, mask)"""
     c, s = math.cos(ang), math.sin(ang)
+    ex, ey = w / 2 + r, h / 2 + r
+    hx = abs(ex * c) + abs(ey * s); hy = abs(ex * s) + abs(ey * c)
+    i0, i1, j0, j1 = gx(cx - hx), gx(cx + hx) + 1, gy(cy - hy), gy(cy + hy) + 1
+    X, Y = np.meshgrid(wx(np.arange(i0, i1)) - cx, wy(np.arange(j0, j1)) - cy)
+    u = X * c + Y * s; v = -X * s + Y * c
+    dx = np.maximum(np.abs(u) - w / 2, 0); dy = np.maximum(np.abs(v) - h / 2, 0)
+    return i0, j0, dx * dx + dy * dy <= r * r
+
+def stamp_rect(layers, cx, cy, w, h, ang, n):
     for r, o in hard.items():
-        ex, ey = w / 2 + r, h / 2 + r
-        hx = abs(ex * c) + abs(ey * s); hy = abs(ex * s) + abs(ey * c)
-        i0, i1, j0, j1 = gx(cx - hx), gx(cx + hx) + 1, gy(cy - hy), gy(cy + hy) + 1
-        X, Y = np.meshgrid(wx(np.arange(i0, i1)) - cx, wy(np.arange(j0, j1)) - cy)
-        u = X * c + Y * s; v = -X * s + Y * c
-        dx = np.maximum(np.abs(u) - w / 2, 0); dy = np.maximum(np.abs(v) - h / 2, 0)
-        m = dx * dx + dy * dy <= r * r
+        i0, j0, m = rect_mask(cx, cy, w, h, ang, r)
         for L in layers: stamp(o, L, i0, j0, m, n)
+
+# No via hole in or at an SMD pad, its own net's neither: solder would run down it
+# (review/hall_pcb.md). The vias are tented (mask over both faces) and the pads' mask
+# openings are their copper, so a via's drill keeps HOLE_GAP from the pad's copper (the
+# fab's mask expansion and a mask web); its ring may touch the pad, or a short neck
+# joins them. Exposed thermal pads are the exception: there vias are wanted (GND, at
+# least 1.5 mm both ways; test points and wire pads excluded).
+HOLE_GAP = 0.15
+novia = np.zeros((NY, NX), bool)
+def is_thermal(f, p, w, h):
+    return p.GetNetname() == "GND" and min(w, h) >= 1.5 and "TestPoint" not in f.GetFPID().GetLibItemName().wx_str()
+def mark_novia(cx, cy, w, h, ang):
+    i0, j0, m = rect_mask(cx, cy, w, h, ang, VIA_DR / 2 + HOLE_GAP)
+    hh, ww = m.shape
+    xs, ys = max(i0, 0), max(j0, 0); xe, ye = min(i0 + ww, NX), min(j0 + hh, NY)
+    if xs < xe and ys < ye: novia[ys:ye, xs:xe] |= m[ys - j0:ye - j0, xs - i0:xe - i0]
 
 terms, PADS = {}, []
 for f in b.GetFootprints():
@@ -94,11 +115,12 @@ for f in b.GetFootprints():
         ang = -math.radians(p.GetOrientationDegrees())
         n = nid_of(p.GetNetname())
         stamp_rect(cu, x, y, w, h, ang, n if n else -1)
+        if p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD and not is_thermal(f, p, w, h): mark_novia(x, y, w, h, ang)
         if p.GetDrillSizeX() > 0:
             dr = max(p.GetDrillSizeX(), p.GetDrillSizeY()) / IU + 0.2
             stamp_rect([0, 1], x, y, dr, dr, 0, n if n else -1)
         if p.GetNetname():
-            terms.setdefault(p.GetNetname(), []).append(dict(ref=f.GetReference(), num=p.GetNumber(), x=x, y=y, layers=cu))
+            terms.setdefault(p.GetNetname(), []).append(dict(ref=f.GetReference(), num=p.GetNumber(), x=x, y=y, layers=cu, w=w, h=h))
 name_of = {v: k for k, v in netid.items()}
 
 pts = [(OX + x, OY - y) for x, y in d.OUTLINE]
@@ -154,10 +176,11 @@ def rebuild_soft():
     for r in RADII: soft[r][:] = 0
     vcen[:] = 0; vblk[:] = False
     pad = int(math.ceil((VIA_D / 2 + R_VIA) / RES)) + 2
-    for net in list(routes) + [n for n in gvias if n not in routes]:
+    for net in list(routes) + [n for n in set(gvias) | set(bus_paths) if n not in routes]:
         n = netid[net]; w = width_of.get(net, W_SIG)
-        cells = [c for p in routes.get(net, []) for c in p]
-        vias_ = [(a[1], a[2]) for p in routes.get(net, []) for a, c in zip(p, p[1:]) if a[1:] == c[1:] and a[0] != c[0]]
+        paths = routes.get(net, bus_paths.get(net, []))      # a torn-up net keeps its fan-outs
+        cells = [c for p in paths for c in p]
+        vias_ = [(a[1], a[2]) for p in paths for a, c in zip(p, p[1:]) if a[1:] == c[1:] and a[0] != c[0]]
         vias_ += list(gvias.get(net, []))
         for j, i in vias_: mark_via(n, j, i)
         if not cells and not vias_: continue
@@ -212,7 +235,7 @@ def astar(n, sources, targets, tx, ty, width, rip=False, limit=700000):
             w = (L, j2, i2); g2 = g + cost
             if g2 < best.get(w, 1e18):
                 best[w] = g2; prev[w] = u; heapq.heappush(pq, (g2 + WGT * h(i2, j2), g2, w))
-        ok, pen = via_free(n, j, i), 0
+        ok, pen = via_free(n, j, i) and not novia[j, i], 0
         if ok:
             # the vias this search has already put on the way here
             a, k = u, 0
@@ -282,29 +305,30 @@ def term_cells(t):
 
 rips = {}
 failed = []
-def route_net(net, rip_ok=True):
+def route_net(net, rip_ok=True, rip_until=None):
     """returns the nets it tore up"""
     n = netid[net]
     width = W_PWR if net in POWER else W_SIG
     width_of[net] = width
     routes[net] = list(bus_paths.get(net, []))
     stubs[net] = []
-    tree = set(c for p in routes[net] for c in p)
+    # a pin with a fan-out is reached at its pad or anywhere on its fan-out; the tree
+    # starts from the first pin alone, so every pin's piece gets joined
+    tcells = lambda t: term_cells(t) | set(fan_of.get((net, t["ref"], t["num"]), ()))
     rest = list(terms[net])
-    if not tree:
-        t0 = rest.pop(0); tree = term_cells(t0); stubs[net].append((t0, next(iter(tree))))
+    t0 = rest.pop(0); tree = tcells(t0); stubs[net].append((t0, next(iter(term_cells(t0)))))
     torn = set()
     while rest:
         tl = list(tree)[:: max(1, len(tree) // 50)]
         rest.sort(key=lambda t: min(abs(gx(t["x"]) - c[2]) + abs(gy(t["y"]) - c[1]) for c in tl))
-        t = rest.pop(0); tc = term_cells(t)
+        t = rest.pop(0); tc = tcells(t)
         if tc & tree: continue
         w_used = width
         lim = QUICK if time.time() - T_START > TIME_LIMIT else 700000
         path = astar(n, tree, tc, gx(t["x"]), gy(t["y"]), width, limit=lim)
         if path is None and width > W_SIG:
             w_used = W_SIG; path = astar(n, tree, tc, gx(t["x"]), gy(t["y"]), W_SIG, limit=lim)
-        if path is None and rip_ok and time.time() - T_START < RIP_BUDGET:
+        if path is None and rip_ok and time.time() - T_START < (rip_until or RIP_BUDGET):
             w_used = W_SIG
             # up to three rounds: a shared cell (-1) may hide a net that only shows once
             # its neighbour is gone
@@ -328,8 +352,8 @@ def route_net(net, rip_ok=True):
             failed.append((net, t["ref"], t["num"])); print("  FAILED", net, t["ref"], t["num"], flush=True); continue
         routes[net].append(path); stamp_path(n, path, w_used)
         if w_used < width: width_of[net] = W_SIG
-        stubs[net].append((t, path[-1]))
-        tree |= set(path)
+        if path[-1] in term_cells(t): stubs[net].append((t, path[-1]))    # else it ends on the pin's fan-out
+        tree |= set(path) | tc
     return torn
 
 def route_gnd_pad(t):
@@ -338,7 +362,7 @@ def route_gnd_pad(t):
     L = t["layers"][0]; i0, j0 = gx(t["x"]), gy(t["y"])
     seen = {(j0, i0): None}; q = [(j0, i0)]; hit = None
     for (j, i) in q:
-        if via_free(n, j, i) and all(hv[l, j, i] in (0, n) and sv[l, j, i] in (0, n) for l in range(NL)): hit = (j, i); break
+        if via_free(n, j, i) and not novia[j, i] and all(hv[l, j, i] in (0, n) and sv[l, j, i] in (0, n) for l in range(NL)): hit = (j, i); break
         for di, dj, c in DIRS[:4]:
             w = (j + dj, i + di)
             if w in seen or not (0 <= w[1] < NX and 0 <= w[0] < NY): continue
@@ -361,8 +385,63 @@ bus_paths = {}
 # GND fan-out before any signal: each GND pad gets its via to the plane while there is room.
 # GND is never torn up (it is not routed again as a net), so mark it as ripped out.
 rips[netid["GND"]] = MAX_RIPS
-gnd_early = [t for t in terms["GND"] if not route_gnd_pad(t)]
+COMPLETE = os.environ.get("ROUTE_COMPLETE")
+gnd_early = [] if COMPLETE else [t for t in terms["GND"] if not route_gnd_pad(t)]
 print("GND fan-out:", len(terms["GND"]) - len(gnd_early), "of", len(terms["GND"]), flush=True)
+
+# The ADCs' pins fan out next, before any net: a short track from each signal pin to a via
+# just outside the pin row. No via may stand in a pad (novia), so without these the pins
+# end up enclosed by +3V3 and the bus round the chip, and the key lines, routed last, find
+# no way out. The fan-outs are part of their nets from the start (bus_paths) and stay
+# when a net is torn up. DECAP (one capacitor beside the pin) and GND (done above) need none.
+# The vias stand on a ring FAN_R round the chip's middle, not at the pins' toes: there the
+# ring is long enough for them all, and the tracks spread out on their way to it.
+ADC_REFS = {f.GetReference() for f in b.GetFootprints() if f.GetValue().startswith("ADS7128")}
+ADC_AT = {f.GetReference(): (f.GetPosition().x / IU, f.GetPosition().y / IU) for f in b.GetFootprints() if f.GetReference() in ADC_REFS}
+FAN_R = float(os.environ.get("ROUTE_FAN_R", 2.5))
+fan_ids, fan_of = set(), {}
+def fan_out(net, t, fan_r=FAN_R):
+    n = netid[net]; hv, sv = hard[R_VIA], soft[R_VIA]; ho, so = hard[R_SIG], soft[R_SIG]
+    L = t["layers"][0]; i0, j0 = gx(t["x"]), gy(t["y"]); cx, cy = ADC_AT[t["ref"]]
+    seen = {(j0, i0): None}; q = collections.deque([(j0, i0)]); hit = None
+    while q:
+        j, i = q.popleft()
+        if math.hypot(wx(i) - cx, wy(j) - cy) >= fan_r and via_free(n, j, i) and not novia[j, i] \
+                and all(hv[l, j, i] in (0, n) and sv[l, j, i] in (0, n) for l in range(NL)):
+            hit = (j, i); break
+        for di, dj, c in DIRS:
+            w = (j + dj, i + di)
+            if w in seen or not (0 <= w[1] < NX and 0 <= w[0] < NY): continue
+            if ho[L, w[0], w[1]] in (0, n) and so[L, w[0], w[1]] in (0, n): seen[w] = (j, i); q.append(w)
+        if len(seen) > 20000: break
+    if hit is None: return False
+    path = [hit]
+    while seen[path[-1]] is not None: path.append(seen[path[-1]])
+    nodes = [(L, j, i) for j, i in path[::-1]] + [(1 - L, hit[0], hit[1])]
+    bus_paths.setdefault(net, []).append(nodes); fan_ids.add(id(nodes)); fan_of[(net, t["ref"], t["num"])] = nodes
+    stamp_path(n, nodes, W_SIG)
+    return True
+fans = [] if COMPLETE else [(net, t) for net, T in terms.items() if net != "GND" and not net.startswith("DECAP")
+        for t in T if t["ref"] in ADC_REFS]
+# the middle pins of each side first: the corner pins can still turn aside
+fans.sort(key=lambda f: math.hypot(f[1]["x"] - ADC_AT[f[1]["ref"]][0], f[1]["y"] - ADC_AT[f[1]["ref"]][1]))
+left = [(net, t) for net, t in fans if not fan_out(net, t)]
+# a pin left over: its ADC's fan-outs are done again, that pin first
+for net_l, t_l in list(left):
+    ref = t_l["ref"]
+    mine = [(net, t) for net, t in fans if t["ref"] == ref]
+    for net, t in mine:
+        nodes = fan_of.pop((net, t["ref"], t["num"]), None)
+        if nodes is not None:
+            bus_paths[net] = [p for p in bus_paths[net] if p is not nodes]; fan_ids.discard(id(nodes))
+    rebuild_soft()
+    order = [f for f in mine if f in left] + [f for f in mine if f not in left]
+    redo = [(net, t) for net, t in order if not fan_out(net, t)]
+    left = [f for f in left if f[1]["ref"] != ref] + redo
+for r_ in (2.0, 3.0, 3.5):                   # a last chance for the few left, nearer or farther
+    left = [(net, t) for net, t in left if not fan_out(net, t, r_)]
+fan_failed = [(net, t["ref"], t["num"]) for net, t in left]
+print("ADC fan-out:", len(fans) - len(fan_failed), "of", len(fans), "failed:", fan_failed, flush=True)
 
 pri = sys.argv[2].split(",") if len(sys.argv) > 2 and sys.argv[2] else []
 # order: the short nets local to each ADC (DECAP, ADDR) first, then the given nets (the bus
@@ -375,7 +454,123 @@ queue = [n for n in local if len(terms[n]) <= 3]
 queue += [n for n in pri if n in terms and n != "GND" and n not in queue]
 queue += [n for n in sorted(POWER) if n in terms and n not in queue]
 queue += [n for n in local + keys if n not in queue]
+# Completion [2026-11-19]: on a routed board one pad left unjoined (a run's best ends
+# with one open connection more often than with none). The board's copper goes into the
+# maps as paths. The pad's piece of its net (its fan-out, say) is joined to the rest; where
+# no way is free, only the paths of other nets in the way are taken out, and those nets
+# are joined up again the same way (their other copper, fan-outs included, stays). The
+# nets that changed are written anew; the ground fill is redone.
+changed, pw_c = set(), {}
+if COMPLETE:
+    queue = []
+    c_net, c_ref, c_num = COMPLETE.split(":")
+    def raster(L, a, c):
+        i0, j0, i1, j1 = gx(a[0]), gy(a[1]), gx(c[0]), gy(c[1])
+        k_ = max(abs(i1 - i0), abs(j1 - j0), 1)
+        return [(L, j0 + round((j1 - j0) * k / k_), i0 + round((i1 - i0) * k / k_)) for k in range(k_ + 1)]
+    old_items = {}
+    for t in list(b.GetTracks()):
+        net = t.GetNetname()
+        if net not in netid: continue
+        old_items.setdefault(net, []).append(t)
+        if t.GetClass() == "PCB_VIA":
+            p = t.GetPosition(); path = [(0, gy(p.y / IU), gx(p.x / IU)), (1, gy(p.y / IU), gx(p.x / IU))]
+        elif t.GetLayer() in LI:
+            path = raster(LI[t.GetLayer()], (t.GetStart().x / IU, t.GetStart().y / IU), (t.GetEnd().x / IU, t.GetEnd().y / IU))
+            pw_c[id(path)] = W_PWR if t.GetWidth() / IU > W_SIG + 0.01 else W_SIG
+            if pw_c[id(path)] > W_SIG: width_of[net] = W_PWR
+        else: continue
+        routes.setdefault(net, []).append(path)
+    rebuild_soft()
+    for k_ in list(rips):
+        if k_ != netid["GND"]: rips[k_] = 0
+    def pieces(net):
+        """the net's pieces that hold a terminal: cells joined by adjacency, vias and pads"""
+        cells = {c for p in routes.get(net, []) for c in p}
+        vias_at = {a[1:] for p in routes.get(net, []) for a, c in zip(p, p[1:]) if a[1:] == c[1:] and a[0] != c[0]}
+        for t in terms[net]: cells |= term_cells(t)
+        par = {c: c for c in cells}
+        def find(c):
+            while par[c] != c: par[c] = par[par[c]]; c = par[c]
+            return c
+        for (L, j, i) in cells:
+            for dj in (-1, 0, 1):
+                for di in (-1, 0, 1):
+                    if (L, j + dj, i + di) in cells: par[find((L, j, i))] = find((L, j + dj, i + di))
+            if (j, i) in vias_at:          # the faces meet at vias only
+                for L2 in range(NL):
+                    if (L2, j, i) in cells: par[find((L, j, i))] = find((L2, j, i))
+        roots = set()
+        for t in terms[net]:
+            rw, rh = int(t["w"] / 2 / RES) + 1, int(t["h"] / 2 / RES) + 1
+            r_ = max(rw, rh)
+            inpad = [(L, j, i) for L in t["layers"] for j in range(gy(t["y"]) - r_, gy(t["y"]) + r_ + 1)
+                     for i in range(gx(t["x"]) - r_, gx(t["x"]) + r_ + 1) if (L, j, i) in cells
+                     and abs(wx(i) - t["x"]) <= t["w"] / 2 + RES and abs(wy(j) - t["y"]) <= t["h"] / 2 + RES]
+            ins = inpad or list(term_cells(t))
+            for c in ins[1:]: par[find(c)] = find(ins[0])
+            roots.add(find(ins[0]))
+        groups = {}
+        for c in cells: groups.setdefault(find(c), set()).add(c)
+        held = {find(r) for r in roots}
+        pieces.loose = set().union(*[g for r, g in groups.items() if r not in held]) if len(groups) > len(held) else set()
+        return [groups[r] for r in held]
+    K_NEAR = int(math.ceil((VIA_D + W_PWR / 2 + CLR) / RES)) + 1
+    def take_out(n, p2):
+        """the other nets' paths near p2 come out; returns those nets"""
+        near = {}
+        for a, c in zip(p2, p2[1:] + p2[-1:]):
+            via = a[1:] == c[1:] and a[0] != c[0]
+            for dj in range(-K_NEAR, K_NEAR + 1):
+                for di in range(-K_NEAR, K_NEAR + 1):
+                    for L in (range(NL) if via else (a[0],)): near[(L, a[1] + dj, a[2] + di)] = True
+        hit = set()
+        for net, ps in list(routes.items()):
+            if net == "GND" or netid[net] == n: continue
+            keep = []
+            for p in ps:
+                vp = any(x[1:] == y[1:] for x, y in zip(p, p[1:]))
+                if any((near.get(c) or (vp and any(near.get((L, c[1], c[2])) for L in range(NL)))) for c in p): hit.add(net)
+                else: keep.append(p)
+            routes[net] = keep
+        return hit
+    def join_net(net, until):
+        n = netid[net]
+        for _ in range(12):
+            ps = pieces(net)
+            if len(ps) <= 1: break
+            ps.sort(key=len); isl = ps[0]; rest = set().union(*ps[1:])
+            c0 = next(iter(isl)); tx, ty = c0[2], c0[1]
+            path = astar(n, rest, isl, tx, ty, W_SIG, limit=2000000)
+            k = 0
+            while path is None and k < 4 and time.time() - T_START < until:
+                near_ = min(rest, key=lambda c: (c[2] - tx) ** 2 + (c[1] - ty) ** 2)
+                p2 = astar(n, isl, rest, near_[2], near_[1], W_SIG, rip=True, limit=2000000)
+                if p2 is None: break
+                hit = take_out(n, p2)
+                for h_ in hit:
+                    changed.add(h_)
+                    if h_ not in pending: pending.append(h_)
+                rebuild_soft()
+                path = astar(n, rest, isl, tx, ty, W_SIG, limit=2000000)
+                k += 1
+            if path is None: return False
+            routes[net].append(path); pw_c[id(path)] = W_SIG; stamp_path(n, path, W_SIG); changed.add(net)
+        ok_ = len(pieces(net)) <= 1
+        # copper left without a pad (a piece cut off by a path taken out) goes
+        loose = pieces.loose
+        if loose:
+            routes[net] = [p for p in routes[net] if not all(c in loose for c in p)]
+            changed.add(net); rebuild_soft()
+        return ok_
+    pending = [c_net]
+    while pending and time.time() - T_START < 40 * 60:
+        net = pending.pop(0)
+        ok_ = join_net(net, 40 * 60)
+        print("completion:", net, "joined" if ok_ else "NOT joined", "| pending", pending, flush=True)
 done_ = 0
+if os.environ.get("ROUTE_FANOUT_ONLY"):      # to look at the fan-outs alone: write them and stop
+    queue = []; routes.update({k: list(v) for k, v in bus_paths.items()})
 while queue:
     net = queue.pop(0)
     torn = route_net(net)
@@ -385,20 +580,38 @@ while queue:
     if torn: print(f"{net}: tore up {sorted(torn)}", flush=True)
     if done_ > 600: break
 print("nets", round(time.time() - t0, 1), "s", flush=True)
-# a net torn up and not routed again, or failed: one more try each without tearing
-missing = [n for n in terms if n != "GND" and n not in routes]
-for n in missing: route_net(n, rip_ok=False)
-gnd_failed = [(t["ref"], t["num"]) for t in gnd_early if not route_gnd_pad(t)]
-failed = [f for f in failed if True]
 # what is still open: terminals not reached by their net's copper
 def open_terms():
     out = []
     for net, T in terms.items():
         if net == "GND": continue
-        cells = set(c for p in routes.get(net, []) for c in p)
+        # a pin's own fan-out does not reach it: a path to the pad or to the fan-out does
+        cells = set(c for p in routes.get(net, []) if id(p) not in fan_ids for c in p)
         for t in T:
-            if not (term_cells(t) & cells) and len(T) > 1: out.append((net, t["ref"], t["num"]))
+            tc = term_cells(t) | set(fan_of.get((net, t["ref"], t["num"]), ()))
+            if not (tc & cells) and len(T) > 1: out.append((net, t["ref"], t["num"]))
     return out
+# Finishing round [2026-11-19]: the open nets once more, now tearing up others again until
+# FINISH (tearing stops at RIP_BUDGET in the main pass, and a try used about half of
+# build.sh's 50 minutes); the nets torn up go back into the queue.
+FINISH = 42 * 60
+# the nets locked by MAX_RIPS in the main pass are often the ones round the open terminal:
+# the finishing round may tear them up again (GND stays fixed)
+for k_ in list(rips):
+    if k_ != netid["GND"]: rips[k_] = 0
+for round_ in range(3):
+    if os.environ.get("ROUTE_FANOUT_ONLY") or COMPLETE or time.time() - T_START > FINISH: break
+    q2 = sorted({o[0] for o in open_terms()} | {n for n in terms if n != "GND" and n not in routes})
+    if not q2: break
+    print(f"finishing round {round_ + 1}: {q2}", flush=True)
+    while q2 and time.time() - T_START < FINISH:
+        net = q2.pop(0)
+        for vn in route_net(net, rip_until=FINISH):
+            if vn not in q2: q2.append(vn)
+# a net torn up and not routed again, or failed: one more try each without tearing
+missing = [n for n in terms if n != "GND" and n not in routes and not os.environ.get("ROUTE_FANOUT_ONLY")]
+for n in missing: route_net(n, rip_ok=False)
+gnd_failed = [(t["ref"], t["num"]) for t in gnd_early if not route_gnd_pad(t)]
 still = open_terms() + [("GND",) + g for g in gnd_failed]
 print("open:", still, flush=True)
 json.dump(still, open(os.path.join(OUTDIR, "route_failed.json"), "w"))
@@ -411,9 +624,16 @@ def add_via(net, p):
     v = pcbnew.PCB_VIA(b); v.SetPosition(pcbnew.VECTOR2I(mm(p[0]), mm(p[1]))); v.SetWidth(mm(VIA_D)); v.SetDrill(mm(VIA_DR))
     v.SetNet(b.GetNetsByName()[net]); v.SetViaType(pcbnew.VIATYPE_THROUGH); b.Add(v)
 placed_vias = set()
-for net, paths in routes.items():
-    w = width_of.get(net, W_SIG)
+write = routes
+if COMPLETE:
+    for net in changed:
+        for t in old_items.get(net, []): b.Remove(t)
+    for z in list(b.Zones()): b.Remove(z)
+    write = {net: routes.get(net, []) for net in changed}
+    stubs = {}
+for net, paths in write.items():
     for p in paths:
+        w = W_SIG if id(p) in fan_ids else (pw_c.get(id(p), W_SIG) if COMPLETE else width_of.get(net, W_SIG))
         i = 0
         while i < len(p) - 1:
             a = p[i]
@@ -441,6 +661,49 @@ for lay in (pcbnew.F_Cu, pcbnew.B_Cu):
     z.SetLocalClearance(mm(CLR)); z.SetMinThickness(mm(0.2)); z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
     z.SetThermalReliefGap(mm(0.25)); z.SetThermalReliefSpokeWidth(mm(0.3))
     b.Add(z)
+pcbnew.ZONE_FILLER(b).Fill(b.Zones())
+
+# Tracks on a face can cut pieces off its ground fill; a piece holding a GND pad's via or
+# a thermal spoke is then cut off from ground (KiCad keeps it, it is not an empty island).
+# Each piece but the largest gets a stitching via at a free cell, into the other face's
+# largest piece; then the faces are filled again.
+gid = netid["GND"]; hv, sv = hard[R_VIA], soft[R_VIA]
+def stitch():
+    zs = {z.GetLayer(): z for z in b.Zones()}
+    polys = {L: zs[L].GetFilledPolysList(L) for L in LAYERS}
+    big = {L: max(range(p.OutlineCount()), key=lambda k: abs(p.Outline(k).Area())) for L, p in polys.items()}
+    added = 0
+    gnd_vias = [t.GetPosition() for t in b.GetTracks() if t.GetClass() == "PCB_VIA" and t.GetNetname() == "GND"]
+    for L, p in polys.items():
+        other = polys[LAYERS[1 - LI[L]]].Outline(big[LAYERS[1 - LI[L]]])
+        for k in range(p.OutlineCount()):
+            if k == big[L]: continue
+            o = p.Outline(k); bb = o.BBox()
+            if any(o.PointInside(v) for v in gnd_vias): continue      # already tied by a via of its own
+            i0, i1 = gx(bb.GetX() / IU), gx((bb.GetX() + bb.GetWidth()) / IU)
+            j0, j1 = gy(bb.GetY() / IU), gy((bb.GetY() + bb.GetHeight()) / IU)
+            done = False
+            for j in range(max(j0, 0), min(j1 + 1, NY)):
+                for i in range(max(i0, 0), min(i1 + 1, NX)):
+                    if not (not vblk[j, i] and not novia[j, i] and all(hv[l, j, i] in (0, gid) and sv[l, j, i] in (0, gid) for l in range(NL))):
+                        continue
+                    at = pcbnew.VECTOR2I(mm(wx(i)), mm(wy(j)))
+                    if o.PointInside(at) and other.PointInside(at):
+                        add_via("GND", (wx(i), wy(j))); stamp_path(gid, [(0, j, i), (1, j, i)], W_SIG); added += 1; done = True; break
+                if done: break
+    return added
+for _ in range(1):
+    n_st = stitch()
+    print("stitching vias:", n_st, flush=True)
+    if not n_st: break
+    pcbnew.ZONE_FILLER(b).Fill(b.Zones())
+# two vias of a net in one spot (one hole drilled twice): one goes
+seen_v = set()
+for t in list(b.GetTracks()):
+    if t.GetClass() != "PCB_VIA": continue
+    k_ = (t.GetNetname(), t.GetPosition().x, t.GetPosition().y)
+    if k_ in seen_v: b.Remove(t)
+    else: seen_v.add(k_)
 pcbnew.ZONE_FILLER(b).Fill(b.Zones())
 b.BuildConnectivity()
 pcbnew.SaveBoard(BOARD, b)

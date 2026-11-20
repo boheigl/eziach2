@@ -58,8 +58,8 @@ def Cc(ref, val, a, b, pos, group, fp=C0402):
 mod = {"1": ("GND", "GND"), "2": ("+3V3", "3V3"), "3": ("EN", "EN"), "4": (None, "IO4"), "5": (None, "IO5"),
        "6": (None, "IO6"), "7": (None, "IO7"), "8": (None, "IO15"), "9": (None, "IO16"), "10": (None, "IO17"),
        "11": (None, "IO18"), "12": (None, "IO8"), "13": ("USB_DN", "USB_D-"), "14": ("USB_DP", "USB_D+"),
-       "15": (None, "IO3"), "16": (None, "IO46"), "17": ("SDA1", "IO9"), "18": ("I2S_MCLK", "IO10"),
-       "19": ("I2S_BCLK", "IO11"), "20": ("I2S_WCLK", "IO12"), "21": ("I2S_DOUT", "IO13"), "22": ("SCL1", "IO14"),
+       "15": (None, "IO3"), "16": (None, "IO46"), "17": ("I2S_MCLK", "IO9"), "18": ("I2S_BCLK", "IO10"),
+       "19": ("I2S_WCLK", "IO11"), "20": ("I2S_DOUT", "IO12"), "21": ("SDA1", "IO13"), "22": ("SCL1", "IO14"),
        "23": ("INT1", "IO21"), "24": ("SDA2", "IO47"), "25": ("SCL2", "IO48"), "26": (None, "IO45"),
        "27": ("BOOT", "IO0"), "28": (None, "IO35"), "29": (None, "IO36"), "30": (None, "IO37"), "31": ("INT2", "IO38"),
        "32": ("DAC_RST", "IO39"), "33": ("DISC_ON", "IO40"), "34": ("VBUS_SENSE", "IO41"), "35": ("LOW_BAT", "IO42"),
@@ -158,15 +158,19 @@ R("R16", "1M", "EN_SYS", "GND", (12.0, 31.9, 90), "power")   # beside D2: EN_SYS
 # TPS63001: buck-boost, fixed 3.3 V, from the system rail (3.0 .. 4.4 V); PS/SYNC high:
 # fixed frequency, no power-save bursts near the audio
 part("U5", "TPS63001DRCR", "Package_SON:Texas_DRC0010J", {"1": "+3V3", "2": "L2", "3": "GND", "4": "L1",
-     "5": "VSYS", "6": "EN_SYS", "7": "VSYS", "8": "VINA", "9": "GND", "10": "+3V3", "11": "GND"}, (19.8, 21.3, 0),
+     "5": "VSYS", "6": "EN_SYS", "7": "VSYS", "8": "VINA", "9": "GND", "10": "+3V3", "11": "GND"}, (19.8, 21.3, 180),
      pinfo={"1": "VOUT", "2": "L2", "3": "PGND", "4": "L1", "5": "VIN", "6": "EN", "7": "PS/SYNC", "8": "VINA",
             "9": "GND", "10": "FB", "11": "PGND"}, group="power", title="3.3 V")
-part("L1", "2.2u, Isat 2 A", "Inductor_SMD:L_1008_2520Metric", {"1": "L1", "2": "L2"}, (19.8, 17.4, 0), group="power")
-Cc("C10", "10u", "VSYS", "GND", (17.6, 25.0, 0), "power", C0805)
-R("R17", "100R", "VSYS", "VINA", (21.0, 25.6, 0), "power")
-Cc("C11", "100n", "VINA", "GND", (21.0, 24.5, 0), "power")
-Cc("C12", "22u", "+3V3", "GND", (23.4, 18.6, 90), "power", C0805)
-Cc("C13", "22u", "+3V3", "GND", (23.4, 22.4, 90), "power", C0805)
+# Its power loop as SLVS520C 8.2.2.3 asks [review/main_pcb.md, 2026-11-18]: U5 turned so
+# its power pins (VOUT, L2, PGND, L1, VIN) face +X; the inductor upright beside L1/L2, the
+# input cap at VIN above, the output caps at VOUT below, their GND ends at the
+# exposed pad; the VINA filter on the other side, at pin 8
+part("L1", "2.2u, Isat 2 A", "Inductor_SMD:L_1008_2520Metric", {"1": "L1", "2": "L2"}, (23.15, 21.3, 270), group="power")
+Cc("C10", "10u", "VSYS", "GND", (21.0, 24.3, 180), "power", C0805)
+R("R17", "100R", "VSYS", "VINA", (18.2, 24.3, 0), "power")
+Cc("C11", "100n", "VINA", "GND", (17.25, 21.3, 90), "power")
+Cc("C12", "22u", "+3V3", "GND", (21.0, 18.3, 180), "power", C0805)
+Cc("C13", "22u", "+3V3", "GND", (21.0, 16.2, 180), "power", C0805)
 part("Q3", "AO3401A", SOT23, {"1": "DET_G", "2": "+3V3", "3": "+3V3_D"}, (17.0, 28.8, 0),
      pinfo={"1": "G", "2": "S", "3": "D"}, group="power")
 Cc("C14", "1u", "+3V3_D", "GND", (20.1, 31.9, 90), "power")
@@ -190,12 +194,12 @@ part("U6", "TLV75518PDBVR", "Package_TO_SOT_SMD:SOT-23-5", {"1": "+3V3", "2": "G
      (30.1, 31.0, 0), pinfo={"1": "IN", "2": "GND", "3": "EN", "4": "NC", "5": "OUT"}, group="audio")
 Cc("C15", "1u", "+3V3", "GND", (28.6, 27.6, 90), "audio")
 Cc("C16", "1u", "+1V8", "GND", (30.8, 27.6, 90), "audio")
-part("FB1", "600R @ 100 MHz", "Inductor_SMD:L_0402_1005Metric", {"1": "+3V3", "2": "+3V3A"}, (40.3, 27.6, 90), group="audio")
+part("FB1", "600R @ 100 MHz", "Inductor_SMD:L_0402_1005Metric", {"1": "+3V3", "2": "+3V3A"}, (40.9, 27.6, 90), group="audio")   # 0.6 off the DAC: SDA2 and SCL2 leave between [2026-11-19]
 Cc("C17", "100n", "+3V3", "GND", (27.5, 27.6, 90), "audio")
 Cc("C18", "100n", "+1V8", "GND", (31.9, 27.6, 90), "audio")
-Cc("C19", "100n", "+3V3A", "GND", (40.3, 29.8, 90), "audio")
+Cc("C19", "100n", "+3V3A", "GND", (40.9, 29.8, 90), "audio")
 Cc("C20", "10u", "+3V3A", "GND", (42.4, 27.4, 0), "audio")
-Cc("C21", "100n", "+3V3", "GND", (40.3, 31.75, 90), "audio")
+Cc("C21", "100n", "+3V3", "GND", (40.9, 31.75, 90), "audio")
 Cc("C24", "100n", "+3V3A", "GND", (32.7, 31.0, 90), "audio")
 R("R22", "100k", "DAC_RST", "GND", (29.7, 27.6, 90), "audio")
 Cc("C22", "100u", "HPL", "EAR_L", (11.9, 6.0, 0), "audio", C0805)

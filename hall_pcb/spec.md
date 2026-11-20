@@ -177,6 +177,27 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   more than the underside, and the underside costs it 1.6; it drops to the pins
   through vias. The lanes form a tree, so the ground plane stays one piece round
   their ends; the bus's 400 kHz and the slow sensor signals do not mind the slot.
+- **No via in a pad** [2026-11-18, review/hall_pcb.md MAJOR]: the router dropped vias
+  into or against SMD pads (182 on the discant, 72 on the bass), where solder runs down
+  them. The vias are tented and the pads' mask openings are their copper, so a via's
+  drill now keeps 0.15 mm from any SMD pad's copper (`novia` in `route.py`); its ring
+  may touch the pad, or a short neck joins them. Thermal pads (the ADCs' exposed pads)
+  are exempt. Checked on the boards with a pcbnew script: no drill in or within 0.15 of
+  an SMD pad.
+- **ADC fan-out** [2026-11-19]: without vias in the pins the ADCs' pins ended up
+  enclosed by +3V3 and the bus round each chip, and the key lines, routed last, found no
+  way out (26 open on the discant). So before any net, every signal pin of an ADC
+  (not GND, not DECAP) gets a short track to a via on a ring 2.5 mm round the chip's
+  middle, the middle pins of each side first (the corner pins can still turn aside);
+  a pin left over has its chip's fan-outs redone with it first, all 81 then fit. The
+  fan-outs belong to their nets from the start and stay when a net is torn up.
+- **Stitching** [2026-11-19]: tracks on a face cut pieces off its ground fill; a piece
+  holding a GND pad's via is then off ground (KiCad keeps it: not an empty island).
+  After the fill every piece but the largest gets a GND via into the other face's
+  largest piece, and the faces are filled again.
+- **Finishing round** [2026-11-19]: tearing up others stops after 25 minutes in the
+  main pass; the nets still open are then routed once more with tearing allowed until
+  minute 42 (build.sh stops a try at 50).
 - **Rip-up:** a cell in the clearance of two nets may be torn up too (both nets
   go); the search for a way through others' copper runs from the terminal back to
   the net's tree, since a terminal shut in otherwise ran the search out of steps.
@@ -196,22 +217,23 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   (`HALL_PRI`), brought it to 9: SDA, SCL, INT and four key lines (KEY1_6, KEY1_10,
   KEY3_6, KEY3_7); four more on the bass did no better than 2 (+3V3 and one key
   line).
-- **Discant finished by hand** [2026-11-15]: six more tries left 11 open (best);
-  they were closed on the routed board itself, not in `design.py`: the +3V3 pin 7
-  of U1, U2, U3, U5 (the pin 6 key line moved onto its own radial lane, pin 7 to the
-  ring cap's +3V3 pad beside it; at U2 and U5 also pin 10, with the ADDR line on its
-  own lane), SDA and SCL to U3 (about 42 mm each over both faces, three and six vias,
-  with KEY1_11 and KEY0_12 re-laid round them), KEY3_3 from U139 to U4 (28 mm, SDA's
-  via at U4 moved 0.4), the SDA pull-up R12 moved 2.9 down out of a boxed-in corner,
-  and two ground vias (x 147.6 / 148.4, y 57.4 / 57.6) that join a ground island
-  round C4 / C5 (the NAU7802's caps) to the planes. KiCad's DRC: no unconnected
-  items, no clearance errors or shorts; left are silkscreen, 7 starved thermals and
-  nothing else. **A new `build.sh discant` routes from scratch and loses these
-  edits**: the routed board in git is the reference.
-- **Bass finished by hand** [2026-11-16]: four more tries (KEY1_9 and +3V3 first) gave
-  2 open again, now +3V3 pin 7 of U1 and U2; closed the same way (pin 6's key line on
-  its own lane; at U2 KEY1_4 and KEY1_5 re-laid). DRC: no unconnected items, no
-  clearance errors; 3 starved thermals.
+- **Routed again** [2026-11-18/19, with no via in a pad, the fan-out, stitching and the
+  finishing round; the boards finished by hand on 2026-11-15/16 are in git history, and
+  R12, moved by hand then, is back where `design.py` puts it]:
+  - **Bass:** all routed by `build.sh bass` itself (the third of three tries, the bus and
+    +3V3 and the three key lines open before first); 114 vias, none in a pad.
+  - **Discant:** some thirty tries ended with 1 to 26 open; the best three times 1,
+    always the bus to U3 (from J1 down the middle, along the upper row, down the left
+    link and along the whole lower row to its right end: about 240 mm; a middle link
+    down to the lower row did worse). The best of them was completed with
+    `ROUTE_COMPLETE=SDA:U3:14 route.py discant/discant.kicad_pcb`: the board's copper
+    goes into the maps, the pin's piece of SDA is joined to the rest, only the paths of
+    other nets in the way come out and those nets are joined up again (10 nets
+    touched round U3). The rest of `build.sh`'s steps (schematic, fab files, DRC,
+    viewer, board.scad) were then run on it by hand. 344 vias, none in a pad.
+  - KiCad's DRC on both: no unconnected items, no clearance errors or shorts; left are
+    silkscreen, dangling vias (fan-outs the net reached elsewhere) and a few dangling
+    track stubs. Channels (`channels.json`) unchanged, so the firmware's table holds.
 
 ## 6. Bass board [given: from the same description]
 

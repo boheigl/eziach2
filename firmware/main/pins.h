@@ -23,18 +23,19 @@
 #define PINS_H
 
 // I2C bus 1, through the contacts: the discant's ADCs 10h-15h and the gauges' NAU7802 (2Ah)
-#define PIN_SDA1 9
+#define PIN_SDA1 13
 #define PIN_SCL1 14
 #define PIN_INT1 21
 // I2C bus 2, in the bass: the bass's ADCs 10h-12h and the DAC (18h)
 #define PIN_SDA2 47
 #define PIN_SCL2 48
 #define PIN_INT2 38
-// I2S to the DAC
-#define PIN_MCLK 10
-#define PIN_BCLK 11
-#define PIN_WCLK 12
-#define PIN_DOUT 13
+// I2S to the DAC [2026-11-19: one module pin to the right, in the DAC's pin order, so the
+// four lines run straight down to it; SDA1 took IO13]
+#define PIN_MCLK 9
+#define PIN_BCLK 10
+#define PIN_WCLK 11
+#define PIN_DOUT 12
 // others
 #define PIN_DAC_RESET 39     // low: DAC in reset
 #define PIN_DISCANT_ON 40    // the discant's 3.3 V through 10k / 100k: high when it is plugged
