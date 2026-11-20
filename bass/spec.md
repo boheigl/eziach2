@@ -150,7 +150,7 @@ keys: `../BOM.md`.
     (DET) and the 3.3 V supply (TPS63001) for both halves; four layers, parts on the
     side towards the back cover (`../main_pcb/`, whose `board.scad` this file reads).
     In the side wall: USB-C (z −104.5; charging, firmware, MIDI; the board's tab under
-    the socket in a 0.65 mm pocket of the wall, 1.35 mm of wall left, see
+    the socket in a 0.95 mm pocket of the wall; outside, a 0.2 mm recess round the port (12.85 × 7.0, for the USB Type-C spec's largest overmold, 12.35 × 6.5) so a plug's overmold reaches the socket's face [given 2026-11-20: 0 mm], leaving 0.85 mm of wall over the pocket; see
     `../main_pcb/spec.md`), the charge light (red charging or battery low, green full) and
     the earphone jack [given 2026-11-15: a panel jack in the case, a bulge in the back
     cover allowed]: Switchcraft 35PRM3, from inside through the side wall (⌀6.2, the
@@ -222,8 +222,10 @@ keys: `../BOM.md`.
   against the discant's pad board. Its nine wires are soldered to its back first and
   threaded through the cavity behind it and the ⌀2.6 bore through the back wall into
   the box; then the board goes into the pocket from the front, where the pins' force
-  (about 8.5 N, 0.8 mm pressed) holds it on the ledge round the cavity [open: a drop of glue at two
-  corners against falling out while apart] (`link.scad`, `../assembly/spec.md`).
+  (about 8.5 N, 0.8 mm pressed) holds it on the ledge round the cavity; a drop of
+  neutral-curing silicone at two corners keeps it in while the halves are apart
+  [given 2026-11-20: glue only, no detent; review/contact_pcb.md MINOR 5]
+  (`link.scad`, `../assembly/spec.md`).
 - **Reading** [given: the gauges are bent by the push, which works]: the hand pushes the
   plate along y, above the gauges, so the push bends their flexure plates as a force
   along z would; each bridge reads the moment at its column, push × arm. Pressed at the

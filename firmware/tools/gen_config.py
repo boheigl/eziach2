@@ -195,8 +195,8 @@ extern const uint8_t keymap_num_adc[KEYMAP_NUM_BOARDS];
 #define CONF_FORCE_PULL_GAIN %s
 #define CONF_FORCE_SIGN %d
 
-#define CONF_KEY_ACTUATE %s
-#define CONF_KEY_RELEASE %s
+#define CONF_KEY_ACTUATE_COUNTS %d
+#define CONF_KEY_RELEASE_COUNTS %d
 #define CONF_KEY_DEFAULT_SPAN %d
 #define CONF_KEY_REST_FOLLOW %s
 
@@ -211,7 +211,7 @@ extern const uint8_t keymap_num_adc[KEYMAP_NUM_BOARDS];
 #endif
 """ % (len(qidx), ", ".join(map(str, qidx)), ml["transpose_row"], ml["transpose"], fl(ml["new_force_portion"]),
        ml["velocity"], fl(fo["counts_per_newton"]), fl(fo["threshold"]), fl(fo["offset"]), fl(fo["push_gain"]),
-       fl(fo["pull_gain"]), fo["sign"], fl(ke["actuate"]), fl(ke["release"]), ke["default_span"], fl(ke["rest_follow"]),
+       fl(fo["pull_gain"]), fo["sign"], ke["actuate_counts"], ke["release_counts"], ke["default_span"], fl(ke["rest_follow"]),
        sy["soundfont_name"],
        len(vols), ", ".join(fl(v) for v in vols), sy["sample_rate"], sy["period_size"], fl(sy["gain_db"]), fl(conf["tuning"]["third_cents"])))
     lowered = sum(1 for k in keys for c in k["push_cents"] + k["pull_cents"] if c)

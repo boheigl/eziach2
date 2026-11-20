@@ -385,6 +385,32 @@ rips[netid["GND"]] = MAX_RIPS
 gnd_early = [t for t in terms["GND"] if not route_gnd_pad(t)]
 print("GND fan-out:", len(terms["GND"]) - len(gnd_early), "of", len(terms["GND"]), flush=True)
 
+# Thermal pads get a grid of vias into the plane [2026-11-19, review/main_pcb.md MINOR 3: the
+# BQ24074's pad had one via, about 1.3 W while charging]: pitch at least 0.75 (hole to hole
+# 0.25 and more), each via inside the pad by 0.05.
+def thermal_vias():
+    n = netid["GND"]; hv, sv = hard[R_VIA], soft[R_VIA]; k_ = 0
+    for f in b.GetFootprints():
+        for p in f.Pads():
+            if p.GetAttribute() != pcbnew.PAD_ATTRIB_SMD or not p.IsOnCopperLayer(): continue
+            q = p.GetBoundingBox(); w, h = q.GetWidth() / IU, q.GetHeight() / IU
+            if not is_thermal(f, p, w, h): continue
+            cx, cy = q.GetCenter().x / IU, q.GetCenter().y / IU
+            room_x, room_y = w - VIA_D - 0.1, h - VIA_D - 0.1
+            nx_, ny_ = min(3, int(room_x / 0.75) + 1), min(3, int(room_y / 0.75) + 1)
+            for a in range(nx_):
+                for c in range(ny_):
+                    x = cx + (a - (nx_ - 1) / 2) * (room_x / max(nx_ - 1, 1) if nx_ > 1 else 0)
+                    y = cy + (c - (ny_ - 1) / 2) * (room_y / max(ny_ - 1, 1) if ny_ > 1 else 0)
+                    j, i = gy(y), gx(x)
+                    if not (via_free(n, j, i) and all(hv[l, j, i] in (0, n) and sv[l, j, i] in (0, n) for l in (0, 1, 2))):
+                        continue
+                    gvias.setdefault("GND", set()).add((j, i))
+                    stamp_path(n, [(0, j, i), (1, j, i), (2, j, i)], W_SIG); k_ += 1
+    return k_
+if not os.environ.get("ROUTE_COMPLETE"):
+    print("thermal pad vias:", thermal_vias(), flush=True)
+
 # The fine-pitch QFNs' pins fan out next, before any net (as ../hall_pcb/route.py does for
 # its ADCs): a short track from each signal pin to a via on a square ring FAN_D (in the
 # chip's frame) round its middle. No via may stand in a pad (novia), so without these

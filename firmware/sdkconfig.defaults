@@ -11,7 +11,13 @@ CONFIG_SPIRAM_USE_MALLOC=y
 CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
 CONFIG_FREERTOS_HZ=1000
 CONFIG_COMPILER_OPTIMIZATION_PERF=y
-# the console on UART0 (the TX/RX test pads): USB belongs to TinyUSB (MIDI)
+# the console on UART0 (the TX/RX test pads) and, through main/usb_console.c, over USB:
+# USB belongs to TinyUSB (MIDI and a CDC serial port), so ESP-IDF's own console stays on UART
 CONFIG_ESP_CONSOLE_UART_DEFAULT=y
-# USB-MIDI (TinyUSB)
+# USB-MIDI and the console's serial port (TinyUSB)
 CONFIG_TINYUSB_MIDI_COUNT=1
+CONFIG_TINYUSB_CDC_ENABLED=y
+CONFIG_TINYUSB_CDC_COUNT=1
+# a crash's core dump into its flash partition (main/history.c)
+CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=y
+CONFIG_ESP_COREDUMP_DATA_FORMAT_ELF=y

@@ -73,12 +73,12 @@ static void test_keys(void) {
 	all_at_rest();
 	int k; key_state_t s;
 	CHECK(!keys_get_next_changed(&k, &s));
-	keys_update(5, at(CONF_KEY_ACTUATE - 0.02f));  CHECK(keys_get_state(5) == OFF);
-	keys_update(5, at(CONF_KEY_ACTUATE + 0.02f));  CHECK(keys_get_state(5) == ON);
+	keys_update(5, REST + CONF_KEY_ACTUATE_COUNTS - 1);  CHECK(keys_get_state(5) == OFF);
+	keys_update(5, REST + CONF_KEY_ACTUATE_COUNTS);      CHECK(keys_get_state(5) == ON);
 	CHECK(keys_get_next_changed(&k, &s) && k == 5 && s == ON);
 	CHECK(!keys_get_next_changed(&k, &s));
-	keys_update(5, at(CONF_KEY_RELEASE + 0.02f));  CHECK(keys_get_state(5) == ON);     // hysteresis
-	keys_update(5, at(CONF_KEY_RELEASE - 0.02f));  CHECK(keys_get_state(5) == OFF);
+	keys_update(5, REST + CONF_KEY_RELEASE_COUNTS + 1);  CHECK(keys_get_state(5) == ON);   // hysteresis
+	keys_update(5, REST + CONF_KEY_RELEASE_COUNTS);      CHECK(keys_get_state(5) == OFF);
 	CHECK(keys_get_next_changed(&k, &s) && k == 5 && s == OFF);
 	// clear: a held key comes back as changed
 	press(7); CHECK(keys_get_next_changed(&k, &s) && k == 7);
@@ -90,13 +90,20 @@ static void test_keys(void) {
 	for(int i = 0; i < KEYMAP_NUM_KEYS; i++) keys_update(i, REST - 500);   // every key to the bottom, falling
 	all_at_rest();
 	CHECK(keys_cal_end() == KEYMAP_NUM_KEYS);
-	keys_update(3, REST - 120);  CHECK(keys_get_state(3) == ON);           // 0.24 of 500, falling
+	keys_update(3, REST - CONF_KEY_ACTUATE_COUNTS);  CHECK(keys_get_state(3) == ON);   // falling
 	keys_update(3, REST + 400);  CHECK(keys_get_state(3) == OFF);
 	int16_t sp[KEYMAP_NUM_KEYS]; keys_get_spans(sp); CHECK(sp[3] == -500);
-	// rest drift while released is followed
+	// a slow drift while released (temperature: 20 counts over 200 000 readings, minutes)
+	// is followed, so it does not switch the key on
 	keys_init(); keys_update(0, 2000);
-	for(int i = 0; i < 3000; i++) keys_update(0, 2000 + i / 100);    // 30 counts, slowly
-	keys_update(0, 2030 + (int)(0.15f * CONF_KEY_DEFAULT_SPAN)); CHECK(keys_get_state(0) == OFF);
+	for(int i = 0; i < 200000; i++) keys_update(0, 2000 + i / 10000);
+	CHECK(keys_get_state(0) == OFF);
+	keys_update(0, 2020 + CONF_KEY_ACTUATE_COUNTS - 2); CHECK(keys_get_state(0) == OFF);
+	keys_update(0, 2020 + CONF_KEY_ACTUATE_COUNTS + 1); CHECK(keys_get_state(0) == ON);
+	// a key pressed very slowly (a count per 50 readings) is not followed: it goes on
+	keys_init(); keys_update(1, 2000);
+	for(int i = 0; i < 1000 && keys_get_state(1) == OFF; i++) keys_update(1, 2000 + i / 50);
+	CHECK(keys_get_state(1) == ON);
 }
 
 static void test_force(void) {

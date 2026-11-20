@@ -22,11 +22,17 @@ includes. The scripts come from `../hall_pcb/` and from the discant's old main b
   bass's z), seen from the parts. USB-C and charge light sit at X = 0, in the side
   wall: USB-C at Y 21.3 (z −104.5), light at Y 29.0. The earphone jack is the case's
   (§2), its axis over the board at Y 9.8.
-- **USB tab** [given 2026-11-18: way B]: the board reaches 0.8 mm past X = 0 from Y 15.8
+- **USB tab** [given 2026-11-18: way B]: the board reaches 1.1 mm past X = 0 from Y 15.8
   to 26.8, under the USB socket, so the socket's front shell legs and their slots sit
-  inside the board (copper 0.55 mm, slots 0.75 mm from the tab's edge) instead of at
-  the edge. The tab lies in a pocket of the side wall (`../bass/elec.scad`): 0.35 mm
-  into the wall, the pocket 0.3 mm larger all round, 1.35 mm of wall left outside it.
+  inside the board (copper 0.6 mm, slots 0.75 mm from the tab's edge) instead of at
+  the edge. The tab lies in a pocket of the side wall (`../bass/elec.scad`): 0.65 mm
+  into the wall, the pocket 0.3 mm larger all round, 0.85 mm of wall left outside it (the
+  wall's face carries a 0.2 mm recess round the port, so a plug's overmold reaches the
+  socket's face: `../bass/spec.md`).
+  The socket's mouth is 0.2 mm inside the wall's face, as the case's port expects
+  [2026-11-20: `gen_pcb.py` placed it by its courtyard, which reaches 0.55 past the
+  body, not 0.25 as assumed, so it stood 0.5 inside; now by its body, 2.25 beyond the
+  board's edge; the tab was 0.8 and 1.35 mm of wall were left].
   The board goes in with the back cover off, slid sideways into the pocket.
 - **Four layers** [chosen]: top, ground plane, signals, bottom. The bottom carries no
   parts, so it routes freely; all four are filled with ground where nothing else runs.
@@ -71,7 +77,7 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 | AO3401A × 2, BAT54C | the system switch (DET, VBUS) and the discant's 3.3 V (DET only) |
 | LTST-S326KGJRKT, DMG1012T × 2 | the red/green charge light; the green switch and the ESP32's low-battery red |
 | TLV320DAC3100IRHB, TLV75518 | I²S DAC with headphone driver; its 1.8 V core supply |
-| 3 solder pads P19–P21 | the earphone jack's wires (tip, ring, sleeve); 100 µF coupling caps on the board |
+| 3 solder pads P19–P21 | the earphone jack's wires (tip, ring, sleeve); 2 × 100 µF coupling caps per channel on the board (one cut off at about 140 Hz into 16 Ω, derated by its DC bias; two at about 70 Hz) [2026-11-19, review MINOR 5] |
 | SRV05-4 | ESD on the contacts' SDA, SCL, INT |
 | PTC 1206, 1.5 A hold | in the battery's plus lead |
 | 18 solder pads 1.5 × 1.5 | the wires (§4) |
@@ -94,6 +100,14 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 - **Charger settings** [datasheet: SLUS810]: ISET 1k ≈ 0.89 A charge (0.22 C for
   4 Ah); ILIM 1.5k ≈ 1.0 A from USB (EN2 high, EN1 low); ITERM open, 10 % termination;
   CE low.
+  - **Input current by the source** [2026-11-19, review MINOR 4: EN2 on VBUS and EN1 on
+    GND took 1 A from any port, a PC's too, which promises 500 mA; and EN2's abs. max is
+    7 V]: EN1/EN2 from IO5/IO6, pulled to 500 mA (EN2 100k down, EN1 100k up to 3.3 V,
+    which USB itself switches on, §3). The firmware reads CC1/CC2 (IO2, IO4, ADC1; our
+    5.1k Rd against the source's Rp): 0.70–1.16 V is a 1.5 A source, 1.31–2.04 V 3 A
+    [USB Type-C spec, vRd], then EN2 high, EN1 low: ILIM's 1.0 A. A PC's port or an A-to-C
+    cable (0.25–0.61 V) stays at 500 mA; charging then takes longer than the 9.1 h timer
+    allows for a flat 4 Ah cell (the charger stops; unplugging restarts it).
   - **TS to the cell's 10k NTC** [chosen 2026-11-15] on pad P17 (the former spare
     3.3 V), the NTC's other end on the cell's minus; the fixed 10k (R5) is gone. The
     charger then charges only within about 0–50 °C (the cell allows 0–45). Without the
@@ -108,7 +122,7 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
     about 5–6 h for a full charge at 0.89 A.
 - **Charge light** [given 2026-11-15: red while charging, green when full, red also when
   the battery runs low]: a side-emitting red/green LED with a common anode on VSYS
-  (LiteOn LTST-S326KGJRKT [unverified: which pad is which colour; height 1.6]), its lens
+  (LiteOn LTST-S326KGJRKT; height 1.6; pads from datasheet DS22-2000-287 rev. E [checked 2026-11-20, review/main_pcb.md MAJOR 1]: anode at one end, green's cathode C2 in the middle, red's cathode C1 at the marked end; in KiCad's footprint pad 1 C1, pad 2 C2, pad 3 the anode, which `design.py` before had on the middle pad), its lens
   at the board's edge behind the wall's ⌀1.6 hole. About 1.5 mA each [estimated].
   - **Red** through R9 (1k5) into the charger's ~CHG, low while charging; and into Q5
     (DMG1012T), which the ESP32 turns on through IO42 (LOW_BAT, R28 100k down, so it
@@ -126,9 +140,16 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
   output caps were 5 mm off on the far side, the input cap 4.5 mm, L2 through two vias]:
   U5 turned so its power pins face +X, the inductor upright beside L1/L2, the input cap
   C10 at VIN above, the output caps C12/C13 at VOUT below (2 mm), their GND ends at the
-  exposed pad; the VINA filter (R17, C11) on the other side at pin 8. It carries the ESP32 (up to about 350 mA in bursts), both key boards' sensors
+  exposed pad; the VINA filter (R17, C11) on the other side at pin 8. Thermal pads (U3,
+  U5, the DAC, the module's) carry a grid of vias into the plane (2 × 2 to 3 × 3; review
+  MINOR 3: the BQ24074's had one, about 1.3 W while charging).
+- **The module's decoupling** (C1 22 µF, C2 100 nF) sits about 20 mm from its 3.3 V pin
+  [review MINOR 2]: pin 2 is at the board's edge X 44, the module beside it and the
+  antenna's keepout below, so no part fits nearer on a board with parts on one side.
+  The module carries its own decoupling; +3V3 runs 0.4 mm to it. It carries the ESP32 (up to about 350 mA in bursts), both key boards' sensors
   (46 + 18 × 2–4 mA [datasheet], up to about 260 mA) and the ADCs. [estimated]
-- **Measuring:** VBAT through 1M/1M to IO1 (ADC); VBUS through 100k/100k to IO41;
+- **Measuring:** VBAT through 1M/1M to IO1 (ADC); VBUS through 68k/100k to IO41 (3.0 V
+  at 5 V; 100k/100k gave 2.5 V against the pin's VIH 2.475, review MINOR 1);
   the discant's 3.3 V through 10k (100k down) to IO40, so the firmware knows whether
   the discant is plugged.
 
@@ -160,9 +181,10 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 
 | | ESP32 | |
 |---|---|---|
-| bus 1, through the contacts | IO13 SDA1, IO14 SCL1, IO21 INT1 | discant's ADCs 10h–15h, the gauges' NAU7802 (2Ah); pull-ups 2k2 to the discant's 3.3 V, so the pins carry nothing apart |
+| bus 1, through the contacts | IO13 SDA1, IO14 SCL1, IO21 INT1 | discant's ADCs 10h–15h, the gauges' NAU7802 (2Ah); pull-ups 2k2 to the discant's 3.3 V, so the pins carry nothing apart; 33 R in each line between the contacts (and their ESD array U8) and the module [2026-11-19, review/contact_pcb.md MINOR 4: as the discant comes off, its ground may part first, and the return current then runs through the bus into the module's pins] |
 | bus 2, in the bass | IO47 SDA2, IO48 SCL2, IO38 INT2 | bass's ADCs 10h–12h, the DAC (18h); pull-ups 2k2 to 3.3 V |
 | I²S | IO9 MCLK, IO10 BCLK, IO11 WCLK, IO12 DOUT | DAC [2026-11-19: in the DAC's pin order on module pins 17–20, so the lines run straight down to it; before IO10–IO13, and DOUT had to cross under the DAC's other pins to pin 21] |
+| charger | IO2 CC1, IO4 CC2 (ADC1), IO5 EN1, IO6 EN2 | what the USB source offers; the charger's input current (§2) |
 | others | IO39 DAC reset, IO40 discant on, IO41 VBUS, IO1 VBAT, IO42 low-battery light, IO0 boot | |
 
 The module's pins face the parts on its long side (27–40) and its top end (15–26);

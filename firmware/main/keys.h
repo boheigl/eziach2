@@ -19,10 +19,11 @@
 
 // Key states from the Hall sensors' readings (../switch_hall/spec.md §6), without hardware:
 // the driver (keyio.c) feeds every key's 12-bit reading in with keys_update(). Each key has
-// a rest reading, tracked while it is released, and a span (bottom - rest, signed by the
-// magnet's pole); travel = (reading - rest) / span. A key goes on at CONF_KEY_ACTUATE of its
-// travel and off again at CONF_KEY_RELEASE. The interface of the changed keys is that of
-// ../ctrl/keyio.h.
+// a rest reading, tracked slowly while it is released, and a span (bottom - rest, signed by
+// the magnet's pole). A key goes on CONF_KEY_ACTUATE_COUNTS above its rest (in the span's
+// direction) and off again below CONF_KEY_RELEASE_COUNTS, whatever its full travel: it
+// switches at the top of its stroke. travel = (reading - rest) / span is only shown. The
+// interface of the changed keys is that of ../ctrl/keyio.h.
 
 #ifndef KEYS_H
 #define KEYS_H
@@ -53,7 +54,8 @@ bool keys_get_next_changed(int *i, key_state_t *state);
 void keys_clear_states(void);
 
 // calibration: between begin and end every key is pressed to the bottom once; end takes
-// each key's largest deviation from rest as its span. Returns the number of keys whose
+// each key's largest deviation from rest as its span (its sign: the direction a press
+// moves the reading; its size: the travel shown). Returns the number of keys whose
 // deviation was large enough (more than a quarter of the default span).
 void keys_cal_begin(void);
 int keys_cal_end(void);

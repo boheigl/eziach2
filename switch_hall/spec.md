@@ -197,8 +197,10 @@ Before: a spring-steel ⌀8 × 0.4 × 25 with 8 coils, 105 → 128 g (+22 %).
   ±85 mT range.
 - **Calibration:** the field rises monotonically but not linearly with travel.
   The firmware stores each key's rest and bottom readings and maps the reading
-  back to travel. The actuation point and hysteresis are then set as fractions
-  of the stroke.
+  back to travel. Switching itself does not use it [given 2026-11-20]: a key goes
+  on a fixed number of ADC counts above its rest reading and off below a smaller one,
+  so it switches at the top of the stroke whatever happens at the bottom (see Early
+  actuation; `../firmware/spec.md` §3).
 - **Early actuation:** at rest the field rises by 3.2 mT/mm; 0.1 / 0.2 / 0.5 mT
   above the rest reading are reached after 31 / 61 / 149 µm. One ADC step
   (12 bit, DRV5055A3 at 3.3 V) is about 0.05 mT, about 15 µm here. The limit is

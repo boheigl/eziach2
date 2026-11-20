@@ -96,7 +96,11 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   80–120 pF [estimate: wire, 6 or 3 ADCs, NAU7802 or DAC, ESD diodes, ESP32, tracks].
   1k5 sinks about 2 mA at 0.4 V, within I²C's 3 mA (R ≥ 1 kΩ). To check: the rise time
   on SCL/SDA with a scope on the assembled instrument (bus 1 with the discant plugged);
-  if it stays under 120 ns without them, they can come off.
+  if it stays under 120 ns without them, they can come off. Also at bring-up: the
+  NAU7802's low level [review/hall_pcb.md F5]: its VOL is specified only at 1 mA
+  (≤ 0.2 DVDD, Rev 1.7 §7.2), 1k5 asks it for about 1.9 mA (its own optional 1.6 kΩ
+  pull-up suggests it is meant to); above about 0.6 V during its ACK and data bits,
+  R12/R13 come off (and the rise time is checked again).
 - **Current:** 46 × 2–4 mA = 92 … 184 mA for the sensors, plus well under 1 mA for
   the ADCs. [datasheet: SBAS640C, SBAS868A]
 
@@ -160,8 +164,12 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
 
 ## 5. Layout rules [chosen]
 
-- Two layers, 1.6 mm. Tracks 0.2 mm, clearance 0.2 mm; 3.3 V 0.4 mm where it
-  fits. Vias 0.6 / 0.3. Copper to the edge 0.3 mm.
+- Two layers, 1.6 mm. Tracks 0.2 mm, clearance 0.2 mm; 3.3 V asks for 0.4 mm but the
+  router writes a net at one width, and one connection that only fits narrow makes
+  the whole of +3V3 0.2 mm (so it is on both boards, review/hall_pcb.md): about 46 mV
+  drop at the discant's far end, 14 mV on the bass [computed in the review], harmless
+  for the sensors' ratiometric outputs and the ADCs. Vias 0.6 / 0.3. Copper to the
+  edge 0.3 mm.
 - **Routing:** on the underside. The top is the ground plane; tracks cross it
   only briefly (4 × the cost per mm). Every ground pad gets a via to the plane
   first; both faces are then filled with ground. Net order: the short nets at
@@ -234,6 +242,19 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   - KiCad's DRC on both: no unconnected items, no clearance errors or shorts; left are
     silkscreen, dangling vias (fan-outs the net reached elsewhere) and a few dangling
     track stubs. Channels (`channels.json`) unchanged, so the firmware's table holds.
+  - **Discant with the ESD array U8** [2026-11-20]: two batches of six tries, best 3 open
+    (SDA to U5, KEY2_4 to U4, and a ground island). The two pads were joined with
+    `ROUTE_COMPLETE` as above. The island was U8's ground: the bus on the top face
+    encloses U8 and C4, so their ground pieces on both faces were tied only to each
+    other by their own vias. The stitching step skipped them for that reason; it now
+    goes by groups (pieces joined by GND vias or through-hole pads), and a group cut off
+    from the main ground gets a via, or a message when no cell is free (here none was).
+    New: `ROUTE_COMPLETE=GND:REF:PAD` routes a track from the ground pad to the largest
+    ground piece of either face within 12 mm, taking out paths in the way as above; run
+    for U8 pad 2 and C4 pad 2. Track stubs left dangling by the completions were then
+    removed one at a time, each kept if KiCad's DRC showed an open connection without it
+    (two kept: they run past their joint). 370 vias, none in a pad; DRC: no unconnected
+    items, no clearance errors or shorts. Channels unchanged.
 
 ## 6. Bass board [given: from the same description]
 
@@ -246,7 +267,8 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   stay the same, so all keys behave alike (`riser` in ../switch_hall/key.scad).
 - **Outline:** a parallelogram 176 × 32 mm, both ends slanting with the rows'
   10 mm offset, 8 mm beyond the outer keys.
-- **Three ADS7128**, between the rows at x = −55 / 5 / 65, six keys each, by X;
+- **Three ADS7128**, between the rows at x = −55 / −15 / 65, six keys each, by X (the middle
+  group's keys centre on 5; −15 and 25 are as near, and the slot taken is −15);
   addresses 10h, 11h, 12h.
 - **Own I²C bus:** the discant already uses 10h–15h, and the ADS7128 has only
   eight addresses, so the bass board goes to the ESP32's second I²C controller

@@ -18,6 +18,7 @@
  */
 
 // USB-MIDI out (TinyUSB): the same notes and volume as the synthesizer, for a computer or app.
+// midi_init() installs the USB device: MIDI and the console's serial port (usb_console.h).
 
 #ifndef MIDI_H
 #define MIDI_H

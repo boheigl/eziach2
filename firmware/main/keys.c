@@ -64,13 +64,14 @@ void keys_update(int i, uint16_t reading) {
 		if(d > k->cal_max) k->cal_max = d;
 		return;            // no playing, no rest tracking while calibrating
 	}
-	float t = keys_get_travel(i);
-	if(k->state == OFF && t >= CONF_KEY_ACTUATE)
+	// counts away from rest, in the direction a press moves the reading (the span's sign)
+	float d = ((float)reading - k->rest) * (k->span < 0 ? -1.0f : 1.0f);
+	if(k->state == OFF && d >= CONF_KEY_ACTUATE_COUNTS)
 		k->state = ON;
-	else if(k->state == ON && t <= CONF_KEY_RELEASE)
+	else if(k->state == ON && d <= CONF_KEY_RELEASE_COUNTS)
 		k->state = OFF;
-	// the rest drifts (temperature, the soft stop): follow it while the key is clearly up
-	if(k->state == OFF && t < CONF_KEY_RELEASE / 2.0f)
+	// the rest drifts (temperature, the soft stop): follow it, slowly, while the key is up
+	if(k->state == OFF && d < CONF_KEY_RELEASE_COUNTS / 2.0f)
 		k->rest += CONF_KEY_REST_FOLLOW * ((float)reading - k->rest);
 }
 

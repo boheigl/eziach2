@@ -108,6 +108,7 @@ R0402 = "Resistor_SMD:R_0402_1005Metric"
 C0402 = "Capacitor_SMD:C_0402_1005Metric"
 C0805 = "Capacitor_SMD:C_0805_2012Metric"
 SOT23 = "Package_TO_SOT_SMD:SOT-23"
+SOT236 = "Package_TO_SOT_SMD:SOT-23-6"
 # TI RTE (WQFN-16, 3 x 3, 0.5 pitch); exposed pad assumed 1.68 square [unverified]
 WQFN16 = "Package_DFN_QFN:WQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm"
 JST5 = "Connector_JST:JST_SH_BM05B-SRSS-TB_1x05-1MP_P1.00mm_Vertical"
@@ -208,6 +209,12 @@ if BOARD == "discant":
     # main board's 2k2: 1k5 together, see spec.md
     for i, (r, v, n) in enumerate([("R11", "10k", "INT"), ("R12", "4k7", "SDA"), ("R13", "4k7", "SCL")]):
         part(r, v, R0402, {"1": n, "2": "+3V3"}, (-2.2 + 1.2 * i, 40.8), rot=90, group="bus")
+    # ESD on the bus [2026-11-19, review/hall_pcb.md MINOR: the contact pads lie open while the
+    # halves are apart, straight to the ADCs]: SRV05-4 as on the main board, in the middle lane
+    # the bus takes from J1 (nearer J1 the wire pads and the NAU7802 leave no room)
+    part("U8", "SRV05-4", SOT236, {"1": "SDA", "2": "GND", "3": "SCL", "4": "INT", "5": "+3V3", "6": None},
+         (-4.85, 40.6), rot=0, group="bus",
+         pinfo={"1": "IO1", "2": "VN", "3": "IO2", "4": "IO3", "5": "VP", "6": "IO4"})
     # --- the gauges' ADC: NAU7802SGI (SOP-16) [datasheet: Nuvoton NAU7802 Rev 2.6] --------
     # AVDD from +3V3 through a ferrite (its LDO stays off, the power-on default): the
     # half bridges' excitation (J2/J3 E+) and REFP are AVDD, so the reading is ratiometric.
@@ -259,6 +266,7 @@ LCSC = {
     ("DRV5055A3QDBZR", SOT23): "C266128",
     ("ADS7128IRTER", WQFN16): "C2867992",
     ("NAU7802SGI", SOIC16): "C2614351",
+    ("SRV05-4", SOT236): "C85364",                 # ProTek SRV05-4-P-T7, as on the main board
     ("10k 0.1%", R0402): "C190095",               # Yageo RT0402BRD0710KL, thin film, 25 ppm/K
     ("47R", R0402): "C25118",
     ("600R @ 100 MHz", L0402): "C76884",          # Murata BLM15AG601SN1D

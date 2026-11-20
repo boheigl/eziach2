@@ -49,6 +49,10 @@ usb     = [7.35, 8.94, 3.26];               // along x (plugging), z, y
 usb_z   = -104.5 + ez;
 usb_x1  = box_x[1] - 0.2;
 usb_yc  = brd_y[1] + usb[2] / 2;
+// a recess in the wall's face round the port, as deep as the mouth lies inside it, so a
+// plug's overmold reaches the socket's face [given 2026-11-20: 0 mm]: the USB Type-C spec's
+// largest overmold 12.35 x 6.5, and 0.25 round it
+usb_rec = [12.35 + 0.5, 6.5 + 0.5, box_x[1] - usb_x1];   // along z, y; depth
 led_z   = mz(main_led_y);         // the charge light (red/green, side-emitting, ../main_pcb D1)
 led_h   = 1.6;                    // its height; the lens at half of it [unverified: LTST-S326 datasheet]
 // the main board's own frame (../main_pcb/design.py): X from its side wall's edge, Y up
@@ -104,6 +108,8 @@ module power_board() {
 module elec_cuts() {
     translate([box_x[1] - 3, usb_yc, usb_z]) rotate([0, 90, 0]) linear_extrude(4)
         offset(r = 1.2) offset(delta = -1.2) square([usb[1] + 0.5, usb[2] + 0.5], center = true);
+    translate([box_x[1] - usb_rec[2], usb_yc, usb_z]) rotate([0, 90, 0]) linear_extrude(usb_rec[2] + 1)
+        offset(r = 1.2) offset(delta = -1.2) square([usb_rec[0], usb_rec[1]], center = true);
     // the pocket for the board's tab [given 2026-11-18: way B]: fit all round; the board slides
     // into it with the socket into its port (back cover off, the board 2 mm off the wall first)
     bx([pwr_x[1] - 1, tab_x[1] + fit], [brd_y[0] - fit, brd_y[1] + fit], [tab_z[0] - fit, tab_z[1] + fit]);

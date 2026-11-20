@@ -18,11 +18,13 @@
  */
 
 // Start-up and the control loop (core 0): keys and force in, instrument.c, notes out to the
-// synthesizer (core 1) and USB-MIDI. A console on UART0 (the TX/RX test pads) for bring-up.
+// synthesizer (core 1) and USB-MIDI. A console for bring-up, on UART0 (the TX/RX test pads)
+// and over USB (usb_console.c).
 
 #include "bus.h"
 #include "config.h"
 #include "force.h"
+#include "history.h"
 #include "instrument.h"
 #include "keyio.h"
 #include "keymap.h"
@@ -33,6 +35,7 @@
 #include "power.h"
 #include "settings.h"
 #include "synthesizer.h"
+#include "usb_console.h"
 #include "esp_console.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -143,7 +146,8 @@ static int cmd_status(int argc, char **argv) {
 	       (long)cells[0], (long)cells[1], force_get_sign());
 	printf("synth: %d voices, load %.0f %% avg, %.0f %% peak; MIDI %s\n", synthesizer_voices(),
 	       avg * 100, peak * 100, midi_mounted() ? "mounted" : "not mounted");
-	printf("battery %d mV, USB %s; transpose %d%s\n", power_battery_mv(), power_usb() ? "yes" : "no",
+	printf("battery %d mV, USB %s (offers %d mA, charger input %d mA); transpose %d%s\n", power_battery_mv(),
+	       power_usb() ? "yes" : "no", power_usb_offer_ma(), power_charge_limit_ma(),
 	       instrument_transpose(), instrument_is_adjusting() ? ", adjusting" : "");
 	return 0;
 }
@@ -219,6 +223,26 @@ static int cmd_play(int argc, char **argv) {
 	return 0;
 }
 
+static int cmd_history(int argc, char **argv) {
+	(void)argc; (void)argv;
+	history_print();
+	return 0;
+}
+
+static int cmd_crash(int argc, char **argv) {
+	if(argc == 2 && !strcmp(argv[1], "erase")) history_crash_erase();
+	else history_crash_print();
+	return 0;
+}
+
+static int cmd_download(int argc, char **argv) {
+	(void)argc; (void)argv;
+	printf("restarting into the download mode: flash with idf.py -p /dev/ttyACM0 flash\n");
+	fflush(stdout);
+	usb_console_download();
+	return 0;
+}
+
 static void console_init(void) {
 	esp_console_repl_t *repl = NULL;
 	esp_console_repl_config_t rc = ESP_CONSOLE_REPL_CONFIG_DEFAULT();
@@ -233,14 +257,19 @@ static void console_init(void) {
 		{.command = "tare", .help = "zero the force (nothing touched)", .func = cmd_tare},
 		{.command = "log", .help = "log on | off: print notes", .func = cmd_log},
 		{.command = "play", .help = "play <board> <row> <key>: the key's tones for the current direction", .func = cmd_play},
+		{.command = "history", .help = "the log since the last power-on (kept over restarts and crashes)", .func = cmd_history},
+		{.command = "crash", .help = "crash | crash erase: the stored crash's task, address and backtrace", .func = cmd_crash},
+		{.command = "download", .help = "restart into the ROM's download mode over USB, to flash", .func = cmd_download},
 	};
 	for(unsigned i = 0; i < sizeof(cmds) / sizeof(cmds[0]); i++)
 		ESP_ERROR_CHECK(esp_console_cmd_register(&cmds[i]));
 	esp_console_register_help_command();
 	ESP_ERROR_CHECK(esp_console_start_repl(repl));
+	usb_console_start();                      // the same commands over USB
 }
 
 void app_main(void) {
+	history_init();
 	ESP_LOGI(TAG, "%d keys (discant and bass)", KEYMAP_NUM_KEYS);
 	keys_init();
 	force_init();

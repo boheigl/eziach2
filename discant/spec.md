@@ -210,7 +210,9 @@ git history.
   GND, SDA, SCL, INT) are soldered to its back pads, in a 7.2 × 7.2 × 1.5 mm recess of the
   boss, and a ⌀2.2 bore down the boss leads them (a 1.3 mm bundle) into the
   pad's groove and straight on through the channel at x = 0 to the key board's J1
-  (28 mm).
+  (28 mm). The board is glued onto the boss, its edges flush with the boss's (the same
+  outline): that locates it within a few tenths, and the pins' tips stay on the pads up
+  to ±0.65 mm [given 2026-11-20: glue only; review/contact_pcb.md MINOR 5].
   The latches in the inner holders carry the load, not the contacts.
   `../assembly/spec.md`, Contacts.
 - **Overload:** no stop needed [2026-11-15]: the bought load cells are rated 490 N with 150 % overload; 100 N is a fifth of that (`../strain_gauge/spec.md` §4a).

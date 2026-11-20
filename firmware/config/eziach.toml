@@ -53,14 +53,23 @@ pull_gain = 3.2
 sign = 1                  # +1 or -1: which way is push, set once by pressing (strain_gauge/spec.md)
 
 [keys]
-# Hall keys (../switch_hall/spec.md §6): actuation and release as fractions of the
-# calibrated travel, rest tracked while a key is released.
-actuate = 0.20
-release = 0.10
+# Hall keys (../switch_hall/spec.md §6): a key goes on a fixed distance above its rest
+# reading and off again below a smaller one, in ADC counts, whatever its full travel
+# [given 2026-11-20: switching at the top only]. At rest the field rises by 3.2 mT/mm
+# [estimated], one count is about 0.054 mT (DRV5055A3 at 3.3 V, 15 mV/mT, over 0.806 mV
+# per count): 9 counts are about 0.15 mm of travel, 5 counts about 0.08 mm. How small they
+# may be (noise, drift, the soft stop's return) is to be measured on the prototype.
+actuate_counts = 9
+release_counts = 5
 # rest-to-bottom change in ADC counts before a key is calibrated: 32 mT x 15 mV/mT
-# over 0.806 mV per count [estimated]; the sign follows the magnets' pole
+# over 0.806 mV per count [estimated]; its sign follows the magnets' pole and gives the
+# direction a press moves the reading (calibration sets it per key); the span itself only
+# scales the travel `keys` shows
 default_span = 600
-rest_follow = 0.01        # portion of a new reading taken into the rest value while released
+# portion of a new reading taken into the rest value while a key is up: slow, so that a
+# key pressed slowly is not followed (about one reading per ms: 0.0002 is a time constant
+# of about 5 s; temperature drifts over minutes)
+rest_follow = 0.0002
 
 [synthesizer]
 soundfont_name = "ZiachMini.sf2"

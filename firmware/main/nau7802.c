@@ -25,13 +25,16 @@
 
 static const char *TAG = "nau7802";
 
-// registers [datasheet: Nuvoton NAU7802 Rev 2.6; to check at bring-up]
+// registers [datasheet: Nuvoton NAU7802 Rev 1.7 (Rev 2.6 not to be had), checked 2026-11-20:
+// §9.1 power-on sequence, §11.1-11.3 PU_CTRL/CTRL1/CTRL2 bit for bit, §11.9 result
+// MSB first, §11.10 REG0x15 = 0x30 as §9.1's example, §11.15 PGA_CAP_EN]
 #define ADDR 0x2A
 #define REG_PU_CTRL 0x00   // bit 0 RR, 1 PUD, 2 PUA, 3 PUR (ready), 4 CS (start), 5 CR (data ready), 7 AVDDS
 #define REG_CTRL1   0x01   // bits 2:0 gain (111 = 128)
 #define REG_CTRL2   0x02   // bits 1:0 CALMOD, 2 CALS, 3 CAL_ERR, 6:4 CRS (111 = 320/s), 7 CHS (channel 2)
 #define REG_ADCO_B2 0x12   // 24-bit result, MSB first
 #define REG_ADC     0x15   // bits 5:4 REG_CHPS: 11 = chopper clock off (the usual setting)
+#define REG_PWR     0x1C   // bit 7 PGA_CAP_EN: a capacitor across VIN2P/VIN2N, for one-channel use only
 #define CRS_320 (7 << 4)
 #define DISCARD 3          // conversions dropped after a channel switch, while the filter settles [chosen]
 
@@ -89,6 +92,9 @@ esp_err_t nau7802_init(void) {
 	if((e = wr(REG_PU_CTRL, 0x06)) != ESP_OK) goto fail;
 	if((e = wr(REG_CTRL1, 0x07)) != ESP_OK) goto fail;             // gain 128
 	if((e = wr(REG_ADC, 0x30)) != ESP_OK) goto fail;               // chopper clock off
+	// both channels in use: no PGA capacitor across channel 2's inputs (the datasheet gives
+	// no default for this register, so it is set), full bias currents
+	if((e = wr(REG_PWR, 0x00)) != ESP_OK) goto fail;
 	vTaskDelay(pdMS_TO_TICKS(600));                                // AVDD and PGA settle
 	if((e = wr(REG_PU_CTRL, 0x16)) != ESP_OK) goto fail;           // start conversions
 	for(int ch = 1; ch >= 0; ch--) {                               // each channel's offset

@@ -9,13 +9,13 @@ not blade or card-edge contacts: `../assembly/spec.md`, Contacts.
 
 | | |
 |---|---|
-| Panel | 16 × 25 mm, 2 layers, 1.6 mm, **ENIG** (the pads are contacts): both boards in a 2 mm frame, 1 mm milled gaps round them, each held by a 5 mm tab on either side (JLCPCB's minimum with mouse bites; 2 mm before 2026-11-18, review/contact_pcb.md) with seven ⌀0.5 mouse-bite holes at 0.75 along the board's edge, the nearest 0.45 mm from a via's copper [given 2026-11-15: tabs, not V-cut] |
+| Panel | 17.2 × 26.8 mm, 2 layers, 1.6 mm, **ENIG** (the pads are contacts): both boards in a 2 mm frame, 1.6 mm milled gaps round them (1.0 before 2026-11-19: JLCPCB's least slot; 1.6–2 advised), each held by a 5 mm tab on either side (JLCPCB's minimum with mouse bites; 2 mm before 2026-11-18, review/contact_pcb.md) with seven ⌀0.5 mouse-bite holes at 0.75 along the board's edge, the nearest 0.45 mm from a via's copper [given 2026-11-15: tabs, not V-cut] |
 | Each board | 10.0 × 9.0 mm |
 | Grid | 3 × 3: 2.54 mm across (x), 3.0 mm up (z); the strips are 2.5 wide, so 3.0 leaves them 0.5 apart |
 | Pads | ⌀2.2 on both boards (the strip's recommended pad) |
 | Vias | 0.45 / 0.2, in the gaps between four pads (0.64 mm clear of each) or beside the middle row; tented |
 | Tracks | 0.2, supply 0.3; clearance 0.15 |
-| Wire pads | 1.2 × 1.4 mm on the back, within ±3.4 mm, so the joints sit in the cavity (bass) or recess (discant) behind the board |
+| Wire pads | 1.2 × 1.4 mm on the back, within ±3.4 mm, so the joints sit in the cavity (bass) or recess (discant) behind the board; each net's name below its pad on the back silkscreen, mirrored so it reads from the back [2026-11-19, review MINOR 1] |
 
 ## Pin board (bass)
 
@@ -67,6 +67,9 @@ board, seen from the bass, shows it mirrored.
 - **Breaking out:** bend each board out over its tabs; the tabs break through their
   holes and leave half holes and little stubs on the boards' sides (x). Those sides
   locate the pin board in the bass's pocket (0.1 clearance), so file them flush.
+- **Fixing** [given 2026-11-20: glue only, no holes or pegs on the boards]: the pad board
+  glued onto the discant's boss (edges flush), the pin board kept in its pocket by a
+  drop of silicone (`../assembly/spec.md`, Contacts).
 - The strip's housing height is estimated in the model (`contact_pins()`), only its
   overall heights are from the datasheet.
 

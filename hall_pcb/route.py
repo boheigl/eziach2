@@ -7,7 +7,8 @@ rip-up and reroute, from ../discant/main_pcb (git history). GND pads get a via t
 the top plane first; afterwards both faces are filled with ground. KiCad's DRC
 judges the result.
 usage: route.py [BOARD] [first,nets,...]
-       ROUTE_COMPLETE=NET:REF:PAD route.py BOARD   (a routed board: join that pad, see below)"""
+       ROUTE_COMPLETE=NET:REF:PAD route.py BOARD   (a routed board: join that pad, see below;
+                                                    GND:REF:PAD joins a ground pad cut off)"""
 import sys, heapq, math, time, json, os, collections
 import numpy as np, pcbnew
 from scipy import ndimage
@@ -563,7 +564,48 @@ if COMPLETE:
             routes[net] = [p for p in routes[net] if not all(c in loose for c in p)]
             changed.add(net); rebuild_soft()
         return ok_
+    def join_gnd(ref, num):
+        """[2026-11-20] GND:REF:PAD: a ground pad whose fill pieces are cut off from the main
+        ground (enclosed by other nets' tracks on both faces, so no stitching via fits) gets
+        a track from the pad to the largest ground piece of either face, within 12 mm;
+        paths in the way come out as in join_net. Returns the nets taken out."""
+        n = netid["GND"]
+        t = next(t for t in terms["GND"] if t["ref"] == ref and t["num"] == num)
+        zs = {z.GetLayer(): z for z in b.Zones() if z.GetNetname() == "GND"}
+        ho, so = hard[R_SIG], soft[R_SIG]
+        tg, R_ = set(), int(12 / RES)
+        for L in LAYERS:
+            p = zs[L].GetFilledPolysList(L)
+            k = max(range(p.OutlineCount()), key=lambda k: abs(p.Outline(k).Area()))
+            o, l = p.Outline(k), LI[L]
+            for j in range(max(gy(t["y"]) - R_, 0), min(gy(t["y"]) + R_, NY)):
+                for i in range(max(gx(t["x"]) - R_, 0), min(gx(t["x"]) + R_, NX)):
+                    if ho[l, j, i] not in (0, n) or so[l, j, i] not in (0, n): continue
+                    P = pcbnew.VECTOR2I(mm(wx(i)), mm(wy(j)))
+                    if o.PointInside(P) and not any(p.Hole(k, h).PointInside(P) for h in range(p.HoleCount(k))):
+                        tg.add((l, j, i))
+        src = set(term_cells(t)); tx, ty = gx(t["x"]), gy(t["y"])
+        print("completion: GND", ref, num, "targets", len(tg), flush=True)
+        hit_all = []
+        path = astar(n, tg, src, tx, ty, W_SIG, limit=2000000)
+        k = 0
+        while path is None and k < 4:
+            p2 = astar(n, tg, src, tx, ty, W_SIG, rip=True, limit=2000000)
+            if p2 is None: break
+            for h_ in take_out(n, p2):
+                changed.add(h_)
+                if h_ not in hit_all: hit_all.append(h_)
+            rebuild_soft()
+            path = astar(n, tg, src, tx, ty, W_SIG, limit=2000000)
+            k += 1
+        if path is None:
+            print("completion: GND", ref, num, "NOT joined", flush=True); return hit_all
+        routes.setdefault("GND", []).append(path); pw_c[id(path)] = W_SIG; stamp_path(n, path, W_SIG); changed.add("GND")
+        print("completion: GND", ref, num, "joined, path", len(path), "cells, taken out", hit_all, flush=True)
+        return hit_all
     pending = [c_net]
+    if c_net == "GND":
+        pending = join_gnd(c_ref, c_num)
     while pending and time.time() - T_START < 40 * 60:
         net = pending.pop(0)
         ok_ = join_net(net, 40 * 60)
@@ -669,28 +711,53 @@ pcbnew.ZONE_FILLER(b).Fill(b.Zones())
 # largest piece; then the faces are filled again.
 gid = netid["GND"]; hv, sv = hard[R_VIA], soft[R_VIA]
 def stitch():
+    """[2026-11-20] by groups, not by pieces: pieces joined by GND vias or through-hole pads
+    form a group; a group without the largest pieces is cut off even when it holds vias
+    (two cut-off pieces on the two faces, tied only to each other: U8's ground on the
+    discant). Each such group gets a via from one of its pieces into the other face's
+    largest piece."""
     zs = {z.GetLayer(): z for z in b.Zones()}
     polys = {L: zs[L].GetFilledPolysList(L) for L in LAYERS}
     big = {L: max(range(p.OutlineCount()), key=lambda k: abs(p.Outline(k).Area())) for L, p in polys.items()}
+    def inside(L, k, P):
+        p = polys[L]
+        return p.Outline(k).PointInside(P) and not any(p.Hole(k, h).PointInside(P) for h in range(p.HoleCount(k)))
+    par = {(L, k): (L, k) for L, p in polys.items() for k in range(p.OutlineCount())}
+    def find(a):
+        while par[a] != a: a = par[a]
+        return a
+    ties = [t.GetPosition() for t in b.GetTracks() if t.GetClass() == "PCB_VIA" and t.GetNetname() == "GND"]
+    ties += [p.GetPosition() for f in b.GetFootprints() for p in f.Pads()
+             if p.GetNetname() == "GND" and p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
+    for P in ties:
+        hit = [(L, k) for L, p in polys.items() for k in range(p.OutlineCount()) if inside(L, k, P)]
+        for h in hit[1:]: par[find(h)] = find(hit[0])
+    par[find((LAYERS[0], big[LAYERS[0]]))] = find((LAYERS[1], big[LAYERS[1]]))
+    main = find((LAYERS[0], big[LAYERS[0]]))
+    groups = {}
+    for key in par: groups.setdefault(find(key), []).append(key)
     added = 0
-    gnd_vias = [t.GetPosition() for t in b.GetTracks() if t.GetClass() == "PCB_VIA" and t.GetNetname() == "GND"]
-    for L, p in polys.items():
-        other = polys[LAYERS[1 - LI[L]]].Outline(big[LAYERS[1 - LI[L]]])
-        for k in range(p.OutlineCount()):
-            if k == big[L]: continue
-            o = p.Outline(k); bb = o.BBox()
-            if any(o.PointInside(v) for v in gnd_vias): continue      # already tied by a via of its own
+    for root, members in groups.items():
+        if root == main: continue
+        done = False
+        for L, k in members:
+            Lo = LAYERS[1 - LI[L]]
+            o = polys[L].Outline(k); bb = o.BBox()
             i0, i1 = gx(bb.GetX() / IU), gx((bb.GetX() + bb.GetWidth()) / IU)
             j0, j1 = gy(bb.GetY() / IU), gy((bb.GetY() + bb.GetHeight()) / IU)
-            done = False
             for j in range(max(j0, 0), min(j1 + 1, NY)):
                 for i in range(max(i0, 0), min(i1 + 1, NX)):
                     if not (not vblk[j, i] and not novia[j, i] and all(hv[l, j, i] in (0, gid) and sv[l, j, i] in (0, gid) for l in range(NL))):
                         continue
                     at = pcbnew.VECTOR2I(mm(wx(i)), mm(wy(j)))
-                    if o.PointInside(at) and other.PointInside(at):
+                    if inside(L, k, at) and inside(Lo, big[Lo], at):
                         add_via("GND", (wx(i), wy(j))); stamp_path(gid, [(0, j, i), (1, j, i)], W_SIG); added += 1; done = True; break
                 if done: break
+            if done: break
+        if not done:
+            bb = polys[members[0][0]].Outline(members[0][1]).BBox()
+            print("stitching: group cut off, no free cell:", len(members), "pieces near",
+                  round(bb.GetX() / IU, 1), round(bb.GetY() / IU, 1), flush=True)
     return added
 for _ in range(1):
     n_st = stitch()

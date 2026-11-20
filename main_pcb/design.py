@@ -16,11 +16,12 @@ the top; the underside lies 0.47 mm over the front wall.
 W, H = 45.5, 33.0                 # board outline [given: elec.scad]
 PCB_T = 1.0                       # [given: elec.scad pcb_tk]
 # a tab under the USB socket, into a pocket of the side wall [given 2026-11-18: way B]: the
-# socket stands 1.95 beyond the board's edge, so its front shell legs (slots to X -0.05,
-# copper to X -0.25) lay on the edge, cut by the router. With the tab to X -0.8 their copper
-# keeps 0.55 from the edge, the slots 0.75. The board's edge lies 0.45 inside the wall, so
-# the tab stands 0.35 into it (the pocket: ../bass/elec.scad elec_cuts()).
-USB_TAB = (-0.8, 15.8, 26.8)      # X of its end, Y from .. to (the socket's legs: Y 16.48 .. 26.12)
+# socket stands 2.25 beyond the board's edge (its mouth 0.2 inside the wall's face), so its
+# front shell legs (slots to X -0.35, copper to X -0.55) would lie past the edge. With the
+# tab to X -1.1 their copper keeps 0.55 from the edge, the slots 0.75 [2026-11-20: was -0.8
+# with the socket 0.3 further in]. The board's edge lies 0.45 inside the wall, so the tab
+# stands 0.65 into it (the pocket: ../bass/elec.scad elec_cuts()).
+USB_TAB = (-1.1, 15.8, 26.8)      # X of its end, Y from .. to (the socket's legs: Y 16.48 .. 26.12)
 OUTLINE = [(0, 0), (W, 0), (W, H), (0, H),
            (0, USB_TAB[2]), (USB_TAB[0], USB_TAB[2]), (USB_TAB[0], USB_TAB[1]), (0, USB_TAB[1])]
 # M2 screws from the parts' side into pilots in the front wall; head clearance d 4.4
@@ -55,15 +56,15 @@ def Cc(ref, val, a, b, pos, group, fp=C0402):
 # --- module ------------------------------------------------------------------------
 # ESP32-S3-WROOM-1-N16R8 (GPIO35-37 belong to the octal PSRAM). Pins 1-14 face the side
 # wall's opposite edge (X 44), 15-26 the top, 27-40 the parts (X 26.6).
-mod = {"1": ("GND", "GND"), "2": ("+3V3", "3V3"), "3": ("EN", "EN"), "4": (None, "IO4"), "5": (None, "IO5"),
-       "6": (None, "IO6"), "7": (None, "IO7"), "8": (None, "IO15"), "9": (None, "IO16"), "10": (None, "IO17"),
+mod = {"1": ("GND", "GND"), "2": ("+3V3", "3V3"), "3": ("EN", "EN"), "4": ("CC2", "IO4"), "5": ("EN1", "IO5"),
+       "6": ("EN2", "IO6"), "7": (None, "IO7"), "8": (None, "IO15"), "9": (None, "IO16"), "10": (None, "IO17"),
        "11": (None, "IO18"), "12": (None, "IO8"), "13": ("USB_DN", "USB_D-"), "14": ("USB_DP", "USB_D+"),
        "15": (None, "IO3"), "16": (None, "IO46"), "17": ("I2S_MCLK", "IO9"), "18": ("I2S_BCLK", "IO10"),
        "19": ("I2S_WCLK", "IO11"), "20": ("I2S_DOUT", "IO12"), "21": ("SDA1", "IO13"), "22": ("SCL1", "IO14"),
        "23": ("INT1", "IO21"), "24": ("SDA2", "IO47"), "25": ("SCL2", "IO48"), "26": (None, "IO45"),
        "27": ("BOOT", "IO0"), "28": (None, "IO35"), "29": (None, "IO36"), "30": (None, "IO37"), "31": ("INT2", "IO38"),
        "32": ("DAC_RST", "IO39"), "33": ("DISC_ON", "IO40"), "34": ("VBUS_SENSE", "IO41"), "35": ("LOW_BAT", "IO42"),
-       "36": ("RXD0", "RXD0"), "37": ("TXD0", "TXD0"), "38": (None, "IO2"), "39": ("VBAT_SENSE", "IO1"),
+       "36": ("RXD0", "RXD0"), "37": ("TXD0", "TXD0"), "38": ("CC1", "IO2"), "39": ("VBAT_SENSE", "IO1"),
        "40": ("GND", "GND"), "41": ("GND", "GND")}
 part("U1", "ESP32-S3-WROOM-1-N16R8", "RF_Module:ESP32-S3-WROOM-1", {p: v[0] for p, v in mod.items()},
      (35.3, 13.25, 180), pinfo={p: v[1] for p, v in mod.items()}, group="mcu", title="ESP32-S3")
@@ -93,13 +94,16 @@ part("U2", "USBLC6-2SC6", SOT236,
      pinfo={"1": "I/O1", "2": "GND", "3": "I/O2", "4": "I/O2", "5": "VBUS", "6": "I/O1"}, group="usb")
 
 # --- charger with power path ------------------------------------------------------
-# BQ24074: OUT carries the system from USB or battery; EN2 high, EN1 low: input
-# current set by ILIM (1.5k: about 1.0 A); ISET 1k: about 0.9 A charge; TS to the cell's
+# BQ24074: OUT carries the system from USB or battery; EN1/EN2 from the ESP32 [2026-11-19,
+# review/main_pcb.md MINOR 4: before EN2 on VBUS, EN1 on GND, so 1 A from any port, and EN2
+# saw VBUS beyond its 7 V abs. max]: pulled to 500 mA (EN2 low, EN1 high, SLUS810 Table 7-2)
+# until the firmware reads CC1/CC2 (IO2, IO4) and finds a source offering 1.5 A or more,
+# then EN2 high, EN1 low: input current set by ILIM (1.5k: about 1.0 A); ISET 1k: about 0.9 A charge; TS to the cell's
 # own 10k NTC (a 3-wire cell, third wire on pad P17): charging only within 0 ... 50 C;
 # TMR 68k: fast-charge timer 10 x 68k x K_TMR 48 s/kOhm = 9.1 h (6.8 ... 11.3 h; TMR is
 # specified for 18 ... 72k only) against about 5 ... 6 h for a full charge; ITERM open:
 # 10 % termination.
-chg = {"1": "TS", "2": "VBAT", "3": "VBAT", "4": "GND", "5": "VBUS", "6": "GND", "7": "PGOOD", "8": "GND",
+chg = {"1": "TS", "2": "VBAT", "3": "VBAT", "4": "GND", "5": "EN2", "6": "EN1", "7": "PGOOD", "8": "GND",
        "9": "CHG", "10": "VSYS", "11": "VSYS", "12": "ILIM", "13": "VBUS", "14": "TMR", "15": None,
        "16": "ISET", "17": "GND"}
 part("U3", "BQ24074RGTR", "Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm", chg, (12.9, 21.3, 0),
@@ -110,19 +114,27 @@ Cc("C4", "4u7", "VBUS", "GND", (12.9, 24.9, 0), "charger", C0603)
 Cc("C5", "10u", "VSYS", "GND", (15.9, 21.3, 90), "charger", C0603)
 Cc("C6", "10u", "VBAT", "GND", (12.9, 17.7, 0), "charger", C0603)
 R("R6", "1k5", "ILIM", "GND", (12.9, 26.2, 0), "charger")
+R("R29", "100k", "EN2", "GND", (10.4, 17.9, 0), "charger")       # 500 mA until the firmware says more
+R("R30", "100k", "EN1", "+3V3", (16.4, 17.8, 0), "charger")
 R("R7", "1k", "ISET", "GND", (11.6, 16.1, 0), "charger")
 R("R8", "68k", "TMR", "GND", (13.6, 16.1, 0), "charger")
 # charge light [given 2026-11-15: red while charging, green when full; red too when the
 # battery runs low]: a side-emitting red/green LED with a common anode on VSYS (USB or
-# battery), LiteOn LTST-S326KGJRKT [unverified: which pad is which colour, datasheet
-# DS22-2000-287], through a hole in the side wall (elec.scad led_z).
+# battery), LiteOn LTST-S326KGJRKT, through a hole in the side wall (elec.scad led_z).
+# Its pads [datasheet DS22-2000-287 rev. E, checked 2026-11-20; review/main_pcb.md MAJOR 1:
+# before, the middle pad was taken for the anode and the light could never come on]: the
+# package drawing puts the anode at one end, C2 (green's cathode, the "reinforcing pin")
+# in the middle and C1 (red's cathode, the marked end) at the other; the tape drawing,
+# seen from above with the light to the right, has the marked end up. In KiCad's
+# footprint the middle pad 2 lies to the back (-X, the light to +X), so pad 1 (up) is C1,
+# pad 3 the anode.
 #   red: through R9 into ~CHG, which the charger pulls low while charging, and Q5, which
 #        the ESP32 turns on (IO42) when the battery runs low;
 #   green: through R27 and Q4 into ~PGOOD (low only with USB); Q4's gate is ~CHG, pulled
 #        up through the red LED and R9 once ~CHG lets go, so green comes on when the
 #        charge is done and red goes off. Without USB ~PGOOD is open: no green.
 part("D1", "LTST-S326KGJRKT", "LED_SMD:LED_LiteOn_LTST-S326",
-     {"2": "VSYS", "1": "LED_G", "3": "LED_R"}, (None, 29.0, None), pinfo={"2": "A", "1": "K green", "3": "K red"},
+     {"1": "LED_R", "2": "LED_G", "3": "VSYS"}, (None, 29.0, None), pinfo={"1": "C1 (K red)", "2": "C2 (K green)", "3": "A"},
      group="charger")
 R("R9", "1k5", "LED_R", "CHG", (3.4, 27.4, 0), "charger")
 part("Q4", "DMG1012T", "Package_TO_SOT_SMD:SOT-523", {"1": "CHG", "2": "PGOOD", "3": "LED_GQ"}, (8.4, 25.85, 90),
@@ -165,7 +177,7 @@ part("U5", "TPS63001DRCR", "Package_SON:Texas_DRC0010J", {"1": "+3V3", "2": "L2"
 # its power pins (VOUT, L2, PGND, L1, VIN) face +X; the inductor upright beside L1/L2, the
 # input cap at VIN above, the output caps at VOUT below, their GND ends at the
 # exposed pad; the VINA filter on the other side, at pin 8
-part("L1", "2.2u, Isat 2 A", "Inductor_SMD:L_1008_2520Metric", {"1": "L1", "2": "L2"}, (23.15, 21.3, 270), group="power")
+part("L1", "2.2u, Isat 2 A", "Inductor_SMD:L_1008_2520Metric", {"1": "L1", "2": "L2"}, (23.2, 21.3, 270), group="power")
 Cc("C10", "10u", "VSYS", "GND", (21.0, 24.3, 180), "power", C0805)
 R("R17", "100R", "VSYS", "VINA", (18.2, 24.3, 0), "power")
 Cc("C11", "100n", "VINA", "GND", (17.25, 21.3, 90), "power")
@@ -176,7 +188,7 @@ part("Q3", "AO3401A", SOT23, {"1": "DET_G", "2": "+3V3", "3": "+3V3_D"}, (17.0, 
 Cc("C14", "1u", "+3V3_D", "GND", (20.1, 31.9, 90), "power")
 R("R18", "10k", "+3V3_D", "DISC_ON", (17.9, 31.9, 90), "power")
 R("R19", "100k", "DISC_ON", "GND", (19.0, 31.9, 90), "power")
-R("R20", "100k", "VBUS", "VBUS_SENSE", (7.6, 16.1, 0), "power")
+R("R20", "68k", "VBUS", "VBUS_SENSE", (7.6, 16.1, 0), "power")   # 3.0 V at 5 V [2026-11-19: was 100k, 2.5 V against VIH 2.475]
 R("R21", "100k", "VBUS_SENSE", "GND", (15.6, 16.1, 0), "power")
 
 # --- audio ---------------------------------------------------------------------------
@@ -202,8 +214,12 @@ Cc("C20", "10u", "+3V3A", "GND", (42.4, 27.4, 0), "audio")
 Cc("C21", "100n", "+3V3", "GND", (40.9, 31.75, 90), "audio")
 Cc("C24", "100n", "+3V3A", "GND", (32.7, 31.0, 90), "audio")
 R("R22", "100k", "DAC_RST", "GND", (29.7, 27.6, 90), "audio")
-Cc("C22", "100u", "HPL", "EAR_L", (11.9, 6.0, 0), "audio", C0805)
-Cc("C23", "100u", "HPR", "EAR_R", (15.4, 6.0, 0), "audio", C0805)
+# two 100 µF per channel [2026-11-19, review MINOR 5: one, derated by the DC bias to about
+# 60 %, cut off at about 140 Hz into 16 Ω; two at about 70 Hz]
+Cc("C25", "100u", "HPL", "EAR_L", (5.0, 6.0, 0), "audio", C0805)
+Cc("C22", "100u", "HPL", "EAR_L", (8.5, 6.0, 0), "audio", C0805)
+Cc("C23", "100u", "HPR", "EAR_R", (12.0, 6.0, 0), "audio", C0805)
+Cc("C26", "100u", "HPR", "EAR_R", (15.5, 6.0, 0), "audio", C0805)
 # the earphone jack is not on the board: a panel jack (Switchcraft 35PRM3, M6 nut) in the
 # side wall, its body over the board (../bass/elec.scad), three wires to these pads. Under
 # its body (JACK_ZONE: X from the edge to its lugs' end, Y round its axis) the parts stay
@@ -215,17 +231,24 @@ for i, (net, name) in enumerate((("EAR_L", "jack tip (left)"), ("EAR_R", "jack r
          title="Earphones" if i == 0 else None)
 
 # --- I2C: bus 1 to the discant through the contacts, bus 2 in the bass ----------------
-R("R23", "2k2", "SDA1", "+3V3_D", (21.0, 14.6, 0), "i2c")
-R("R24", "2k2", "SCL1", "+3V3_D", (21.0, 13.4, 0), "i2c")
+R("R23", "2k2", "SDA1_C", "+3V3_D", (21.0, 14.6, 0), "i2c")
+R("R24", "2k2", "SCL1_C", "+3V3_D", (21.0, 13.4, 0), "i2c")
+# 33 R between the contacts and the module [2026-11-19, review/contact_pcb.md MINOR 4]: as the
+# discant comes off, its ground pins may part before its 3.3 V; the return current then
+# runs through the bus into the module's pins, which these limit (33 R x 4.7 mA: 0.15 V
+# more on a low level)
+R("R31", "33R", "SDA1_C", "SDA1", (12.0, 7.75, 0), "i2c")
+R("R32", "33R", "SCL1_C", "SCL1", (14.0, 7.75, 0), "i2c")
+R("R33", "33R", "INT1_C", "INT1", (16.0, 7.75, 0), "i2c")
 R("R25", "2k2", "SDA2", "+3V3", (24.6, 27.0, 0), "i2c")
 R("R26", "2k2", "SCL2", "+3V3", (22.0, 26.9, 0), "i2c")
 # the contacts' lines are touched when the bass is apart
-part("U8", "SRV05-4", SOT236, {"1": "SDA1", "2": "GND", "3": "SCL1", "4": "INT1", "5": "+3V3", "6": None},
+part("U8", "SRV05-4", SOT236, {"1": "SDA1_C", "2": "GND", "3": "SCL1_C", "4": "INT1_C", "5": "+3V3", "6": None},
      (17.8, 13.4, 0), pinfo={"1": "IO1", "2": "VN", "3": "IO2", "4": "IO3", "5": "VP", "6": "IO4"}, group="i2c")
 
 # --- wires: solder pads at the bottom edge --------------------------------------------
 WIRES = [("+3V3_D", "contacts 3.3 V"), ("+3V3_D", "contacts 3.3 V"), ("GND", "contacts GND"), ("GND", "contacts GND"),
-         ("GND", "contacts GND"), ("SDA1", "contacts SDA"), ("SCL1", "contacts SCL"), ("INT1", "contacts INT"),
+         ("GND", "contacts GND"), ("SDA1_C", "contacts SDA"), ("SCL1_C", "contacts SCL"), ("INT1_C", "contacts INT"),
          ("GND", "battery -"),
          ("DET", "contacts DET"), ("+3V3", "bass keys 3.3 V"), ("GND", "bass keys GND"), ("SDA2", "bass keys SDA"),
          ("SCL2", "bass keys SCL"), ("INT2", "bass keys INT"), ("GND", "spare GND / NTC return"), ("TS", "battery NTC"),
@@ -262,5 +285,5 @@ LCSC = {
     ("100n", C0402): "C1525",                          # basic, 16 V
     ("100R", R0402): "C25076", ("1k", R0402): "C11702", ("1k5", R0402): "C25867", ("2k2", R0402): "C25879",
     ("5k1", R0402): "C25905", ("10k", R0402): "C25744", ("100k", R0402): "C25741", ("1M", R0402): "C26083",
-    ("68k", R0402): "C36871",                          # UNI-ROYAL 0402WGF6802TCE, extended; the rest basic
+    ("68k", R0402): "C36871", ("33R", R0402): "C25105",                          # UNI-ROYAL 0402WGF6802TCE, extended; the rest basic
 }

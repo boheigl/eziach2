@@ -60,11 +60,17 @@ belongs to one key and one direction, so the tuner knows its chord; the table he
 
 ## 3. Keys [../switch_hall/spec.md §6]
 
-Travel = (reading − rest) / span, the span signed by the magnet's pole. A key goes on at
-20 % of its travel and off at 10 %; the rest follows slow drift while the key is clearly up
-(below 5 %). The span comes from a calibration pass (each key pressed once to the bottom),
-kept in NVS; until then 600 counts, the estimate from the field (32 mT × 15 mV/mT over
-0.806 mV per count). [chosen; to tune on the instrument]
+A key goes on a fixed distance above its rest reading and off below a smaller one [given
+2026-11-20: switching at the top of the stroke only; before: at 20 % / 10 % of the
+calibrated travel]: 9 and 5 ADC counts, about 0.5 and 0.27 mT, about 0.15 and 0.08 mm at
+rest (`[keys]` in `config/eziach.toml`). So the switching does not depend on the bottom:
+a key that is calibrated short, or a sensor that runs into its limit at the bottom, still
+switches at the same place. The rest follows drift while the key is up (below half the
+release distance), slowly — a time constant of about 5 s — so a key pressed slowly is not
+followed. The span (bottom − rest, from a calibration pass, kept in NVS; until then 600
+counts, the estimate from the field: 32 mT × 15 mV/mT over 0.806 mV per count) gives only
+the direction a press moves the reading (the magnet's pole) and the travel `keys` shows.
+[chosen; the counts to tune on the prototype: noise, drift, the soft stop's return]
 
 ## 4. Force [../strain_gauge/spec.md]
 
@@ -81,31 +87,53 @@ Level for the volume as ../ctrl: dead band 0.3 N, then 3.2 per newton (127 at ab
 | `nau7802.c` | NAU7802, bus 1, 2Ah | gain 128, 320/s, both cells in turn, 3 conversions dropped after each switch: about 45 force readings/s |
 | `dac.c` | TLV320DAC3100, bus 2, 18h | I²S slave, MCLK 256 fs, NDAC 1, MDAC 2, DOSR 128; headphones, −6 dB digital |
 | `synthesizer.c` | I²S 48 kHz, 64-frame blocks (1.3 ms) | TinySoundFont on the mapped `soundfont` partition, 32 voices, its own task on core 1, notes through a queue |
-| `midi.c` | USB (TinyUSB) | USB-MIDI device "eziach": notes, CC 7, CC 123 |
-| `power.c` | IO40, IO41, IO1, IO42 | discant plugged, USB, battery (1M/1M), low-battery light below 3.4 V without USB |
+| `midi.c` | USB (TinyUSB) | the USB device "eziach", MIDI and a serial port: notes, CC 7, CC 123 |
+| `usb_console.c` | USB (TinyUSB CDC) | the console over USB; `download`: restart into the ROM's loader over USB-Serial/JTAG |
+| `history.c` | RAM, flash partition `coredump` (64 KB at 0x510000) | every log line also into a 4 KB ring that a restart or crash does not clear (power does): `history`; the last reset's reason logged at start; a crash's core dump (ELF) kept in flash: `crash` sums it up (task, address, reason, backtrace), `crash erase`, or `idf.py coredump-info` |
+| `power.c` | IO40, IO41, IO1, IO42, IO2/IO4, IO5/IO6 | discant plugged, USB, battery (1M/1M), low-battery light below 3.4 V without USB; the USB source's offer from CC1/CC2 and the charger's input set to match (1 A from 1.5 A or 3 A sources, else 500 mA; ../main_pcb/spec.md §2) |
 | `settings.c` | NVS | key spans, force sign |
 | `app_main.c` | | control loop on core 0 every 1 ms; the discant's ADCs and gauges re-initialised when it is plugged in; console |
 
 Register values: the ADS7128's and the TLV320DAC3100's checked against their datasheets
-(SBAS868A, SLAS671) on 2026-11-18, every field the firmware writes; the NAU7802's from its
-datasheet as known, without the PDF at hand [unverified: to check against Rev 2.6].
+(SBAS868A, SLAS671) on 2026-11-18, every field the firmware writes; the NAU7802's against
+Rev 1.7 on 2026-11-20 (Rev 2.6, which the board's design cites, was not to be had): the
+power-on sequence (§9.1), PU_CTRL, CTRL1, CTRL2 bit for bit, the result MSB first,
+REG0x15 = 0x30 as the datasheet's own example. One addition: REG0x1C is now written 0 —
+its bit 7 puts a capacitor across VIN2P/VIN2N (for one-channel use), and the datasheet
+gives no default; we read both channels.
 
 ## 6. Building, flashing, bring-up
 
 ```sh
 . ~/esp/esp-idf-v5.5.6/export.sh
 idf.py build                       # generates the key table, fetches esp_tinyusb
-idf.py -p /dev/ttyUSB0 flash monitor   # app and soundfont (sound/ZiachMini.sf2, partition at 0x310000)
+idf.py -p /dev/ttyUSB0 flash monitor   # the first time, over UART0: app and soundfont (sound/ZiachMini.sf2, partition at 0x310000)
 make -C test                       # host tests of the core
 make -C test sf2                   # the soundfont through TinySoundFont on the host
 ```
 
-USB belongs to MIDI; flashing and the console go through UART0 (the main board's TX / RX
-test pads, a USB-serial adapter; boot pad to GND for the download mode).
+**One USB cable** [given 2026-11-20]: the instrument is a USB device with two functions,
+MIDI and a serial port (`/dev/ttyACM0` on Linux, a COM port on Windows), the console's
+(`usb_console.c`). A terminal on it (`idf.py -p /dev/ttyACM0 monitor`, `screen
+/dev/ttyACM0`) gets the same commands as UART0; while it is open, the console's output
+goes there instead of UART0. To flash over the same cable: the command `download` (or
+opening the port at 1200 baud) restarts into the ROM's download mode — the firmware gives
+the chip's USB PHY back to its USB-Serial/JTAG and sets RTC_CNTL_FORCE_DOWNLOAD_BOOT, as
+ESP-IDF's own USB console does — and the port comes back as the USB-Serial/JTAG
+(`/dev/ttyACM0` again): `idf.py -p /dev/ttyACM0 flash`. esptool's reset at the end starts
+the firmware [to check on the hardware: the ROM clears the download flag; if the chip
+stays in the loader, a power cycle].
+
+UART0 (the main board's TX / RX test pads, a USB-serial adapter) stays for the first
+flashing, the boot messages before USB is up, and a firmware that does not start (boot
+pad to GND at power-on for the download mode).
 
 Console commands (`help`): `status`, `keys` (every key's place, ADC input, raw reading,
 span, travel), `cal begin` / `cal end` (each key once to the bottom; saved), `sign` (while
-pushing; saved), `tare`, `log on|off` (notes), `play <board> <row> <key>`.
+pushing; saved), `tare`, `log on|off` (notes), `play <board> <row> <key>`, `history`
+(the log since power-on, kept over restarts and crashes; the notes of `log on` and the
+console's own output are not in it), `crash` / `crash erase` (the stored crash), `download`
+(restart into the download mode over USB).
 
 Bring-up order: `status` (boards, gauges, DAC); `keys`, pressing keys one after the other:
 does each move its own line (the place assumption of §1)?; `cal`; `sign`; `play` and
@@ -130,6 +158,6 @@ chords.
   than it starts [to judge by ear].
 - The bass's lowest tones lie up to 13 half tones under the lowest sample (39): played
   slower, so darker than the sampled range [to judge by ear].
-- Not yet run on hardware. Open: the NAU7802's register values (§5), the synth's load at full
+- Not yet run on hardware. Open: the synth's load at full
   polyphony (TinySoundFont keeps the samples as float in PSRAM), the force's scale
   (2190 counts/N estimated), the actuation points.

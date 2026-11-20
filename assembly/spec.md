@@ -100,7 +100,13 @@ teeth of both positions meet the slots' ends.
   (`../discant/gauge_link.scad`, face at gauge y 85). They meet head on as the bass
   slides on, the pins 4.7 high when latched (0.8 pressed, not the working height 4.5:
   the tolerances of the stack, about ±0.35, then stay within the travel to the limit 4.2;
-  bottomed out they would be a stiff force path past the gauges) [chosen 2026-11-18]. Pads: 3.3 V × 2, GND × 3,
+  bottomed out they would be a stiff force path past the gauges) [chosen 2026-11-18].
+  **Fixing** [given 2026-11-20: glue only]: the pad board glued onto its boss, edges
+  flush (that locates it; the pins' tips stay on the pads up to ±0.65 mm), with a thin
+  layer of slow epoxy, wires soldered and led down the bore first, pressed flat until it
+  sets (a glue line changes the pins' compression: keep it thin, 0.1 mm at most); the pin
+  board held in its pocket by the pins' force while mated, and by a drop of
+  neutral-curing silicone at two corners while apart (it comes off again). Pads: 3.3 V × 2, GND × 3,
   SDA, SCL, INT (the discant's ADCs, open drain, wired), DET. The NAU7802 is polled over
   I2C.
 - **Not chosen** [2026-11-15]: blade contacts (a flat tab between two spring leaves,

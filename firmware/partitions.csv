@@ -4,3 +4,5 @@ phy_init,   data, phy,     0xf000,  0x1000
 factory,    app,  factory, 0x10000, 3M
 # the soundfont (ZiachMini.sf2, 1.39 MB), mapped into memory at run time
 soundfont,  data, 0x40,    ,        2M
+# a crash's core dump (main/history.c: `crash`; idf.py coredump-info)
+coredump,   data, coredump, ,       64K

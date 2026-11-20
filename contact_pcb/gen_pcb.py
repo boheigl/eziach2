@@ -2,7 +2,7 @@
 """Writes contact_pcb/contact.kicad_pcb: the two small boards of the spring contacts
 between bass and discant, as one panel of two in a frame, broken out after assembly
 (milled gaps and tabs with mouse bites: JLCPCB cuts V-grooves only in panels of at least
-70 x 70 mm; its economic assembly takes 10 x 10 and up, the panel is 16 x 25).
+70 x 70 mm; its economic assembly takes 10 x 10 and up, the panel is 17.2 x 26.8).
 
   pins (bass)    three PG2541-03-003P strips (3 spring pins each, 2.54 pitch, SMD,
                  C49451741), nine wire pads on the back, one wire per pin, as the main
@@ -52,7 +52,7 @@ WIRES_DISCANT = {"3V3": (-1, 1), "SDA": (0, 1), "SCL": (1, 1), "GND": (0, 0), "I
 # [2026-11-18, review/contact_pcb.md MAJOR 2] JLCPCB asks for tabs of 5 mm with mouse
 # bites (was 2 mm): seven holes at 0.75 fill them; TAB_Z keeps the nearest hole 0.45 mm
 # from the copper of the via at the middle row (x 4.4, z 0)
-GAP, RAIL = 1.0, 2.0
+GAP, RAIL = 1.6, 2.0                 # 1.6 [2026-11-19, review MINOR: 1.0 was JLCPCB's least slot, 1.6-2 advised]
 TAB, TAB_Z = 5.0, 1.875
 BITE_D, BITE_P, BITE_N = 0.5, 0.75, 7
 BOARDS = {"pins": dict(vc=+(H + GAP) / 2, mirror=+1, prefix="B_"),      # bass, upper half of the panel
@@ -132,6 +132,11 @@ for name, bd in BOARDS.items():
         else:
             seg(pcbnew.F_Cu, a, v_, n, wd); via(v_, n); seg(pcbnew.B_Cu, v_, w_, n, wd)
         smd_pad(wp, f"{c + 2 + 3 * (1 - r)}", w_, BACK, pcbnew.PAD_SHAPE_RECT, False, False, n)
+        # its name on the back, below the pad, read from the back [2026-11-19, review MINOR 1:
+        # unlabelled, the back's mirrored layout invited a crossed wire]
+        lbl = g.split("_")[0] if name == "pins" else PAD_NET[g]
+        if name == "pins" or (c, r) in WIRES_DISCANT.values() and WIRES_DISCANT.get(PAD_NET[g]) == (c, r):
+            text(pcbnew.B_SilkS, lbl, (w_[0], w_[1] - BACK[1] / 2 - 0.42), 0.55, mirror=True)
     if name == "pads":
         g = net(pre + "GND")
         seg(pcbnew.B_Cu, uv(*back_xz(-1, 0)), uv(*back_xz(1, 0)), g, TW_P)       # the three GND

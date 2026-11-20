@@ -13,5 +13,5 @@ if(NOT gen_result EQUAL 0)
 endif()
 
 idf_component_register(
-    SRCS "app_main.c" "mapping.c" "keys.c" "force.c" "instrument.c" "bus.c" "keyio.c" "nau7802.c" "dac.c" "synthesizer.c" "midi.c" "power.c" "settings.c" "${gen}/keymap.c"
+    SRCS "app_main.c" "mapping.c" "keys.c" "force.c" "instrument.c" "bus.c" "keyio.c" "nau7802.c" "dac.c" "synthesizer.c" "midi.c" "usb_console.c" "history.c" "power.c" "settings.c" "${gen}/keymap.c"
     INCLUDE_DIRS "." "${gen}")

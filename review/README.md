@@ -46,6 +46,9 @@ charge light. The MAJOR findings should be fixed or consciously accepted before 
 
 ## MINOR (short)
 
+All handled 2026-11-20 (changes in the specs; C1/C2 stay where they are, with a note in
+`main_pcb/spec.md`):
+
 - Main: VBUS sense 100k/100k gives 2.5 V against VIH min 2.475 V; R20 68k.
 - Main: ESP32 decoupling C1/C2 about 20 mm from module pin 2.
 - Main: BQ24074 thermal pad has a single via; charging throttles on heat.
@@ -60,7 +63,7 @@ charge light. The MAJOR findings should be fixed or consciously accepted before 
   pocket clearance; 1.0 mm milled gap at JLCPCB's minimum.
 - Contacts: on unplugging, GND pins may break before 3.3 V; return current through I²C.
   33–100 Ω series resistors on SDA1/SCL1/INT1 on the main board.
-- Contacts: no fixing or locating feature on either board.
+- Contacts: no fixing or locating feature on either board. **Decided 2026-11-20: glue only** (pad board onto its boss, edges flush; pin board a drop of silicone).
 
 ## When ordering
 
@@ -87,7 +90,7 @@ charge light. The MAJOR findings should be fixed or consciously accepted before 
 | 4 | TPS63001 layout | **fixed**: U5 turned, L1 upright beside L1/L2 (2.2 mm, no vias), C10 at VIN, C12/C13 at VOUT 2 mm off. |
 | 5 | Spring pins bottoming out | **fixed (5a)**: pins at 4.7 (0.8 pressed) instead of 4.5 (`bass/link.scad` pin_h, pin_base); case clash-checked. |
 | 6 | Panel tabs 2 mm | **fixed (6a)**: 5 mm tabs, 7 bites, nearest 0.45 mm from via copper; DRC clean. |
-| 3 | Charge LED D1 | open: needs the pinout confirmed (datasheet drawing or diode test). |
+| 3 | Charge LED D1 | **fixed** from the datasheet (DS22-2000-287 rev. E): the middle pad is green's cathode, not the anode; pad 1 red's cathode, pad 3 the anode (package and tape drawings). |
 
 Side changes the routing needed:
 - **Main board:** I²S moved to IO9–IO12 in the DAC's pin order (module pins 17–20), SDA1 to
@@ -96,11 +99,15 @@ Side changes the routing needed:
 - **Hall boards:** both were finished by hand before (2026-11-15/16); the rebuilt boards are
   the router's alone. The bass key board routes completely; the discant: see below.
 
-Board state:
-- **Main board:** all routed, DRC clean, no via in a pad; no clash in the bass.
+Board state (2026-11-20, after the minor points):
+- **Main board:** rebuilt with the LED fix, R20 68k, charger EN1/EN2 and CC sensing, the
+  headphone caps, the 33 Ω series resistors, thermal vias and the USB socket placed by
+  its body (mouth 0.2 inside the wall, flush with the case's 0.2 mm recess). All routed
+  by `build.sh` (fifth of six tries), DRC clean (no unconnected items, no clearance or
+  edge errors), no via in a pad; no clash in the bass (control overlaps).
 - **Bass key board:** all routed, DRC clean, no via in a pad; channels unchanged.
-- **Discant key board:** all routed, DRC clean, no via in a pad; channels unchanged. The
-  router's best left one connection open (SDA to U3, three times in some thirty tries);
-  a new completion step (`ROUTE_COMPLETE` in `hall_pcb/route.py`) joined it on the
-  routed board (`hall_pcb/spec.md`, Routed again).
+- **Discant key board:** rebuilt with the ESD array U8 (SRV05-4) at J1. Best of twelve
+  tries left 3 open; completed with `ROUTE_COMPLETE` (two signal pads, and U8's and C4's
+  ground, which the bus had cut off from the main ground: `hall_pcb/spec.md`, Routed
+  again). DRC clean, no via in a pad; channels unchanged.
 - **Contact boards:** DRC clean.

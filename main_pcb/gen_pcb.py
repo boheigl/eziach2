@@ -46,8 +46,15 @@ for c in d.C:
             else:                      # the lens: where the courtyard reaches further
                 X0, X1, _, _ = court(f); ok = 10 - X0 > X1 - 10 + 0.2
             if ok: break
-        X0 = court(f)[0]
-        edge = {"J1": -2.25 - 0.25, "D1": -0.75}[c["ref"]]   # D1: its lens (0.75 inside its courtyard) at the edge
+        if c["ref"] == "J1":
+            # its body (the F.Fab outline) 2.25 beyond the edge: the mouth 0.2 inside the wall's
+            # face (elec.scad usb_x1) [2026-11-20: by the courtyard before, which reaches 0.55
+            # past the body, not 0.25, so the mouth stood 0.5 inside]
+            X0 = min(pcbnew.ToMM(g.GetBoundingBox().GetLeft()) - OX for g in f.GraphicalItems() if g.GetLayer() == pcbnew.F_Fab)
+            edge = -2.25
+        else:
+            X0 = court(f)[0]
+            edge = -0.75                                   # D1: its lens (0.75 inside its courtyard) at the edge
         f.SetPosition(P(10 + edge - X0, y))
     else:
         f.SetOrientationDegrees(rot); f.SetPosition(P(x, y))

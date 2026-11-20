@@ -39,7 +39,11 @@
 // others
 #define PIN_DAC_RESET 39     // low: DAC in reset
 #define PIN_DISCANT_ON 40    // the discant's 3.3 V through 10k / 100k: high when it is plugged
-#define PIN_VBUS 41          // USB's 5 V through 100k / 100k
+#define PIN_VBUS 41          // USB's 5 V through 68k / 100k
+#define PIN_CC1 2            // USB-C CC1 and CC2 (ADC1 channels 1 and 3): what the source offers
+#define PIN_CC2 4
+#define PIN_CHG_EN1 5        // the charger's EN1 / EN2: 500 mA (low/high by pulls) or 1 A by ILIM (high/low)
+#define PIN_CHG_EN2 6
 #define PIN_VBAT 1           // the cell through 1M / 1M (ADC1 channel 0)
 #define PIN_LOW_BAT 42       // high: the red low-battery light
 
