@@ -77,4 +77,30 @@ charge light. The MAJOR findings should be fixed or consciously accepted before 
   rerouted the same day with the tab (`main_pcb/spec.md`, Routing): DRC clean (0
   unconnected, no clearance or edge errors). Its findings on power widths and vias were
   rechecked on the new board and still hold; the J1 edge errors it mentions are gone.
-- Nothing from these findings has been changed yet.
+
+## Done since (2026-11-18/19, not committed)
+
+| # | Finding | State |
+|---|---|---|
+| 1 | Vias in SMD pads | **fixed** in both routers: a via's drill keeps 0.15 mm from any SMD pad's copper (vias tented; thermal pads exempt). Main board 0 (was 135), bass key board 0 (was 69), discant 0 (was 175). To route without them: a fan-out of the ADCs' and the DAC's/charger's pins to vias on a ring round the chip, stitching vias for ground pieces cut off, a finishing round. |
+| 2 | Main board power tracks 0.127 mm | **fixed**: width per connection (one narrow connection made the whole net narrow), narrow only within 0.8 mm of the net's pads and at a wide path's ends; power off the inner layer. VBAT 72 % wide, VSYS 61 %, +3V3 52 % (all 0 % before but BATP). |
+| 4 | TPS63001 layout | **fixed**: U5 turned, L1 upright beside L1/L2 (2.2 mm, no vias), C10 at VIN, C12/C13 at VOUT 2 mm off. |
+| 5 | Spring pins bottoming out | **fixed (5a)**: pins at 4.7 (0.8 pressed) instead of 4.5 (`bass/link.scad` pin_h, pin_base); case clash-checked. |
+| 6 | Panel tabs 2 mm | **fixed (6a)**: 5 mm tabs, 7 bites, nearest 0.45 mm from via copper; DRC clean. |
+| 3 | Charge LED D1 | open: needs the pinout confirmed (datasheet drawing or diode test). |
+
+Side changes the routing needed:
+- **Main board:** I²S moved to IO9–IO12 in the DAC's pin order (module pins 17–20), SDA1 to
+  IO13 (`firmware/main/pins.h` too; firmware builds); without, I2S_DOUT stayed open in
+  some twenty tries. FB1, C19, C21 0.6 mm further from the DAC (SDA2/SCL2 leave between).
+- **Hall boards:** both were finished by hand before (2026-11-15/16); the rebuilt boards are
+  the router's alone. The bass key board routes completely; the discant: see below.
+
+Board state:
+- **Main board:** all routed, DRC clean, no via in a pad; no clash in the bass.
+- **Bass key board:** all routed, DRC clean, no via in a pad; channels unchanged.
+- **Discant key board:** all routed, DRC clean, no via in a pad; channels unchanged. The
+  router's best left one connection open (SDA to U3, three times in some thirty tries);
+  a new completion step (`ROUTE_COMPLETE` in `hall_pcb/route.py`) joined it on the
+  routed board (`hall_pcb/spec.md`, Routed again).
+- **Contact boards:** DRC clean.
