@@ -34,6 +34,15 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 | Half-bridge load cell, 50 kg, 1000 Ω per gauge (2 kΩ red–black, yellow the middle), 1.0 mV/V, 3 wires (the bathroom-scale cell: plate with its gauges; plate 30 × 23.3 × 2.5) | 2 | sold as 4 with an HX711 board (unused); `strain_gauge/spec.md` §4a |
 | Dowel pin ⌀1.5 × 10, ISO 2338 | 4 | hold the plates in the outer holders |
 
+## Overload stops: 2 sides — `assembly/spec.md`, Overload stops
+
+| Part | Count | |
+|---|---|---|
+| Heat-set insert M3, for a ⌀4.0 hole, 4 long | 4 | one per side in the bass's block floor (S1), one in the discant's tongue (S2), both from below [unverified: the insert bought; a longer one needs the holes changed] |
+| Grub screw **M3 × 4**, ISO 4026, flat point | 2 | S1, its tip against the tongue (push down) |
+| Grub screw **M3 × 6**, ISO 4026, flat point | 2 | S2, its tip against the slot's roof (push up) |
+| Medium threadlocker | a drop each | on the screw only, kept off the plastic (anaerobic threadlockers crack PETG); or a second grub screw as a lock in the same insert |
+
 ## Bass — `bass/spec.md`
 
 | Part | Count | |
