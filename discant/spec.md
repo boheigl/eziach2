@@ -120,7 +120,14 @@ z −19 (the old foot below, which held the old cover, left out): 0.2 mm rms, 0.
   1.8 below the tray's underside (0.1 above it before), is cut flush with it (W = `w_b`,
   in the slope's plane) [given 2026-11-21]. Only the gauge pad at the back reaches lower.
   The foot's front edge is rounded, R2 (`tb_round`) [given 2026-11-21]: over its lowest
-  3 mm the bar's front stands back, 2.8 at the foot; above that the profile is unchanged. Played and stored it touches none of the bass's parts
+  3 mm the bar's front stands back, 2.8 at the foot; above that the profile is unchanged.
+- **Ribs to the plate** [given 2026-11-21: a little stiffer, the keys must not strike, not
+  bulky, nothing past the housing in x/y]: 6 thin triangular ribs (2 thick, `tb_rib_t`),
+  each in the middle of a gap between the first row's keys (9 from either axis: clear of
+  the caps, r 7.5, and the skirts, r 6.2), from the bar's back at its full height (13.55)
+  down onto the cover plate at the keys' axes' line (`tb_web()`); only in the gaps with no
+  cover screw under them (x −90, −50, −10, 30, 70, 110; the screws at Y −3.5 sit in the
+  others). The bar's top stays 0.8 under the pressed caps' rims (underside 14.35). Played and stored it touches none of the bass's parts
   (solid intersection, 2026-11-21).
 - **Never cut** [given 2026-11-14]: it keeps its whole profile over its whole length;
   the bass makes room for it (its box is longer, `../bass/layout.scad`).

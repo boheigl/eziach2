@@ -159,6 +159,7 @@ cap_sock = rod_l - (z_cu - z_cb - mag_l);  // so deep in the cap: pressed and gl
 cap_h    = cap_sock + cap_roof;            // the cap grows with the pin (3.2 with the 14 mm pin; 3 with 13.8 cut from bar)
 z_ct     = z_cu + cap_h;                   // cap top at rest
 function key_cap_top() = z_ct;             // for ../discant/cover.scad (the thumb bar follows the caps)
+function key_cap_low() = z_cu - stroke;     // the cap's underside pressed (../discant/cover.scad: the bar's web)
 function key_bore_lo() = bore_lo;          // for ../discant/cover.scad (run down through the plate)
 bore_lo  = bush_od + bush_slip;           // the bushing's way in; the collar runs in it without contact
 bore_hi  = rod_d + 2 * rod_clear;          // above the bushing

@@ -54,6 +54,16 @@ tb_above = 7;        // the caps' top over the bar's top, along the keys' axis [
                      //   5.1 as fitted]: the whole bar, profile unchanged, 1.9 lower
 tb_dz    = key_cap_top() - tb_above - (tb_z0 + tb_len);   // the bar follows the caps up
 tb_round = 2;        // the foot's front edge rounded [given 2026-11-21: "etwas"]
+// THE RIBS [given 2026-11-21: a little stiffer, the keys must not strike, not bulky, nothing
+// past the housing in x/y]: thin triangular ribs behind the bar, one in the middle of each gap
+// between the first row's keys (9 from either axis: clear of caps r 7.5 and skirts r 6.2),
+// from the bar's back at its full height down onto the cover plate at the keys' axes' line;
+// only in the gaps without a cover screw under it (every other one: 6 ribs, 40 apart), so the
+// screws stay free to reach. The bar's top stays under the pressed caps' rims by
+// key_cap_low() - bar top (0.8 at tb_above 7).
+tb_rib_t   = 2;      // thickness (x)
+tb_rib_y   = 0;      // where a rib meets the plate (row 0's axes)
+tb_web_cap = 0.5;    // the least under a pressed cap (checked below)
 
 $fa = 4; $fs = 0.4;
 
@@ -87,8 +97,28 @@ module tb_section() let(band = 3 * tb_round) {
         tb_above_floor(0, band + 0.01);
     }
 }
+tb_top = tb_z0 + tb_len + tb_dz;   // the bar's top (z, the keys' axis)
+assert(key_cap_low() - tb_top >= tb_web_cap, "the bar's top would touch the pressed caps");
+echo(str("thumb bar's top ", tb_top, ", the pressed caps' underside ", key_cap_low(), ": ", key_cap_low() - tb_top, " apart"));
+function plate_top(y) = key_ztop + y * tan(slab_t) + cover_t / cos(slab_t);   // the cover's top (z) at y
+r0 = [for (i = [0 : len(hall_keys) - 1]) if (key_row(i) == 0) key_x(i)];
+r0s = [for (i = [0 : len(r0) - 1]) min([for (x = r0) if (x >= r0[i]) x])];     // row 0's x, sorted
+// the gaps' middles with no screw within its head's reach of a rib
+function screw_near(x) = len([for (h = hall_holes) if (abs(h[0] - x) < (csk_d + tb_rib_t) / 2 + 0.5
+                                                       && h[1] > tb_fill - csk_d && h[1] < tb_rib_y + csk_d) 1]) > 0;
+tb_ribs = [for (i = [0 : len(r0s) - 2]) let(x = (r0s[i] + r0s[i + 1]) / 2) if (!screw_near(x)) x];
+echo(str("thumb bar's ribs at x = ", tb_ribs));
+module tb_web() difference() {
+    for (x = tb_ribs) translate([x - tb_rib_t / 2, 0, 0])
+        rotate([90, 0, 90]) linear_extrude(tb_rib_t)
+            polygon([[tb_fill - 0.01, -5], [tb_fill - 0.01, tb_top], [tb_rib_y, plate_top(tb_rib_y)], [tb_rib_y, -5]]);
+    below_top();
+}
 module thumb_bar() difference() {
-    translate([x_front[0], 0, tb_dz]) rotate([90, 0, 90]) linear_extrude(x_front[1] - x_front[0]) tb_section();
+    union() {
+        translate([x_front[0], 0, tb_dz]) rotate([90, 0, 90]) linear_extrude(x_front[1] - x_front[0]) tb_section();
+        tb_web();
+    }
     // the tray and the board stay whole: the bar ends at their front face, and sits on the
     // tray's shelf (hall.scad), with nothing under it
     slab_solid(-50, 0, fit + wall);
