@@ -13,9 +13,11 @@
 // ORTHOGRAPHIC VIEWS [given 2026-11-21]: a row of buttons is added under the page's "View"
 // row: Ortho (parallel projection, the same scale at the centre as the perspective) and the
 // six standard views +X -X +Y -Y +Z -Z (looking from that side; z up in the side views, x
-// right and y up from +Z), which switch Ortho on. In Ortho a mm grid lies behind the model,
-// on whole mm of the model's frame (1 mm, every 10th bold; coarser when zoomed out), its
-// pitch and the screen's axes shown in the view's corner. The page's camera stays a
+// right and y up from +Z), which switch Ortho on. In Ortho, while the view is square to the
+// model's axes (a standard view, also panned or zoomed), a mm grid lies behind the model,
+// on whole mm of its frame (1 mm, every 10th bold; coarser when zoomed out), its pitch and
+// the screen's axes shown in the view's corner; turned away from the axes it is hidden
+// (a screen-parallel grid has no whole mm there, and its lines would jump while turning). The page's camera stays a
 // PerspectiveCamera; in Ortho its projection matrix is replaced.
 // o: { view, canvas, camera, scene, draw, home: {target: [x, y, z], azim, elev, dist},
 //      ok(point) -> false for points cut away by a section (optional),
@@ -219,13 +221,19 @@ function viewerNav(o) {
   function axisName(v) {
     for (var i = 0; i < 3; i++) for (var sg = -1; sg <= 1; sg += 2) {
       var a = W(i === 0 ? sg : 0, i === 1 ? sg : 0, i === 2 ? sg : 0);
-      if (a.dot(v) > 0.9999) return (sg > 0 ? '+' : '−') + AXN[i];
+      if (a.dot(v) > 0.99999) return (sg > 0 ? '+' : '−') + AXN[i];
     }
     return '';
   }
   function grid() {
-    gridGrp.visible = ortho;
-    if (!ortho) { label.textContent = ''; return; }
+    if (!ortho) { gridGrp.visible = false; label.textContent = ''; return; }
+    var r0 = new THREE.Vector3(1, 0, 0).applyQuaternion(quat), u0 = new THREE.Vector3(0, 1, 0).applyQuaternion(quat);
+    if (!axisName(r0) || !axisName(u0)) {
+      gridGrp.visible = false;
+      label.textContent = 'grid in the standard views only' + (fr.name ? ' (' + fr.name + ')' : '');
+      return;
+    }
+    gridGrp.visible = true;
     var hPx = canvas.getBoundingClientRect().height || 1;
     var h = 2 * dist * Math.tan(camera.fov * Math.PI / 360), w = h * camera.aspect, pxmm = hPx / h;
     var step = 1; while (step * pxmm < 6) step *= 10;             // the fine lines at least 6 px apart
@@ -249,8 +257,8 @@ function viewerNav(o) {
       gridLines[i].geometry = new THREE.BufferGeometry().setFromPoints(pts[i]);
     }
     var ax = axisName(right), ay = axisName(up), from = axisName(back);
-    label.textContent = 'grid ' + step + ' mm, bold ' + (10 * step) + ' mm' +
-      (from ? ' · from ' + from.toUpperCase() + (ax && ay ? ': ' + ax + ' → , ' + ay + ' ↑' : '') : '') +
+    label.textContent = 'grid ' + step + ' mm, bold ' + (10 * step) + ' mm · from ' + from.toUpperCase() +
+      ': ' + ax + ' → , ' + ay + ' ↑' +
       (fr.name ? ' (' + fr.name + ')' : '');
   }
 

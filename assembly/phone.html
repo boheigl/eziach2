@@ -206,18 +206,65 @@
   });
   document.getElementById('press').addEventListener('click', function () { anim = 0; });
 
-  // section plane parallel to Y/Z (normal along x): keeps part x >= the value
+  // section plane parallel to Y/Z (normal along x): keeps part x >= the value.
+  // THE SECTION'S CAPS by the stencil buffer [2026-11-21] (three.js example
+  // webgl_clipping_stencil): per solid its clipped back faces count up and its front faces
+  // down along each pixel's ray, so the count is not 0 just where the plane passes through
+  // its inside; there a plane in the section, coloured as the solid (darker), is drawn, and
+  // the stencil is cleared for the next. The caps lie in the plane itself: nothing to look
+  // into, and nothing at the same depth to flicker against (the inside's back faces did both).
+  var capGeo = new THREE.PlaneGeometry(4000, 4000), capN = 0;
+  // hatched as in a drawing [given 2026-11-21]: 45 deg lines in the screen's pixels (the same
+  // pitch at any zoom), darker on the cap's colour; the direction alternates from solid to
+  // solid (/// and \\\), so touching parts stay apart
+  var HATCH_PX = 8 * (window.devicePixelRatio || 1), HATCH_W = 1.6 * (window.devicePixelRatio || 1);
+  function hatch(mat, dir) {
+    mat.onBeforeCompile = function (sh) {
+      sh.fragmentShader = sh.fragmentShader.replace('#include <dithering_fragment>',
+        '#include <dithering_fragment>\n' +
+        '  float hq = mod(gl_FragCoord.x ' + (dir ? '-' : '+') + ' gl_FragCoord.y, ' + HATCH_PX.toFixed(2) + ');\n' +
+        '  if (hq < ' + HATCH_W.toFixed(2) + ') gl_FragColor.rgb *= 0.45;\n');
+    };
+    mat.customProgramCacheKey = function () { return 'hatch' + dir; };
+  }
+  function makeCap(o) {
+    var i = capN++;
+    function writer(side, op) {
+      var m = new THREE.Mesh(o.mesh.geometry, new THREE.MeshBasicMaterial({ side: side, clippingPlanes: planes,
+        depthWrite: false, depthTest: false, colorWrite: false, stencilWrite: true, stencilFunc: THREE.AlwaysStencilFunc,
+        stencilFail: op, stencilZFail: op, stencilZPass: op }));
+      m.renderOrder = 10 + 2 * i; m.userData.navMarker = true;   // not hit by taps
+      return m;
+    }
+    var mb = writer(THREE.BackSide, THREE.IncrementWrapStencilOp), mf = writer(THREE.FrontSide, THREE.DecrementWrapStencilOp);
+    o.mesh.add(mb, mf);                                // they follow the solid's place and visibility
+    var capMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(o.colour).multiplyScalar(0.75),
+      side: THREE.DoubleSide, stencilWrite: true, stencilRef: 0, stencilFunc: THREE.NotEqualStencilFunc,
+      stencilFail: THREE.ReplaceStencilOp, stencilZFail: THREE.ReplaceStencilOp, stencilZPass: THREE.ReplaceStencilOp });
+    hatch(capMat, i % 2);
+    var plane = new THREE.Mesh(capGeo, capMat);
+    plane.rotation.y = Math.PI / 2;                    // the plane's normal along x, as the section's
+    plane.renderOrder = 11 + 2 * i; plane.frustumCulled = false; plane.userData.navMarker = true;
+    plane.onAfterRender = function (r) { r.clearStencil(); };
+    scene.add(plane);
+    o.cap = { writers: [mb, mf], plane: plane };
+  }
+  function shownObj(q) { for (; q; q = q.parent) if (!q.visible) return false; return true; }
+  function syncCaps() {   // before each frame: a cap only for a solid that is shown, at the section
+    solids.forEach(function (o) {
+      if (!o.cap) return;
+      o.cap.writers.forEach(function (m) { m.visible = clipped; });
+      o.cap.plane.visible = clipped && shownObj(o.mesh);
+      o.cap.plane.position.x = cutY;
+    });
+  }
   function applyCut() {
     var on = document.getElementById('cut').getAttribute('aria-pressed') === 'true', y = cutY;
     if (on !== clipped) {   // clipping only while the section is on: materials and caps change then
       solids.forEach(function (o) {
         o.mesh.material.clippingPlanes = on ? planes : null;
         o.mesh.material.needsUpdate = true;
-        if (on && !o.cap) {
-          o.cap = new THREE.Mesh(o.mesh.geometry, new THREE.MeshBasicMaterial({ color: new THREE.Color(o.colour).multiplyScalar(0.75), side: THREE.BackSide, clippingPlanes: planes }));
-          o.grp.add(o.cap);
-        }
-        if (o.cap) o.cap.visible = on;
+        if (on && !o.cap) makeCap(o);
       });
       renderer.localClippingEnabled = on;
       clipped = on;
@@ -250,7 +297,7 @@
       if (anim >= 1) { anim = null; setTravel(0); }
     }
     if (nav.step(dt)) dirty = true;
-    if (dirty) { renderer.render(scene, camera); dirty = false; }
+    if (dirty) { syncCaps(); renderer.render(scene, camera); dirty = false; }
     requestAnimationFrame(loop);
   }
 
