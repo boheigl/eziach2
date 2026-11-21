@@ -73,7 +73,7 @@
     <button type="button" id="zout" aria-label="Zoom out">－</button>
     <button type="button" id="reset">Reset view</button>
   </div>
-  <p class="note">In the view: turn with one finger, zoom or move with two (mouse: drag, right-drag or Shift-drag, wheel); double-tap (double-click) a surface to make that point the centre of turning and zooming; tap a key to press it. Scroll the page outside the view. The arrow and ＋/－ buttons work too; Reset view goes back to the start. Press moves the middle key of the front row 3 mm until its O-ring lands on the tube's top and back; Hold down keeps it there; with All keys on, both act on every key.
+  <p class="note">In the view: turn with one finger, zoom or move with two (mouse: drag, right-drag or Shift-drag, wheel); double-tap (double-click) a surface to make that point the centre of turning and zooming; tap a key to press it. Scroll the page outside the view. The arrow and ＋/－ buttons work too; Reset view goes back to the start. Ortho switches to a parallel projection with a mm grid behind the model (1 mm, every 10th bold, coarser when zoomed out; its pitch in the corner); +X … −Z look from that side of the discant, in Ortho. Press moves the middle key of the front row 3 mm until its O-ring lands on the tube's top and back; Hold down keeps it there; with All keys on, both act on every key.
     The board is drawn with its parts' bodies (boxes, from the KiCad board); the springs are left out, hidden under the caps' skirts.
     All parts come from the OpenSCAD build (switch_hall/, discant/, hall_pcb/).</p>
 </main>
@@ -192,7 +192,7 @@
 
   // turning, zooming, moving, the centre by double tap: viewer_nav.js; a single tap on a key presses it
   var HOME = { target: [-5, 0, -26], azim: -0.55, elev: 0.62, dist: 400 };
-  var nav = viewerNav({ view: view, canvas: renderer.domElement, camera: camera, scene: scene, draw: draw, home: HOME,
+  var nav = viewerNav({ view: view, canvas: renderer.domElement, camera: camera, scene: scene, draw: draw, home: HOME, frame: { name: 'discant' },
                         ok: function (p) { return !clipped || cutPlane.distanceToPoint(p) >= 0; },
                         onTap: function (hits) {
                           if (hits.length && hits[0].object.userData.key !== undefined) { tapAnim[hits[0].object.userData.key] = 0; draw(); }
