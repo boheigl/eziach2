@@ -187,7 +187,8 @@ module discant_side() to_bass() {
 // caps 3.2 for the 14 mm dowel pins): nearest -21.494 (the caps' tops; -18.546 was stale,
 // the caps ran 2 mm into the back cover), farthest 6.24 (the housing), lowest -15.92
 // (front_d kept at -16.47: 0.55 more over the playing mount).
-socket_e   = 8.3;                 // holder y -16.7 .. -4.2: the W's bottom edge (-12.5) to the tongue's tip
+socket_e   = 8.3;                 // holder y -16.7 .. -4.2: from y -12.5 (the STEP's bottom edge of the W; the
+                                  // bought cell's is -10.8, the holder kept its length) to the tongue's tip
 travel     = socket_e + 1;
 store_tilt = atan(3 / 16);
 store_gap  = 1;
@@ -198,7 +199,7 @@ store_at   = [(deck_x[0] + deck_x[1]) / 2, box_back + store_gap - wall_d, z_bot 
 module to_store() translate(store_at) rotate([90 - store_tilt, 0, 0]) children();
 
 // the short socket, one per gauge: the inner holder from its back (holder y -16.7, the
-// bridge) to socket_e past the W's bottom edge (holder y -12.5)
+// bridge) to socket_e past holder y -12.5 (the STEP's bottom edge of the W)
 module store_socket() to_store() for (d = [-1, 1]) at_gauge(d)
     intersection() {
         import("../build/strain_gauge/inner_holder_detent.stl");

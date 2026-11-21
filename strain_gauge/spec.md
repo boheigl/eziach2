@@ -22,11 +22,21 @@ axes, so the plate runs z = −1.25 … +1.25. This is 1.25 mm below the STEP,
 which places the plate from z = 0 upwards. Geometry is otherwise identical.
 Both holders use the same frame.
 
+**The bought cell differs [measured 2026-11-21]:** 30 × **23.3** × 2.5. Its arms and the
+W's bottom block end 1.7 mm earlier at the open edge, so the plate runs y = −10.8 …
++12.5; the slots' closed ends and the top are as in the STEP, and the origin stays
+the STEP's centre. `strain_gauge_plate.scad` models the bought cell (`shorter = 1.7`;
+0 gives the STEP). Its lead is glued along the whole column, across its full width:
+**4 mm thick there, 1.5 proud of one face**; the glue at most 7.1 wide, 19 long from
+the +y edge, so over y = −6.5 … +12.5: the bridge and the column down to the inner
+slots' closed ends (photo, measured 2026-11-21). In the inner holder's recess (9 wide,
+from y = −8) it keeps 0.95 to each side and 1.5 behind its end; it touches no web.
+
 ## 2. The plate
 
 | | | |
 |---|---|---|
-| Envelope | 30 × 25 × 2.5 mm | [given], confirmed [STEP] |
+| Envelope | 30 × 25 × 2.5 mm in the STEP; the bought cell 30 × 23.3 × 2.5 | [given], confirmed [STEP]; [measured 2026-11-21] |
 | Slot width, arm width, web width | 3.00 mm — all three | [STEP] |
 | Corner radii | R1.5 throughout, R3 at the two +y corners | [STEP] |
 | Volume | 1337.93 mm³ | [STEP] |
@@ -95,8 +105,8 @@ What follows from it:
 
 - **Material and making** need no choice: steel and gauges come made. §4's beam
   estimate (1100 µε at about 200 N) is replaced by the seller's 1 mV/V at 490 N, about
-  2 µε/N. [unverified: that the bought cell's plate is the STEP's 30 × 25 × 2.5;
-  measure one before printing the holders]
+  2 µε/N. The bought cell's plate is 30 × 23.3 × 2.5, its arms 1.7 shorter than the
+  STEP's, its lead glued 1.5 proud on the column [measured 2026-11-21; §1].
 - **Signal at 3.3 V excitation** (AVDD, ratiometric): 3.3 mV at 490 N, **6.7 µV/N**.
   Playing forces of 20–40 N give 0.13–0.27 mV; the NAU7802's 150 nV at 80 SPS
   resolves about 0.02 N, over a thousand steps in 30 N. Below the seller's 5 V, but a
@@ -106,8 +116,10 @@ What follows from it:
   6400–12 500 N·mm on the two cells, past the 150 % at the top of the hand plate and on
   one cell off centre. [2026-11-20; it read "a fifth of the range, no stop" before,
   comparing forces.] Hence the overload stops (`../assembly/spec.md`).
-- **Current:** 3.3 mA per cell at 1000 Ω (1.65 mA if the 1000 Ω is per gauge
-  [unverified: measure E+ to E−]).
+- **Resistance [measured 2026-11-21]:** red–yellow 1 kΩ, black–yellow 1 kΩ, black–red
+  2 kΩ: yellow is the middle, red and black are E+ and E− (which is which is the
+  firmware's sign), and the seller's 1000 Ω is **per gauge**.
+- **Current:** 1.65 mA per cell at 3.3 V across its 2 kΩ.
 - **Drift is the weak point:** 0.3 % F.S. per 10 °C is 1.5 N per 10 °C, as much as a
   soft note. The firmware tares at start and keeps re-taring while no key is pressed
   and the force is steady; the hand warms the cells slowly.
@@ -117,8 +129,7 @@ What follows from it:
 
 ## 5. Inner holder — `inner_holder.scad`
 
-Grips the W-shaped inner part and introduces the load. **23 × 21.2 × 8.8 mm**,
-3152.6 mm³.
+Grips the W-shaped inner part and introduces the load. **23 × 21.2 × 11.8 mm**.
 
 | Decision | Value | Why |
 |---|---|---|
@@ -130,11 +141,16 @@ Grips the W-shaped inner part and introduces the load. **23 × 21.2 × 8.8 mm**,
 | Mouth corners | R2 on the two vertical edges | [given] |
 | Lead-in flare | 0.6 mm over 1.5 mm | printed parts catch on the first layer otherwise |
 
-**Gauge recess:** 9 × 12.5 × 1 mm in the inner face of each plate, from y = −8
+**Gauge recess:** 9 × 12.5 × 1.8 mm in the inner face of each plate, from y = −8
 forward, opening at the mouth. 9 mm wide puts its edges mid-slot — 1.5 mm clear
 of the column and 1.5 mm clear of the webs — so the inner holder never touches the
 member being measured. That member stays free to bend; clamping is left to the
-webs and the bottom block, which the inner holder still holds over y = −12.7 … −8.
+webs and the bottom block, which the inner holder still holds over y = −11.0 … −8.
+The depth is the bought cell's glued lead [measured 2026-11-21]: 1.5 proud of one face
+along the whole column, 0.45 clear with the 0.15 fit; in both faces, so the plate goes
+in either way up (1.0 before, for the bare plate). 2.7 mm of wall stays over it.
+The bought cell's bottom block is 1.7 shorter, so the bridge is 5.7 thick instead of 4:
+the holder's back (y = −16.7), the latch tongue's root and the bass's socket stay put.
 
 **Note on the mechanics:** because the inner holder clamps the webs, they no longer
 act as cantilevers. The flexing members become the column and the arms. The
@@ -179,7 +195,7 @@ ear meeting its ledge at 2.0 mm (control).
 
 ## 6. Outer holder — `outer_holder.scad`
 
-Takes the two fixed arms. One piece. **38.4 × 27.3 × 10.8 mm**, 0.5 of the length
+Takes the two fixed arms. One piece. **38.4 × 26.1 × 10.8 mm**, 0.5 of the length
 inside the pad. **Printed as part of the discant's housing** [given]: its +y end
 grows out of the gauge pad on the back face (`discant/gauge_link.scad`), so
 nothing fixes it there, and it cannot slide on. The plate slides in instead.
@@ -189,8 +205,8 @@ nothing fixes it there, and it cannot slide on. The plate slides in instead.
 | Plate slides in from −y, +y edge first | same side as the inner holder; the jaws are open channels | follows from being part of the housing [given] |
 | Material above, below, outboard | 4 mm | [given] |
 | Jaw inner face | x = 12 | flush with the arm, 0.5 mm clear of the inner holder |
-| Two yokes | over and under the plate, y = 5.5…12.5, z = ±2.4…±5.4 | [given]; a pair rather than one ties the jaws symmetrically. Depth follows from keeping 1 mm back from the inner holder |
-| Lead gap between yokes | 4.8 mm, 1.15 mm clear of each plate face | the leads pass through here |
+| Two yokes | over and under the plate, y = 5.5…12.5, z = ±3.2…±5.4 (2.2 thick) | [given]; a pair rather than one ties the jaws symmetrically. Depth follows from keeping 1 mm back from the inner holder |
+| Lead gap between yokes | 6.4 mm, 1.95 mm clear of each plate face | the leads pass through here; the bought cell's glued lead (1.5 proud of one face) runs under them, 0.45 clear [measured 2026-11-21; was 4.8] |
 | Stop | the plate's +y edge on the pad, on strips either side of each jaw | replaces the earlier stop wall at −y |
 | Retention | a dowel pin ⌀1.5 × 10 (ISO 2338) across each jaw, 0.05 mm beyond the arm's tip | [chosen]; keeps the plate from pulling out |
 | Plate fits | as the inner holder | same process |
@@ -208,13 +224,14 @@ up the cross-tie.
 
 1. **Plate first**, into the outer holder from −y, leads ahead of it, until its
    +y edge lands on the pad. It passes between the yokes, which the inner holder,
-   8.8 mm tall where the gap is 4.8, cannot do.
+   11.8 mm tall where the gap is 6.4, cannot do.
 2. **Inner holder second**, onto the W from −y.
 3. **Dowel pins**, one across each jaw.
 4. Leads leave in +y: along the recesses, out of the inner holder's mouth, across the
    plate, through the gap between the yokes, into the groove in the pad, which takes
-   them to the link board (`discant/gauge_link.scad`). Two per gauge, ⌀0.7, which clears the recess ceiling and
-   the yokes by about 0.45 mm. [chosen]
+   them to the link board (`discant/gauge_link.scad`). On the bought cell the lead is
+   glued along the column, 1.5 proud of one face; it clears the recess ceiling and the
+   yokes by 0.45 mm. [measured 2026-11-21]
 
 This order is forced by the geometry, not a preference.
 
@@ -245,7 +262,6 @@ deviation below 0.001 mm, both meshes watertight.
 ## 10. Still open
 
 - Force introduction on the inner holder — nothing to attach a loading rod to.
-- Measure one bought cell against the STEP (§4a) and its E+ / E− resistance.
 - Lead wires appear in `viewer.html` only, as straight runs for clearance — they are not a manufactured part and have no `.scad`.
 
 ## 11. Files

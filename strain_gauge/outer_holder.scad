@@ -27,11 +27,12 @@
 // Coordinates as in inner_holder.scad: origin at the centre of the plate, material
 // from z = -plate_t/2 to +plate_t/2.
 
-/* [Flexure plate — from the STEP, do not edit] */
+/* [Flexure plate — from the STEP, do not edit; plate_bot the bought cell's] */
 plate_t    = 2.5;    // plate thickness
 plate_x    = 15;     // plate half width
 plate_top  = 12.5;   // the plate's +y edge
-plate_bot  = -12.5;  // the plate's -y edge, where the arms end
+plate_bot  = -10.8;  // the plate's -y edge, where the arms end: the bought cell's
+                     //   [measured 2026-11-21; -12.5 in the STEP]
 arm_inner  = 12;     // inner face of the outer arms
 
 /* [What it has to clear] */
@@ -52,8 +53,10 @@ pin_wall   = 0.75;   // jaw left beyond the pin
 root       = 0.5;    // the +y end reaches this far into the pad, so the two are one solid
 
 /* [Lead gap] */
-cable_h    = 4.8;    // free height kept around the plate for the leads; the
-                     // yoke starts above it
+cable_h    = 6.4;    // free height kept around the plate for the leads; the
+                     // yoke starts above it. The bought cell's lead lies glued 1.5 proud of
+                     // one face [measured 2026-11-21] where the column runs under the yokes:
+                     // 1.95 each side of the plate leaves it 0.45, either way up (was 4.8)
 
 /* [Lead-in] */
 lead_in    = 1.5;    // flare where the arms enter the jaws, 0 disables it

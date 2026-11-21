@@ -140,8 +140,8 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   - Leads: 19 mm each in the groove, away from the bus wires; before, the far gauge's
     76 mm ran beside SDA/SCL in the same groove. Better than before.
   - The other way round, the gauges' currents against the Hall sensors [estimate
-    2026-11-15]: the bridges' excitation (DC, about 3.3 mA per 1000 Ω cell) is the
-    only current worth a look; 3.3 mA 1 mm from a sensor gives 0.7 µT, 0.01 mV at
+    2026-11-15]: the bridges' excitation (DC, 1.65 mA per cell: 2 kΩ, measured
+    2026-11-21) is the only current worth a look; 1.65 mA 1 mm from a sensor gives 0.35 µT, 0.005 mV at
     15 mV/mT, far under the ADS7128's 0.8 mV step, constant (the calibration takes
     it), mostly cancelled by its return beside it and lying in the board's plane, which
     the DRV5055 does not sense. The ferrite FB1 sits 5 mm beside U141, off the
@@ -149,8 +149,9 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
   - Heat: the board's 0.3–0.6 W warms the dividers slowly and both resistors alike;
     their ratio drifts with their 25 ppm/K mismatch at most, which taring at start
     takes out.
-- **Gauges** [given 2026-11-15]: two bought half-bridge load cells of 1000 Ω, about
-  6.6 mA from AVDD in all through the ferrite (300 mA). DRDY is unused (the ESP32 polls,
+- **Gauges** [given 2026-11-15]: two bought half-bridge load cells of 1000 Ω per gauge
+  (2 kΩ E+ to E−, measured 2026-11-21), 3.3 mA from AVDD in all through the ferrite
+  (300 mA). DRDY is unused (the ESP32 polls,
   `../assembly/spec.md`).
 
 ## 4. Which ADC reads which key

@@ -4,7 +4,13 @@
 // Part 1"). The STEP profile is reproduced segment for segment, so this model
 // and the CAD file describe the same solid.
 //
-// Envelope 30 x 25 x 2.5 mm. Two hairpin slots, 3 mm wide, open at the bottom
+// The bought load cell is shorter [measured 2026-11-21]: 30 x 23.3 x 2.5, its arms and
+// the W's bottom block ending 1.7 earlier at the open edge (-y); the slots' closed ends
+// and the top are as in the STEP. So every point of the profile at the open edge
+// (y <= -11) moves up by `shorter`, and the plate runs from y = -10.8 to +12.5: the
+// origin stays where the STEP's centre is, so the holders keep their frame.
+//
+// The STEP's envelope 30 x 25 x 2.5 mm. Two hairpin slots, 3 mm wide, open at the bottom
 // edge, run up the plate, turn across the top and return to a closed end. Arms
 // and webs are also 3 mm wide, and every free end is a half-round cap of that
 // diameter. All corners are R1.5 except the two top corners at R3.
@@ -16,6 +22,7 @@
 
 /* [Size] */
 thickness = 2.5;     // mm, as modelled in the STEP
+shorter   = 1.7;     // mm the bought cell's arms end earlier [measured 2026-11-21]; 0: the STEP
 
 /* [Output] */
 export_2d = false;   // true renders the flat profile only
@@ -71,7 +78,7 @@ function seg_points(s) =
           let (a = a1 + (a2 - a1) * i / n)
           [c[0] + r * cos(a), c[1] + r * sin(a)]];
 
-function outline() = [for (s = profile) for (p = seg_points(s)) p];
+function outline() = [for (s = profile) for (p = seg_points(s)) p[1] <= -11 + 1e-6 ? [p[0], p[1] + shorter] : p];
 
 module plate_profile() { polygon(outline()); }
 

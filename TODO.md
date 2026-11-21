@@ -62,11 +62,14 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
 
 ## To measure on the bought parts
 
-19. **Load cell plate** against `strain_gauge/StrainGauge.step` (30 × 25 × 2.5, slots and
-    arms 3 mm), before the holders are printed. `strain_gauge/spec.md` §4a.
-20. **Load cell resistance**: E+ to E− (the largest of the three), and each to the
-    middle: is the seller's 1000 Ω the whole bridge or one gauge (3.3 or 1.65 mA per
-    cell at 3.3 V)? `strain_gauge/spec.md` §4a, `hall_pcb/spec.md` §3a.
+19. ~~**Load cell plate**~~ measured 2026-11-21: 30 × 23.3 × 2.5 (the STEP 25), the arms
+    1.7 shorter; the lead glued along the column, 4 thick, 1.5 proud of one face, the
+    glue 7.1 wide and 19 long from the top edge. Plate
+    model, inner holder's recess (1.8 deep) and the outer holder's lead gap (6.4)
+    follow. `strain_gauge/spec.md` §1, §5, §6.
+20. ~~**Load cell resistance**~~ measured 2026-11-21: red–yellow and black–yellow 1 kΩ,
+    black–red 2 kΩ: 1000 Ω per gauge, yellow the middle, 1.65 mA per cell.
+    `strain_gauge/spec.md` §4a, `hall_pcb/spec.md` §3a.
 21. **Load cell drift** in play: zero over 30 min with a hand on it and from a cold
     start (the seller: 1.5 N per 10 °C); decides how often the firmware re-tares.
 22. **Spring force** of a built key: 119 g at rest, 149 g at the bottom [from the

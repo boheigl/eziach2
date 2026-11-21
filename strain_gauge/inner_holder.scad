@@ -20,11 +20,12 @@
 // run from the bottom edge up to y = 6.5, which is what the side walls use to
 // reach through the plate.
 
-/* [Flexure plate — read from the STEP, do not edit] */
+/* [Flexure plate — read from the STEP, do not edit; plate_bot the bought cell's] */
 plate_t    = 2.5;    // plate thickness
 web_outer  = 9;      // outer face of the webs = inner edge of the open slot
 arm_inner  = 12;     // inner face of the outer arms = outer edge of the slot
-plate_bot  = -12.5;  // bottom edge of the plate
+plate_bot  = -10.8;  // bottom edge of the plate: the bought cell's [measured 2026-11-21;
+                     //   -12.5 in the STEP] (strain_gauge_plate.scad, shorter)
 web_tip    = 3.5;    // top of the two web prongs
 slot_top   = 6.5;    // where the open slots close at the U-turn
 
@@ -41,7 +42,10 @@ w_clear    = 0.2;    // clearance to the W — this is the sliding fit.
                      // here binds rather than grips.
 arm_clear  = 0.5;    // clearance to the fixed outer arms — must never touch
 reach      = 1.0;    // how far past the web tips the holder covers
-back       = 4;      // thickness of the closing bridge below the plate
+back       = 5.7;    // thickness of the closing bridge below the plate: 4 below the STEP's
+                     //   edge, and the 1.7 the bought cell is shorter, so that the holder's
+                     //   back (y -16.7), the tongue's root in the bridge and the bass's socket
+                     //   stay where they were
 corner_r   = 2;      // radius on the two vertical edges at the mouth corners,
                      // i.e. at (+x, y_front) and (-x, y_front)
 side_walls = true;   // true: walls reach through the open slots (stiffer box)
@@ -51,7 +55,13 @@ lead_in    = 1.5;    // length of the flared mouth, 0 disables it
 lead_c     = 0.6;    // how much the mouth is flared, per side
 
 /* [Gauge and cable recess] */
-recess_d   = 1.0;    // depth, cut into the inner face of each plate
+recess_d   = 1.8;    // depth, cut into the inner face of each plate. The bought cell's lead
+                     //   is glued along the whole column, across its width, 4 thick on the
+                     //   plate's 2.5: 1.5 proud of one face [measured 2026-11-21]; 1.8 and
+                     //   the 0.15 fit leave it 0.45 (was 1.0, for the STEP's bare plate).
+                     //   The glue is 7.1 wide at most and runs from the +y edge to y -6.5:
+                     //   0.95 to the recess's sides, 1.5 to its back end (recess_back)
+                     //   Both faces, so the plate goes in either way up
 recess_w   = 9.0;    // width, centred on the column. The column is 6 mm wide
                      // and the inner slots run from |x| = 3 to 6, so 9 mm puts
                      // the recess edges mid-slot: 1.5 mm clear of the column,

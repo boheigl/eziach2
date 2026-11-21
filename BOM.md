@@ -31,7 +31,7 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 
 | Part | Count | |
 |---|---|---|
-| Half-bridge load cell, 50 kg, 1000 Ω, 1.0 mV/V, 3 wires (the bathroom-scale cell: plate with its gauges) | 2 | sold as 4 with an HX711 board (unused); `strain_gauge/spec.md` §4a |
+| Half-bridge load cell, 50 kg, 1000 Ω per gauge (2 kΩ red–black, yellow the middle), 1.0 mV/V, 3 wires (the bathroom-scale cell: plate with its gauges; plate 30 × 23.3 × 2.5) | 2 | sold as 4 with an HX711 board (unused); `strain_gauge/spec.md` §4a |
 | Dowel pin ⌀1.5 × 10, ISO 2338 | 4 | hold the plates in the outer holders |
 
 ## Bass — `bass/spec.md`
