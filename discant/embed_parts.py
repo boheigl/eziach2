@@ -4,7 +4,8 @@
 # x,y,z, three vertices per triangle, put where the page has
 # its "parts: filled in by embed_parts.py" comment.
 #   python3 embed_parts.py phone.html ../build/discant/phone.html [--keys board.scad] NAME=part.stl ...
-# --keys fills the page's /*KEYS*/[] with [row, key, x] of every key (hall_keys in the
+# --data NAME=file.json puts the file's JSON where the page has /*NAME*/[] (repeatable,
+# first). --keys fills the page's /*KEYS*/[] with [row, key, x] of every key (hall_keys in the
 # board's data, ../hall_pcb/<board>/board.scad). A <script src="x.js"> with a relative
 # path (viewer_nav.js) is put into the page inline.
 import base64, re, struct, sys
@@ -25,6 +26,11 @@ def triangles(stl):
 page, out = sys.argv[1:3]
 args = sys.argv[3:]
 s = open(page).read()
+while args[:1] == ['--data']:
+    name, f = args[1].split('=', 1)
+    assert s.count('/*%s*/[]' % name) == 1, 'the page needs exactly one /*%s*/[]' % name
+    s = s.replace('/*%s*/[]' % name, open(f).read().strip())
+    args = args[2:]
 if args[:1] == ['--keys']:
     m = re.search(r'hall_keys = (\[.*?\]\]);', open(args[1]).read())
     keys = [[k[0], k[1], k[2]] for k in eval(m.group(1))]
