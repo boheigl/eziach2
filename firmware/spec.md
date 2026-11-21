@@ -159,7 +159,7 @@ chords.
   0-127; every one of the table's 64 tones sounds, holds while held and is in tune within
   14 cents; a full chord of 10 tones clipped at 0 dB, so the synth runs at -12 dB (peak
   -2.7 dBFS) and the DAC at 0 dB; all drivers; builds with ESP-IDF v5.5.6 without warnings
-  (app 404 KB of 3 MB).
+  (app 427 KB of 3 MB, 2026-11-21).
 - `sound/ZiachMini.sf2` differs from ../ctrl's in two bytes [given 2026-11-18: fix the
   overlap in the copy]: the "D3" sample's zones (root 74) covered keys 73-86 and overlapped
   the "D4" zones (85-127), so notes 85 and 86 (the table's 83 and 84 at transposition 2)
