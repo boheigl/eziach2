@@ -60,6 +60,10 @@ the cover's tube, cap on top, the magnet's collar below, spring round the tube.
   tray's front face.
 - **Gauge pad** on the back face, with both gauges' outer holders growing out of it, and
   the channels for the wires (§7).
+  Its block reaches 1 over the cover plate's back edge, a lip the cover goes under: 0.3 over
+  the plate and round its edge (`cover_gap` in `housing.scad`) [given 2026-11-21: 0.01 and 0
+  before]. Checked by moving the housing 0.05 against the cover in all six directions: the
+  plate on the rim is the only contact left.
 - **Size** (built STL, discant frame): x −135.6 … 135.6, y −11.3 … 88.4 including the
   gauge holders.
 

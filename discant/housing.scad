@@ -59,6 +59,8 @@ module supports() difference() {
 module pilots() on_slab() for (h = hall_holes)
     translate([h[0], h[1], w_b + floor_keep]) cylinder(d = pilot_d, h = -w_b + 1);
 
+cover_gap = 0.3;     // the gauge pad's lip over the cover plate's back edge (the case's fit)
+
 module housing() union() {
     difference() {
         union() {
@@ -69,7 +71,9 @@ module housing() union() {
         difference() { slab_solid(w_ft, 1, fit); supports(); }
         on_slab() hall_bodies(part_gap);
         pilots();
-        slab_solid(0, cover_t + 0.01, fit + wall);   // the cover plate (the pad's block reaches 1 into it)
+        // the cover plate: the pad's block reaches 1 over its back edge, a lip it goes under;
+        // cover_gap over the plate and round its edge [given 2026-11-21: was 0.01 and 0]
+        slab_solid(0, cover_t + cover_gap, fit + wall + cover_gap);
         gauge_housing_cuts();
     }
     gauge_holders();
