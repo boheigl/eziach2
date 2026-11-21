@@ -115,8 +115,10 @@ keys: `../BOM.md`.
   z −116 up to the deck, with the side walls' last 1.6 mm, one 1.6 mm plate following the
   box's outline. Two tongues at its bottom edge hook in behind the mount's strip (which
   stays with the case: the gauges' and contacts' load never passes the cover): 24 mm
-  wide left of the battery, 7 mm wide and 3.2 thick (2 mm more, inwards [given
-  2026-11-15]) between the battery's rib and the main board
+  wide left of the battery, 5.35 mm wide and 3.2 thick (2 mm more, inwards [given
+  2026-11-15]) between the battery's rib and the main board [2026-11-21: 7 mm wide it
+  stood 1.25 into that rib, which had moved with the longer cradle; now it starts 0.3 past
+  the rib (`cov_gap`)]
   [given 2026-11-15: over the board it sat 0.6 mm above the ESP32 module, and tilting
   the cover to hook it in swung it onto the module beyond about 9°]. Checked: both
   tongues swing clear of board, wires and battery up to 20° of tilt; three M2 × 6
@@ -130,6 +132,12 @@ keys: `../BOM.md`.
   (1.0) and pad (0.47), 2.0 mm into the 2 mm pilots in the 3 mm front wall, 1 mm left to
   the hand's face; the key board 12 × M2 × 6 countersunk brass (DIN 965), 1.9 mm into
   the case as on the discant.
+  **Fit to the case** [given 2026-11-21: it was cut from the same body, 0 all round]:
+  `cov_gap` = 0.3 where its edges meet the case (the strip below, the deck above, round the
+  jack's bulge and wall and the screw's piece), behind the strip for the tongues (0.05
+  before), and clear of the mount, whose overload stops' blocks stand up outside its bottom
+  edge (they touched its outer face). It still rests on the side walls' ends, the ribs and
+  the pillars. Checked by moving it 0.05 against the case: only those seats touch.
 - **Battery** [given: 6 mm, for the thinner box; it was a 9 mm 906090 of about 6 Ah]: a
   1S LiPo pouch 606090 of 4000 mAh with its protection board (PCM) and a 10k NTC, three
   wires (e.g. DNK606090 [datasheet]; 3-wire variants with JST-PH are sold). With the PCM it

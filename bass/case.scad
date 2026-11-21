@@ -244,16 +244,34 @@ module cover_slab() difference() {
     }
     jack_wall_zone();            // but not the side wall that holds the jack
 }
+// the back cover's share of it: cov_gap back from the case all round, where its edges meet
+// the case (the strip below, the deck above, round the jack's bulge and the screw's piece)
+// [given 2026-11-21: was cut from the same body, 0 all round]; the outer faces and the
+// cover's seats on side walls, ribs and pillars (along y) stay as they are
+module cover_slab_cover() difference() {
+    union() {
+        translate([-300, box_back - back_t, z_split + cov_gap]) cube([600, back_t + 0.001, z_floor - z_split - 2 * cov_gap]);
+        // the jack's bulge and the screw's piece (elec.scad's zones), cov_gap smaller at their
+        // x and z faces
+        for (b = [jack_cover_box(), screw_cover_box()])
+            translate(b[0] + [cov_gap, 0, cov_gap]) cube(b[1] - [2 * cov_gap, 0, 2 * cov_gap]);
+    }
+    minkowski() { jack_wall_zone(); cube(2 * cov_gap, center = true); }   // the jack's wall, cov_gap larger (x, z)
+}
 // between the ribs; the right one beside the main board, between the rib at the battery
 // and the board's edge [given 2026-11-15: over the ESP32 module it left 0.6 mm, and
 // tilting the cover to hook it in swung it onto the module beyond about 9 deg]
 // [x0, x1, thickness]: the narrow right one 2 mm thicker, inwards [given 2026-11-15]
-cov_tongues = [[-80 + ex, -56 + ex, 1.2], [48.3 + ex, 55.2 + ex, 3.2]];
-// each tongue: behind the strip's inner face below z_split (0.05 clear of it), joined to
-// the cover above it
+// The right one starts cov_gap past the rib at the battery (rib_x at bat_x[1] + 1.7, rib_t;
+// its 6 wide foot stays below the tongue) [2026-11-21: it stood 1.25 into the rib at 48.3 + ex,
+// since the cradle grew]
+cov_gap = 0.3;
+cov_tongues = [[-80 + ex, -56 + ex, 1.2], [bat_x[1] + 1.7 + rib_t / 2 + cov_gap, 55.2 + ex, 3.2]];
+// each tongue: behind the strip's inner face below z_split (cov_gap clear of it; 0.05 before
+// 2026-11-21), joined to the cover above it, which starts cov_gap over the strip
 module cover_tongues() for (x = cov_tongues) {
-    translate([x[0], box_back - back_t - 0.05 - x[2], z_split - 4]) cube([x[1] - x[0], x[2], 6]);
-    translate([x[0], box_back - back_t - 0.05 - x[2], z_split + 0.05]) cube([x[1] - x[0], x[2] + 0.55, 1.95]);
+    translate([x[0], box_back - back_t - cov_gap - x[2], z_split - 4]) cube([x[1] - x[0], x[2], 6]);
+    translate([x[0], box_back - back_t - cov_gap - x[2], z_split + cov_gap]) cube([x[1] - x[0], x[2] + cov_gap + 0.5, 2.3 - cov_gap]);
 }
 
 module body() {
@@ -321,7 +339,10 @@ module strap() {
 }
 if (part == "strap") strap();
 if (part == "back_cover") difference() {
-    union() { intersection() { body(); outer3d(); cover_slab(); } cover_tongues(); }
+    union() { intersection() { body(); outer3d(); cover_slab_cover(); } cover_tongues(); }
+    // cov_gap clear of the mount, whose overload stops' blocks stand up past z_split outside
+    // the cover's bottom edge (link.scad) [2026-11-21: they touched its outer face]
+    minkowski() { mount(); cube(2 * cov_gap, center = true); }
     for (p = cov_screws) translate([p[0], box_back - back_t - 1, p[1]]) rotate([-90, 0, 0]) {
         cylinder(d = 2.2, h = back_t + 2, $fn = 16);
         translate([0, 0, back_t + 1 - csk_h]) cylinder(d1 = 2.2, d2 = csk_d, h = csk_h + 0.01, $fn = 24);   // countersink

@@ -142,13 +142,15 @@ module jack_cuts() translate([0, jack_yc, jack_z]) rotate([0, 90, 0]) {
 }
 // which of the bulge is the back cover's: all but the side wall, which carries the jack
 // (so the cover comes off with the jack in place)
-module jack_cover_zone() translate([jack_bump_x0 - 1, box_back - back_t, jack_z - jack_bump_r - 1])
-    cube([jack_x1 - jack_bump_x0 + 1, 30, 2 * jack_bump_r + 2]);
+// [corner, size]; also for case.scad's back cover, which stands cov_gap back from the case
+function jack_cover_box() = [[jack_bump_x0 - 1, box_back - back_t, jack_z - jack_bump_r - 1], [jack_x1 - jack_bump_x0 + 1, 30, 2 * jack_bump_r + 2]];
+module jack_cover_zone() translate(jack_cover_box()[0]) cube(jack_cover_box()[1]);
 // the main board's lowest screw lies below z_split, behind the case's strip: the strip's
 // piece in front of it is the cover's too, so with the cover off a screwdriver reaches it
 // [given 2026-11-15: all screws reachable]
 low_hole = [for (h = main_holes) if (h[1] == min([for (q = main_holes) q[1]])) h][0];
-module screw_cover_zone() translate([mx(low_hole[0]) - 3.5, box_back - back_t, mz(low_hole[1]) - 3.5]) cube([7, 30, 7]);
+function screw_cover_box() = [[mx(low_hole[0]) - 3.5, box_back - back_t, mz(low_hole[1]) - 3.5], [7, 30, 7]];
+module screw_cover_zone() translate(screw_cover_box()[0]) cube(screw_cover_box()[1]);
 module jack_wall_zone() translate([jack_x1, -50, jack_z - jack_bump_r - 1]) cube([10, 100, 2 * jack_bump_r + 2]);
 
 // cut from the case's ribs: the main board's room, front to back
