@@ -122,7 +122,8 @@ What follows from it:
 - **Current:** 1.65 mA per cell at 3.3 V across its 2 kΩ.
 - **Drift is the weak point:** 0.3 % F.S. per 10 °C is 1.5 N per 10 °C, as much as a
   soft note. The firmware tares at start and keeps re-taring while no key is pressed
-  and the force is steady; the hand warms the cells slowly.
+  and the force is steady; the hand warms the cells slowly. Measured on the assembled
+  instrument (`../firmware/spec.md` §4: `force track off`, `force log on`), TODO 21.
 - **Polarity:** find the leads by resistance (E+ to E− is the largest), wire them to
   E+, middle, E−; which way a push goes is the firmware's sign, set once by pressing.
   Nothing in the hardware depends on it.

@@ -51,6 +51,10 @@ static const char *TAG = "eziach";
 static const float channel_volumes[CONF_NUM_CHANNELS] = CONF_CHANNEL_VOLUMES;
 static SemaphoreHandle_t lock;          // the control loop against console commands
 static volatile bool log_notes = false;
+static volatile bool log_force = false; // the drift log: a CSV line every FORCE_LOG_MS (force.h)
+#define FORCE_LOG_MS 100
+static force_avg_t force_avg;
+static TickType_t force_log_last;
 static volatile float newtons = 0.0f;   // last force
 static int32_t cells[2];
 
@@ -107,7 +111,9 @@ static bool any_key_down(void) {
 static void control_task(void *arg) {
 	(void)arg;
 	TickType_t last_check = 0;
+	static char line[96];
 	for(;;) {
+		int line_len = 0;
 		xSemaphoreTake(lock, portMAX_DELAY);
 		// the discant comes and goes with the plug: its ADCs and the gauges then too
 		TickType_t now = xTaskGetTickCount();
@@ -123,13 +129,23 @@ static void control_task(void *arg) {
 		keyio_scan();
 		int32_t sum;
 		if(nau7802_poll(&sum, cells)) {
+			bool key = any_key_down();
 			newtons = force_newtons(sum);
-			// re-tare slowly while nothing is played (../strain_gauge/spec.md)
-			if(!any_key_down() && fabsf(newtons) < CONF_FORCE_THRESHOLD)
+			// re-tare slowly while nothing is played (../strain_gauge/spec.md); not while
+			// `force track off`
+			if(!key && fabsf(newtons) < CONF_FORCE_THRESHOLD)
 				force_track_zero(sum, 0.002f);
+			if(log_force)
+				force_avg_add(&force_avg, cells, key);
+		}
+		if(log_force && now - force_log_last >= pdMS_TO_TICKS(FORCE_LOG_MS)) {
+			force_log_last = now;
+			line_len = force_avg_line(&force_avg, (uint32_t)(now * portTICK_PERIOD_MS), line, sizeof line);
 		}
 		instrument_step(newtons);
 		xSemaphoreGive(lock);
+		if(line_len)                          // printed outside the lock: the console may wait
+			printf("%s\n", line);
 		vTaskDelay(1);
 	}
 }
@@ -142,8 +158,8 @@ static int cmd_status(int argc, char **argv) {
 	synthesizer_load(&avg, &peak);
 	printf("boards: discant %s (plug %s), bass %s; gauges %s\n", keyio_board_up(0) ? "up" : "down",
 	       power_discant_on() ? "in" : "out", keyio_board_up(1) ? "up" : "down", nau7802_up() ? "up" : "down");
-	printf("force %+.2f N (%s), cells %ld / %ld, sign %+d\n", newtons, instrument_is_push() ? "push" : "pull",
-	       (long)cells[0], (long)cells[1], force_get_sign());
+	printf("force %+.2f N (%s), cells %ld / %ld, sign %+d%s\n", newtons, instrument_is_push() ? "push" : "pull",
+	       (long)cells[0], (long)cells[1], force_get_sign(), force_tracking() ? "" : ", zero tracking off");
 	printf("synth: %d voices, load %.0f %% avg, %.0f %% peak; MIDI %s\n", synthesizer_voices(),
 	       avg * 100, peak * 100, midi_mounted() ? "mounted" : "not mounted");
 	printf("battery %d mV, USB %s (offers %d mA, charger input %d mA); transpose %d%s\n", power_battery_mv(),
@@ -205,6 +221,33 @@ static int cmd_tare(int argc, char **argv) {
 	return 0;
 }
 
+// the drift measurement (../strain_gauge/spec.md §4a, TODO 21): `force track off`, then
+// `force log on` and capture the console (e.g. screen -L /dev/ttyACM0; grep '^F,')
+static int cmd_force(int argc, char **argv) {
+	bool on = argc == 3 && !strcmp(argv[2], "on");
+	bool off = argc == 3 && !strcmp(argv[2], "off");
+	xSemaphoreTake(lock, portMAX_DELAY);
+	if(argc == 3 && !strcmp(argv[1], "log") && (on || off)) {
+		memset(&force_avg, 0, sizeof force_avg);
+		force_log_last = xTaskGetTickCount();
+		if(on)
+			printf("%s\n", FORCE_LOG_HEADER);
+		log_force = on;
+	} else if(argc == 3 && !strcmp(argv[1], "track") && (on || off)) {
+		force_set_tracking(on);
+	} else if(argc != 1) {
+		xSemaphoreGive(lock);
+		printf("force | force log on|off | force track on|off\n");
+		return 1;
+	}
+	float z = force_zero();
+	bool tr = force_tracking();
+	xSemaphoreGive(lock);
+	printf("force %+.2f N, zero %.1f counts; zero tracking %s; log %s\n", newtons, z, tr ? "on" : "off (not saved)",
+	       log_force ? "on" : "off");
+	return 0;
+}
+
 static int cmd_log(int argc, char **argv) {
 	log_notes = argc == 2 && !strcmp(argv[1], "on");
 	return 0;
@@ -255,6 +298,7 @@ static void console_init(void) {
 		{.command = "cal", .help = "cal begin | cal end: each key's span (press each once to the bottom)", .func = cmd_cal},
 		{.command = "sign", .help = "while pushing: make push positive", .func = cmd_sign},
 		{.command = "tare", .help = "zero the force (nothing touched)", .func = cmd_tare},
+		{.command = "force", .help = "force log on|off: a CSV line every 100 ms (drift); force track on|off: follow the zero", .func = cmd_force},
 		{.command = "log", .help = "log on | off: print notes", .func = cmd_log},
 		{.command = "play", .help = "play <board> <row> <key>: the key's tones for the current direction", .func = cmd_play},
 		{.command = "history", .help = "the log since the last power-on (kept over restarts and crashes)", .func = cmd_history},

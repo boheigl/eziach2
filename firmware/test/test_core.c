@@ -118,6 +118,44 @@ static void test_force(void) {
 	CHECK(fabsf(force_level(-10.0f) - (-10.0f + CONF_FORCE_OFFSET) * CONF_FORCE_PULL_GAIN) < 1e-4f);
 	force_track_zero(2000, 0.5f);
 	CHECK(fabsf(force_newtons(1500)) < 1e-6f);
+	// zero tracking off (the drift measurement): the zero stays where it was
+	CHECK(force_tracking());
+	force_set_tracking(false);
+	force_track_zero(5000, 0.5f);
+	CHECK(fabsf(force_zero() - 1500.0f) < 1e-6f);
+	force_tare(1200);                                  // a tare still sets it
+	CHECK(fabsf(force_zero() - 1200.0f) < 1e-6f);
+	force_set_tracking(true);
+	force_track_zero(1400, 0.5f);
+	CHECK(fabsf(force_zero() - 1300.0f) < 1e-6f);
+	force_init();
+	CHECK(force_tracking());
+}
+
+static void test_force_log(void) {
+	char buf[96];
+	force_avg_t a;
+	memset(&a, 0, sizeof a);
+	force_init();
+	force_tare(1000);
+	CHECK(force_avg_line(&a, 0, buf, sizeof buf) == 0);    // no reading, no line
+	// two readings: means 600.5 and 500; sum 1100.5 is 100.5 counts over the zero
+	force_avg_add(&a, (const int32_t[2]){600, 500}, false);
+	force_avg_add(&a, (const int32_t[2]){601, 500}, true);
+	CHECK(force_avg_line(&a, 12345, buf, sizeof buf) > 0);
+	char expect[96];
+	snprintf(expect, sizeof expect, "F,12345,600.5,500.0,1000.0,%.3f,1", 100.5 * CONF_FORCE_SIGN / CONF_FORCE_COUNTS_PER_NEWTON);
+	CHECK(!strcmp(buf, expect));
+	if(strcmp(buf, expect)) printf("  got %s\n  want %s\n", buf, expect);
+	CHECK(a.n == 0 && !a.key && a.sum[0] == 0);        // the next interval starts empty
+	CHECK(force_avg_line(&a, 12445, buf, sizeof buf) == 0);
+	// the header has as many columns as a line
+	force_avg_add(&a, (const int32_t[2]){0, 0}, false);
+	force_avg_line(&a, 1, buf, sizeof buf);
+	int ch = 0, cl = 0;
+	for(const char *p = FORCE_LOG_HEADER; *p; p++) ch += *p == ',';
+	for(const char *p = buf; *p; p++) cl += *p == ',';
+	CHECK(ch == cl);
 }
 
 static void settle(float newtons) { for(int i = 0; i < 40; i++) instrument_step(newtons); }
@@ -171,6 +209,7 @@ int main(void) {
 	test_keymap();
 	test_keys();
 	test_force();
+	test_force_log();
 	test_instrument();
 	if(failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core tests passed\n");

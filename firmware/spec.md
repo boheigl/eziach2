@@ -76,6 +76,15 @@ the direction a press moves the reading (the magnet's pole) and the travel `keys
 
 Newtons = sign × (counts − zero) / 2190 [estimated: 6.73 µV/N per cell at 3.3 V, gain 128];
 zero tared at start and followed while no key is pressed; the sign set once by a push.
+
+**Drift measurement** [2026-11-21; TODO 21]: `force track off` stops following the zero
+(back on with `force track on` or a restart), `force log on` prints a CSV line every
+100 ms: `F,t_ms,cell0,cell1,zero,newtons,key`, each cell's mean counts over the 100 ms,
+the zero, the force from the means, and 1 if a key was down. Capture the console
+(`screen -L /dev/ttyACM0`, or `idf.py monitor | tee`) and keep the lines with `grep '^F,'`.
+With the zero held, `newtons` while nothing is touched is the drift itself; a known
+weight on the hand plate gives the real counts per newton. The averaging and the line
+are `force_avg_add()` / `force_avg_line()` in `force.c`, host-tested.
 Level for the volume as ../ctrl: dead band 0.3 N, then 3.2 per newton (127 at about 40 N).
 
 ## 5. Hardware
@@ -130,7 +139,8 @@ pad to GND at power-on for the download mode).
 
 Console commands (`help`): `status`, `keys` (every key's place, ADC input, raw reading,
 span, travel), `cal begin` / `cal end` (each key once to the bottom; saved), `sign` (while
-pushing; saved), `tare`, `log on|off` (notes), `play <board> <row> <key>`, `history`
+pushing; saved), `tare`, `force` (zero, tracking, log), `force log on|off` (the drift log,
+§4), `force track on|off` (zero tracking, not saved), `log on|off` (notes), `play <board> <row> <key>`, `history`
 (the log since power-on, kept over restarts and crashes; the notes of `log on` and the
 console's own output are not in it), `crash` / `crash erase` (the stored crash), `download`
 (restart into the download mode over USB).

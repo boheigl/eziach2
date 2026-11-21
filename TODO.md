@@ -72,6 +72,10 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
     `strain_gauge/spec.md` §4a, `hall_pcb/spec.md` §3a.
 21. **Load cell drift** in play: zero over 30 min with a hand on it and from a cold
     start (the seller: 1.5 N per 10 °C); decides how often the firmware re-tares.
+    On the assembled instrument at bring-up (#26) [2026-11-21: the real heat path
+    through hand plate and holders, the real NAU7802 and divider]: `force track off`,
+    `force log on`, capture the console, `grep '^F,'`; a known weight checks the
+    estimated 2190 counts/N on the way. `firmware/spec.md` §4, §6.
 22. **Spring force** of a built key: 119 g at rest, 149 g at the bottom [from the
     catalogue's rate, ±10 %]. `switch_hall/spec.md` §5.
 23. **Battery NTC**: about 10 kΩ from P17 to GND at room temperature, falling when warmed.
