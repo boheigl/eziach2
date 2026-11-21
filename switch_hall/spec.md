@@ -157,7 +157,7 @@ both rows as `bass0_*` / `bass1_*`.
 ## 5. Spring
 
 **A standard part** [given 2026-11-15: stainless, a standard spring, not a custom one;
-C-UY8-25 with the lowered seat]: **Misumi C-UY8-25**, SUS304-WPB stainless, ⌀8
+UY8-25 with the lowered seat]: **Misumi UY8-25**, SUS304-WPB stainless, ⌀8
 outside × 0.45 wire × 25 free length, closed ends, inside ⌀7.1, 12 coils (solid 5.4).
 Cold drawn 304 is weakly magnetic (Misumi says so), far less than spring steel; the
 per-key calibration takes the rest out (§6).

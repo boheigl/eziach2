@@ -50,7 +50,7 @@ discant.
 | `collar.stl` | 8 | printed |
 | Bushing, sintered bronze, d3 × D5 × 4 | 8 | stock |
 | Rod: dowel pin ISO 2338 ⌀3 h8 × 14, stainless A1 | 8 | stock |
-| Spring Misumi C-UY8-25 | 8 | stock |
+| Spring Misumi UY8-25 | 8 | stock |
 | O-ring 4 × 1.5 | 8 | stock |
 | Stop washer ⌀4.5 / ⌀2.5, 1 mm silicone or PU | 8 | punched |
 | Magnet ⌀3 × 1.5 N52 | 8 | optional: nothing senses it; it adds 0.08 g |

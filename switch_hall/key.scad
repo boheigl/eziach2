@@ -20,7 +20,7 @@
 // bushing; cover turned over onto its caps, stop washer over the rod's end, collar
 // glued on (the spring holds it against the bushing while the glue sets).
 //
-// SPRING. A stock compression spring (Misumi C-UY8-25, stainless) stands on a seat
+// SPRING. A stock compression spring (Misumi UY8-25, stainless) stands on a seat
 // round the tube and pushes the cap up. Its length between the plate and the cap's underside sets the force; at
 // the lower stop it is still well above its minimum length.
 //
@@ -110,7 +110,7 @@ stop_t   = 1;
 stop_od  = 4.5;      // hollow punches in 0.5 mm steps
 stop_id  = 2.5;      // a little under the rod: it holds itself (punched, stretched over it)
 
-/* [Spring — standard part: Misumi C-UY8-25, SUS304-WPB, d8 x 0.45 x 25] */
+/* [Spring — standard part: Misumi UY8-25, SUS304-WPB, d8 x 0.45 x 25] */
 spring_wd = 0.45;
 spring_od = 8;
 spring_n  = 12;      // total coils, from the catalogue's solid height 5.4 (drawing only)
