@@ -22,7 +22,7 @@ here the gauge plates are the plug and the bass has two sockets:
   of its back wall (as before).
 - **Stored:** the discant turns 90° about x, its keys toward the box's thin back wall,
   and back by its own slope (rows climb 3 per 16: atan(3/16) = 10.62°) [given: use the
-  slope], so that caps and housing lie parallel to the wall, 1 mm off it, 27.8 mm thick
+  slope], so that caps and housing lie parallel to the wall, 1 mm off it, 27.7 mm thick
   instead of 37.6. Its plates lie in the same slope plane [given: gauges in the slope's
   plane], so they point straight up the bass's z: the discant slides straight up until
   they sit 6 mm deep in a short socket in a pocket in the deck's underside [given: short

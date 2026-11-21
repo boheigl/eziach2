@@ -8,7 +8,7 @@
 // (2.4 mm on the board's top, as ../discant/cover.scad) carries a fixed tube round each
 // key, with a sintered bronze sleeve bearing pressed into it (d3 x D5 x 4, oil-
 // impregnated, a stock part). It goes in from below and bears on a rim at the tube's top
-// (rim_t), which takes the collar's pull at the upper stop. The plunger is a ground stainless steel rod d3 h6 running
+// (rim_t), which takes the collar's pull at the upper stop. The plunger is a stock stainless dowel pin d3 h8 (ISO 2338, 14 long) running
 // in it, with a printed collar on its lower end that carries the magnet and the stop
 // washer and does not touch the tube. One bushing is the whole guide: steel in oiled
 // bronze runs at mu about 0.1, so a press jams only beyond bush_l / (2 mu) = 20 mm off
@@ -66,13 +66,13 @@ riser = 0;
 
 /* [Cap — as the earlier contact key's] */
 cap_d    = 15;
-cap_h    = 3;        // deep enough for the rod's socket
 cap_r    = 0.5;
-cap_sock = 2.5;      // rod pressed and glued this far into the cap: it carries the spring's force
+cap_roof = 0.5;      // the cap's top over the rod's socket (cap_h and cap_sock follow from the rod, below)
 stroke   = 3;        // [given]
 
 /* [Plunger: a steel rod in a bronze bushing, a printed collar on its lower end] */
-rod_d    = 3;        // stainless steel 1.4301 (not magnetic), ground h6
+rod_d    = 3;        // a stock dowel pin ISO 2338 3 h8, stainless A1 (not magnetic) [given 2026-11-21]
+rod_l0   = 14;       //   its stock length; the bass's back row (riser) 24
 bush_d   = 3;        // sintered bronze sleeve bearing, oil-impregnated: d3 x D5 x 4 [stock]
 bush_od  = 5;
 bush_l   = 4;        // [given: 4, not 3: margin when it runs dry]
@@ -154,6 +154,9 @@ oring_od = oring_id + 2 * oring_cs;
 oring_out = oring_cs - oring_seat;         // O-ring below the cap's underside
 cbore_d  = oring_od + 2 * oring_gap;
 z_cu     = z_tt + oring_out + stroke;      // cap underside at rest
+rod_l    = rod_l0 + riser;                 // the pin: from the magnet up into the cap
+cap_sock = rod_l - (z_cu - z_cb - mag_l);  // so deep in the cap: pressed and glued, it carries the spring's force
+cap_h    = cap_sock + cap_roof;            // the cap grows with the pin (3.2 with the 14 mm pin; 3 with 13.8 cut from bar)
 z_ct     = z_cu + cap_h;                   // cap top at rest
 function key_cap_top() = z_ct;             // for ../discant/cover.scad (the thumb bar follows the caps)
 function key_bore_lo() = bore_lo;          // for ../discant/cover.scad (run down through the plate)
@@ -238,6 +241,7 @@ assert(stair[1] - cap_d >= 0.5, "caps of neighbouring boards touch");
 assert(skirt_od <= cap_d - 1, "skirt too wide for the cap");
 assert(z_sht < z_cu - stroke - 0.5, "shroud reaches the cap at the lower stop");
 assert(z_sht - (z_cu - skirt_l) >= overlap_min - 1e-6, "spring visible at rest");
+assert(cap_sock >= 2.5 - 1e-6, "the pin is glued less than 2.5 into the cap");
 assert(travel >= 0 && travel <= stroke, str("travel must lie in 0 .. ", stroke));
 
 // ---------------------------------------------------------------- geometry
@@ -263,7 +267,7 @@ module collar() translate([0, 0, z_cb + dz]) difference() {
     translate([0, 0, mag_l - 0.01]) cylinder(d = rod_d, h = collar_h);
 }
 // the steel rod: from the magnet up into the cap
-module rod() translate([0, 0, z_cb + mag_l + dz]) cylinder(d = rod_d, h = z_cu + cap_sock - z_cb - mag_l);
+module rod() translate([0, 0, z_cb + mag_l + dz]) cylinder(d = rod_d, h = rod_l);
 module plunger() { collar(); rod(); }
 // the bushing, fixed in the tube
 module bushing() translate([0, 0, z_bush[0]]) difference() {

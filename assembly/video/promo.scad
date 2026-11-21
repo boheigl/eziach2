@@ -8,6 +8,8 @@
 // cases drawn see-through; ARROW: a force arrow on the hand plate along y (N, sign:
 // + push), GLOW: the gauges highlighted (+ push: blue, - pull: orange).
 include <../../bass/layout.scad>
+d_cap_top = 20.5475;  // as ../assembly.scad
+b_cap_top = 20.135;
 
 RD = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 DB = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
@@ -33,9 +35,9 @@ module key(top, sl) {
 }
 module discant_keys() for (k = [0 : 3], i = [0 : 12 - k])
     let(n = [0, 13, 25, 36][k] + i)
-    translate([-120 + 20 * i + 10 * k, 16 * k, 3 * k - DK[n]]) key(15.066, 6.55);
+    translate([-120 + 20 * i + 10 * k, 16 * k, 3 * k - DK[n]]) key(d_cap_top, 6.51);
 module bass_keys() for (k = [0, 1], i = [0 : n_row - 1])
-    translate(at_key(k, i) - [0, 0, BK[k * n_row + i]]) key(key_top + k * key_riser, 7.3);
+    translate(at_key(k, i) - [0, 0, BK[k * n_row + i]]) key(b_cap_top + k * key_riser, 7.3);
 
 module bass_solid() { for (f = ["case", "back_cover", "cover", "strap"]) import(str(BB, f, ".stl")); bass_keys(); }
 module discant_solid() multmatrix(RD) {

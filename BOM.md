@@ -10,8 +10,8 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 | Part | Per key | Total | Source / type |
 |---|---|---|---|
 | Compression spring **Misumi C-UY8-25** (stainless, ⌀8 × 0.45 × 25) | 1 | 64 | stock |
-| Sleeve bearing, sintered bronze, oil-impregnated, d3 × D5 × 4 | 1 | 64 | stock |
-| Rod ⌀3 h6, ground stainless: 13.8 mm (bass back row 23.8 mm) | 1 | 55 × 13.8 + 9 × 23.8 ≈ 1 m | bar stock, cut to length |
+| Sleeve bearing, sintered bronze, oil-impregnated, d3 × D5 × 4 | 1 | 64 | stock: e.g. Bambu Lab store "Oil Impregnated Bronze Bushings" ED002 (packs of 20), 123kugellager.de BMG03-05-04 (about 5 € each) [found 2026-11-21, unverified] |
+| Rod: dowel pin ISO 2338 ⌀3 h8 × 14, stainless A1 (bass back row × 24) | 1 | 55 × 14 + 9 × 24 | stock (screw dealers); not ISO 8734 (hardened, m6, magnetic) |
 | Magnet ⌀3 × 1.5, N52, magnetised axially | 1 | 64 | stock |
 | O-ring 4 × 1.5 (silicone about 50 Shore A, or NBR 70) | 1 | 64 | stock |
 | Stop washer ⌀4.5 / ⌀2.5 | 1 | 64 | punched from 1 mm silicone or PU sheet |

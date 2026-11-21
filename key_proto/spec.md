@@ -49,7 +49,7 @@ discant.
 | `cap.stl` (cap with skirt) | 8 | printed |
 | `collar.stl` | 8 | printed |
 | Bushing, sintered bronze, d3 × D5 × 4 | 8 | stock |
-| Rod ⌀3 h6 stainless, 13.8 mm | 8 | about 111 mm of bar |
+| Rod: dowel pin ISO 2338 ⌀3 h8 × 14, stainless A1 | 8 | stock |
 | Spring Misumi C-UY8-25 | 8 | stock |
 | O-ring 4 × 1.5 | 8 | stock |
 | Stop washer ⌀4.5 / ⌀2.5, 1 mm silicone or PU | 8 | punched |

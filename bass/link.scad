@@ -177,18 +177,21 @@ module discant_side() to_bass() {
 // TILTED by the discant's slope [given: use the slope]: its rows climb 3 per 16, so turned
 // straight its caps lay on a slant, 1 mm off the wall at the top row and 10 at the bottom
 // one. Turned back by atan(3/16) = 10.62 deg, caps and housing lie parallel to the wall:
-// 26.2 thick. The plates lie in the same slope's plane [given], so they point straight up
+// 27.7 thick (26.2 on 2026-11-14). The plates lie in the same slope's plane [given], so they point straight up
 // the bass's z, and the discant slides straight.
 // Measured from the discant's build (../build/discant/: housing, cover, gauge_link, keys),
 // turned so [2026-11-14: the thin discant on one Hall-sensor board, keys with the bronze
 // bushing]: nearest the wall -18.546 (the caps' tops), farthest 7.64 (the thumb bar's
 // foot), lowest over the playing mount -16.47: the thumb bar, whole along its length
-// [given 2026-11-14: never cut].
+// [given 2026-11-14: never cut]. Measured again 2026-11-21 (the keys taller since, the
+// caps 3.2 for the 14 mm dowel pins): nearest -21.494 (the caps' tops; -18.546 was stale,
+// the caps ran 2 mm into the back cover), farthest 6.24 (the housing), lowest -15.92
+// (front_d kept at -16.47: 0.55 more over the playing mount).
 socket_e   = 8.3;                 // holder y -16.7 .. -4.2: the W's bottom edge (-12.5) to the tongue's tip
 travel     = socket_e + 1;
 store_tilt = atan(3 / 16);
 store_gap  = 1;
-wall_d     = -18.546;
+wall_d     = -21.494;
 front_d    = -16.47;
 // its front edge travel + 0.3 above the playing holders' tops (with the lugs)
 store_at   = [(deck_x[0] + deck_x[1]) / 2, box_back + store_gap - wall_d, z_bot + hold_lo + hold_hi + 0.3 + travel - front_d];

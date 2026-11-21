@@ -31,7 +31,8 @@ is above the board, and **the board has no key holes**.
 - **Tube:** the cover plate (2.4 mm on the board's top, as in
   `../discant/cover.scad`) carries a fixed tube at every key, with a sintered bronze
   sleeve bearing (d3 × D5 × 4, oil-impregnated, stock) in it.
-- **Plunger:** a ground stainless rod ⌀3 h6 runs in the bushing; a printed collar on
+- **Plunger:** a stock dowel pin ISO 2338 ⌀3 h8 × 14, stainless A1 (× 24 in the bass's
+  back row) [given 2026-11-21: stock lengths, no cutting], runs in the bushing; a printed collar on
   its lower end carries the magnet and the stop washer and touches nothing.
 - **Bushing from below, against a rim** [given 2026-11-15]: the tube's lower bore
   (⌀5.1) lets the bushing slide in from below; it is pressed into its seat (⌀4.95) up
@@ -40,16 +41,17 @@ is above the board, and **the board has no key holes**.
   by its shape, with no glue and no screw. Screwing from above, as on an acoustic
   Steirische, does not fit: the spring stands round the tube right up to the cap, so a
   plate over the tubes would cut through it.
-- **Joints on the rod** [given 2026-11-15]: the rod is pressed and glued 2.5 mm deep
-  into the cap (3 mm thick) and glued 1.5 mm deep into the collar (3 mm high, over
+- **Joints on the rod** [given 2026-11-15]: the rod is pressed and glued 2.7 mm deep
+  into the cap (3.2 mm thick, 0.5 over the socket; 3 and 2.5 with the 13.8 mm rod cut
+  from bar before 2026-11-21) and glued 1.5 mm deep into the collar (3 mm high, over
   the magnet's 1.5). Both carry the spring's force at rest.
 - **Spring:** a stock compression spring stands on a seat round the tube and pushes
   the cap up.
 
 **Assembly of one key**, before the cover is screwed onto the board:
 
-1. Cut the rod to 13.8 mm (23.8 in the bass's back row), chamfer its ends lightly.
-   Roughen both ends over about 3 mm (240 grit; the ground h6 surface holds glue
+1. Take a dowel pin 3 × 14 (3 × 24 in the bass's back row); its ends come chamfered.
+   Roughen both ends over about 3 mm (240 grit; the ground surface holds glue
    poorly) and degrease them with isopropanol; keep the middle, which runs in the
    bushing, smooth and clean.
 2. Press and glue the rod into the cap's socket, square, down to the bottom.
@@ -105,8 +107,8 @@ flat.
 (`board_tilt = 0`) and the back row stands 10 mm higher. `riser` in key.scad
 raises the spring seat, the tube top and everything above by that much; collar,
 magnet, stop washer and bushing keep their place at the board. Only the rod is
-10 mm longer: spring, stops, field and guide are the same as in the front row
-(cap top 29.9 instead of 19.9 above the board's middle). The Makefile builds
+10 mm longer (3 × 24): spring, stops, field and guide are the same as in the front row
+(cap top 30.1 instead of 20.1 above the board's middle). The Makefile builds
 both rows as `bass0_*` / `bass1_*`.
 
 | | z | |
@@ -117,14 +119,15 @@ both rows as `bass0_*` / `bass1_*`.
 | Spring seat, between tube and shroud | 4.25 (§5) | |
 | Tube ⌀6.6: lower bore ⌀5.1, bushing seat ⌀4.95, rim with ⌀3.4 | 0.8 … 13.35; bushing 8.55 … 12.55, rim 12.55 … 13.35 | |
 | Collar ⌀4.4 × 3 with magnet ⌀3 × 1.5 | 4.55 … 7.55 | 0.3 above the tilted board at its edge, lower stop |
-| Rod ⌀3 | 6.05 … 19.85 | 1.5 into the collar, 2.5 into the cap |
+| Rod ⌀3 × 14 (dowel pin) | 6.05 … 20.05 | 1.5 into the collar, 2.7 into the cap |
 | Silicone washer ⌀4.5 / ⌀2.5 × 1 on the collar | 7.55 … 8.55 | upper stop |
 | O-ring 4 × 1.5 in the cap | 16.35 … 17.85 | lands on the tube's top after 3 mm |
-| Cap ⌀15 × 3, R0.5 | 17.35 … 20.35 | |
+| Cap ⌀15 × 3.2, R0.5 | 17.35 … 20.55 | |
 
-- **Height** from the cap top to the board's underside is **21.2 mm** on the discant
-  (20.8 on the bass's flat board); 2.8 more than before the rim (0.8), the longer
-  collar (1) and the thicker cap (1) [2026-11-15]. Only the sensor (1.1 mm) is below
+- **Height** from the cap top to the board's underside is **21.4 mm** on the discant
+  (21.0 on the bass's flat board); 2.8 more than before the rim (0.8), the longer
+  collar (1) and the thicker cap (1) [2026-11-15], and 0.2 for the 14 mm dowel pin
+  [2026-11-21]. Only the sensor (1.1 mm) is below
   the board.
 - For comparison, the switch key is 27.1 mm (cap top to its guide tube's bottom),
   and the leaf version was 19.6 mm.

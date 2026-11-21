@@ -29,10 +29,13 @@ module key(top, sl) {
     translate([0, 0, top - 12]) cylinder(d = 3.6, h = 10);
 }
 // the discant's 46 keys: row k at k * (10, 16, 3), 13 - k keys from x = -120 + 10 k
-// (../discant/hall.scad); cap top 15.066, skirt 6.55 (key.scad with the board's tilt)
-module keys_discant() for (k = [0 : 3], i = [0 : 12 - k]) translate([-120 + 20 * i + 10 * k, 16 * k, 3 * k]) key(15.066, 6.55);
+// (../discant/hall.scad); cap top and skirt as key.scad with the board's tilt [measured
+// 2026-11-21 from ../build/switch_hall/: 15.066 before was stale, 5.5 too low]
+d_cap_top = 20.5475;
+b_cap_top = 20.135;   // key.scad, board flat: the bass's caps over its board's middle (layout.scad's key_top is older)
+module keys_discant() for (k = [0 : 3], i = [0 : 12 - k]) translate([-120 + 20 * i + 10 * k, 16 * k, 3 * k]) key(d_cap_top, 6.51);
 // the bass's 18: the back row's 10 higher (key_riser), skirt 7.3 (key.scad, board flat)
-module keys_bass() for (k = [0, 1], i = [0 : n_row - 1]) translate(at_key(k, i)) key(key_top + k * key_riser, 7.3);
+module keys_bass() for (k = [0, 1], i = [0 : n_row - 1]) translate(at_key(k, i)) key(b_cap_top + k * key_riser, 7.3);
 
 module d_all() for (f = ["housing", "cover", "board", "board_parts", "gauge_link"]) import(str(D, f, ".stl"));
 
