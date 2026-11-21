@@ -1,6 +1,8 @@
 // Camera navigation for the phone pages (discant/, bass/, assembly/), inlined into each
 // page by embed_parts.py. Always on in the view, no mode to switch:
-//   one finger / left mouse button: turn round the centre
+//   one finger / left mouse button: turn round the centre, freely: about the camera's own
+//     up and right axes, so it goes on in every direction from any view, over the top too
+//     (a turntable stops at the pole); the model may end up tilted, Reset view rights it
 //   two fingers: pinch to zoom, move together to pan; right button, middle button or
 //     Shift + drag: pan; wheel: zoom towards the point under the cursor
 //   double tap / double click on a surface: that point becomes the centre of turning and
@@ -13,13 +15,25 @@
 //      onTap(hits) (optional), status(text) (optional) }
 function viewerNav(o) {
   var camera = o.camera, view = o.view, canvas = o.canvas;
-  var target = new THREE.Vector3(), azim = 0, elev = 0, dist = 100;
+  // the camera's orientation; it looks at target from dist along its own +z
+  var target = new THREE.Vector3(), quat = new THREE.Quaternion(), dist = 100;
   var MIN_D = 2, MAX_D = 2000;
+  var X = new THREE.Vector3(1, 0, 0), Y = new THREE.Vector3(0, 1, 0), Z = new THREE.Vector3(0, 0, 1);
+  var rq = new THREE.Quaternion();
+  // turn about the camera's own axes: da about its up (as azimuth), de about its right (as elevation)
+  function rot(da, de) {
+    if (da) quat.multiply(rq.setFromAxisAngle(Y, da));
+    if (de) quat.multiply(rq.setFromAxisAngle(X, -de));
+    quat.normalize();
+  }
+  // a view given as azimuth and elevation about the world's y, upright
+  function setAzEl(azim, elev) {
+    quat.setFromAxisAngle(Y, azim); rot(0, elev);
+  }
 
   function place() {
-    camera.position.set(target.x + dist * Math.cos(elev) * Math.sin(azim), target.y + dist * Math.sin(elev),
-                        target.z + dist * Math.cos(elev) * Math.cos(azim));
-    camera.lookAt(target);
+    camera.quaternion.copy(quat);
+    camera.position.copy(Z).applyQuaternion(quat).multiplyScalar(dist).add(target);
     // what lies in front of the centre by more than the view's height there is cut away,
     // so zooming in on a point opens the parts in front of it
     var h = 2 * dist * Math.tan(camera.fov * Math.PI / 360);
@@ -29,7 +43,7 @@ function viewerNav(o) {
   }
   function setHome() {
     var h = o.home; target.set(h.target[0], h.target[1], h.target[2]);
-    azim = h.azim; elev = h.elev; dist = h.dist; anim = null; marker.visible = false; place();
+    setAzEl(h.azim, h.elev); dist = h.dist; anim = null; marker.visible = false; place();
   }
   function clampD(d) { return Math.max(MIN_D, Math.min(MAX_D, d)); }
 
@@ -57,7 +71,7 @@ function viewerNav(o) {
     target.addScaledVector(right, -dx * k).addScaledVector(up, dy * k);
   }
   function turn(dx, dy) {
-    azim -= dx * 0.008; elev = Math.max(-1.55, Math.min(1.55, elev + dy * 0.008));
+    rot(-dx * 0.008, dy * 0.008);
   }
 
   // what lies under a point of the view: visible meshes only, not what a section cut away
@@ -90,8 +104,10 @@ function viewerNav(o) {
     anim.t = Math.min(1, anim.t + dt / 0.3);
     var s = anim.t * anim.t * (3 - 2 * anim.t);
     target.copy(anim.from).lerp(anim.to, s);
-    var v = anim.cam.clone().sub(target);
-    dist = clampD(v.length()); elev = Math.asin(Math.max(-1, Math.min(1, v.y / dist))); azim = Math.atan2(v.x, v.z);
+    // look from where the camera was at the moving centre, keeping its up as near as it goes
+    var up = Y.clone().applyQuaternion(quat);
+    dist = clampD(anim.cam.distanceTo(target));
+    quat.setFromRotationMatrix(new THREE.Matrix4().lookAt(anim.cam, target, up));
     marker.scale.setScalar(dist * 0.006);
     place();
     if (anim.t >= 1) anim = null;
@@ -160,7 +176,7 @@ function viewerNav(o) {
   return {
     place: place, step: step, home: setHome,
     orbit: function (da, de, dz) {
-      azim += da; elev = Math.max(-1.55, Math.min(1.55, elev + de)); dist = clampD(dist * dz); place();
+      rot(da, de); dist = clampD(dist * dz); place();
     },
     look: function (t, d) { target.set(t[0], t[1], t[2]); dist = d; anim = null; marker.visible = false; place(); },
     hideMarker: function () { marker.visible = false; o.draw(); }

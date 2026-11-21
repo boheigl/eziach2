@@ -114,7 +114,7 @@
   <header>
     <p class="eyebrow">From the CAD file</p>
     <h1>Strain gauge flexure plate</h1>
-    <p>The solid described by <code>StrainGauge.step</code>, carrying the half-bridge gauges on both faces of the central column, and the inner holder that slides onto the W-shaped inner part from the open edge. Drag to orbit, scroll to zoom.</p>
+    <p>The solid described by <code>StrainGauge.step</code>, carrying the half-bridge gauges on both faces of the central column, and the inner holder that slides onto the W-shaped inner part from the open edge. Drag to turn freely (in any direction, over the top too; a preset view rights it), scroll to zoom.</p>
   </header>
 
   <div class="layout">
@@ -122,7 +122,7 @@
       <div class="panel-bar"><span>3D view</span><span class="sub">StrainGauge.step</span></div>
       <figure style="margin:0">
         <div id="view">
-          <div class="hint">Drag to orbit · scroll to zoom</div>
+          <div class="hint">Drag to turn freely · scroll to zoom</div>
         </div>
       </figure>
       <div class="controls">
@@ -430,14 +430,22 @@
   });
   scene.add(axes);
 
-  var azim = -0.62, elev = 0.78, dist = 86;
+  // free turning, as ../discant/viewer_nav.js: dragging turns about the camera's own up and
+  // right axes, so it goes on in every direction from any view, over the top too; a
+  // preset view sets it upright again. The camera looks at the origin along its own -z.
+  var quat = new THREE.Quaternion(), dist = 86, rq = new THREE.Quaternion();
+  var AX = new THREE.Vector3(1, 0, 0), AY = new THREE.Vector3(0, 1, 0), AZ = new THREE.Vector3(0, 0, 1);
+  function rot(da, de) {                       // da: about its up (as azimuth), de: about its right (as elevation)
+    if (da) quat.multiply(rq.setFromAxisAngle(AY, da));
+    if (de) quat.multiply(rq.setFromAxisAngle(AX, -de));
+    quat.normalize();
+  }
+  function setAzEl(azim, elev) { quat.setFromAxisAngle(AY, azim); rot(0, elev); }
+  setAzEl(-0.62, 0.78);
   function place() {
-    camera.position.set(
-      dist * Math.cos(elev) * Math.sin(azim),
-      dist * Math.sin(elev),
-      dist * Math.cos(elev) * Math.cos(azim)
-    );
-    camera.lookAt(0, 0, 0);
+    camera.quaternion.copy(quat);
+    camera.position.copy(AZ).applyQuaternion(quat).multiplyScalar(dist);
+    camera.updateMatrixWorld();
     if (camera === ocam) {
       // frustum sized to what the perspective camera would show at this
       // distance, so switching projection does not jump the apparent scale
@@ -457,9 +465,7 @@
   });
   view.addEventListener('pointermove', function (e) {
     if (!drag) return;
-    azim -= (e.clientX - drag.x) * 0.008;
-    elev += (e.clientY - drag.y) * 0.008;
-    elev = Math.max(-1.52, Math.min(1.52, elev));
+    rot(-(e.clientX - drag.x) * 0.008, (e.clientY - drag.y) * 0.008);
     drag = { x: e.clientX, y: e.clientY };
     place();
   });
@@ -474,14 +480,14 @@
 
   var PRESETS = {
     iso:   [-0.62, 0.78, 86],
-    top:   [0, 1.52, 74],
+    top:   [0, Math.PI / 2, 74],
     front: [0, 0.02, 80],
     side:  [1.5708, 0.02, 80]
   };
   Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function (b) {
     b.addEventListener('click', function () {
       var p = PRESETS[b.dataset.view];
-      azim = p[0]; elev = p[1]; dist = p[2];
+      setAzEl(p[0], p[1]); dist = p[2];
       document.getElementById('spin').checked = false;
       place();
     });
@@ -525,7 +531,8 @@
   var last = performance.now();
   function loop(now) {
     var dt = (now - last) / 1000; last = now;
-    if (document.getElementById('spin').checked && !drag) { azim -= dt * 0.25; place(); }
+    // auto-rotate about the world's vertical, whatever the view
+    if (document.getElementById('spin').checked && !drag) { quat.premultiply(rq.setFromAxisAngle(AY, -dt * 0.25)); place(); }
     renderer.render(scene, camera);
     requestAnimationFrame(loop);
   }
