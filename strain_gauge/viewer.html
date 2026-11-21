@@ -192,7 +192,7 @@
       <li><b>The inner holder grips the W from both faces</b>, 4.5 mm above and 4.5 mm below, and closes into a box: its two side walls pass through the open slots, and a bridge behind the plate's bottom edge joins the two plates. Switch it off to see the plate and gauges it covers. It slides onto the W on a 0.2 mm fit per side and 0.15 mm per face — set for FDM printing — keeps 0.5 mm to the fixed outer arms, and stops 2 mm short of where the slots close. The two vertical edges at the mouth corners are rounded R2. The mouth also carries a 0.6 mm lead-in flare, which is not drawn here.</li>
       <li><b>A 9 × 1.8 mm recess in each plate</b> clears the gauge and carries its leads out through the rear face. Its edges sit mid-slot, 1.5 mm clear of the central column and 1.5 mm clear of the webs, so the inner holder never touches the member being measured — that one stays free to bend, and clamping is left to the webs and the bottom block. 2.7 mm of wall remains above and below each recess. Its depth is the bought cell's lead, glued along the whole column 1.5 mm proud of one face; it keeps 0.45 mm clear, either way up.</li>
       <li><b>The outer holder is one piece</b>: a C-jaw on each fixed arm — 4 mm of material above, below and outboard — joined by a yoke at the +y end. It is printed as part of the discant's housing, so the plate slides into it from −y until the plate's +y edge lands on the housing's pad, and a ⌀1.5 dowel pin across each jaw keeps it in. Two yokes bridge across the plate instead of reaching past it, so nothing projects beyond the +y edge. They stand off the plate faces at z = ±3.2, leaving a 6.4 mm gap for the leads to pass through, and sit in y at 5.5…12.5, filling the stretch between the inner holder and the plate edge down to a 1 mm gap. Using a pair rather than one ties the jaws together symmetrically. The jaw faces at x = 12 keep 0.5 mm to the inner holder, but the order is fixed: <b>this part goes on first</b>, since the yoke cannot pass over the 11.8 mm tall holder.</li>
-      <li><b>The leads run forward, in +y</b>, two off each gauge. Each recess starts at y = −8, just behind its gauge, and opens at the inner holder's mouth; from there the leads lie on the plate, cross the open gap and leave through the gap between the outer holder's two yokes, standing 2 mm proud of its +y face. The glued lead clears the recess ceiling and the yokes by 0.45 mm. The inner holder's back wall is solid again, and it still clamps the bottom block over y = −11.0 … −8 (the bought cell's bottom block is 1.7 mm shorter than the STEP's).</li>
+      <li><b>The lead runs forward, in +y</b>: on the bought cell it is glued along the middle web on one face, 7.1 mm wide and 1.5 mm proud, from y = −6.5 to the +y edge, and its three wires (red, yellow, black) leave over that edge. The recess starts at y = −8 and opens at the inner holder's mouth; past it the lead passes between the outer holder's two yokes. It clears the recess ceiling and the yokes by 0.45 mm. The inner holder's back wall is solid again, and it still clamps the bottom block over y = −11.0 … −8 (the bought cell's bottom block is 1.7 mm shorter than the STEP's).</li>
       <li><b>Orthographic or perspective.</b> Parallel projection is the one to judge fits and alignment in — edges that should line up actually line up, and the preset views read as true elevations. Perspective is the natural-looking one. The switch keeps the apparent size, so the model does not jump.</li>
       <li><b>The triad is the part's own frame</b>, the one every dimension here is quoted in: origin at the centre of the plate in all three axes, X across the plate, Y towards the closed end, Z out of the gauged face. The plate therefore runs from z = −1.25 to +1.25, which is 1.25 mm below where the STEP file puts it; nothing else differs. Arrows are 20 mm long and drawn over the solids so they stay readable.</li>
       <li><b>Two hairpin slots</b> open at one edge, run the length of the plate, turn across the top and return to a closed end. Files: <code>strain_gauge_plate.scad</code>, <code>inner_holder.scad</code> and the matching STLs.</li>
@@ -208,6 +208,10 @@
   var view = document.getElementById('view');
   var css = function (n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
 
+  // OUTLINE is the STEP's; the bought cell's arms and bottom block end 1.7 earlier at the
+  // open edge [measured 2026-11-21] (strain_gauge_plate.scad, shorter)
+  var SHORTER = 1.7;
+  for (var j = 1; j < OUTLINE.length; j += 2) if (OUTLINE[j] <= -11 + 1e-6) OUTLINE[j] += SHORTER;
   var pts = [];
   for (var i = 0; i < OUTLINE.length; i += 2) pts.push(new THREE.Vector2(OUTLINE[i], OUTLINE[i + 1]));
 
@@ -301,24 +305,24 @@
     color: 0x6f8f86, metalness: 0.1, roughness: 0.65
   });
   var brEdge = new THREE.LineBasicMaterial({ color: 0x3c5a53 });
-  // the two plates are split around the 9 x 1 mm gauge/cable recess, which runs
-  // from y = 1 back through the rear face at y = -17
+  // walls 4.5 (z 1.4 .. 5.9), the 9 x 1.8 recess for the glued lead, the bridge 5.7 behind
+  // the bought cell's bottom edge (-10.8); the latch tongues are not drawn.
   // Split so the two mouth corners can carry their R2: everything outboard of
   // the pocket face is one solid strip, and the rounding is a quarter cylinder.
   // The gauge recess runs from y = -8 forward and opens at the mouth.
-  [[ -9.2,  -4.5, -16.7,  4.5,  -4.4,  -1.4],  // bottom plate, left of the recess
-   [  4.5,   9.2, -16.7,  4.5,  -4.4,  -1.4],  // bottom plate, right of it
-   [ -4.5,   4.5, -16.7,   -8,  -4.4,  -1.4],  // bottom plate, behind it
-   [ -4.5,   4.5,    -8,  4.5,  -4.4,  -2.4],  // bottom plate, under it
-   [ -9.2,  -4.5, -16.7,  4.5,   1.4,   4.4],  // top plate, left of the recess
-   [  4.5,   9.2, -16.7,  4.5,   1.4,   4.4],  // top plate, right of it
-   [ -4.5,   4.5, -16.7,   -8,   1.4,   4.4],  // top plate, behind it
-   [ -4.5,   4.5,    -8,  4.5,   2.4,   4.4],  // top plate, over it
-   [ -9.2,   9.2, -16.7,-12.7,  -1.4,   1.4],  // closing bridge, now solid
-   [-11.5,  -9.2, -16.7,  2.5,  -4.4,   4.4],  // outer strip, left (wall + plates)
-   [  9.2,  11.5, -16.7,  2.5,  -4.4,   4.4],  // outer strip, right
-   [ -9.5,  -9.2,   2.5,  4.5,  -4.4,   4.4],  // inboard of the left rounding
-   [  9.2,   9.5,   2.5,  4.5,  -4.4,   4.4]   // inboard of the right rounding
+  [[ -9.2,  -4.5, -16.7,  4.5,  -5.9,  -1.4],  // bottom plate, left of the recess
+   [  4.5,   9.2, -16.7,  4.5,  -5.9,  -1.4],  // bottom plate, right of it
+   [ -4.5,   4.5, -16.7,   -8,  -5.9,  -1.4],  // bottom plate, behind it
+   [ -4.5,   4.5,    -8,  4.5,  -5.9,  -3.2],  // bottom plate, under it
+   [ -9.2,  -4.5, -16.7,  4.5,   1.4,   5.9],  // top plate, left of the recess
+   [  4.5,   9.2, -16.7,  4.5,   1.4,   5.9],  // top plate, right of it
+   [ -4.5,   4.5, -16.7,   -8,   1.4,   5.9],  // top plate, behind it
+   [ -4.5,   4.5,    -8,  4.5,   3.2,   5.9],  // top plate, over it
+   [ -9.2,   9.2, -16.7,-11.0,  -1.4,   1.4],  // closing bridge, 5.7
+   [-11.5,  -9.2, -16.7,  2.5,  -5.9,   5.9],  // outer strip, left (wall + plates)
+   [  9.2,  11.5, -16.7,  2.5,  -5.9,   5.9],  // outer strip, right
+   [ -9.5,  -9.2,   2.5,  4.5,  -5.9,   5.9],  // inboard of the left rounding
+   [  9.2,   9.5,   2.5,  4.5,  -5.9,   5.9]   // inboard of the right rounding
   ].forEach(function (b) {
     var g = stepBox(b[0], b[1], b[2], b[3], b[4], b[5]);
     innerHolder.add(new THREE.Mesh(g, brMat));
@@ -326,7 +330,7 @@
   });
   // the two rounded vertical edges at the mouth
   [[9.5, Math.PI / 2], [-9.5, Math.PI]].forEach(function (c) {
-    var g = new THREE.CylinderGeometry(2, 2, 8.8, 28, 1, false, c[1], Math.PI / 2);
+    var g = new THREE.CylinderGeometry(2, 2, 11.8, 28, 1, false, c[1], Math.PI / 2);
     g.translate(c[0], 0, -2.5);
     innerHolder.add(new THREE.Mesh(g, brMat));
     innerHolder.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 20), brEdge));
@@ -340,14 +344,15 @@
   });
   var fxEdge = new THREE.LineBasicMaterial({ color: 0x4a4138 });
   // one piece: a jaw on each arm, joined by a yoke bridging over the plate
-  [[ 15.2,  19.2, -14.8, 13.0,  -5.4,   5.4],   // right jaw, outboard wall
-   [   12,  15.2, -14.8, 13.0,   1.4,   5.4],   // right jaw, over the arm
-   [   12,  15.2, -14.8, 13.0,  -5.4,  -1.4],   // right jaw, under the arm
-   [-19.2, -15.2, -14.8, 13.0,  -5.4,   5.4],   // left jaw, outboard wall
-   [-15.2,   -12, -14.8, 13.0,   1.4,   5.4],   // left jaw, over the arm
-   [-15.2,   -12, -14.8, 13.0,  -5.4,  -1.4],   // left jaw, under the arm
-   [  -12,    12,   5.5, 13.0,   2.4,   5.4],   // yoke over the plate
-   [  -12,    12,   5.5, 13.0,  -5.4,  -2.4]    // yoke under the plate
+  // (the jaws end at y -13.1, past the bought cell's arm tips and the dowel pins)
+  [[ 15.2,  19.2, -13.1, 13.0,  -5.4,   5.4],   // right jaw, outboard wall
+   [   12,  15.2, -13.1, 13.0,   1.4,   5.4],   // right jaw, over the arm
+   [   12,  15.2, -13.1, 13.0,  -5.4,  -1.4],   // right jaw, under the arm
+   [-19.2, -15.2, -13.1, 13.0,  -5.4,   5.4],   // left jaw, outboard wall
+   [-15.2,   -12, -13.1, 13.0,   1.4,   5.4],   // left jaw, over the arm
+   [-15.2,   -12, -13.1, 13.0,  -5.4,  -1.4],   // left jaw, under the arm
+   [  -12,    12,   5.5, 13.0,   3.2,   5.4],   // yoke over the plate, 6.4 lead gap
+   [  -12,    12,   5.5, 13.0,  -5.4,  -3.2]    // yoke under the plate
   ].forEach(function (b) {
     var g = stepBox(b[0], b[1], b[2], b[3], b[4], b[5]);
     outerHolder.add(new THREE.Mesh(g, fxMat));
@@ -355,21 +360,19 @@
   });
   scene.add(outerHolder);
 
-  // --- leads: two per gauge, running forward in +y and out past the outer holder ---
+  // --- the lead: glued along the middle web on one face [measured 2026-11-21], 7.1 wide,
+  // 1.5 proud, from the +y edge to y -6.5; its three wires leave over the +y edge ---
   var leads = new THREE.Group();
-  var WIRE_R = 0.35, WIRE_Y0 = -1.8, WIRE_Y1 = 14.5;   // 2 mm past the +y face
-  function wire(xOff, side, colour) {
+  var glue = stepBox(-3.55, 3.55, -6.5, 12.5, THICK / 2, THICK / 2 + 1.5);
+  leads.add(new THREE.Mesh(glue, new THREE.MeshStandardMaterial({
+    color: 0xeef0f2, metalness: 0.0, roughness: 0.4, transparent: true, opacity: 0.85 })));
+  var WIRE_R = 0.35, WIRE_Y0 = 6, WIRE_Y1 = 16;
+  [[-0.8, 0xb7311f], [0, 0xd8b31f], [0.8, 0x1b1f22]].forEach(function (w) {   // red, yellow, black
     var len = WIRE_Y1 - WIRE_Y0;
     var g = new THREE.CylinderGeometry(WIRE_R, WIRE_R, len, 12);
     g.rotateX(Math.PI / 2);                             // lie along world Z
-    g.translate(xOff, side * (THICK / 2 + WIRE_R), -(WIRE_Y0 + len / 2));
-    leads.add(new THREE.Mesh(g, new THREE.MeshStandardMaterial({
-      color: colour, metalness: 0.0, roughness: 0.55
-    })));
-  }
-  [1, -1].forEach(function (side) {
-    wire(-0.6, side, 0x1b1f22);                         // black
-    wire(0.6, side, 0xb7311f);                          // red
+    g.translate(w[0], THICK / 2 + 0.75, -(WIRE_Y0 + len / 2));
+    leads.add(new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: w[1], metalness: 0.0, roughness: 0.55 })));
   });
   scene.add(leads);
 

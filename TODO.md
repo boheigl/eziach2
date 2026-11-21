@@ -24,7 +24,7 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
    3–7 ms after DET, fully after about 12 ms (`main_pcb/spec.md` §3). In the main board's
    routing run with the NTC changes.
 7. ~~**Strain gauges**~~ done 2026-11-15: bought half-bridge load cells, 50 kg, 1000 Ω, 1 mV/V
-   (`strain_gauge/spec.md` §4a). Still: measure one against the STEP and its E+/E−.
+   (`strain_gauge/spec.md` §4a). Measured against the STEP and E+/E−: #19, #20.
 
 ## Mechanics
 
