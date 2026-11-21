@@ -132,7 +132,9 @@ z −19 (the old foot below, which held the old cover, left out): 0.2 mm rms, 0.
 - **Never cut** [given 2026-11-14]: it keeps its whole profile over its whole length;
   the bass makes room for it (its box is longer, `../bass/layout.scad`).
 - Its back sits on the housing's shelf (§2); the tray and the board stay whole, the bar
-  ends at their front face.
+  ends at their front face. Fit [given 2026-11-21; 0 before]: 0.3 to the tray's front face
+  and the shelf's front and ends (`tb_gap`, the case's fit), 0.1 over the shelf (`tb_gap_s`):
+  the cover sits on the rim and the bosses, pressed hard the bar comes down onto the shelf.
 - Printing: the bar makes the cover's front heavier; the lobes overhang when the cover
   prints top down [unverified: supports needed].
 

@@ -54,6 +54,11 @@ tb_above = 7;        // the caps' top over the bar's top, along the keys' axis [
                      //   5.1 as fitted]: the whole bar, profile unchanged, 1.9 lower
 tb_dz    = key_cap_top() - tb_above - (tb_z0 + tb_len);   // the bar follows the caps up
 tb_round = 2;        // the foot's front edge rounded [given 2026-11-21: "etwas"]
+// its fit to the housing [given 2026-11-21: was 0 everywhere]: the cover goes on from above,
+// the bar sliding down the tray's front face and over the shelf
+tb_gap   = 0.3;      // to the tray's front face and the shelf's front and ends (case_fit)
+tb_gap_s = 0.1;      // over the shelf: the cover sits on the rim and the bosses; pressed hard,
+                     //   the bar comes down onto the shelf
 // THE RIBS [given 2026-11-21: a little stiffer, the keys must not strike, not bulky, nothing
 // past the housing in x/y]: thin triangular ribs behind the bar, one in the middle of each gap
 // between the first row's keys (9 from either axis: clear of caps r 7.5 and skirts r 6.2),
@@ -119,10 +124,12 @@ module thumb_bar() difference() {
         translate([x_front[0], 0, tb_dz]) rotate([90, 0, 90]) linear_extrude(x_front[1] - x_front[0]) tb_section();
         tb_web();
     }
-    // the tray and the board stay whole: the bar ends at their front face, and sits on the
-    // tray's shelf (hall.scad), with nothing under it
-    slab_solid(-50, 0, fit + wall);
-    front_shelf(-50, w_b + shelf_t);
+    // the tray and the board stay whole: the bar ends tb_gap in front of their front face, and
+    // stands tb_gap_s over the tray's shelf (hall.scad), tb_gap clear of its front and ends
+    slab_solid(-50, 0, fit + wall + tb_gap);
+    let(f = hall_outline[0][1] - case_rim, x0 = hall_outline[0][0] + 3, x1 = hall_outline[1][0] - 3)
+        on_slab() translate([x0 - tb_gap, f - shelf_d - tb_gap, -50])
+            cube([x1 - x0 + 2 * tb_gap, shelf_d + tb_gap + 0.5, 50 + w_b + shelf_t + tb_gap_s]);
     // and the bar does not stand into the plate's ends
     translate([-1000, -500, -500]) cube([1000 + x_front[0], 1000, 1000]);
     translate([x_front[1], -500, -500]) cube([1000, 1000, 1000]);
