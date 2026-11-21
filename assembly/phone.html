@@ -173,9 +173,10 @@
   window.addEventListener('resize', function () { size(); draw(); });
 
   // turning, zooming, moving, the centre by double tap: ../discant/viewer_nav.js
-  // the start view from -x, -y, +z (the bass's frame; the page's world is (x, z, -y)): an
-  // isometric corner view, 45 deg round and atan(1/sqrt 2) = 35.26 deg up
-  var HOME = { target: [0, -60, -40], azim: -Math.PI / 4, elev: Math.atan(Math.SQRT1_2), dist: 820 };
+  // the start view from -x, -y, +z of the discant [given 2026-11-21], which stands turned
+  // 180 deg about z in the bass's frame drawn here: from +x, +y, +z of the bass (the page's
+  // world is (x, z, -y)); an isometric corner view, atan(1/sqrt 2) = 35.26 deg up
+  var HOME = { target: [0, -60, -40], azim: 3 * Math.PI / 4, elev: Math.atan(Math.SQRT1_2), dist: 820 };
   var nav = viewerNav({ view: view, canvas: renderer.domElement, camera: camera, scene: scene, draw: draw, home: HOME,
                         ok: function (p) { return !clipped || cutPlane.distanceToPoint(p) >= 0; } });
   [['left', 0.25, 0, 1], ['right', -0.25, 0, 1], ['up', 0, 0.15, 1], ['down', 0, -0.15, 1],
