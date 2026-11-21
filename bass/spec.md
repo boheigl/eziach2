@@ -9,9 +9,14 @@ mechanism. Markers as in `../discant/spec.md`: **[given]** stated by the user,
 The earlier case, `../../shape/OrderOnShape20260107/BassCase - Part BassCase.step`
 (converted to `ref/bass_case_example.stl` by `ref/convert.py`, for measuring only):
 
-- **Key arrangement:** two staggered rows, 20 mm pitch, the back row 16 mm behind and
-  10 mm to the side; caps 11 mm high in front, 21 mm at the back. Front row x = −80 … 80
-  at y = 0, back row x = −70 … 90 at y = 16. The example has 8 per row; **2 × 9**
+- **Key arrangement:** two staggered rows, 20 mm pitch, the back row 14 mm behind and
+  10 mm to the side [given 2026-11-21: 14, was the example's 16; the fingers' way as on
+  a real instrument: the example's caps sat 1.5 mm off their axes towards the other
+  row, 13 apart, which the new keys cannot do: a round pin turns, and the cap must
+  cover its skirt]; caps 11 mm high in front, 21 mm at the back. Front row x = −80 … 80
+  at y = 0, back row x = −70 … 90 at y = 14. The back row's spring shrouds (⌀10.2,
+  solid from the board up) stand 0.9 mm out of the step's face (y 9.8), 4.6 mm from
+  the front caps' edges. The example has 8 per row; **2 × 9**
   [given]: the front row's 9th sits where the example has a half-closed well (x = −80),
   the back row's at x = 90 [chosen].
 - **Hand plate:** the flat middle part of the plate the hand presses against, 263 × 171 mm
@@ -24,7 +29,7 @@ The earlier case, `../../shape/OrderOnShape20260107/BassCase - Part BassCase.ste
 
 The discant's Hall key (`../switch_hall/`, `key.scad` and spec): a ground stainless rod
 ⌀3 in a sintered bronze bushing in the cover's tube, the cap on top, a printed collar
-with the magnet (⌀3 × 1.5 N52) below, a stock stainless spring (Misumi C-UY8-25) round
+with the magnet (⌀3 × 1.5 N52) below, a stock stainless spring (Misumi UY8-25) round
 the tube, an O-ring as the bottom stop and a punched washer as the rest stop; the
 board's DRV5055 senses the magnet on the key's axis. The board lies flat under both
 rows, and the back row stands 10 mm higher on a 10 mm longer rod (dowel pin 3 × 24 instead of 3 × 14);

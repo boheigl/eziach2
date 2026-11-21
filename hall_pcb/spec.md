@@ -239,6 +239,10 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
     other nets in the way come out and those nets are joined up again (10 nets
     touched round U3). The rest of `build.sh`'s steps (schematic, fab files, DRC,
     viewer, board.scad) were then run on it by hand. 344 vias, none in a pad.
+  - **Bass with the rows 14 apart** [2026-11-21]: `build.sh bass` routed all nets in the
+    first try; one 0.1 mm stub of +3V3 removed after. 135 vias, 3 in thermal pads, none
+    in other pads; DRC: no unconnected items, no clearance errors or shorts (18 dangling
+    fan-out vias, silkscreen). Board 30 deep (32 before). Channels unchanged.
   - KiCad's DRC on both: no unconnected items, no clearance errors or shorts; left are
     silkscreen, dangling vias (fan-outs the net reached elsewhere) and a few dangling
     track stubs. Channels (`channels.json`) unchanged, so the firmware's table holds.
@@ -259,7 +263,8 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
 ## 6. Bass board [given: from the same description]
 
 - **Keys:** 2 × 9 as `../bass/layout.scad`: front row x = −80 … 80 at y = 0, back
-  row x = −70 … 90 at y = 16.
+  row x = −70 … 90 at y = 14 [given 2026-11-21, was 16]; the screws between the rows
+  10.6 from the three keys' axes (11.3 before).
 - **Flat, not tilted** [chosen]. The back row stands 10 mm higher; a board in
   that slope would be tilted 32°, and the collar would have to stop 1.4 mm
   earlier. Instead the board lies flat under both rows, and the back row's tubes

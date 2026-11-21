@@ -64,13 +64,13 @@ if BOARD == "discant":
     BUS_TITLE = "Bus to the ESP32 in the bass (through the bellows)"
 else:
     # --- bass: 2 x 9 keys, as ../bass/layout.scad: front row x = -80 .. 80 at y = 0,
-    # back row x = -70 .. 90 at y = 16 and 10 mm higher. The board is flat under both
+    # back row x = -70 .. 90 at y = 14 [given 2026-11-21, was 16] and 10 mm higher. The board is flat under both
     # rows [chosen]: the back row's tubes and pins are 10 mm longer, so the sensor sees
     # the same magnet travel and nothing is tilted.
-    STAIR = (10, 16, 0)
+    STAIR = (10, 14, 0)
     ROWS = 2
     N_HOLES = 9
-    D = 16.0
+    D = 14.0
     TAN = 0.0
     SENS_DY = 0.0
     def key_xy(k, h):
@@ -82,12 +82,12 @@ else:
     def x_right(y): return 80 + MARGIN_X + STAIR[0] * y / D
     # SCREWS on a regular grid, as the discant's: in the gap every GRID mm in the middle of
     # three keys [given 2026-11-15], two of the front row and the back row's key between
-    # them (TRI_Y up from the front row, 11.3 from each axis); a line in front of the front
+    # them (TRI_Y up from the front row, 10.6 from each axis); a line in front of the front
     # row and one behind the back row, half way between their keys (J1 sits between the
     # front keys at -80 and -60). The back line also carries the stored discant's sockets
     # (../bass/link.scad, at x -20 and 30). The ADCs stay on the gap's middle line.
     GRID = 40
-    TRI_Y = (D * D - (PITCH / 2) ** 2) / (2 * D)     # 4.88: the three keys' circumcentre
+    TRI_Y = (D * D - (PITCH / 2) ** 2) / (2 * D)     # 3.43: the three keys' circumcentre
     def _line(y, x0):
         return [(x0 + GRID * j, y) for j in range(-8, 9) if x_left(y) + 6 <= x0 + GRID * j <= x_right(y) - 6]
     HOLES = _line(-5.0, -50) + _line(TRI_Y, -70) + _line(D + 5.0, -40)

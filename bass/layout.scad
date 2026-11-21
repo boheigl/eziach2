@@ -5,7 +5,8 @@
 
 // --- keys: the example's arrangement
 pitch    = 20;
-rows_y   = [0, 16];              // front, back
+rows_y   = [0, 14];              // front, back [given 2026-11-21: 14, was 16; the fingers' way as on a real
+                                 //   instrument: the old BassCase's caps sat 1.5 off their axes towards each other]
 rows_x0  = [-80, -70];           // first key of each row; 9 per row [given: 2 x 9]: the
 n_row    = 9;                    //   example's 8 + 8, its half-closed front-left well and an added x = 90
 cap_top  = [11, 21];             // cap tops at rest: the example's short and tall keys
