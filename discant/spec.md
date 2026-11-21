@@ -114,6 +114,14 @@ z −19 (the old foot below, which held the old cover, left out): 0.2 mm rms, 0.
   is solid, so it overlaps the cover plate along its whole length.
 - **It follows the keys' tops** [given 2026-11-13]: the Hall keys' caps stand higher
   (`key.scad` `key_cap_top()`), so the bar moves up with them by `tb_dz`.
+- **7 mm under the caps** [given 2026-11-21]: the first row's cap tops stand 7.0 over the
+  bar's top along the keys' axis (`tb_above`; 5.1 as fitted above). The whole bar, profile
+  unchanged, sits 1.9 lower; its back still sits on the shelf. Its foot, which then reached
+  1.8 below the tray's underside (0.1 above it before), is cut flush with it (W = `w_b`,
+  in the slope's plane) [given 2026-11-21]. Only the gauge pad at the back reaches lower.
+  The foot's front edge is rounded, R2 (`tb_round`) [given 2026-11-21]: over its lowest
+  3 mm the bar's front stands back, 2.8 at the foot; above that the profile is unchanged. Played and stored it touches none of the bass's parts
+  (solid intersection, 2026-11-21).
 - **Never cut** [given 2026-11-14]: it keeps its whole profile over its whole length;
   the bass makes room for it (its box is longer, `../bass/layout.scad`).
 - Its back sits on the housing's shelf (§2); the tray and the board stay whole, the bar

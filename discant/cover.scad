@@ -49,8 +49,11 @@ wire_rec = 0.8;      // over the wire pads' solder joints
 tb_len = 21.7;  tb_angle = 86.1;  tb_r = 1.2;  tb_R = 20.6;   // thumb_profile()'s parameters
 tb_y   = -13.9; tb_z0 = -18.8;
 tb_fill  = -7.5 - 0.4;   // the bar's solid back: 0.4 in front of the caps (cap_d / 2), into the plate
-tb_cap0  = 8;        // the caps' top the bar was fitted to (row 0, z)
-tb_dz    = key_cap_top() - tb_cap0;   // the bar follows the caps up
+tb_cap0  = 8;        // the caps' top the bar was fitted to (row 0, z): its top 5.1 below them
+tb_above = 7;        // the caps' top over the bar's top, along the keys' axis [given 2026-11-21;
+                     //   5.1 as fitted]: the whole bar, profile unchanged, 1.9 lower
+tb_dz    = key_cap_top() - tb_above - (tb_z0 + tb_len);   // the bar follows the caps up
+tb_round = 2;        // the foot's front edge rounded [given 2026-11-21: "etwas"]
 
 $fa = 4; $fs = 0.4;
 
@@ -65,11 +68,27 @@ module below_top() on_slab() translate([-500, -500, -100]) cube([1000, 1000, 100
 // the bar along the whole front edge
 front = [for (p = hall_outline) p[1]][0];
 x_front = [hall_outline[0][0] - (fit + wall) * 1.2, hall_outline[1][0] + (fit + wall) * 1.2];
-module thumb_bar() difference() {
-    translate([x_front[0], 0, tb_dz]) rotate([90, 0, 90]) linear_extrude(x_front[1] - x_front[0]) {
-        translate([tb_y, tb_z0]) rotate(90 - tb_angle) thumb_profile(tb_len, tb_angle, tb_r, tb_R);
-        translate([tb_y - 0.01, tb_z0]) square([tb_fill - tb_y + 0.02, tb_len]);
+// The section, in the extrusion's plane (u, v) = (y, z - tb_dz). Its foot is cut flush with
+// the housing's underside (the tray's bottom, W = w_b, in the slope's plane) [given
+// 2026-11-21: lowered for tb_above it reached 1.8 below], and the edge there rounded by
+// tb_round; the rounding (an opening) acts only within 3 tb_round of the cut.
+module tb_raw() {
+    translate([tb_y, tb_z0]) rotate(90 - tb_angle) thumb_profile(tb_len, tb_angle, tb_r, tb_R);
+    translate([tb_y - 0.01, tb_z0]) square([tb_fill - tb_y + 0.02, tb_len]);
+}
+// W >= w_b + h0 .. up to w_b + h1, as a strip in (u, v): W = -u sin + (v + tb_dz - key_ztop) cos
+module tb_above_floor(h0, h1) let(s = sin(slab_t), c = cos(slab_t), o = [0, w_b / c - tb_dz + key_ztop],
+                                   d = [c, s], n = [-s, c])
+    polygon([o - 500 * d + h0 * n, o + 500 * d + h0 * n, o + 500 * d + h1 * n, o - 500 * d + h1 * n]);
+module tb_section() let(band = 3 * tb_round) {
+    intersection() { tb_raw(); tb_above_floor(band, 500); }
+    intersection() {
+        offset(r = tb_round) offset(delta = -tb_round) intersection() { tb_raw(); tb_above_floor(0, 500); }
+        tb_above_floor(0, band + 0.01);
     }
+}
+module thumb_bar() difference() {
+    translate([x_front[0], 0, tb_dz]) rotate([90, 0, 90]) linear_extrude(x_front[1] - x_front[0]) tb_section();
     // the tray and the board stay whole: the bar ends at their front face, and sits on the
     // tray's shelf (hall.scad), with nothing under it
     slab_solid(-50, 0, fit + wall);
