@@ -8,13 +8,7 @@ gauge pad facing the bass's hand plate.
 
 `make` builds the discant and the bass first, then the discant's parts moved
 (`../build/assembly/d_*.stl`), light keys for all 64 (stem, felt, cap; the full
-buttons are on the two sides' own pages), and the phone page `phone.html`. Its
-"Key spacing" button [given 2026-11-21] draws the distances between neighbouring keys'
-cap tops, each run along the bass's x, y or z: `assembly.scad` (part `key_marks`) puts a
-small cube on every cap top's middle, the discant's moved as played, and `key_dims.py`
-measures between them (bass 20 / 10 / 14 / rise 10; discant 20 / 10 / 16.28, its rows
-level when played), and from two marks on a cap's rim its diameter (⌀15). They follow
-the model, nothing is typed in by hand.
+buttons are on the two sides' own pages), and the phone page `phone.html`.
 
 Checked by solid intersection (`../bass/spec.md` §4): the whole discant, mated,
 touches none of the bass's parts.

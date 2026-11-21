@@ -30,14 +30,9 @@ PHONE_PARTS := B_CASE=$(BB)/case.stl B_LID=$(BB)/back_cover.stl B_CSCREW=$(BB)/c
                KEYS_B=$(B)/keys_bass.stl KEYS_D=$(B)/keys_discant.stl
 BASS_STL := $(addprefix $(BB)/,case.stl back_cover.stl cover_screws.stl battery.stl cover.stl boards.stl connectors.stl elec.stl wires.stl strap.stl latch_rod.stl contact_pins.stl)
 $(BASS_STL): parts ;
-# the keys' spacings: a mark on every cap top, key_dims.py measures between them
-$(B)/key_marks.stl: assembly.scad ../bass/link.scad ../bass/layout.scad | parts
-	@mkdir -p $(B) && echo "  OPENSCAD $@" && $(OPENSCAD) -q -o $@ -D 'part="key_marks"' $<
-$(B)/key_dims.json: key_dims.py $(B)/key_marks.stl
-	@echo "  DIMS     $@" && $(PYTHON) key_dims.py $(B)/key_marks.stl $@ > /dev/null
-$(B)/phone.html: phone.html ../discant/embed_parts.py ../discant/viewer_nav.js $(PIECES) $(BASS_STL) $(B)/key_dims.json
+$(B)/phone.html: phone.html ../discant/embed_parts.py ../discant/viewer_nav.js $(PIECES) $(BASS_STL)
 	@echo "  EMBED    $@"
-	@$(PYTHON) ../discant/embed_parts.py $< $@ --data DIMS=$(B)/key_dims.json $(PHONE_PARTS)
+	@$(PYTHON) ../discant/embed_parts.py $< $@ $(PHONE_PARTS)
 
 promo: $(PIECES) $(BASS_STL) $(BB)/discant_link.stl video/promo.py video/promo.scad video/frames.scad
 	$(PYTHON) video/promo.py $(B)/eziach_promo.webm

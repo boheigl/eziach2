@@ -24,7 +24,7 @@ D = "../build/discant/";
 // (cap top at top over the board's middle, skirt sl long)
 module key(top, sl) {
     $fn = 24;
-    translate([0, 0, top - 2]) cylinder(d = cap_d, h = 2);
+    translate([0, 0, top - 2]) cylinder(d = 15, h = 2);
     translate([0, 0, top - 2 - sl]) difference() { cylinder(d = 12.4, h = sl); translate([0, 0, -1]) cylinder(d = 10.8, h = sl + 2); }
     translate([0, 0, top - 12]) cylinder(d = 3.6, h = 10);
 }
@@ -46,15 +46,6 @@ if (part == "d_parts")   to_bass() import(str(D, "board_parts.stl"));
 if (part == "d_cables")  to_bass() import(str(D, "gauge_link.stl"));  // gauges, link board, wires
 if (part == "keys_discant") to_bass() keys_discant();
 if (part == "keys_bass") keys_bass();
-// key_dims.py: a small cube on every cap top's middle, the discant's moved as played,
-// and a larger one on each side of the cap's rim along x, for its diameter; it finds
-// them and writes the spacings along x, y and z for the page
-cap_d = 15;          // ../switch_hall/key.scad cap_d
-module mark() { cube(0.4, center = true); for (s = [-1, 1]) translate([s * cap_d / 2, 0, 0]) cube(0.8, center = true); }
-if (part == "key_marks") {
-    for (k = [0, 1], i = [0 : n_row - 1]) translate(at_key(k, i) + [0, 0, b_cap_top + k * key_riser]) mark();
-    to_bass() for (k = [0 : 3], i = [0 : 12 - k]) translate([-120 + 20 * i + 10 * k, 16 * k, 3 * k + d_cap_top]) mark();
-}
 // for the clash checks: the whole discant, played and stored
 if (part == "d_played") to_bass() { d_all(); keys_discant(); }
 if (part == "store_discant") to_store() { d_all(); keys_discant(); }

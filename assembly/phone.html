@@ -68,7 +68,6 @@
     <button type="button" class="tog" data-part="keys" aria-pressed="true">Keys</button>
     <button type="button" class="tog" data-part="cables" aria-pressed="true">Cables, strap, gauges</button>
     <button type="button" id="packed" aria-pressed="false">Stored</button>
-    <button type="button" class="tog" data-part="dims" aria-pressed="true">Key spacing</button>
   </div>
   <div class="row" aria-label="View">
     <button type="button" id="left" aria-label="Turn left">◀</button>
@@ -79,7 +78,7 @@
     <button type="button" id="zout" aria-label="Zoom out">－</button>
     <button type="button" id="reset">Reset view</button>
   </div>
-  <p class="note">In the view: turn with one finger, zoom or move with two (mouse: drag, right-drag or Shift-drag, wheel); double-tap (double-click) a surface to make that point the centre of turning and zooming. Scroll the page outside the view. The arrow and ＋/－ buttons work too; Reset view goes back to the start. The bass on top, a closed box with its battery inside; the discant turned and behind it below: the gauges' plates sit in the discant's outer holders and the bass's inner holders, pointing along the bass's y. Both halves carry one Hall-sensor board each; the keys are drawn simply (cap, skirt, pin; no springs). Press all keys moves all 64 by 3 mm and back, Hold down keeps them down; the discant's move along their own axis, tilted with the slope. Key spacing shows the distances between neighbouring keys' cap tops (their middles), each along x, y or z: on the bass the pitch in a row, the back row's offset along the row, the rows' distance (14) and the back row's 10 mm rise; on the discant, whose rows lie level when played, the pitch, the offset and the rows' distance in that plane (16.28); on both the caps' diameter. Stored shows them for carrying: the discant turned and plugged into the short socket under the bass's deck, tilted by its slope so that its keys lie flat against the bass's box, which covers all but the outer ones: 271 × 38 × 158 mm. The thumb bar stays whole, the bass's box is long enough for it to slide past the mount. All parts come from the OpenSCAD build (switch_hall/, hall_pcb/, discant/, bass/, assembly/).</p>
+  <p class="note">In the view: turn with one finger, zoom or move with two (mouse: drag, right-drag or Shift-drag, wheel); double-tap (double-click) a surface to make that point the centre of turning and zooming. Scroll the page outside the view. The arrow and ＋/－ buttons work too; Reset view goes back to the start. The bass on top, a closed box with its battery inside; the discant turned and behind it below: the gauges' plates sit in the discant's outer holders and the bass's inner holders, pointing along the bass's y. Both halves carry one Hall-sensor board each; the keys are drawn simply (cap, skirt, pin; no springs). Press all keys moves all 64 by 3 mm and back, Hold down keeps them down; the discant's move along their own axis, tilted with the slope. Stored shows them for carrying: the discant turned and plugged into the short socket under the bass's deck, tilted by its slope so that its keys lie flat against the bass's box, which covers all but the outer ones: 271 × 38 × 158 mm. The thumb bar stays whole, the bass's box is long enough for it to slide past the mount. All parts come from the OpenSCAD build (switch_hall/, hall_pcb/, discant/, bass/, assembly/).</p>
 </main>
 
 <!-- parts: filled in by embed_parts.py -->
@@ -93,9 +92,6 @@
 
   var STROKE = 3;                                               // ../switch_hall/key.scad
   var SLOPE = Math.atan(3 / 16), keysB = null, keysD = null;   // the discant's tilt; the two key sets
-  // the keys' spacings along x, y and z, from one cap top's middle to its neighbours'
-  // (key_dims.py: [{a, b, t}] in the bass's frame)
-  var DIMS = /*DIMS*/[];
 
   var view = document.getElementById('view');
   var renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'low-power' });
@@ -163,38 +159,9 @@
     ['bass cover', function () { grp('bcover').add(mesh('B_COVER', 0x5b6f86)); }],
     ['discant cover', function () { grp('dcover').add(mesh('D_COVER', 0x5b6f86)); }],
     ['keys', function () { keysB = mesh('KEYS_B', 0x4a6fa5); keysD = mesh('KEYS_D', 0x4a6fa5); grp('keys').add(keysB, keysD); }],
-    ['key spacing', function () { keyDims(grp('dims')); }],
     ['cables and gauges', function () { grp('cables').add(mesh('D_CABLES', 0xd8c08a), mesh('B_WIRES', 0xd8c08a), mesh('B_STRAP', 0x6b4a32), mesh('B_ROD', 0xb8bcc2)); }]
   ];
   scene.add(buttonGrp);
-
-  // each run of DIMS: a line with end ticks and its length on a label, drawn over the parts
-  // (no depth test) so that keys and cases do not hide it; part (x, y, z) -> world (x, z, -y)
-  function W(p) { return new THREE.Vector3(p[0], p[2], -p[1]); }
-  function label(t) {
-    var c = document.createElement('canvas'), g = c.getContext('2d'), h = 64;
-    g.font = '600 44px ui-monospace, monospace';
-    var w = Math.ceil(g.measureText(t).width) + 28; c.width = w; c.height = h;
-    g.fillStyle = 'rgba(255,255,255,0.9)'; g.fillRect(0, 0, w, h);
-    g.strokeStyle = '#a3321f'; g.lineWidth = 4; g.strokeRect(2, 2, w - 4, h - 4);
-    g.font = '600 44px ui-monospace, monospace'; g.fillStyle = '#a3321f'; g.textBaseline = 'middle'; g.fillText(t, 14, h / 2 + 2);
-    // the same size on the screen at any zoom: 3.5 % of the view's height
-    var s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true, sizeAttenuation: false }));
-    s.scale.set(0.035 * w / h, 0.035, 1); s.renderOrder = 11;
-    return s;
-  }
-  function keyDims(into) {
-    var mat = new THREE.LineBasicMaterial({ color: 0xa3321f, depthTest: false }), pts = [];
-    DIMS.forEach(function (d) {
-      var n = d.s;                                                  // ticks across it, the label to that side
-      var a = W(d.a), b = W(d.b), t = W(n).multiplyScalar(1.5);
-      pts.push(a, b, a.clone().sub(t), a.clone().add(t), b.clone().sub(t), b.clone().add(t));
-      var s = label(d.t); s.position.copy(a).add(b).multiplyScalar(0.5).add(W(n).multiplyScalar(5));
-      into.add(s);
-    });
-    var l = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), mat); l.renderOrder = 10;
-    into.add(l);
-  }
 
   function size() {
     var r = view.getBoundingClientRect();
@@ -206,7 +173,9 @@
   window.addEventListener('resize', function () { size(); draw(); });
 
   // turning, zooming, moving, the centre by double tap: ../discant/viewer_nav.js
-  var HOME = { target: [0, -60, -40], azim: -0.95, elev: 0.4, dist: 820 };
+  // the start view from -x, -y, +z (the bass's frame; the page's world is (x, z, -y)): an
+  // isometric corner view, 45 deg round and atan(1/sqrt 2) = 35.26 deg up
+  var HOME = { target: [0, -60, -40], azim: -Math.PI / 4, elev: Math.atan(Math.SQRT1_2), dist: 820 };
   var nav = viewerNav({ view: view, canvas: renderer.domElement, camera: camera, scene: scene, draw: draw, home: HOME,
                         ok: function (p) { return !clipped || cutPlane.distanceToPoint(p) >= 0; } });
   [['left', 0.25, 0, 1], ['right', -0.25, 0, 1], ['up', 0, 0.15, 1], ['down', 0, -0.15, 1],
