@@ -177,7 +177,7 @@ z −19 (the old foot below, which held the old cover, left out): 0.2 mm rms, 0.
    Print the test piece first (Printing): `make bambu` writes `holder_test_x2d.3mf`,
    one gauge's corner of the housing standing as in the whole print (outer holder with
    its slot, dowel pin holes, the stop's tongue, cut level in the pad), 47 × 11 × 30 mm,
-   about 31 min and 6.6 g [Bambu Studio's estimate]. The bought plate should slide in to
+   about 30 min and 6.0 g [Bambu Studio 02.09.01.70, 2026-11-22]. The bought plate should slide in to
    the pad with no play to feel and no force; the pin then goes through.
 2. **Thumb bar lobes:** supports when printing the cover (§3.2) [unverified].
 3. **Standing print's stability** (below) [unverified]: 101 mm tall on a narrow edge.

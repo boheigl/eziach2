@@ -51,7 +51,7 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
 
 15. Plate fits: 0.15 mm in the discant housing, and the inner holders in the large
     bass print. Print the discant's test piece first (`discant/`: `make bambu`,
-    `holder_test_x2d.3mf`, about 31 min).
+    `holder_test_x2d.3mf`, about 30 min, 6 g; sliced again 2026-11-22).
 16. Stiffness of the PETG inner holders: if they yield, the calibration shifts.
 17. Latches: root strain (1.1–1.3 %, estimated) and the stored hold (about 15 N,
     estimated).

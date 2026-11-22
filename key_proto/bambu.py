@@ -2,9 +2,14 @@
 """Turns plate.3mf and fit_test.3mf into Bambu Studio projects for the Bambu Lab X2D in
 PETG, sliced, so they open without the "not from Bambu Lab" note and print as they are.
 
-    python3 bambu.py APPIMAGE BUILD_DIR [NAME ...]
+    python3 bambu.py BAMBU BUILD_DIR [NAME ...]
 
-Takes the system profiles out of the Bambu Studio AppImage (its profiles inherit from one
+BAMBU is the Bambu Studio AppImage, or "flatpak" for the Flathub app com.bambulab.BambuStudio
+[2026-11-22: the AppImage wants ffmpeg 7 and WebKitGTK, which Ubuntu 24.04 lacks]. The
+Flatpak's bambu-studio is run directly with its runtime's loader and libraries, not through
+`flatpak run`, which needs user namespaces and a D-Bus session (both missing in containers).
+
+Takes the system profiles out of Bambu Studio (its profiles inherit from one
 another; the command line wants them whole), lays the spec's settings over the process
 (spec.md, Printing), and has Bambu Studio's command line load each 3MF, keep its layout,
 slice it and save it as a project: BUILD_DIR/<NAME>_x2d.3mf for each BUILD_DIR/<NAME>.3mf
@@ -13,7 +18,7 @@ slice it and save it as a project: BUILD_DIR/<NAME>_x2d.3mf for each BUILD_DIR/<
 The command line leaves the plate's printer_model_id empty (the G-code itself names the
 X2D); pressing "Slice plate" in Bambu Studio before sending fills it, as for any project.
 """
-import glob, json, os, subprocess, sys
+import glob, json, os, re, subprocess, sys
 
 MACHINE  = "Bambu Lab X2D 0.4 nozzle"
 PROCESS  = "0.20mm Standard @BBL X2D"
@@ -53,12 +58,31 @@ def flat(idx, name):
     return out
 
 
-def main(appimage, build, names=("plate", "fit_test")):
+def flatpak_files(ref):
+    loc = subprocess.run(["flatpak", "info", "--show-location", ref], capture_output=True, text=True, check=True)
+    return os.path.join(loc.stdout.strip(), "files")
+
+
+def studio(bambu, work):
+    """The command that runs Bambu Studio, and its BBL profiles' folder."""
+    if bambu == "flatpak":
+        app = flatpak_files("com.bambulab.BambuStudio")
+        meta = open(os.path.join(os.path.dirname(app), "metadata")).read()
+        runtime = flatpak_files(re.search(r"^runtime=(.*)/(.*)/(.*)$", meta, re.M).expand(r"\1//\3"))
+        libs = ":".join(os.path.join(d, s) for d in (app, runtime) for s in ("lib", "lib/x86_64-linux-gnu"))
+        loader = os.path.join(runtime, "lib", "x86_64-linux-gnu", "ld-linux-x86-64.so.2")
+        return [loader, "--library-path", libs, os.path.join(app, "bin", "bambu-studio")], \
+            os.path.join(app, "share", "BambuStudio", "profiles", "BBL")
+    subprocess.run([bambu, "--appimage-extract", "resources/profiles/BBL/*"], cwd=work,
+                   check=True, stdout=subprocess.DEVNULL)
+    return [bambu], os.path.join(work, "squashfs-root", "resources", "profiles", "BBL")
+
+
+def main(bambu, build, names=("plate", "fit_test")):
     work = os.path.join(build, ".bambu")          # the extracted profiles and the whole presets
     os.makedirs(work, exist_ok=True)
-    subprocess.run([appimage, "--appimage-extract", "resources/profiles/BBL/*"], cwd=work,
-                   check=True, stdout=subprocess.DEVNULL)
-    idx = profiles(os.path.join(work, "squashfs-root", "resources", "profiles", "BBL"))
+    run, bbl = studio(bambu, work)
+    idx = profiles(bbl)
 
     machine = flat(idx, MACHINE)
     process = flat(idx, PROCESS)
@@ -78,7 +102,7 @@ def main(appimage, build, names=("plate", "fit_test")):
         json.dump(p, open(paths[key], "w"), indent=1)
 
     for src, dst in ((n + ".3mf", n + "_x2d.3mf") for n in names):
-        cmd = [appimage, "--debug", "2",
+        cmd = run + ["--debug", "2",
                "--load-settings", paths["machine"] + ";" + paths["process"],
                "--load-filaments", paths["filament"],
                "--arrange", "0", "--orient", "0",
@@ -93,5 +117,5 @@ def main(appimage, build, names=("plate", "fit_test")):
 
 
 if __name__ == "__main__":
-    main(os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2] if len(sys.argv) > 2 else "../build/key_proto"),
+    main(sys.argv[1] if sys.argv[1] == "flatpak" else os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2] if len(sys.argv) > 2 else "../build/key_proto"),
          sys.argv[3:] or ("plate", "fit_test"))

@@ -44,8 +44,9 @@ key:
 clean:
 	rm -rf $(B)
 
-# Bambu Studio projects for the X2D in PETG, sliced (bambu.py; needs the AppImage, not part of all)
-BAMBU ?= $(HOME)/Applications/BambuStudio.AppImage
+# Bambu Studio projects for the X2D in PETG, sliced (bambu.py; needs Bambu Studio: the AppImage or the Flathub app; not part of all)
+# the AppImage if there is one, else the Flathub app (bambu.py)
+BAMBU ?= $(if $(wildcard $(HOME)/Applications/BambuStudio.AppImage),$(HOME)/Applications/BambuStudio.AppImage,flatpak)
 bambu: $(B)/plate_x2d.3mf
 $(B)/plate_x2d.3mf: bambu.py $(B)/plate.3mf
 	@python3 bambu.py $(BAMBU) $(B)
