@@ -140,10 +140,13 @@ for c in d.C:
     connect(f, c); placed[c["ref"]] = f
 
 # --- outline, screw holes, rules ------------------------------------------------
-o = d.OUTLINE
-for i in range(len(o)):
-    s = pcbnew.PCB_SHAPE(b); s.SetShape(pcbnew.SHAPE_T_SEGMENT)
-    s.SetStart(P(*o[i])); s.SetEnd(P(*o[(i + 1) % len(o)])); s.SetLayer(pcbnew.Edge_Cuts); s.SetWidth(mm(0.1)); b.Add(s)
+for e in d.outline_path():     # lines, and arcs at the corners (d.CORNER_R)
+    s = pcbnew.PCB_SHAPE(b)
+    if e[0] == "line":
+        s.SetShape(pcbnew.SHAPE_T_SEGMENT); s.SetStart(P(*e[1])); s.SetEnd(P(*e[2]))
+    else:
+        s.SetShape(pcbnew.SHAPE_T_ARC); s.SetArcGeometry(P(*e[1]), P(*e[2]), P(*e[3]))
+    s.SetLayer(pcbnew.Edge_Cuts); s.SetWidth(mm(0.1)); b.Add(s)
 for x, y in d.HOLES:
     s = pcbnew.PCB_SHAPE(b); s.SetShape(pcbnew.SHAPE_T_CIRCLE)
     s.SetCenter(P(x, y)); s.SetEnd(P(x + d.HOLE_D / 2, y)); s.SetLayer(pcbnew.Edge_Cuts); s.SetWidth(mm(0.1)); b.Add(s)

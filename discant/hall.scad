@@ -55,13 +55,22 @@ slab_back = hall_outline[2][1] + case_rim;   // the back face (Y)
 // nothing under the ledge). Part of the housing between w0 and w1 (slab frame).
 shelf_d = 2.5;
 shelf_t = 1.6;
-module front_shelf(w0, w1) let(f = hall_outline[0][1] - case_rim, x0 = hall_outline[0][0] + 3, x1 = hall_outline[1][0] - 3)
+// the board's shape: hall_outline with its corners rounded by hall_corner_r (arcs tangent to
+// both edges, as the routed board's Edge.Cuts; ../hall_pcb/design.py CORNER_R) [2026-11-21]
+module hall_shape2d() offset(r = hall_corner_r, $fn = 64) offset(delta = -hall_corner_r) polygon(hall_outline);
+// how far from corner i its rounding reaches along the edges
+function hall_corner_t(i) = let(n = len(hall_outline), p = hall_outline[i], a = hall_outline[(i + n - 1) % n],
+    b = hall_outline[(i + 1) % n], u = (a - p) / norm(a - p), v = (b - p) / norm(b - p))
+    hall_corner_r / tan(acos(u * v) / 2);
+// the shelf ends 1 past the front corners' rounding (3 in from the corners before)
+module front_shelf(w0, w1) let(f = hall_outline[0][1] - case_rim, x0 = hall_outline[0][0] + max(3, hall_corner_t(0) + 1),
+                               x1 = hall_outline[1][0] - max(3, hall_corner_t(1) + 1))
     on_slab() translate([x0, f - shelf_d, w0]) cube([x1 - x0, shelf_d + 0.5, w1 - w0]);
 
 // the board: laminate with its holes, and the parts' bodies on the underside
 module hall_board() on_slab() {
     color("SeaGreen") translate([0, 0, -hall_t]) linear_extrude(hall_t) difference() {
-        polygon(hall_outline);
+        hall_shape2d();
         for (h = hall_holes) translate(h) circle(d = hall_hole_d, $fn = 24);
     }
     color("DimGray") hall_bodies(0);

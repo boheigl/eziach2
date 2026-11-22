@@ -10,7 +10,7 @@ include <hall.scad>
 part = "all";
 
 if (part == "board" || part == "all") on_slab() translate([0, 0, -hall_t]) linear_extrude(hall_t) difference() {
-    polygon(hall_outline);
+    hall_shape2d();
     for (h = hall_holes) translate(h) circle(d = hall_hole_d, $fn = 24);
 }
 if (part == "parts" || part == "all") on_slab() hall_bodies(0);

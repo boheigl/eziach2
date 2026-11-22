@@ -97,6 +97,36 @@ else:
 
 OUTLINE = [(x_left(Y_FRONT), Y_FRONT), (x_right(Y_FRONT), Y_FRONT),
            (x_right(Y_BACK), Y_BACK), (x_left(Y_BACK), Y_BACK)]
+# the outline's corners rounded [given 2026-11-21: as the bass's case, R 4]: the discant's
+# housing and cover follow the board at 0.3 + 1.2, so its corners are the board's, grown;
+# the bass's board lies inside a wider deck (CORNER_R 0)
+CORNER_R = 4.0 if BOARD == "discant" else 0.0
+
+
+def outline_path():
+    """the outline as ("line", a, b) and ("arc", start, mid, end), corners rounded by
+    CORNER_R (an arc tangent to both edges), board frame"""
+    import math
+    o, n, out, cut = OUTLINE, len(OUTLINE), [], []
+    for i in range(n):
+        p, a, b = o[i], o[i - 1], o[(i + 1) % n]
+        u = ((a[0] - p[0]), (a[1] - p[1])); v = ((b[0] - p[0]), (b[1] - p[1]))
+        lu, lv = math.hypot(*u), math.hypot(*v); u = (u[0] / lu, u[1] / lu); v = (v[0] / lv, v[1] / lv)
+        ang = math.acos(max(-1, min(1, u[0] * v[0] + u[1] * v[1])))
+        if CORNER_R <= 0:
+            cut.append((p, p, p)); continue
+        t = CORNER_R / math.tan(ang / 2)                       # tangent points from the corner
+        s0 = (p[0] + u[0] * t, p[1] + u[1] * t); s1 = (p[0] + v[0] * t, p[1] + v[1] * t)
+        bis = (u[0] + v[0], u[1] + v[1]); lb = math.hypot(*bis); bis = (bis[0] / lb, bis[1] / lb)
+        c = CORNER_R / math.sin(ang / 2)                       # corner to the arc's centre
+        ctr = (p[0] + bis[0] * c, p[1] + bis[1] * c)
+        mid = (ctr[0] - bis[0] * CORNER_R, ctr[1] - bis[1] * CORNER_R)
+        cut.append((s0, mid, s1))
+    for i in range(n):
+        if CORNER_R > 0:
+            out.append(("arc", cut[i][0], cut[i][1], cut[i][2]))
+        out.append(("line", cut[i][2], cut[(i + 1) % n][0]))
+    return out
 
 # --- parts --------------------------------------------------------------------
 C = []
