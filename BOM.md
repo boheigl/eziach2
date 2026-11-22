@@ -22,10 +22,11 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 
 | Part | Count | |
 |---|---|---|
-| Housing (with the outer holders and the contacts' boss), cover | 1 + 1 | printed |
+| Housing (with the outer holders, the contacts' boss and the shoulder strap's bridges), cover | 1 + 1 | printed |
 | Countersunk screw M2 × 6, **brass**, DIN 965 CuZn | 27 | cover through the board into the housing |
 | Hall board, discant (assembled) | 1 | `hall_pcb/discant` |
 | Pad board | 1 | half of the contacts' panel, `contact_pcb` |
+| Shoulder strap for the right shoulder, ending in two leather tabs 20 × 2–2.5 mm with buckles | 1 | [assumed]; the tabs go round the housing's bridges, `discant/spec.md` §2 |
 
 ## Gauges: 2 — `strain_gauge/spec.md`
 

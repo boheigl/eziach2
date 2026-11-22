@@ -67,8 +67,22 @@ the cover's tube, cap on top, the magnet's collar below, spring round the tube.
   the plate and round its edge (`cover_gap` in `housing.scad`) [given 2026-11-21: 0.01 and 0
   before]. Checked by moving the housing 0.05 against the cover in all six directions: the
   plate on the rim is the only contact left.
-- **Size** (built STL, discant frame): x −135.6 … 135.6, y −11.3 … 88.4 including the
-  gauge holders.
+- **Shoulder strap's bridges** [given 2026-11-22: a strap for the right shoulder, on the
+  discant, on the housing's back near both ends of the rows; slots as on the bass do not
+  fit]: the floor is 1.2 thick with 1.65 under the board, so no strap passes inside the
+  tray; at the thumb bar's ends the first row's last caps stand right behind it. So on the
+  tray's underside (the side to the body) a bridge near each end: a bar 12 wide (along the
+  rows) and 2.5 thick on two posts, standing 5.5 out of the underside, the tunnel under it
+  22 × 3 along the rows for the strap's tab [assumed: leather 20 × 2–2.5, through the
+  tunnel, round the bar and back onto itself, buckled]; the bar's edges rounded R 1 where
+  the tab goes round. They sit as far out as the slanted sides allow (2.5 in), X ±100.2 …
+  112.2, Y −8 … 24.5 (`strap_bridges()` in `housing.scad`). Printed standing (Printing),
+  the bar grows up along Y; the lower post is a 45° wedge, the tunnel's roof a 3 mm bridge.
+  Bar at 100 N on a tab [estimate, as the bass's strap]: about 22 MPa (beam fixed at both
+  posts, PETG). Played, they face the body, clear of the bass; stored, they are the
+  package's back, 2.6 behind the deck's back face (§ `../assembly/spec.md`, Stored).
+- **Size** (built STL, discant frame): x −131.3 … 131.3, y −11.3 … 87.6 including the
+  gauge holders, z −9.5 (the strap's bridges) … 20.5.
 
 ## 3. Cover and mounting [given 2026-11-13: variant A, one flat plate on the tilted board]
 
@@ -197,7 +211,7 @@ rebuilding only what changed; it first has `../switch_hall/` build the key's par
 | File | Content |
 |---|---|
 | `hall.scad` | the board in the discant's frame (slab frame, `on_slab()`), the tray's dimensions and the thumb bar's shelf; shared by all parts here |
-| `housing.scad`, `housing.stl` | the tray under the board: floor, rim, ledge and bosses, the shelf, the gauge pad with the outer holders and the wires' channels |
+| `housing.scad`, `housing.stl` | the tray under the board: floor, rim, ledge and bosses, the shelf, the gauge pad with the outer holders and the wires' channels, the shoulder strap's bridges |
 | `cover.scad`, `cover.stl` | the cover plate with the 46 keys' tubes and shrouds, the screw countersinks, the pads' recess and the thumb bar (§3.2) |
 | `board.scad`, `board.stl`, `board_parts.stl` | the board's laminate with its holes, and the parts' bodies on its underside |
 | `keys.scad`, `keys.stl`, `keys_down.stl` | the 46 keys in place, at rest and pressed (springs left out) |
