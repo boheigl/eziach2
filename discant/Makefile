@@ -33,7 +33,7 @@ $(BODY_STL): $(B)/%.stl: %.scad
 # holders are part of the housing
 GAUGE_STL := $(addprefix ../build/strain_gauge/,outer_holder.stl inner_holder.stl strain_gauge_plate.stl)
 $(B)/gauge_link.stl $(B)/housing.stl: $(GAUGE_STL)
-$(GAUGE_STL): gauge ;
+$(GAUGE_STL) ../build/strain_gauge/inner_holder_detent.stl: gauge ;
 gauge:
 	@$(MAKE) --no-print-directory -C ../strain_gauge
 
@@ -68,7 +68,12 @@ $(B)/phone.html: phone.html embed_parts.py viewer_nav.js $(BODY_STL) $(B)/board.
 # needs Bambu Studio: the AppImage or the Flathub app; not part of all)
 $(B)/print_holder_test.stl: print.scad $(B)/housing.stl
 	$(call scad,$<,-D 'part="holder_test"')
-$(B)/holder_test.3mf: plate.py ../key_proto/plate.py $(B)/print_holder_test.stl
+# the bass's inner holders with their latches, the lock and the detent [2026-11-22]
+$(B)/print_inner_lock.stl: print.scad $(GAUGE_STL)
+	$(call scad,$<,-D 'part="inner_lock"')
+$(B)/print_inner_detent.stl: print.scad $(GAUGE_STL) ../build/strain_gauge/inner_holder_detent.stl
+	$(call scad,$<,-D 'part="inner_detent"')
+$(B)/holder_test.3mf: plate.py ../key_proto/plate.py $(B)/print_holder_test.stl $(B)/print_inner_lock.stl $(B)/print_inner_detent.stl
 	@echo "  PLATE    $@" && $(PYTHON) plate.py $(B)
 # the AppImage if there is one, else the Flathub app (bambu.py)
 BAMBU ?= $(if $(wildcard $(HOME)/Applications/BambuStudio.AppImage),$(HOME)/Applications/BambuStudio.AppImage,flatpak)

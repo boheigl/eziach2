@@ -177,8 +177,14 @@ z −19 (the old foot below, which held the old cover, left out): 0.2 mm rms, 0.
    Print the test piece first (Printing): `make bambu` writes `holder_test_x2d.3mf`,
    one gauge's corner of the housing standing as in the whole print (outer holder with
    its slot, dowel pin holes, the stop's tongue, cut level in the pad), 47 × 11 × 30 mm,
-   about 30 min and 6.0 g [Bambu Studio 02.09.01.70, 2026-11-22]. The bought plate should slide in to
-   the pad with no play to feel and no force; the pin then goes through.
+   and beside it the bass's two inner holders with their latches [given 2026-11-22], the
+   lock (playing) and the detent (stored), each 23 × 15 × 21 mm standing on its bridge as in
+   the bass's print; all three about 46 min and 15.2 g [Bambu Studio 02.09.01.70,
+   2026-11-22]. The bought plate should slide in to the pad with no play to feel and no
+   force; the pin then goes through. Its W slides into each inner holder from above until
+   the tongues click into the inner slots; the lock then holds against a pull, the detent
+   lets go to a firm pull (about 15 N for all four tongues [estimated], so about 7 N for
+   one holder with its two).
 2. **Thumb bar lobes:** supports when printing the cover (§3.2) [unverified].
 3. **Standing print's stability** (below) [unverified]: 101 mm tall on a narrow edge.
 
