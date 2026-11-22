@@ -62,6 +62,21 @@ module hall_shape2d() offset(r = hall_corner_r, $fn = 64) offset(delta = -hall_c
 function hall_corner_t(i) = let(n = len(hall_outline), p = hall_outline[i], a = hall_outline[(i + n - 1) % n],
     b = hall_outline[(i + 1) % n], u = (a - p) / norm(a - p), v = (b - p) / norm(b - p))
     hall_corner_r / tan(acos(u * v) / 2);
+// the centre of corner i's rounding (the same for the board's shape grown by any g)
+function hall_corner_c(i) = let(n = len(hall_outline), p = hall_outline[i], a = hall_outline[(i + n - 1) % n],
+    b = hall_outline[(i + 1) % n], u = (a - p) / norm(a - p), v = (b - p) / norm(b - p))
+    p + (u + v) / norm(u + v) * hall_corner_r / sin(acos(u * v) / 2);
+// THE CASE'S OUTER SHAPE: the board's shape grown by g, and for the outer faces (g >= case_rim)
+// its two front corners filled out under their rounding's widest point, square to the front
+// edge: the thumb bar's ends (cover.scad) stand there, in line with the case's sides, so case
+// and bar make one rounding in plan, R hall_corner_r + case_rim, from the side round to the
+// bar's front [given 2026-11-22]
+case_x_max = [for (i = [0, 1]) hall_corner_c(i)[0] + (2 * i - 1) * (hall_corner_r + case_rim)];   // the case's sides
+module case_shape2d(g) {
+    offset(delta = g) hall_shape2d();
+    if (g >= case_rim) for (i = [0, 1]) let(c = hall_corner_c(i), r = hall_corner_r + g, y0 = hall_outline[i][1] - g)
+        translate([i == 0 ? c[0] - r : c[0], y0]) square([r, c[1] - y0]);
+}
 // the shelf ends 1 past the front corners' rounding (3 in from the corners before)
 module front_shelf(w0, w1) let(f = hall_outline[0][1] - case_rim, x0 = hall_outline[0][0] + max(3, hall_corner_t(0) + 1),
                                x1 = hall_outline[1][0] - max(3, hall_corner_t(1) + 1))

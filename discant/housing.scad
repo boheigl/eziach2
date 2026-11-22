@@ -40,7 +40,7 @@ $fa = 4; $fs = 0.4;
 echo(str("tray: floor top W = ", w_ft, ", bottom W = ", w_b, " (", -w_b, " below the board's top); rim ", wall,
          " round the board, ", fit, " clear"));
 
-module outline2d(g) offset(delta = g) hall_shape2d();   // the board's shape, grown (its corners rounded)
+module outline2d(g) case_shape2d(g);   // the board's shape, grown (its corners rounded; hall.scad)
 module slab_solid(w0, w1, g) on_slab() translate([0, 0, w0]) linear_extrude(w1 - w0) outline2d(g);
 module below_top() on_slab() translate([-500, -500, -100]) cube([1000, 1000, 100]);   // W < 0
 

@@ -57,7 +57,8 @@ tb_round = 2;        // the foot's front edge rounded [given 2026-11-21: "etwas"
 // its fit to the housing [given 2026-11-21: was 0 everywhere]: the cover goes on from above,
 // the bar sliding down the tray's front face and over the shelf
 tb_gap   = 0.3;      // to the tray's front face and the shelf's front and ends (case_fit)
-tb_end_r = 4;        // the bar's outer end edges rounded in plan (as the housing's corners)
+tb_end_r = hall_corner_r + case_rim;   // the bar's outer end edges rounded in plan, as the case's corners
+                     //   [given 2026-11-22: one rounding with the case; 4 before]
 tb_y_min = -15.3;    // about the bar's frontmost (its lobe; built: -15.27): the rounding's line
 tb_gap_s = 0.1;      // over the shelf: the cover sits on the rim and the bosses; pressed hard,
                      //   the bar comes down onto the shelf
@@ -78,13 +79,15 @@ assert((csk_d - screw_d) / 2 <= cover_t - 0.2, "countersink too deep for the cov
 echo(str("thumb bar ", tb_dz, " higher than before: z = ", tb_z0 + tb_dz, " .. ", tb_z0 + tb_len + tb_dz,
          " (caps' top ", key_cap_top(), ")"));
 
-module outline2d(g) offset(delta = g) hall_shape2d();   // the board's shape, grown (its corners rounded)
+module outline2d(g) case_shape2d(g);   // the board's shape, grown (its corners rounded; hall.scad)
 module slab_solid(w0, w1, g) on_slab() translate([0, 0, w0]) linear_extrude(w1 - w0) outline2d(g);
 module below_top() on_slab() translate([-500, -500, -100]) cube([1000, 1000, 100]);   // W < 0
 
 // the bar along the whole front edge
 front = [for (p = hall_outline) p[1]][0];
-x_front = [hall_outline[0][0] - (fit + wall) * 1.2, hall_outline[1][0] + (fit + wall) * 1.2];
+// its ends in line with the case's sides (hall.scad case_x_max) [given 2026-11-22: was 0.3
+// past the board's front corners grown by the rim, 3.4 past the case's sides]
+x_front = case_x_max;
 // The section, in the extrusion's plane (u, v) = (y, z - tb_dz). Its foot is cut flush with
 // the housing's underside (the tray's bottom, W = w_b, in the slope's plane) [given
 // 2026-11-21: lowered for tb_above it reached 1.8 below], and the edge there rounded by
@@ -136,7 +139,7 @@ module thumb_bar() difference() {
     // and the bar does not stand into the plate's ends
     translate([-1000, -500, -500]) cube([1000 + x_front[0], 1000, 1000]);
     translate([x_front[1], -500, -500]) cube([1000, 1000, 1000]);
-    // its outer end edges rounded in plan, R tb_end_r, as the housing's corners [2026-11-21]
+    // its outer end edges rounded in plan, R tb_end_r, as the case's corners [2026-11-21]
     for (s = [0, 1]) translate([x_front[s], tb_y_min, -500]) mirror([s, 0, 0])
         linear_extrude(1000) difference() {
             translate([-0.01, -0.01]) square(tb_end_r + 0.01);

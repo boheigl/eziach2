@@ -50,7 +50,10 @@ the cover's tube, cap on top, the magnet's collar below, spring round the tube.
 - **Floor** 1.2 mm thick, its top 0.3 mm under the tallest part on the board's
   underside [chosen]. Parts deeper than the rest stand into the floor, which is thinner
   under them: on this board the NAU7802 (`deep_parts`).
-- **Rim** round the board up to its top face: 0.3 mm fit, 1.2 mm wall.
+- **Rim** round the board up to its top face: 0.3 mm fit, 1.2 mm wall. Its outer face
+  (and the cover plate's edge) follows the board's rounded corners, R 5.5; at the two front
+  corners it is filled out square under the rounding's widest point, in line with the
+  thumb bar's ends (`hall.scad` `case_shape2d()`) [given 2026-11-22].
 - **What carries the board:** a ledge along its edge and a ⌀4.4 boss at every screw hole,
   from the floor up to the board's underside, clear of the parts' bodies. The bosses
   carry the ⌀1.7 pilots for the cover's screws (§3).
@@ -125,6 +128,12 @@ z −19 (the old foot below, which held the old cover, left out): 0.2 mm rms, 0.
   in the slope's plane) [given 2026-11-21]. Only the gauge pad at the back reaches lower.
   The foot's front edge is rounded, R2 (`tb_round`) [given 2026-11-21]: over its lowest
   3 mm the bar's front stands back, 2.8 at the foot; above that the profile is unchanged.
+- **Its ends one rounding with the case** [given 2026-11-22]: the bar ends at the case's
+  sides, x ±131.26 (`case_x_max`: the widest point of the case's front corner rounding;
+  3.4 shorter on each side than before), its outer end edges rounded in plan R 5.5
+  (`tb_end_r`, as the case's corners; R 4 before). Under the bar the case's front corners
+  are filled out square to that line (`case_shape2d()`, §2), so in plan the case's side
+  runs on, round its corner, straight down the bar's end and round to the bar's front.
 - **Ribs to the plate** [given 2026-11-21: a little stiffer, the keys must not strike, not
   bulky, nothing past the housing in x/y]: 6 thin triangular ribs (2 thick, `tb_rib_t`),
   each in the middle of a gap between the first row's keys (9 from either axis: clear of
