@@ -54,6 +54,7 @@
     <button type="button" id="cut" aria-pressed="false">Section Y/Z</button>
     <button type="button" id="cutback" aria-label="Move the section towards −x" disabled>−x</button>
     <button type="button" id="cutfwd" aria-label="Move the section towards +x" disabled>+x</button>
+    <input type="range" id="cutpos" min="-135" max="140" step="0.5" value="0" aria-label="Section position along x" disabled>
     <span class="val" id="cutval">x = 0</span>
   </div>
   <div class="row">
@@ -270,8 +271,9 @@
       clipped = on;
     }
     cutPlane.set(new THREE.Vector3(1, 0, 0), -y);   // keeps x >= the value (y here is the section's x)
-    document.getElementById('cutback').disabled = document.getElementById('cutfwd').disabled = !on;
-    document.getElementById('cutval').textContent = 'x = ' + y.toFixed(0);
+    document.getElementById('cutback').disabled = document.getElementById('cutfwd').disabled = document.getElementById('cutpos').disabled = !on;
+    document.getElementById('cutpos').value = y;
+    document.getElementById('cutval').textContent = 'x = ' + (y % 1 ? y.toFixed(1) : y.toFixed(0));
     draw();
   }
   var cutY = 0;
@@ -280,6 +282,8 @@
   });
   document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-135, cutY - 5); applyCut(); });
   document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(140, cutY + 5); applyCut(); });
+  // the slider: the section's position directly, in steps of 0.5 [2026-11-22]
+  document.getElementById('cutpos').addEventListener('input', function () { cutY = parseFloat(this.value); applyCut(); });
   // in the stored view the same buttons act on its copies (packedParts)
   var packedOn = false, packedParts = {};
   function showParts() {
