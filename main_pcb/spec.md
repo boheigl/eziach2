@@ -229,3 +229,14 @@ track, D2 to the regulator.
   five fan-out vias left unused. In the bass: no clash with case, back cover, battery or
   wires (shifted controls overlap).
 - The DAC's speaker outputs are left open (earphones only).
+- **The DAC's thermal pad** [checked 2026-11-22 against SLAS671C, RHB0032E, pp. 108–110]:
+  KiCad's `VQFN-32-1EP_5x5mm_P0.5mm_EP3.1x3.1mm` has a 3.1 mm land, smaller than TI's
+  land example and the package's pad (3.45 ± 0.1): the pad overhangs about 0.15 a side,
+  usual for QFNs, and less risk of bridges. Signal pads 0.875 × 0.25 at ±2.44 (TI 0.6 ×
+  0.25 at ±2.4), 0.45 from the thermal land (TI 0.375). Paste 4 × 1.25 mm, 65 % (TI 4 ×
+  1.49, 75 % of its larger land): about the same solder. The 8 vias (⌀0.2/0.45, pitch 1.3)
+  lie open under the paste, the mask being open over the land; TI recommends filled,
+  plugged or tented: a little solder wicks into them. Kept as is [chosen 2026-11-22]: the
+  DAC drives earphones only, little heat. Options if needed: JLCPCB's epoxy-filled vias
+  (all vias), or the 3.45 mm footprint with the vias between the paste openings (rerouting
+  the board).

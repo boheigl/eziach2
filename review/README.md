@@ -70,9 +70,16 @@ All handled 2026-11-20 (changes in the specs; C1/C2 stay where they are, with a 
 - In JLCPCB's preview, check every part's rotation (the pos files carry KiCad's raw
   rotations). Critical: Hall sensors (180° swaps VCC and GND) and ADCs.
 - Finish: key boards lead-free HASL (no nickel near the sensors); contact boards ENIG.
-- Stock: LCSC had only 14 ESP32-S3-WROOM-1-N16R8 today; inductor C23894 gave no data.
-- Bring-up: I²C rise times with a scope; DAC thermal pad and USB4105 footprint not
-  checked pad by pad.
+- Stock: LCSC had only 14 ESP32-S3-WROOM-1-N16R8 today; inductor C23894 gave no data
+  (2026-11-22: C23894 is the Sunlord SWPA252012S2R2MT, the LCSC listing exists).
+- Bring-up: I²C rise times with a scope.
+- **Checked 2026-11-22:**
+  - DAC thermal pad against SLAS671C's RHB0032E (pp. 108–110): kept as is
+    (`main_pcb/spec.md` §5).
+  - USB4105 footprint: pad by pad as KiCad 9.0.9's library (the two NPTH pegs say
+    `*.Cu` against `F&B.Cu`, no difference on the board). Not checked against GCT's own
+    drawing.
+  - U1 (ESP32-S3-WROOM-1): all 62 pads as the library.
 
 ## State of the boards reviewed
 
