@@ -70,7 +70,9 @@ cover_gap = 0.3;     // the gauge pad's lip over the cover plate's back edge (th
 // inside the tray, as on the bass. Each sits in a front corner of the underside, as far
 // out as the slanted side and the front face allow (strap_side, strap_y0).
 // The housing prints standing on its front edge (spec.md, Printing): the fin then stands
-// 27 deg off upright, its lower end (the pull's) is a 45 deg wedge, the hole a teardrop.
+// 27 deg off upright, its lower end (the pull's) is a 45 deg wedge, the hole's back end a
+// teardrop. The hole is a slot along the pull [given 2026-11-22: longer, so the carabiner
+// goes in easily], its front end where the hook bears.
 // (A bar across the pull, as for a tab, would lie 27 deg off level in the print.)
 strap_hook = 4;      // the carabiner's wire [assumed: up to 4 thick, its gate opening 6 or more]
 strap_dir  = [-1, -2];  // the pull at both eyes (X, Y) [given]
@@ -78,9 +80,11 @@ strap_t    = 4;      // the fin's thickness
 strap_hr   = (strap_hook + 1) / 2;   // the hole's radius
 strap_hd   = 1 + strap_hr;           // the hole's middle out of the underside
 strap_lig  = 4.5;    // material between the hole and the fin's end, along the pull: in the gate
-strap_hs   = 6.5;    // the hole's middle from the fin's back end (the teardrop's tip 3 behind it)
+strap_slot = 12;     // the slot's length along the pull (its width 2 strap_hr)
+strap_hs   = 6.5;    // the slot's back end's middle from the fin's back end (the teardrop's tip 3 behind it)
+strap_hf   = strap_hs + strap_slot - 2 * strap_hr;   // its front end's middle, where the hook bears
 strap_h    = strap_hd + strap_hr + 1.5;   // how far it stands out of the underside
-strap_L    = strap_hs + strap_hr + strap_lig + strap_hd;   // the fin's length (its end slanted 45 deg)
+strap_L    = strap_hf + strap_hr + strap_lig + strap_hd;   // the fin's length (its end slanted 45 deg)
 strap_r    = 1.5;    // its back corner rounded
 strap_y0   = -8;     // the eye's lowest point (Y; the case's front face at -9.5)
 strap_side = 2.5;    // the eye's outermost point in from the slanted side
@@ -98,7 +102,7 @@ function strap_E(d) = let(P = strap_P(d), N = strap_N(d), ey = strap_y0 + strap_
 function strap_B(d) = strap_E(d) - strap_L * strap_P(d);
 strap_d    = [[-strap_dir[0], strap_dir[1]], strap_dir];   // -X eye (before mirroring), +X eye
 for (d = strap_d) echo(str("strap eye: fin from ", strap_B(d), " to ", strap_E(d), " (in the +X corner), pull ",
-    atan2(strap_P(d)[1], strap_P(d)[0]), " deg from the rows, ", strap_t, " thick, ", strap_h, " out of the underside, hole d ", 2 * strap_hr));
+    atan2(strap_P(d)[1], strap_P(d)[0]), " deg from the rows, ", strap_t, " thick, ", strap_h, " out of the underside, slot ", strap_slot, " x ", 2 * strap_hr));
 // the fin in (s, D): s along the pull from the back end, D out of the underside
 module strap_fin2d() difference() {
     let(L = strap_L, h = strap_h, r = strap_r)
@@ -107,10 +111,11 @@ module strap_fin2d() difference() {
             translate([0, -0.01]) square([0.01, 0.01]);
             polygon([[L - h, h], [L, -0.01], [L - h, -0.01]]);
         }
-    // teardrop, its tip up in the print (towards the back end)
-    translate([strap_hs, strap_hd]) hull() {
-        circle(r = strap_hr, $fn = 32);
-        translate([-strap_hr * sqrt(2), 0]) square(0.01, center = true);
+    // the slot, its back end a teardrop with its tip up in the print
+    translate([0, strap_hd]) hull() {
+        translate([strap_hf, 0]) circle(r = strap_hr, $fn = 32);
+        translate([strap_hs, 0]) circle(r = strap_hr, $fn = 32);
+        translate([strap_hs - strap_hr * sqrt(2), 0]) square(0.01, center = true);
     }
 }
 // x -> along the pull, y -> out of the underside (-W), z -> across; from the back end at the underside

@@ -73,17 +73,18 @@ the cover's tube, cap on top, the magnet's collar below, spring round the tube.
   (+X) alike, not mirrored]: the floor is 1.2 thick
   with 1.65 under the board, so nothing passes inside the tray; at the thumb bar's ends the
   first row's last caps stand right behind it. So on the tray's underside (the side to the
-  body), in each front corner, a fin in the pull's plane, 4 thick, 17 long, standing 7.5
-  out of the underside, with a ⌀5 hole for the carabiner [assumed: wire up to 4 thick, gate
-  opening 6 or more]; the carabiner hangs in line with the pull. 4.5 of material between
-  the hole and the fin's end along the pull. Each is as far out as the slanted side (2.5
+  body), in each front corner, a fin in the pull's plane, 4 thick, 24 long, standing 7.5
+  out of the underside, with a slot 12 × 5 along the pull for the carabiner [assumed: wire
+  up to 4 thick, gate opening 6 or more; given 2026-11-22: the slot longer than the ⌀5 hole
+  first, so the carabiner goes in easily]; the carabiner hangs in line with the pull. 4.5 of
+  material between the slot's front end and the fin's end along the pull. Each is as far out as the slanted side (2.5
   in) and the front face (Y −8) allow, both parallel, along (−1, −2) (`strap_bridges()` in
-  `housing.scad`): the upper from X −119.5, Y 8.1 to its end at X −127.1, Y −7.1, the lower
-  from X 120.6, Y 8.1 to its end at X 113.0, Y −7.1. Printed standing (Printing), the fin
-  stands 27° off upright; its lower end (the pull's) is a 45° wedge, the hole a teardrop
-  with its tip up. A bar across the pull, as for a tab, would have lain 27° off level in
+  `housing.scad`): the upper from X −115.7, Y 14.4 to its end at X −126.4, Y −7.1, the
+  lower from X 116.8, Y 14.4 to its end at X 106.0, Y −7.1. Printed standing (Printing), the fin
+  stands 27° off upright; its lower end (the pull's) is a 45° wedge, the slot's back end a
+  teardrop with its tip up. A bar across the pull, as for a tab, would have lain 27° off level in
   the print. At 100 N on a hook [estimate, as the bass's strap]: about 3 MPa in shear
-  between hole and end, a few MPa at the root (PETG). Played, they face the body, clear of
+  between slot and end, a few MPa at the root (PETG). Played, they face the body, clear of
   the bass; stored, they are the package's back, 4.6 behind the deck's back face
   (`../assembly/spec.md`, Stored).
 - **Size** (built STL, discant frame): x −131.3 … 131.3, y −11.3 … 87.6 including the
