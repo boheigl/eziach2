@@ -35,10 +35,10 @@ bass's bottom instead of 16.6.
 
 Below the stored discant's front edge (the cover's, with the thumb bar whole; discant/spec.md §3.2) stays 9.6 mm (the socket's 8.3 mm, 1 mm and 0.3 mm) above the playing mount's top (the latches' lugs), the travel to slide it on and off; for that the box is 9.8 mm longer than the hand plate [given: +3 mm, then the latch's 2.3, then the holders' thicker walls 2.3; then the lugs for the rod 2.1, 2026-11-15]. The bass's box below the deck is 11.2 thin [given: 4.8 thinner,
 with a 6 mm battery], so the stored discant lies 4.8 closer; the deck's back face
-(27.8) was then the package's back; the discant's shoulder strap bridges now stand 2.6
-behind it (y 30.4; `../discant/spec.md` §2) [given 2026-11-22: the strap]. Checked:
+(27.8) was then the package's back; the discant's shoulder strap eyes now stand 4.6
+behind it (y 32.4; `../discant/spec.md` §2) [given 2026-11-22: the strap, with carabiners]. Checked:
 clear of case, back cover, battery, wires and the bass's keys both seated and 9.6 mm lower; 2.7 mm of deck
-stay under the back row's springs. Package **282.9 × 42.9 × 151.8 mm (1.8 L)**.
+stay under the back row's springs. Package **282.9 × 44.9 × 151.8 mm (1.9 L)**.
 `../bass/link.scad`: `to_store()`, `store_socket()`, `store_pocket()`; the page's Stored
 switch shows it.
 

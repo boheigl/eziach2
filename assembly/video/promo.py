@@ -182,7 +182,7 @@ P3 = T(0, 0, -10) @ RS                              # just under the socket (lin
 def slide_off(u): st.RD = T(0, 18 * u, 0)
 anim(1.2, slide_off); hold(0.3)
 st.title = "Packs flat"
-st.text = "Stored, the treble side plugs in under the bass's deck and the bass covers its keys:\n283 x 43 x 152 mm, 1.8 litres - into any bag."
+st.text = "Stored, the treble side plugs in under the bass's deck and the bass covers its keys:\n283 x 45 x 152 mm, 1.9 litres - into any bag."
 def away(u):
     p = lerpv(P1[:3, 3], P2[:3, 3], u); M = np.eye(4); M[:3, 3] = p; st.RD = M
 anim(1.5, away)
@@ -246,7 +246,7 @@ def overlay(img, s):
         for i, t in enumerate(["Force sensing instead of bellows: push, pull and loudness",
                                "Contactless Hall-effect keys, silent and adjustable",
                                "ESP32-S3 synthesis, headphone jack, USB-C MIDI, battery",
-                               "Plugs together to play, packs to 1.8 litres"]):
+                               "Plugs together to play, packs to 1.9 litres"]):
             d.text((W // 2, 410 + i * 44), t, font=F(FONT, 22), anchor="mm", fill=(190, 196, 204))
         return c
     d.text((40, 22), s.title, font=F(FONT_B, 40), fill=(30, 30, 30))
