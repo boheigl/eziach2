@@ -32,7 +32,7 @@ G = dict(json.loads(m.group(1)))
 PARTS = [
     ("magnet",  "Magnet",            "NdFeB d3 x 1.5, axial",           G["z_cb"]),
     ("collar",  "Collar",            "printed, carries magnet + washer", G["z_cb"]),
-    ("rod",     "Rod",               "stainless d3 h6",                  G["z_cb"] + G["mag_l"]),
+    ("rod",     "Rod",               "stainless d3 h6",                  G["z_cb"] + G["mag_seat"]),
     ("stop",    "Stop washer",       "1 mm silicone, upper stop",        G["z_cb"] + G["collar_h"]),
     ("bushing", "Sleeve bearing",    "sintered bronze d3 x D5 x 4",      G["z_bush0"]),
     ("tube",    "Cover with tube",   "printed, 2.4 mm plate",            G["pcb_t"] / 2),

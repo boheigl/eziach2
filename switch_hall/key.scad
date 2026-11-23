@@ -82,7 +82,7 @@ rim_t    = 0.8;      // the tube's top rim over the bushing: its stop against th
 rod_clear = 0.2;     // radial, the rod above the bushing, where it does not guide
 pin_d    = rod_d;    // (the rod, as the cap and the O-ring see it)
 collar_d = 4.4;      // printed: carries magnet and stop washer, no longer guides
-collar_h = 3;        // the rod glued 1.5 deep into it, over the magnet
+collar_h = 3;        // the rod glued 1.5 deep into it, over the magnet and its web (mag_seat)
 floor_gap = 0.3;     // collar above the board at the lower stop
 mu       = 0.1;      // steel in oiled sintered bronze [estimated]
 mu_dry   = 0.25;     // dry or dirty [estimated]
@@ -128,8 +128,14 @@ sens_h   = 1.1;
 sens_el  = 0.55;     // element below the mounting face [unverified]
 
 /* [Magnet — NdFeB N52, axial, in the collar's lower face] */
+// [2026-11-23: the bought ones are 3 x 1 (yourmagnets.net, 200 pieces), 3 x 1.5 before]: the
+// magnet stays in the collar's lower face, as near the sensor as before, and a printed web
+// mag_web over it takes the half millimetre, so the rod, the cap and every height above
+// stay as they were (mag_seat = 1.5, the old magnet's length)
 mag_d    = 3;
-mag_l    = 1.5;
+mag_l    = 1;
+mag_web  = 0.5;      // the collar's floor between the magnet's pocket and the rod
+mag_seat = mag_l + mag_web;   // where the rod's end sits, over the collar's lower face
 mag_Br   = 1.44;     // T
 sens_range = 85;     // mT, DRV5055A3
 
@@ -155,7 +161,7 @@ oring_out = oring_cs - oring_seat;         // O-ring below the cap's underside
 cbore_d  = oring_od + 2 * oring_gap;
 z_cu     = z_tt + oring_out + stroke;      // cap underside at rest
 rod_l    = rod_l0 + riser;                 // the pin: from the magnet up into the cap
-cap_sock = rod_l - (z_cu - z_cb - mag_l);  // so deep in the cap: pressed and glued, it carries the spring's force
+cap_sock = rod_l - (z_cu - z_cb - mag_seat);  // so deep in the cap: pressed and glued, it carries the spring's force
 cap_h    = cap_sock + cap_roof;            // the cap grows with the pin (3.2 with the 14 mm pin; 3 with 13.8 cut from bar)
 z_ct     = z_cu + cap_h;                   // cap top at rest
 function key_cap_top() = z_ct;             // for ../discant/cover.scad (the thumb bar follows the caps)
@@ -233,7 +239,8 @@ assert(oring_seat < oring_cs - 0.5, "O-ring hardly stands out of its counterbore
 assert(stop_od <= bore_lo - 0.2, "stop washer rubs in the lower bore");
 assert(stop_id < pin_d && stop_id >= pin_d - 0.5, "stop washer must sit a little tight on the rod (silicone stretches)");
 assert(stop_od > bush_d + 0.8, "stop washer hardly meets the bushing's face");
-assert(mag_d <= collar_d - 1.2 && mag_l <= collar_h - 1.5, "magnet does not fit the collar, or the rod's glued length is short");
+assert(mag_d <= collar_d - 1.2 && mag_seat <= collar_h - 1.5, "magnet does not fit the collar, or the rod's glued length is short");
+assert(mag_web >= 0.4, "the web over the magnet is too thin to print (two layers)");
 assert(b_bot <= sens_range, "field beyond the sensor's range at the lower stop");
 assert(sens_l / 2 < margin_n, "sensor beyond the board's edge");
 // staircase: the next board's caps and cover must stay clear of this cap
@@ -261,14 +268,14 @@ module skirt() translate([0, 0, z_cu - skirt_l + dz]) difference() {
     cylinder(d = skirt_od, h = skirt_l + 0.01);
     translate([0, 0, -1]) cylinder(d = skirt_id, h = skirt_l + 2);
 }
-// the printed collar: magnet pocket from below, the rod glued in from above
+// the printed collar: magnet pocket from below, a web over it, the rod glued in from above
 module collar() translate([0, 0, z_cb + dz]) difference() {
     cylinder(d = collar_d, h = collar_h);
-    translate([0, 0, -0.01]) cylinder(d = mag_d + 0.05, h = mag_l);
-    translate([0, 0, mag_l - 0.01]) cylinder(d = rod_d, h = collar_h);
+    translate([0, 0, -0.01]) cylinder(d = mag_d + 0.05, h = mag_l + 0.01);
+    translate([0, 0, mag_seat]) cylinder(d = rod_d, h = collar_h);
 }
-// the steel rod: from the magnet up into the cap
-module rod() translate([0, 0, z_cb + mag_l + dz]) cylinder(d = rod_d, h = rod_l);
+// the steel rod: from the collar's web up into the cap
+module rod() translate([0, 0, z_cb + mag_seat + dz]) cylinder(d = rod_d, h = rod_l);
 module plunger() { collar(); rod(); }
 // the bushing, fixed in the tube
 module bushing() translate([0, 0, z_bush[0]]) difference() {

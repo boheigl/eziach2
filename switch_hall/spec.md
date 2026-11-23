@@ -43,8 +43,7 @@ is above the board, and **the board has no key holes**.
   plate over the tubes would cut through it.
 - **Joints on the rod** [given 2026-11-15]: the rod is pressed and glued 2.7 mm deep
   into the cap (3.2 mm thick, 0.5 over the socket; 3 and 2.5 with the 13.8 mm rod cut
-  from bar before 2026-11-21) and glued 1.5 mm deep into the collar (3 mm high, over
-  the magnet's 1.5). Both carry the spring's force at rest.
+  from bar before 2026-11-21) and glued 1.5 mm deep into the collar (3 mm high, over the magnet's 1 and a 0.5 web). Both carry the spring's force at rest.
 - **Spring:** a stock compression spring stands on a seat round the tube and pushes
   the cap up.
 
@@ -62,7 +61,7 @@ is above the board, and **the board has no key holes**.
    slow epoxies are the stronger. Not cyanoacrylate: thin, it creeps along the rod into
    the bushing and the stop washer and fixes the key. A small drop with a toothpick
    into the hole (not on the rod), squeeze-out wiped off. Glued length 2.5 mm in the
-   cap, 1.5 mm in the collar (where it also holds the magnet): about 24 and 14 mm²,
+   cap, 1.5 mm in the collar (over the magnet's web): about 24 and 14 mm²,
    some 50 N at a few N/mm² on PETG, against 1.2 N and a knock. [estimated]
 
    **Or, with nothing to mix** [2026-11-23, to try on the prototype first]: a one-part MS
@@ -108,8 +107,12 @@ ends at the steel rod. So the key is pulled apart [estimated, to try on the prot
    magnet and washer (the collar passes the ⌀5.1 bore, the rod the bushing).
 4. Only if pulling fails: heat. A soldering iron pressed through the cap's 0.5 mm roof
    onto the rod's end softens epoxy and PETG, and the spring helps lift the cap. A few
-   seconds only: the rod carries the heat to the magnet, and N52 loses strength for good
-   above about 80 °C (it comes out with the collar and can be replaced).
+   seconds only: the rod carries the heat towards the magnet, and N52 loses strength for
+   good above about 80 °C. The collar's 0.5 web between the rod's end and the magnet
+   [2026-11-23] holds much of it back (PETG conducts heat poorly; not computed); the
+   magnet comes out with the collar and can be replaced. To take the magnet out, pierce
+   the web from above (a needle or a ⌀2 pin through the rod's hole) and push it out; the
+   collar is then lost. Taken apart normally, collar and magnet stay one unit.
 5. Back together: the rod up through the bushing (from below with its collar, or from
    above with the cap), spring and O-ring on top, the missing part glued on as in steps
    2 and 6 above. A cap glued on last is pushed up off the rod by the spring: hold it
@@ -168,7 +171,7 @@ both rows as `bass0_*` / `bass1_*`.
 | Cover plate | 0.8 … 3.2 | |
 | Spring seat, between tube and shroud | 4.25 (§5) | |
 | Tube ⌀6.6: lower bore ⌀5.1, bushing seat ⌀4.95, rim with ⌀3.4 | 0.8 … 13.35; bushing 8.55 … 12.55, rim 12.55 … 13.35 | |
-| Collar ⌀4.4 × 3 with magnet ⌀3 × 1.5 | 4.55 … 7.55 | 0.3 above the tilted board at its edge, lower stop |
+| Collar ⌀4.4 × 3 with magnet ⌀3 × 1 and a 0.5 web over it | 4.55 … 7.55 | 0.3 above the tilted board at its edge, lower stop |
 | Rod ⌀3 × 14 (dowel pin) | 6.05 … 20.05 | 1.5 into the collar, 2.7 into the cap |
 | Silicone washer ⌀4.5 / ⌀2.5 × 1 on the collar | 7.55 … 8.55 | upper stop |
 | O-ring 4 × 1.5 in the cap | 16.35 … 17.85 | lands on the tube's top after 3 mm |
@@ -243,20 +246,29 @@ Before: a spring-steel ⌀8 × 0.4 × 25 with 8 coils, 105 → 128 g (+22 %).
 
 ## 6. Sensor [estimated, field of a cylinder magnet on its axis]
 
-- **Magnet:** ⌀3 × 1.5 N52 in the collar. Its lower face is 6.0 mm from the
-  sensor element at rest and 3.0 mm at the bottom (along the axis, through the
-  tilted board).
-- **Field:** 7.5 mT at rest, 39.3 mT at the bottom, inside the DRV5055A3's
-  ±85 mT range.
+- **Magnet:** ⌀3 × 1 N52 in the collar [2026-11-23: the bought ones, 200 from
+  yourmagnets.net; ⌀3 × 1.5 before]. Same material, two thirds the volume, so about
+  three quarters of the field at these distances. It sits in the collar's lower face as
+  before, a printed web 0.5 over it, and the rod on the web, so nothing else moved. The
+  web also helps: pushing the collar on until the rod sits presses on PETG, not on the
+  brittle sintered magnet; the glue stays off the magnet; the rod sits at the same depth
+  whatever the magnet's tolerance; and it keeps a soldering iron's heat from the magnet
+  (Taking a key apart). Its
+  lower face is 6.0 mm from the sensor element at rest and 3.0 mm at the bottom (along
+  the axis, through the tilted board).
+- **Field:** 5.6 mT at rest, 30.8 mT at the bottom (7.6 and 39.9 with ⌀3 × 1.5), inside
+  the DRV5055A3's ±85 mT range [given 2026-11-23: the A3 stays; the A2's ±42 mT would
+  now fit and double the resolution, with little margin].
 - **Calibration:** the field rises monotonically but not linearly with travel.
   The firmware stores each key's rest and bottom readings and maps the reading
   back to travel. Switching itself does not use it [given 2026-11-20]: a key goes
   on a fixed number of ADC counts above its rest reading and off below a smaller one,
   so it switches at the top of the stroke whatever happens at the bottom (see Early
   actuation; `../firmware/spec.md` §3).
-- **Early actuation:** at rest the field rises by 3.2 mT/mm; 0.1 / 0.2 / 0.5 mT
-  above the rest reading are reached after 31 / 61 / 149 µm. One ADC step
-  (12 bit, DRV5055A3 at 3.3 V) is about 0.05 mT, about 15 µm here. The limit is
+- **Early actuation:** at rest the field rises by 2.5 mT/mm (3.3 with ⌀3 × 1.5);
+  0.1 / 0.2 / 0.5 mT above the rest reading are reached after 40 / 79 / 191 µm
+  (30 / 60 / 146). One ADC step (12 bit, DRV5055A3 at 3.3 V) is about 0.05 mT, about
+  20 µm here (15). The limit is
   not the field but noise, temperature drift and how exactly the key returns to
   its rest on the soft washer: the firmware tracks each key's rest reading while
   the key is up and triggers a little above it, e.g. on at 0.15 mm and off at

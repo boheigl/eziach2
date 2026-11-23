@@ -53,7 +53,7 @@ discant.
 | Spring Misumi UY8-25 | 8 | stock |
 | O-ring 4 × 1.5 | 8 | stock |
 | Stop washer ⌀4.5 / ⌀2.5, 1 mm silicone or PU | 8 | punched |
-| Magnet ⌀3 × 1.5 N52 | 8 | optional: nothing senses it; it adds 0.08 g |
+| Magnet ⌀3 × 1 N52 | 8 | optional: nothing senses it; it adds 0.08 g |
 | Countersunk screw M2 × 6, brass, DIN 965 | 5 | stock |
 | Slow 2-component epoxy | | as `../switch_hall/spec.md` §2 |
 

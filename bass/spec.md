@@ -29,7 +29,7 @@ The earlier case, `../../shape/OrderOnShape20260107/BassCase - Part BassCase.ste
 
 The discant's Hall key (`../switch_hall/`, `key.scad` and spec): a ground stainless rod
 ⌀3 in a sintered bronze bushing in the cover's tube, the cap on top, a printed collar
-with the magnet (⌀3 × 1.5 N52) below, a stock stainless spring (Misumi UY8-25) round
+with the magnet (⌀3 × 1 N52) below, a stock stainless spring (Misumi UY8-25) round
 the tube, an O-ring as the bottom stop and a punched washer as the rest stop; the
 board's DRV5055 senses the magnet on the key's axis. The board lies flat under both
 rows, and the back row stands 10 mm higher on a 10 mm longer rod (dowel pin 3 × 24 instead of 3 × 14);
