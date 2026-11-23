@@ -1,6 +1,6 @@
 # Builds every file generated from the discant's sources into ../build/discant/:
 # housing, cover, the gauges with their wires, the Hall-sensor board with its part
-# bodies, the 46 keys, and the phone page phone.html. Only what changed is rebuilt.
+# bodies, the 46 keys, and the 3D view view3d.html. Only what changed is rebuilt.
 #   make                             everything (and the key's parts it needs)
 #   make ../build/discant/cover.stl  one file (and what it needs)
 #   make -j                          in parallel
@@ -20,7 +20,7 @@ BODY_STL := $(addprefix $(B)/,housing.stl cover.stl gauge_link.stl)
 KEY_STL  := $(addprefix $(KEY)/,cap.stl plunger.stl magnet.stl oring.stl stop.stl \
                                 cap_down.stl plunger_down.stl magnet_down.stl oring_down.stl stop_down.stl)
 
-all: $(BODY_STL) $(B)/board.stl $(B)/board_parts.stl $(B)/keys.stl $(B)/keys_down.stl $(B)/phone.html
+all: $(BODY_STL) $(B)/board.stl $(B)/board_parts.stl $(B)/keys.stl $(B)/keys_down.stl $(B)/view3d.html
 
 # $(call scad,source,extra options)
 scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
@@ -53,15 +53,15 @@ $(KEY_STL): key ;
 key:
 	@$(MAKE) --no-print-directory -C ../switch_hall
 
-# --- phone page: phone.html with every part embedded (embed_parts.py), one
+# --- 3D view: view3d.html with every part embedded (embed_parts.py), one
 # file that loads nothing else; NAME=stl as the page reads them
-PHONE_PARTS := BOARD_TRIS=$(B)/board.stl PARTS_TRIS=$(B)/board_parts.stl \
+VIEW_PARTS := BOARD_TRIS=$(B)/board.stl PARTS_TRIS=$(B)/board_parts.stl \
                HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl LINK_TRIS=$(B)/gauge_link.stl \
                CAP_TRIS=$(KEY)/cap.stl PLUNGER_TRIS=$(KEY)/plunger.stl MAGNET_TRIS=$(KEY)/magnet.stl \
                ORING_TRIS=$(KEY)/oring.stl STOP_TRIS=$(KEY)/stop.stl
-$(B)/phone.html: phone.html embed_parts.py viewer_nav.js $(BODY_STL) $(B)/board.stl $(B)/board_parts.stl $(KEY_STL) ../hall_pcb/discant/board.scad
+$(B)/view3d.html: view3d.html embed_parts.py viewer_nav.js $(BODY_STL) $(B)/board.stl $(B)/board_parts.stl $(KEY_STL) ../hall_pcb/discant/board.scad
 	@echo "  EMBED    $@"
-	@$(PYTHON) embed_parts.py $< $@ --keys ../hall_pcb/discant/board.scad $(PHONE_PARTS)
+	@$(PYTHON) embed_parts.py $< $@ --keys ../hall_pcb/discant/board.scad $(VIEW_PARTS)
 
 # --- printing (print.scad, spec.md Printing): the holder's test piece as printed, on the plate
 # (plate.py), and as a sliced Bambu Studio project for the X2D in PETG (../key_proto/bambu.py;

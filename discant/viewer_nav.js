@@ -1,4 +1,4 @@
-// Camera navigation for the phone pages (discant/, bass/, assembly/), inlined into each
+// Camera navigation for the 3D views (discant/, bass/, assembly/), inlined into each
 // page by embed_parts.py. Always on in the view, no mode to switch:
 //   one finger / left mouse button: turn round the centre, freely: about the camera's own
 //     up and right axes, so it goes on in every direction from any view, over the top too

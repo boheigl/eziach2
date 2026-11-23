@@ -3,7 +3,7 @@
 // discant's) with their inner holders (the bass's). Turned 180 deg about z: the
 // gauges point along the bass's y and sense along its z [given].
 //
-// The pieces for the phone page, one per part = ...; the keys are drawn light (cap,
+// The pieces for the 3D view, one per part = ...; the keys are drawn light (cap,
 // skirt, pin) so that the page stays small.
 //
 // STORED [given: plugged, two positions; stored, the bass covers the discant's keys]:

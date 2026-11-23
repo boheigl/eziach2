@@ -2,7 +2,7 @@
 // rest, or at the lower stop (down = true); the back row's with the riser (bass1_*), the
 // front row's flat (bass0_*), from ../build/switch_hall/. The springs are left out: hidden
 // in the shrouds, checked in the key's own model. part = "static" leaves out the key the
-// phone page moves (front row, x = 0).
+// 3D view moves (front row, x = 0).
 //
 // make builds   openscad -o ../build/bass/keys.stl keys.scad
 

@@ -270,5 +270,5 @@ touch nothing at rest and pressed 2.9 mm.
 | `cover.scad` → `cover.stl` | the cover, one piece |
 | `keys.scad` → `keys.stl` | the 18 keys at rest |
 | `array.scad`, `lam.scad` | the boards, their copper and connectors |
-| `phone.html` → `../build/bass/phone.html` | the assembly in 3D, made by `make` |
+| `view3d.html` → `../build/bass/view3d.html` | the assembly in 3D, made by `make` |
 | `ref/` | the example case, for measuring |

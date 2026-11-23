@@ -40,7 +40,7 @@ plane, W out of its top face) and maps it into the discant's frame (row 0, z up)
 
 The keys (`../switch_hall/`) stand entirely above the board: rod in a bronze bushing in
 the cover's tube, cap on top, the magnet's collar below, spring round the tube.
-`keys.scad` places all 46 at rest and pressed for the assembly and the phone page.
+`keys.scad` places all 46 at rest and pressed for the assembly and the 3D view.
 
 ## 2. Housing [given 2026-11-13: the cases as small as possible]
 
@@ -228,7 +228,7 @@ rebuilding only what changed; it first has `../switch_hall/` build the key's par
 | `board.scad`, `board.stl`, `board_parts.stl` | the board's laminate with its holes, and the parts' bodies on its underside |
 | `keys.scad`, `keys.stl`, `keys_down.stl` | the 46 keys in place, at rest and pressed (springs left out) |
 | `gauge_link.scad`, `gauge_link.stl` | two strain gauges (plates) with their pins, the contact board, and the wires from contacts and gauges to the board's pads; the outer holders, pad, groove and channels are in the housing (§7) |
-| `phone.html`, `embed_parts.py`, `viewer_nav.js` | phone view of the discant: board, parts, housing, cover, link and the keys, with Press, a section and gestures. `make` writes `build/discant/phone.html` with every part embedded by `embed_parts.py`, one file that loads nothing else, so it also works in the claude.ai viewer on a phone |
+| `view3d.html`, `embed_parts.py`, `viewer_nav.js` | 3D view of the discant: board, parts, housing, cover, link and the keys, with Press, a section and gestures. `make` writes `build/discant/view3d.html` with every part embedded by `embed_parts.py`, one file that loads nothing else, so it also works in the claude.ai viewer on a phone |
 | `print.scad`, `plate.py` | the housing as printed (standing, holders up) and its test piece `print_holder_test.stl` (Printing); `plate.py` puts the test piece on the X2D's plate, `holder_test.3mf` |
 | `Makefile` | builds the files above; `make bambu` also the sliced Bambu Studio project `holder_test_x2d.3mf` (X2D, PETG, 0.2 mm; `../key_proto/bambu.py`, needs the AppImage) |
 

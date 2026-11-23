@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# Writes the phone page with its parts embedded: each STL becomes an inactive
+# Writes the 3D view with its parts embedded: each STL becomes an inactive
 # <script type="text/plain" id="d-NAME"> block of base64 little-endian float32
 # x,y,z, three vertices per triangle, put where the page has
 # its "parts: filled in by embed_parts.py" comment.
-#   python3 embed_parts.py phone.html ../build/discant/phone.html [--keys board.scad] NAME=part.stl ...
+#   python3 embed_parts.py view3d.html ../build/discant/view3d.html [--keys board.scad] NAME=part.stl ...
 # --keys fills the page's /*KEYS*/[] with [row, key, x] of every key (hall_keys in the
 # board's data, ../hall_pcb/<board>/board.scad). A <script src="x.js"> with a relative
 # path (viewer_nav.js) is put into the page inline.

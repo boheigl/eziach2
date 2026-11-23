@@ -8,7 +8,7 @@ gauge pad facing the bass's hand plate.
 
 `make` builds the discant and the bass first, then the discant's parts moved
 (`../build/assembly/d_*.stl`), light keys for all 64 (stem, felt, cap; the full
-buttons are on the two sides' own pages), and the phone page `phone.html`.
+buttons are on the two sides' own pages), and the 3D view `view3d.html`.
 
 Checked by solid intersection (`../bass/spec.md` §4): the whole discant, mated,
 touches none of the bass's parts.

@@ -1,4 +1,4 @@
-// The discant's Hall-sensor board for the assembly and the phone page: part = "board"
+// The discant's Hall-sensor board for the assembly and the 3D view: part = "board"
 // the laminate with its holes, "parts" the parts' bodies on its underside (boxes from
 // the KiCad board, hall.scad); "all" both.
 //

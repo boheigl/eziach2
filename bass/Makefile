@@ -1,5 +1,5 @@
 # Builds the bass from its sources into ../build/bass/: case (hand plate and
-# housing), covers, the keys and the boards, and the phone page phone.html. Only
+# housing), covers, the keys and the boards, and the 3D view view3d.html. Only
 # what changed is rebuilt.
 #   make        everything (and the key's parts it needs)
 #   make clean  deletes ../build/bass/
@@ -16,7 +16,7 @@ scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
 
 KEY_STL   := $(addprefix $(KEY)/,$(foreach r,0 1,$(foreach p,cap plunger magnet oring stop,bass$(r)_$(p).stl bass$(r)_$(p)_down.stl) bass$(r)_tube_body.stl bass$(r)_tube_cut.stl))
 
-all: $(B)/strap.stl $(B)/elec.stl $(B)/wires.stl $(B)/case.stl $(B)/cover.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(B)/keys.stl $(B)/boards.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/contact_pins.stl $(B)/phone.html
+all: $(B)/strap.stl $(B)/elec.stl $(B)/wires.stl $(B)/case.stl $(B)/cover.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(B)/keys.stl $(B)/boards.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/contact_pins.stl $(B)/view3d.html
 
 $(B)/back_cover.stl: case.scad layout.scad elec.scad
 	$(call scad,$<,-D 'part="back_cover"')
@@ -63,14 +63,14 @@ $(KEY_STL): key ;
 key:
 	@$(MAKE) --no-print-directory -C ../switch_hall
 
-PHONE_PARTS := CASE_TRIS=$(B)/case.stl COVER_TRIS=$(B)/cover.stl BOARDS_TRIS=$(B)/boards.stl \
+VIEW_PARTS := CASE_TRIS=$(B)/case.stl COVER_TRIS=$(B)/cover.stl BOARDS_TRIS=$(B)/boards.stl \
                CONN_TRIS=$(B)/connectors.stl ELEC_TRIS=$(B)/elec.stl WIRES_TRIS=$(B)/wires.stl STRAP_TRIS=$(B)/strap.stl \
                $(foreach r,0 1,$(foreach p,CAP PLUNGER MAGNET ORING STOP,$(p)$(r)_TRIS=$(KEY)/bass$(r)_$(shell echo $(p) | tr A-Z a-z).stl)) \
                LINK_TRIS=$(B)/discant_link.stl ROD_TRIS=$(B)/latch_rod.stl PINS_TRIS=$(B)/contact_pins.stl LID_TRIS=$(B)/back_cover.stl CSCREW_TRIS=$(B)/cover_screws.stl BATTERY_TRIS=$(B)/battery.stl
-$(B)/phone.html: phone.html ../discant/embed_parts.py ../discant/viewer_nav.js $(B)/case.stl $(B)/cover.stl $(B)/boards.stl \
+$(B)/view3d.html: view3d.html ../discant/embed_parts.py ../discant/viewer_nav.js $(B)/case.stl $(B)/cover.stl $(B)/boards.stl \
                  $(B)/connectors.stl $(B)/elec.stl $(B)/wires.stl $(B)/strap.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/contact_pins.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(KEY_STL)
 	@echo "  EMBED    $@"
-	@$(PYTHON) ../discant/embed_parts.py $< $@ $(PHONE_PARTS)
+	@$(PYTHON) ../discant/embed_parts.py $< $@ $(VIEW_PARTS)
 
 clean:
 	rm -rf $(B)

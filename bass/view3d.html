@@ -2,13 +2,13 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!-- Phone view of the discant assembly. make builds ../build/discant/phone.html from this
+<!-- 3D view of the discant assembly. make builds ../build/discant/view3d.html from this
      page with every part embedded as an inactive data block (embed_parts.py): the page
      loads no files, which the claude.ai viewer refuses on phones (403). STROKE is as in
-     ../switch_hall/key.scad; the key positions come from the board (hall.scad). -->
-<title>Discant Assembly</title>
+     ../switch_hall/key.scad, BOARD_Z the board's middle (layout.scad: board_mid). -->
+<title>Bass Assembly</title>
 <style>
-  /* Layout: the 3D view first and as large as the phone allows, controls in wrapping rows under it */
+  /* Layout: the 3D view first and as large as the screen allows, controls in wrapping rows under it */
   :root {
     --bg: #eef1f0; --panel: #f8faf9; --fg: #1c2421; --muted: #5d6964; --line: #c9d2ce; --accent: #2f6c8c; --bad: #a3321f;
     --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -41,8 +41,8 @@
 
 <main>
   <header>
-    <p class="eyebrow">discant · one Hall-sensor board, 46 keys</p>
-    <h1>Discant assembly</h1>
+    <p class="eyebrow">bass · 2 × 9 keys, the example’s arrangement</p>
+    <h1>Bass assembly</h1>
   </header>
   <div id="view"><p id="hint">1 finger: turn · 2: zoom, move · double tap: centre</p><p id="status">Loading …</p></div>
   <div class="row">
@@ -55,15 +55,17 @@
     <button type="button" id="cut" aria-pressed="false">Section Y/Z</button>
     <button type="button" id="cutback" aria-label="Move the section towards −x" disabled>−x</button>
     <button type="button" id="cutfwd" aria-label="Move the section towards +x" disabled>+x</button>
-    <input type="range" id="cutpos" min="-135" max="135" step="0.5" value="0" aria-label="Section position along x" disabled>
+    <input type="range" id="cutpos" min="-100" max="110" step="0.5" value="0" aria-label="Section position along x" disabled>
     <span class="val" id="cutval">x = 0</span>
   </div>
   <div class="row">
-    <button type="button" class="tog" data-part="pcb" aria-pressed="true">Board</button>
-    <button type="button" class="tog" data-part="housing" aria-pressed="true">Housing</button>
+    <button type="button" class="tog" data-part="pcb" aria-pressed="true">Boards</button>
+    <button type="button" class="tog" data-part="case" aria-pressed="true">Case</button>
+    <button type="button" class="tog" data-part="lid" aria-pressed="true">Back cover</button>
     <button type="button" class="tog" data-part="cover" aria-pressed="true">Cover</button>
-    <button type="button" class="tog" data-part="cable" aria-pressed="true">Wires + gauges</button>
-    <button type="button" class="tog" id="showbutton" aria-pressed="true">Keys</button>
+    <button type="button" class="tog" data-part="keys" aria-pressed="true">Keys</button>
+    <button type="button" class="tog" data-part="extra" aria-pressed="true">Strap + gauges</button>
+    <button type="button" class="tog" id="showbutton" aria-pressed="true">Button</button>
   </div>
   <div class="row" aria-label="View">
     <button type="button" id="left" aria-label="Turn left">◀</button>
@@ -74,23 +76,24 @@
     <button type="button" id="zout" aria-label="Zoom out">－</button>
     <button type="button" id="reset">Reset view</button>
   </div>
-  <p class="note">In the view: turn with one finger, zoom or move with two (mouse: drag, right-drag or Shift-drag, wheel); double-tap (double-click) a surface to make that point the centre of turning and zooming; tap a key to press it. Scroll the page outside the view. The arrow and ＋/－ buttons work too; Reset view goes back to the start. Ortho switches to a parallel projection with a mm grid behind the model (1 mm, every 10th bold, coarser when zoomed out; its pitch in the corner); +X … −Z look from that side of the discant, in Ortho. Press moves the middle key of the front row 3 mm until its O-ring lands on the tube's top and back; Hold down keeps it there; with All keys on, both act on every key.
-    The board is drawn with its parts' bodies (boxes, from the KiCad board); the springs are left out, hidden under the caps' skirts.
-    All parts come from the OpenSCAD build (switch_hall/, discant/, hall_pcb/).</p>
+  <p class="note">In the view: turn with one finger, zoom or move with two (mouse: drag, right-drag or Shift-drag, wheel); double-tap (double-click) a surface to make that point the centre of turning and zooming; tap a key to press it. Scroll the page outside the view. The arrow and ＋/－ buttons work too; Reset view goes back to the start. Ortho switches to a parallel projection with a mm grid behind the model (1 mm, every 10th bold, coarser when zoomed out; its pitch in the corner); +X … −Z look from that side of the bass, in Ortho. The key deck on top: a thin tray round one Hall-sensor board under both rows, a cover with the keys' tubes and a 10 mm step for the back row, the hand plate's top flush with the cover; below it a thin closed box (11.2 mm), 211 mm wide, one rectangular block with the deck (stored, the discant's outer keys stay uncovered), ribbed inside for a stiff hand plate, closed at the back by a screwed cover; the hand plate (131.5 × 128.3 mm, from the earlier BassCase, half as wide and 25 % lower) is its flat front; the earphone jack sits in the +x side wall, in a bulge of the back cover. Inside, a 1S battery (dark, with the PCBs). In the step under the deck, behind the box, the gauges' inner holders are printed with the case, on the discant's gauge plates (grey). Every printed part (case, back cover, cover) has its own button; turn the Case off to see inside. Press moves the front row's middle key 3 mm until its O-ring lands on the tube's top and back (with All keys on, every key; tap any key in the view to press it); the springs are left out, hidden under the caps' skirts. Under the deck behind the box hangs the short socket for the stored discant; the box is long enough below the hand plate for the discant's whole thumb bar to slide past the mount. All parts come from the OpenSCAD build (switch_hall/, hall_pcb/ and bass/).</p>
 </main>
 
 <!-- parts: filled in by embed_parts.py -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="viewer_nav.js"></script>
+<script src="../discant/viewer_nav.js"></script>
 <script>
 (function () {
   var statusEl = document.getElementById('status');
   function status(t, bad) { statusEl.textContent = t; statusEl.className = bad ? 'bad' : ''; }
   window.addEventListener('error', function (e) { status('Error: ' + e.message, true); });
 
-  var STROKE = 3;                     // ../switch_hall/key.scad
-  var STEP = [10, 16, 3];               // row k+1 relative to row k
-  var KEYS = /*KEYS*/[];                // [row, key, x] of all 46 (hall.scad)
+  var BOARD_Z = -6.135;                                         // layout.scad: board_mid (cap top 11 - key_top 17.135)
+  var STROKE = 3;                                               // ../switch_hall/key.scad
+  var KEY = [0, 0, BOARD_Z];                                    // the moving key: front row, x = 0
+  // the keys (layout.scad): front row x = -80 .. 80 at y = 0, back row x = -70 .. 90 at y = 16
+  var KEYS = [];
+  for (var r = 0; r < 2; r++) for (var i = 0; i < 9; i++) KEYS.push([r, [-80, -70][r] + 20 * i, 16 * r]);
 
   var view = document.getElementById('view');
   var renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'low-power' });
@@ -134,25 +137,34 @@
     m.polygonOffset = true; m.polygonOffsetFactor = -1; m.polygonOffsetUnits = -4;
     return g;
   }
-  var parts = {}, moving = new THREE.Group(), keysGrp = new THREE.Group();
-  var buttonGrp = new THREE.Group(); buttonGrp.add(keysGrp, moving);
-  var PRESSED = 6;                      // index in KEYS: row 0's middle key (x = 0), the one Press moves
-  // every key its own group at its place, each part copied into every group, so that any
-  // key can move on its own (Press, All keys, or tapped in the view)
-  var KEY_GRPS = KEYS.map(function (k) {
-    var g = new THREE.Group(); g.position.set(k[2], STEP[2] * k[0], -STEP[1] * k[0]);
-    g.userData.base = STEP[2] * k[0]; keysGrp.add(g); return g;
-  });
-  var tapAnim = KEYS.map(function () { return null; });
+  var parts = {}, moving = new THREE.Group(), springGrp = new THREE.Group();
+  var buttonGrp = new THREE.Group(); buttonGrp.add(moving, springGrp);
+  // every key its own group at its place, each row's part (the back row's with the riser)
+  // copied into its keys' groups, so that any key can move on its own (Press moves the
+  // front row's middle one, All keys every one, or tap a key in the view)
+  var KEY_GRPS = null, tapAnim = KEYS.map(function () { return null; });
+  var PRESSED = KEYS.findIndex(function (k) { return k[0] === 0 && k[1] === 0; });
+  function keyGroups() {
+    if (!KEY_GRPS) KEY_GRPS = KEYS.map(function (k) {
+      var g = new THREE.Group(); g.position.set(k[1], BOARD_Z, -k[2]); grp('keys').add(g); return g;
+    });
+    return KEY_GRPS;
+  }
   function keyPart(name, colour) {
-    var m = mesh(name, colour).children[0];
-    KEY_GRPS.forEach(function (g, i) { var c = new THREE.Mesh(m.geometry, m.material); c.userData.key = i; g.add(c); });
+    [0, 1].forEach(function (r) {
+      var m = mesh(name + r + '_TRIS', colour).children[0];
+      keyGroups().forEach(function (g, i) {
+        if (KEYS[i][0] !== r) return;
+        var c = new THREE.Mesh(m.geometry, m.material); c.userData.key = i; g.add(c);
+      });
+    });
   }
   function placeKeys() {
+    if (!KEY_GRPS) return;
     KEY_GRPS.forEach(function (g, i) {
       var d = (allKeys || i === PRESSED) ? travel : 0;
       if (tapAnim[i] !== null) d = Math.max(d, STROKE * Math.sin(Math.PI * tapAnim[i]));
-      g.position.y = g.userData.base - d;
+      g.position.y = BOARD_Z - d;
     });
     draw();
   }
@@ -169,16 +181,20 @@
     });
   });
   var LOAD = [
-    ['board', function () { grp('pcb').add(mesh('BOARD_TRIS', 0x2f7a4f)); }],
-    ['part bodies', function () { grp('pcb').add(mesh('PARTS_TRIS', 0x2b2f33)); }],
-    ['housing', function () { grp('housing').add(mesh('HOUSING_TRIS', 0xd9a441)); }],
+    ['board', function () { grp('pcb').add(mesh('BOARDS_TRIS', 0x2f7a4f)); }],
+    ['part bodies', function () { grp('pcb').add(mesh('CONN_TRIS', 0x2b2f33)); }],
+    ['electronics', function () { grp('pcb').add(mesh('ELEC_TRIS', 0x2f7a4f), mesh('WIRES_TRIS', 0xd8c08a)); }],
+    ['case', function () { grp('case').add(mesh('CASE_TRIS', 0xd9a441), mesh('ROD_TRIS', 0xb8bcc2), mesh('PINS_TRIS', 0xd4af37)); }],
+    ['back cover', function () { grp('lid').add(mesh('LID_TRIS', 0xc99430), mesh('CSCREW_TRIS', 0x5d6166)); }],
+    ['battery', function () { grp('pcb').add(mesh('BATTERY_TRIS', 0x3d4a57)); }],
     ['cover', function () { grp('cover').add(mesh('COVER_TRIS', 0x5b6f86)); }],
-    ['gauges and wires', function () { grp('cable').add(mesh('LINK_TRIS', 0x8a8f96)); }],
-    ['caps', function () { keyPart('CAP_TRIS', 0x4a6fa5); }],
-    ['plungers', function () { keyPart('PLUNGER_TRIS', 0xe8e2d2); }],
-    ['magnets', function () { keyPart('MAGNET_TRIS', 0x7a8a99); }],
-    ['O-rings', function () { keyPart('ORING_TRIS', 0x2b2f33); }],
-    ['stops', function () { keyPart('STOP_TRIS', 0x8c3b3b); }]
+    ['discant link', function () { grp('extra').add(mesh('LINK_TRIS', 0x8a8f96)); }],
+    ['strap', function () { grp('extra').add(mesh('STRAP_TRIS', 0x6b4a32)); }],
+    ['caps', function () { keyPart('CAP', 0x4a6fa5); }],
+    ['plungers', function () { keyPart('PLUNGER', 0xe8e2d2); }],
+    ['magnets', function () { keyPart('MAGNET', 0x7a8a99); }],
+    ['O-rings', function () { keyPart('ORING', 0x2b2f33); }],
+    ['stops', function () { keyPart('STOP', 0x8c3b3b); }]
   ];
   scene.add(buttonGrp);
 
@@ -192,8 +208,8 @@
   window.addEventListener('resize', function () { size(); draw(); });
 
   // turning, zooming, moving, the centre by double tap: viewer_nav.js; a single tap on a key presses it
-  var HOME = { target: [-5, 0, -26], azim: -0.55, elev: 0.62, dist: 400 };
-  var nav = viewerNav({ view: view, canvas: renderer.domElement, camera: camera, scene: scene, draw: draw, home: HOME, frame: { name: 'discant' },
+  var HOME = { target: [0, -40, -40], azim: -0.95, elev: 0.45, dist: 620 };
+  var nav = viewerNav({ view: view, canvas: renderer.domElement, camera: camera, scene: scene, draw: draw, home: HOME, frame: { name: 'bass' },
                         ok: function (p) { return !clipped || cutPlane.distanceToPoint(p) >= 0; },
                         onTap: function (hits) {
                           if (hits.length && hits[0].object.userData.key !== undefined) { tapAnim[hits[0].object.userData.key] = 0; draw(); }
@@ -296,8 +312,8 @@
   document.getElementById('cut').addEventListener('click', function () {
     this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); applyCut();
   });
-  document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-135, cutY - 5); applyCut(); });
-  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(135, cutY + 5); applyCut(); });
+  document.getElementById('cutback').addEventListener('click', function () { cutY = Math.max(-100, cutY - 5); applyCut(); });
+  document.getElementById('cutfwd').addEventListener('click', function () { cutY = Math.min(110, cutY + 5); applyCut(); });
   // the slider: the section's position directly, in steps of 0.5 [2026-11-22]
   document.getElementById('cutpos').addEventListener('input', function () { cutY = parseFloat(this.value); applyCut(); });
   function showParts() { for (var k in parts) parts[k].visible = vis[k] !== false; draw(); }
