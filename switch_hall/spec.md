@@ -73,9 +73,8 @@ is above the board, and **the board has no key holes**.
    lower end with isopropanol [2026-11-23: it has just passed the oil-impregnated
    bushing, and epoxy holds poorly on oily steel; this joint carries the spring at rest],
    let it dry, then the stop washer over the rod's end (it holds itself), then the collar
-   glued on until the rod
-   sits on the magnet. The spring pulls the collar against the bushing while the glue
-   sets; no jig. No glue may reach washer or bushing: little glue, in the collar's hole
+   glued on until the rod sits on the magnet. The spring pulls the collar against the
+   bushing while the glue sets; no jig. No glue may reach washer or bushing: little glue, in the collar's hole
    only. Leave the cover on its caps until the glue is firm (12 h).
 7. When all keys are in: the cover onto the board, the brass screws (27 on the discant); then each key
    calibrated once at rest and once pressed.
