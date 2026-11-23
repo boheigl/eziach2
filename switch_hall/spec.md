@@ -69,8 +69,11 @@ is above the board, and **the board has no key holes**.
 4. Cover upside down: the bushing into the tube from below, up against the rim.
 5. Cover the right way up: the spring round the tube onto its seat, the O-ring into
    the cap's counterbore, the rod with the cap from above through the bushing.
-6. Cover turned over onto its caps (the springs keep the keys at rest): the stop
-   washer over the rod's end (it holds itself), then the collar glued on until the rod
+6. Cover turned over onto its caps (the springs keep the keys at rest): wipe the rod's
+   lower end with isopropanol [2026-11-23: it has just passed the oil-impregnated
+   bushing, and epoxy holds poorly on oily steel; this joint carries the spring at rest],
+   let it dry, then the stop washer over the rod's end (it holds itself), then the collar
+   glued on until the rod
    sits on the magnet. The spring pulls the collar against the bushing while the glue
    sets; no jig. No glue may reach washer or bushing: little glue, in the collar's hole
    only. Leave the cover on its caps until the glue is firm (12 h).
