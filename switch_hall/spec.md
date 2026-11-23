@@ -92,6 +92,13 @@ is above the board, and **the board has no key holes**.
   - **Rest:** a washer punched with hollow punches from 1 mm silicone or PU
     sheet, ⌀4.5 / ⌀2.5. It sits slightly tight on the ⌀3 rod, rests on the
     collar and bears on the bushing's lower face.
+    **Or a stock O-ring 2.5 × 1** [2026-11-23: no punching; NBR 70 or silicone]:
+    1 mm high like the washer, so the rest position stays; stretched onto the ⌀3
+    rod it sits tight and grows to about ⌀4.9 outside [estimated], 0.1 inside the
+    tube's ⌀5.1 bore, and bears on the bushing's face (⌀3 … 5) as before. Its round
+    section gives softer at first, if anything quieter on release. Not 3 × 1: ⌀5
+    outside is too close to the bore's 5.1 and may rub. Whether it sets more than the
+    sheet washer the prototype shows.
   - **Rest position drift:** if the washer sets over time, the key rests a
     little lower. The firmware should keep tracking each key's rest reading
     while the key is not pressed.

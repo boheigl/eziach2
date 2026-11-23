@@ -14,7 +14,7 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 | Rod: dowel pin ISO 2338 ⌀3 h8 × 14, stainless A1 (bass back row × 24) | 1 | 55 × 14 + 9 × 24 | stock: the 55 × 14 ordered 2026-11-21 from MBO Oßwald (mbo-osswald.de, 3 h8 × 14, 1.4305); **the 9 × 24 for the bass's back row still to order** [open] (3 h8 × 24, the same steel); not m6, not ISO 8734 (hardened, magnetic) |
 | Magnet ⌀3 × 1.5, N52, magnetised axially | 1 | 64 | stock: ordered 2026-11-21 from magnethandel.de (Ni-Cu-Ni); its pocket is ⌀3.05, check the diameter |
 | O-ring 4 × 1.5 (silicone about 50 Shore A, or NBR 70) | 1 | 64 | stock |
-| Stop washer ⌀4.5 / ⌀2.5 | 1 | 64 | punched from 1 mm silicone or PU sheet |
+| Stop washer ⌀4.5 / ⌀2.5 | 1 | 64 | punched from 1 mm silicone or PU sheet; or a stock O-ring 2.5 × 1 (NBR 70 or silicone) instead [2026-11-23], `switch_hall/spec.md` §2 |
 | Cap, collar | 1 each | 64 + 64 | printed |
 | Adhesive for the rod in cap and collar: slow 2-component epoxy, e.g. UHU plus endfest | a drop each | 1 pack | not cyanoacrylate (creeps into the bushing); `switch_hall/spec.md` §2 |
 
