@@ -64,6 +64,16 @@ is above the board, and **the board has no key holes**.
    into the hole (not on the rod), squeeze-out wiped off. Glued length 2.5 mm in the
    cap, 1.5 mm in the collar (where it also holds the magnet): about 24 and 14 mm²,
    some 50 N at a few N/mm² on PETG, against 1.2 N and a knock. [estimated]
+
+   **Or, with nothing to mix** [2026-11-23, to try on the prototype first]: a one-part MS
+   polymer (hybrid) adhesive, e.g. UHU Max Repair or Pattex 100 % Repair Gel. Pasty, so it
+   does not creep; it stays elastic and takes the knock; it holds on metal and most
+   plastics, on PETG not yet tried. Weaker than epoxy, about 2–3 N/mm² [typical for MS
+   polymers]: about 30 N in the collar's 14 mm², still far over 1.2 N; and the key pulls
+   apart more easily (Taking a key apart, below). It cures with air moisture, slowly in
+   the blind holes: leave the cover on its caps 1–2 days instead of 12 h. Not for the
+   contacts' pad board (`../assembly/spec.md`, Contacts): its glue line must stay 0.1 mm
+   thin and stiff; there epoxy, or a double-sided tape no thicker than about 0.1 mm.
 3. Press the magnet into the collar from below; every key with the same pole down
    (check against a marked magnet).
 4. Cover upside down: the bushing into the tube from below, up against the rim.

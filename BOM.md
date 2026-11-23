@@ -16,7 +16,7 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 | O-ring 4 × 1.5 (silicone about 50 Shore A, or NBR 70) | 1 | 64 | stock |
 | Stop washer ⌀4.5 / ⌀2.5 | 1 | 64 | punched from 1 mm silicone or PU sheet; or a stock O-ring 2.5 × 1 (NBR 70 or silicone) instead [2026-11-23], `switch_hall/spec.md` §2 |
 | Cap, collar | 1 each | 64 + 64 | printed |
-| Adhesive for the rod in cap and collar: slow 2-component epoxy, e.g. UHU plus endfest | a drop each | 1 pack | not cyanoacrylate (creeps into the bushing); `switch_hall/spec.md` §2 |
+| Adhesive for the rod in cap and collar: slow 2-component epoxy, e.g. UHU plus endfest | a drop each | 1 pack | not cyanoacrylate (creeps into the bushing); `switch_hall/spec.md` §2. Or, nothing to mix: a one-part MS polymer (e.g. UHU Max Repair), cured 1–2 days; try it on the prototype first [2026-11-23] |
 
 ## Discant — `discant/spec.md`
 
