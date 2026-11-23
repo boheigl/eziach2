@@ -78,6 +78,28 @@ is above the board, and **the board has no key holes**.
    only. Leave the cover on its caps until the glue is firm (12 h).
 7. When all keys are in: the cover onto the board, the brass screws (27 on the discant); then each key
    calibrated once at rest and once pressed.
+
+**Taking a key apart** [2026-11-23] (to change a spring, a bushing or a damaged key): the
+collar cannot be reached; it runs inside the tube's ⌀5.1 bore, its lower face 3.75 above
+the tube's bottom at rest and still 0.75 pressed, and from below a drill meets the rod's
+steel end first. The cap is what gives way:
+
+1. The cover off the board (the brass screws); the tubes are then open below.
+2. Break the cap: cut its skirt with side cutters and break the PETG away round the rod
+   (glued 2.5 deep).
+3. Pull the rod down and out with collar, magnet and stop washer: the collar passes the
+   ⌀5.1 bore, the rod the bushing. Spring and O-ring come off at the top; the bushing
+   stays in the tube.
+4. Only the cap is lost. Rod, collar and magnet stay one unit and go back in; clean the
+   glue off the rod's top end (or take a new dowel pin, glued into a new collar).
+5. Back together: the rod with its collar up through the bushing from below, spring and
+   O-ring on top, a new cap glued on. The spring now pushes the fresh cap up off the rod:
+   hold it down (a weight or a clamp) until the glue is firm (12 h).
+
+A retaining ring instead of the glued collar (DIN 6799) does not fit [checked 2026-11-23]:
+size 2.3 for a 3 mm shaft is ⌀6.3 outside, more than the tube (⌀6.6) leaves inside it; it
+goes on sideways, but the rod's end never leaves the tube; and it would have to sit under
+the collar, where the magnet is, with a groove turned into every dowel pin.
 - **Sensor:** a linear ratiometric Hall sensor in SOT-23 (e.g. DRV5055A3,
   ±85 mT) sits on the board's **underside, exactly on the key's axis**, and
   senses through the board. A magnet magnetised along its axis is pressed into
