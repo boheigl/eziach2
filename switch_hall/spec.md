@@ -82,19 +82,28 @@ is above the board, and **the board has no key holes**.
 **Taking a key apart** [2026-11-23] (to change a spring, a bushing or a damaged key): the
 collar cannot be reached; it runs inside the tube's ⌀5.1 bore, its lower face 3.75 above
 the tube's bottom at rest and still 0.75 pressed, and from below a drill meets the rod's
-steel end first. The cap is what gives way:
+steel end first. Cutting the cap is awkward too: its skirt (⌀12.4, 0.8 wall, about 6.5
+long) runs 0.3 over the shroud, so no jaw gets inside, and any cut through its 3.2 mm disc
+ends at the steel rod. So the key is pulled apart [estimated, to try on the prototype]:
 
 1. The cover off the board (the brass screws); the tubes are then open below.
-2. Break the cap: cut its skirt with side cutters and break the PETG away round the rod
-   (glued 2.5 deep).
-3. Pull the rod down and out with collar, magnet and stop washer: the collar passes the
-   ⌀5.1 bore, the rod the bushing. Spring and O-ring come off at the top; the bushing
-   stays in the tube.
-4. Only the cap is lost. Rod, collar and magnet stay one unit and go back in; clean the
-   glue off the rod's top end (or take a new dowel pin, glued into a new collar).
-5. Back together: the rod with its collar up through the bushing from below, spring and
-   O-ring on top, a new cap glued on. The spring now pushes the fresh cap up off the rod:
-   hold it down (a weight or a clamp) until the glue is firm (12 h).
+2. Hold the cover and pull the cap straight up (flat pliers on its rim, a cloth between).
+   The collar holds the rod through stop washer and bushing, so both glued joints are
+   pulled: the collar's (1.5 deep, about 14 mm²) gives first, rather than the cap's (2.5
+   deep, about 24 mm²), at some 50 N. The bushing is only pressed up against its rim
+   (about 4 MPa in the rim's PETG). Do not twist: rod and collar turn freely.
+3. Rod and cap come out at the top, with spring and O-ring; collar, magnet and stop
+   washer drop out below. Nothing is cut; clean the glue off the rod's end and the collar.
+   Should the cap's joint give instead, the rod stays: pull it down and out with collar,
+   magnet and washer (the collar passes the ⌀5.1 bore, the rod the bushing).
+4. Only if pulling fails: heat. A soldering iron pressed through the cap's 0.5 mm roof
+   onto the rod's end softens epoxy and PETG, and the spring helps lift the cap. A few
+   seconds only: the rod carries the heat to the magnet, and N52 loses strength for good
+   above about 80 °C (it comes out with the collar and can be replaced).
+5. Back together: the rod up through the bushing (from below with its collar, or from
+   above with the cap), spring and O-ring on top, the missing part glued on as in steps
+   2 and 6 above. A cap glued on last is pushed up off the rod by the spring: hold it
+   down (a weight or a clamp) until the glue is firm (12 h).
 
 A retaining ring instead of the glued collar (DIN 6799) does not fit [checked 2026-11-23]:
 size 2.3 for a 3 mm shaft is ⌀6.3 outside, more than the tube (⌀6.6) leaves inside it; it
