@@ -79,7 +79,13 @@ jack_x0   = jack_x1 - jack_fl[1] - jack_body[1] - jack_lugs[1];   // the lugs' e
 // the bulge: round the jack, the cover's wall back_t (case.scad) on 0.3 clear
 jack_room_r = jack_fl[0] / 2 + 0.3;
 jack_bump_r = jack_room_r + 1.6;
-jack_bump_x0 = jack_x0 - 0.8 - 1.6;
+// the jack goes in from inside [2026-11-24: since the bulge's lower half is the case's,
+// case.scad]: from behind, its bottom over the bulge's lower half, down into it jack_slide
+// short of the wall, then slid +x through the hole. jack_slide: its thread (3.5) out of the
+// hole, and its lugs clear of the main board's tall part at x 81.75 (more than 5.15 would
+// touch it); the bulge is jack_slide longer for it
+jack_slide = 5;
+jack_bump_x0 = jack_x0 - 0.8 - 1.6 - jack_slide;
 pad_d   = 4.5;
 
 module bx(x, y, z) translate([x[0], y[0], z[0]]) cube([x[1] - x[0], y[1] - y[0], z[1] - z[0]]);
@@ -138,16 +144,32 @@ module jack_cuts() translate([0, jack_yc, jack_z]) rotate([0, 90, 0]) {
         translate([0, -(jack_yc - jack_room_r - brd_y[0]), jack_bump_x0 + 1.6]) cylinder(r = jack_room_r, h = jack_x1 - jack_bump_x0 - 1.6, $fn = 48);
     }
     translate([0, 0, jack_x1 - 1]) cylinder(d = jack_hole, h = wall_t + 2, $fn = 32);
+    // the thread's way down, jack_slide short of the wall: through the side wall's inner
+    // corner rounding above the bulge, inside the back wall's line (the cover's stays whole)
+    intersection() {
+        hull() for (u = [0, 9]) translate([-u, 0, jack_x1 - jack_slide - 0.3]) cylinder(r = jack_thr[0] / 2 + 0.4, h = jack_slide + 0.31, $fn = 32);
+        translate([-20, -20, jack_x1 - jack_slide - 1]) cube([20.01, -(jack_yc - (box_back - back_t)) + 20, jack_slide + 2]);
+    }
     translate([0, 0, box_x[1] - jack_cb]) cylinder(d = jack_nut[0] + 1, h = 2, $fn = 32);
 }
 // which of the bulge is the back cover's: all but the side wall, which carries the jack
 // (so the cover comes off with the jack in place)
 // [corner, size]; also for case.scad's back cover, which stands cov_gap back from the case
 function jack_cover_box() = [[jack_bump_x0 - 1, box_back - back_t, jack_z - jack_bump_r - 1], [jack_x1 - jack_bump_x0 + 1, 30, 2 * jack_bump_r + 2]];
+// the jack's axis (y, z) and the bulge's outer radius, for case.scad's bulge sweep
+function jack_bump_yzr() = [jack_yc, jack_z, jack_bump_r];
+// the jack's lengths along x and radii, for case.scad's cradle: [lugs' end, body's start,
+// flange's start, body r, lugs r, room r, jack_slide]
+function jack_dims() = [jack_x0, jack_x0 + jack_lugs[1], jack_x1 - jack_fl[1], jack_body[0] / 2, jack_lugs[0] / 2, jack_room_r, jack_slide];
+// the jack without its nut, for the checks of putting it in
+module jack_bare() {
+    intersection() { jack(); translate([0, -50, -200]) cube([jack_x1 + wall_t - jack_cb, 100, 400]); }
+    translate([jack_x1, jack_yc, jack_z]) rotate([0, 90, 0]) cylinder(d = jack_thr[0], h = jack_thr[1], $fn = 32);
+}
 module jack_cover_zone() translate(jack_cover_box()[0]) cube(jack_cover_box()[1]);
-// the main board's lowest screw lies below z_split, behind the case's strip: the strip's
-// piece in front of it is the cover's too, so with the cover off a screwdriver reaches it
-// [given 2026-11-15: all screws reachable]
+// the main board's lowest screw lies below z_split, behind the case's strip: case.scad
+// cuts a hole in the strip in front of it, so a screwdriver reaches it [given 2026-11-15:
+// all screws reachable] (until 2026-11-24 that piece of the strip was the cover's)
 low_hole = [for (h = main_holes) if (h[1] == min([for (q = main_holes) q[1]])) h][0];
 function screw_cover_box() = [[mx(low_hole[0]) - 3.5, box_back - back_t, mz(low_hole[1]) - 3.5], [7, 30, 7]];
 module screw_cover_zone() translate(screw_cover_box()[0]) cube(screw_cover_box()[1]);

@@ -81,8 +81,7 @@ keys: `../BOM.md`.
   threaded with the back cover off; about 174 mm between the inner slots (the hand plate
   is 131.5 wide), so the hand can slide along the rows. The bar is the front wall between the slots and a block behind
   it, 5 × 6.5 mm; a 100 N pull on each end puts 200 N round it: about 30 MPa [estimate,
-  PETG]. The outer upright ribs stand at 83 mm from the middle, inside the slots; the back
-  cover's tongues sit between the ribs. (Bars on the slanted side
+  PETG]. The outer upright ribs stand at 83 mm from the middle, inside the slots. (Bars on the slanted side
   walls, tried first, would have twisted a level strap by 31.6° and took only 25 mm.)
   `strap.stl` shows it on the page.
 - **Strength under a strong push** [given: statically stable] (estimates, 100 N; PLA/PETG
@@ -112,19 +111,41 @@ keys: `../BOM.md`.
   discant sits 1.2 mm higher than before the thumb bar (link.scad `front_d`): as high as
   the socket can rise, 0.4 under the back row's middle guide floors (z −3.6).
 - **Back cover** [given: inside, on the side away from the hand]: the back wall from
-  z −116 up to the deck, with the side walls' last 1.6 mm, one 1.6 mm plate following the
-  box's outline. Two tongues at its bottom edge hook in behind the mount's strip (which
-  stays with the case: the gauges' and contacts' load never passes the cover): 24 mm
-  wide left of the battery, 5.35 mm wide and 3.2 thick (2 mm more, inwards [given
-  2026-11-15]) between the battery's rib and the main board [2026-11-21: 7 mm wide it
-  stood 1.25 into that rib, which had moved with the longer cradle; now it starts 0.3 past
-  the rib (`cov_gap`)]
-  [given 2026-11-15: over the board it sat 0.6 mm above the ESP32 module, and tilting
-  the cover to hook it in swung it onto the module beyond about 9°]. Checked: both
-  tongues swing clear of board, wires and battery up to 20° of tilt; three M2 × 6
-  countersunk screws (DIN 965, modelled: `cover_screws.stl`) at z −21 (x −45, 0, 45),
-  above the stored discant's caps, flush in 90° countersinks (⌀4.0, 0.9 deep, 0.7 of the
-  plate left under them), 4.4 mm into ⌀1.7 pilots in pillars from the front wall. It rests on the side walls' ends, the ribs and the pillars.
+  z −128.5 up to the deck, with the side walls' last 1.6 mm, one 1.6 mm plate following the
+  box's outline. The mount's strip below it stays with the case: the gauges' and contacts'
+  load never passes the cover.
+  **Fitting: slid in from the side** [given 2026-11-24]. The deck overhangs the cover's top
+  edge by 27 mm at 0.3 clear, so the cover can neither swing in about its bottom edge (the
+  tongues it had there until 2026-11-24 needed 4 mm of lift) nor about its top (the stored
+  discant's socket stops it at about 9°). So it slides in along its own plane from the −x
+  end, where the side wall's last 1.6 mm is the cover's [given: a few degrees of tilt on
+  the way are fine; checked only straight]. The jack's side wall at +x is its end stop. Its inner face is flat, so inside
+  only the seats it rests on (side walls' ends, ribs, pillars) meet it. From +x it would not
+  go: the jack's wall stands in its plane there, and the bulge's closed end would have to
+  pass over the jack; from −x the bulge's open end leads over the jack.
+  **Bottom edge: a 45° ramp** on the strip, rising outwards (z −128.5 at the inner face,
+  −126.9 at the outer). A pull at the bottom would lift the cover up the ramp, which the
+  screws at the top stop (and the deck, 0.3 over its top edge). Both slopes overhang 45°
+  over 1.6 mm: no supports, for the case standing on its hand face and for the cover on its
+  inner face.
+  **Top: three M2 × 6 countersunk screws** (DIN 965, modelled: `cover_screws.stl`) at z −21
+  (x −45, 0, 45), above the stored discant's caps, flush in 90° countersinks (⌀4.0, 0.9
+  deep, 0.7 of the plate left under them), 4.4 mm into ⌀1.7 pilots in pillars from the
+  front wall.
+  **Under the cover nothing hangs below the split** (it would drag along the whole strip):
+  through the jack's bulge, outside the plate, the split runs level at z −128.6, the
+  bulge's part below it is the case's (a trough the jack lies in, see the jack below); the piece of strip in front of the main board's lowest
+  screw, which was the cover's, is the case's again, with a ⌀4.0 hole in it for the
+  screw's head (⌀3.8) and the screwdriver, on out through the bulge's lower part (clear
+  of the jack's room) and 0.5 in through the outer rib's sliver at the back wall; the
+  hole is seen from the back. Checked: the head's way from the board out is clear.
+  **The overload stops' blocks** stood up to z −126.3, into the bulge's way: their back
+  part by the box (y −1.3 … 4.7) is 2.3 lower (to z −128.6); the roof over the slot
+  (y 6.2 … 15.7) stays whole (`link.scad`). The mount and the inner holders stay below
+  the bulge's way (top about z −129.3).
+  Checked 2026-11-24 (solids): in place it only touches its seats; slid out along −x in
+  steps from 0.3 to 230 mm it is clear of case, mount, battery, electronics, wires and the
+  jack in place; clear of the played discant's link.
   Assembly with it off: battery, the main board (screwed from the back into the front
   wall's pilots; it goes in 2 mm to the left and slides right into the
   port), the key board's bus wires from J1 and the contacts' wires, all in reach. Screws
@@ -133,11 +154,9 @@ keys: `../BOM.md`.
   the hand's face; the key board 12 × M2 × 6 countersunk brass (DIN 965), 1.9 mm into
   the case as on the discant.
   **Fit to the case** [given 2026-11-21: it was cut from the same body, 0 all round]:
-  `cov_gap` = 0.3 where its edges meet the case (the strip below, the deck above, round the
-  jack's bulge and wall and the screw's piece), behind the strip for the tongues (0.05
-  before), and clear of the mount, whose overload stops' blocks stand up outside its bottom
-  edge (they touched its outer face). It still rests on the side walls' ends, the ribs and
-  the pillars. Checked by moving it 0.05 against the case: only those seats touch.
+  `cov_gap` = 0.3 where its edges meet the case (the ramp and strip below, the deck above,
+  round the jack's bulge and wall), normal to the faces, and clear of the mount. It rests
+  on the side walls' ends, the ribs and the pillars.
 - **Battery** [given: 6 mm, for the thinner box; it was a 9 mm 906090 of about 6 Ah]: a
   1S LiPo pouch 606090 of 4000 mAh with its protection board (PCM) and a 10k NTC, three
   wires (e.g. DNK606090 [datasheet]; 3-wire variants with JST-PH are sold). With the PCM it
@@ -170,17 +189,52 @@ keys: `../BOM.md`.
     cover allowed]: Switchcraft 35PRM3, from inside through the side wall (⌀6.2, the
     wall 1.5 at a ⌀10.5 counterbore for its knurled nut), its body over the main board
     and wired to it. 1.0 mm over the board. The back cover bulges 5.7 mm round it (⌀13.3 about the jack's axis,
-    from the side wall 24 mm inwards); the bulge is the cover's, down past z_split,
-    but the side wall round the hole stays the case's, so the cover comes off with
-    the jack in place. Checked: clear of case, cover, board, battery and wires, and
+    from the side wall 28.7 mm inwards); outside the plate the bulge is the cover's above
+    z −128.6, the case's below, and the side wall round the hole stays the case's, so
+    the cover slides off with the jack in place.
+    **Putting the jack in** [2026-11-24: since the bulge's lower part is the case's, it no
+    longer goes in from behind at its place]: with the main board in and the cover off,
+    from behind, 5 mm short of the wall and 2.4–3.0 mm higher than its place (its flange
+    over the trough's rim at z −128.6, under the USB socket J1 2.3 mm above it), down into
+    the trough, then slid +x through the hole, the nut on from outside. The bulge is 5 mm
+    longer for it (`elec.scad`: `jack_slide`); more than 5.15 mm short of the wall its lugs
+    would touch the ESP32 module. The side wall's inner corner rounding over the bulge is
+    cut back for the thread on the way down (inside the back wall's line). Checked (solids,
+    jack without nut, in 0.5–10 mm steps): clear of case, main board's parts and wires
+    along the whole way; at 2.0–2.2 mm it touches the rim.
+    **Cradle** [given 2026-11-24: the jack holds 20 N across the plug]. Clamped alone,
+    its bushing bends the 1.5 mm wall: 20 N, 25 mm out of the wall, is about 520 N·mm,
+    about 45 MPa in the wall round the nut [estimate: rigid boss in a plate], partly
+    across the layers (PETG about 20–30 MPa there). So the body bears on a cradle as far
+    from the wall as it can, x 93.3 … 101.1 (between its lugs and where its flange stands
+    before it is slid in): the plug's moment becomes about 42 N at the cradle and 62 N
+    across the wall (bearing about 7 MPa on the thread). The case's saddle (0.1 round the
+    body, ⌀7.7 [datasheet]) takes down and to the back: from the plate's inner face
+    (y −2.9, just past the body's lowest line) out to z −128.6 (else the jack would not
+    get in). Not to the front (towards the board) [2026-11-25]: inside the plate a saddle
+    would hang free in print (the case stands on its hand face; it started at y −6.45 in
+    the air); that direction stays on the wall alone, about 45 MPa at 20 N [estimate].
+    The cover's rib takes up and to the back: over the body from y −2.9 out and down to
+    the split; it slides in over the lugs, so it clears their envelope (r 4.0
+    [estimated]) by 0.15, 0.3 off the body, for the arch's sag in print (the cover prints
+    on its inner face; the rib is an arch of ⌀8.3 over the body, no supports). Before
+    they bear, the jack turns 0.5° (saddle) or 1.4° (rib) in the wall: about 6–17 MPa
+    there [estimate, ±2×]. On the rib an upward 42 N goes through the cover's bulge to its
+    screws, about 15 MPa in the bulge's shell with the rib [estimate]. If the rib shows
+    play, a turn of tape on the body takes it up. Stiffening the wall round the clamp
+    does not help: the section at the flange's edge stays 1.5–2 mm (the thread's length),
+    and a stiffer wall takes more of the moment before saddle or rib bear. Printing: the
+    saddle starts with the strip's first layer (y −2.9) and grows out with the bulge's
+    shell (checked by slices along y). Checked (solids): the jack still goes in as above,
+    the cover still slides in with it in place. Checked: clear of case, cover, board, battery and wires, and
     of the discant both played and stored (stored, it stays 10 mm above the bulge).
   - **No key electronics in the box:** the bass's Hall-sensor board reads its own keys
     (`../hall_pcb/bass/`); only its bus comes down, from J1 (JST SH, the plug from below)
     straight into the box to the main board.
   The main board lies on the front wall's inside on three pads with M2 pilots,
   screwed from the back with the back cover off. Its lowest screw lies below the cover's
-  bottom edge, behind the case's strip: the strip's piece in front of it (7 × 7 mm) is
-  the cover's, so a screwdriver reaches it [given 2026-11-15: all screws reachable].
+  bottom edge, behind the case's strip: a ⌀4.0 hole in the strip in front of it lets a
+  screwdriver reach it [given 2026-11-15: all screws reachable].
   Checked with a 3 mm shaft and a 16 mm handle: all three main board screws, the bass's
   12 and the discant's 27 key board screws are reachable (the keys in place).
 - **Wires** (`elec.scad`: `wires()`, `wires.stl`): the nine pins' wires leave the mount's

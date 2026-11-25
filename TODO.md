@@ -1,4 +1,4 @@
-# Open items (2026-11-15, updated 2026-11-21)
+# Open items (2026-11-15, updated 2026-11-25)
 
 Collected from the specs and the battery check. Each item names the files it touches.
 
@@ -60,6 +60,15 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
 18a. Standing print of the discant housing: stable at 101 mm on its front edge
      (`discant/spec.md`, Printing).
 18b. Supports under the thumb bar's lobes when printing the cover (`discant/spec.md` §3.2).
+18c. Bass back cover and earphone jack (`bass/spec.md`, Back cover and Electronics):
+     - the cover slides in from −x over its 45° ramp, past pillars and ribs (0 and 0.2
+       clear), and hits nothing on the way;
+     - the jack goes in from behind, 5 mm short of the wall and 2.4–3.0 mm above its
+       place, drops into the saddle and slides into the hole (the window is narrow);
+     - the cover's rib sits about 0.3 mm over the jack body: if it binds on the lugs,
+       sand it; if it rattles, tape on the body;
+     - pulled towards the main board the jack has only the 1.5 mm wall (about 45 MPa at
+       20 N, estimated): try it by hand on the print.
 
 ## To measure on the bought parts
 

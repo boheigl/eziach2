@@ -42,7 +42,7 @@
 // WIDTH [given 2026-11-14: rectangular; stored, the discant's outer keys stay uncovered]:
 // 211, deck and box alike, set by the strap's slots (layout.scad).
 //
-// ASSEMBLY: back cover off (three screws, then lift it out of the tongues' slot): the
+// ASSEMBLY: back cover off (three screws, then slide it out to -x along its plane): the
 // battery, the main board (screwed from the back into the front wall's pilots; it goes
 // in 2 mm to the left and slides right into the port), the key board's bus wires from J1
 // and the contacts' wires are all in reach. The bottom is closed.
@@ -66,7 +66,7 @@ recess_r = 6;
 floor_b  = 2;                    // the box's bottom, closed [given: access by the back cover]
 rib_t    = 1.6;                  // the front wall's ribs
 rib_gap  = 0.2;                  //   short of the back cover
-z_split  = z_bot + 12.5;         // the back cover from here up; below, the mount's strip stays
+z_split  = z_bot + 12.5;         // the back cover from here up (its ramp's inner edge); below, the mount's strip stays
 cov_screws = [[-45 + ex, -21], [ex, -21], [45 + ex, -21]];   // the back cover's screws: above the stored caps (z < -38)
 pillar_d = 6;
 bat       = [93, 6, 60];         // the battery: x, y, z; a 606090 4 Ah LiPo with its PCM, 92 ... 92.5 long
@@ -232,46 +232,105 @@ module pillars() for (p = cov_screws) difference() {
     translate([p[0], plate_y[1] - 0.01, p[1]]) rotate([-90, 0, 0]) cylinder(d = pillar_d, h = box_back - back_t - plate_y[1] + 0.01);
     translate([p[0], box_back - back_t - 6, p[1]]) rotate([-90, 0, 0]) cylinder(d = pilot_d, h = 7);
 }
-// BACK COVER [given: inside, on the side away from the hand]: the back wall from z_split
-// up to the deck, with the side walls' last back_t, as one plate; its bottom edge hooks
-// in behind the mount's strip with two tongues, three screws hold its top; it rests on
-// the side walls' ends, ribs and pillars, so the hand's push never loads it.
+// BACK COVER [given: inside, on the side away from the hand]: the back wall from the
+// strip up to the deck, with the side walls' last back_t, as one plate. It slides in from
+// the -x side along its own plane [given 2026-11-24: the deck overhangs its top edge by 27
+// mm at 0.3 clear, so it cannot swing in about its bottom edge; a few degrees of tilt on
+// the way are fine, checked only straight]: the -x side wall's end is open, the jack's wall at +x is its end stop.
+// Its bottom edge sits on the strip on a 45 deg ramp, rising outwards, so a pull at the
+// bottom would lift it, which the three screws at its top (and the deck, 0.3 over it)
+// stop. It rests on the side walls' ends, ribs and pillars, so the hand's push never loads it.
+ramp_y = box_back - back_t;      // the plate's inner face: the ramp starts at z_split there
+// outside the plate (only the jack's bulge is there) the case keeps the bulge's shell up to
+// split_out: low enough that the jack, coming in from behind, passes over it under the USB
+// socket (elec.scad, jack_slide), high enough that the bulge's way as the cover slides in
+// stays clear of the mount and the holders (top about -129.3) [2026-11-24]
+split_out = z_split - 0.1;       // -128.6
+// the case's side of the split in (y, z): z_split inside, the ramp across the plate, then
+// down to split_out outside (through the jack's bulge)
+module split_below2d() polygon([[-60, -400], [-60, z_split], [ramp_y, z_split], [ramp_y + back_t, z_split + back_t],
+                                [ramp_y + back_t, split_out], [60, split_out], [60, -400]]);
+// above the split, d off it (normal to its faces), along all x
+module split_above(d = 0) rotate([90, 0, 90]) linear_extrude(800, center = true)
+    difference() { translate([-60, -400]) square([120, 800]); offset(delta = d) split_below2d(); }
 module cover_slab() difference() {
-    union() {
-        translate([-300, box_back - back_t, z_split]) cube([600, back_t + 0.001, z_floor - z_split]);
-        jack_cover_zone();       // the jack's bulge, down past z_split (elec.scad)
-        screw_cover_zone();      // in front of the main board's lowest screw (elec.scad)
+    intersection() {
+        split_above();
+        union() {
+            translate([-300, ramp_y, z_split - 1]) cube([600, back_t + 0.001, z_floor - z_split + 1]);
+            jack_cover_zone();   // the jack's bulge (elec.scad): its part over the split
+        }
     }
     jack_wall_zone();            // but not the side wall that holds the jack
 }
 // the back cover's share of it: cov_gap back from the case all round, where its edges meet
-// the case (the strip below, the deck above, round the jack's bulge and the screw's piece)
-// [given 2026-11-21: was cut from the same body, 0 all round]; the outer faces and the
-// cover's seats on side walls, ribs and pillars (along y) stay as they are
+// the case (the strip below, the deck above, round the jack's bulge) [given 2026-11-21: was
+// cut from the same body, 0 all round]; the outer faces and the cover's seats on side walls,
+// ribs and pillars (along y) stay as they are
+cov_gap = 0.3;
 module cover_slab_cover() difference() {
-    union() {
-        translate([-300, box_back - back_t, z_split + cov_gap]) cube([600, back_t + 0.001, z_floor - z_split - 2 * cov_gap]);
-        // the jack's bulge and the screw's piece (elec.scad's zones), cov_gap smaller at their
-        // x and z faces
-        for (b = [jack_cover_box(), screw_cover_box()])
-            translate(b[0] + [cov_gap, 0, cov_gap]) cube(b[1] - [2 * cov_gap, 0, 2 * cov_gap]);
+    intersection() {
+        split_above(cov_gap);
+        union() {
+            translate([-300, ramp_y, z_split - 1]) cube([600, back_t + 0.001, z_floor - cov_gap - z_split + 1]);
+            let(b = jack_cover_box()) translate(b[0] + [cov_gap, 0, 0]) cube(b[1] - [2 * cov_gap, 0, cov_gap]);
+        }
     }
     minkowski() { jack_wall_zone(); cube(2 * cov_gap, center = true); }   // the jack's wall, cov_gap larger (x, z)
 }
-// between the ribs; the right one beside the main board, between the rib at the battery
-// and the board's edge [given 2026-11-15: over the ESP32 module it left 0.6 mm, and
-// tilting the cover to hook it in swung it onto the module beyond about 9 deg]
-// [x0, x1, thickness]: the narrow right one 2 mm thicker, inwards [given 2026-11-15]
-// The right one starts cov_gap past the rib at the battery (rib_x at bat_x[1] + 1.7, rib_t;
-// its 6 wide foot stays below the tongue) [2026-11-21: it stood 1.25 into the rib at 48.3 + ex,
-// since the cradle grew]
-cov_gap = 0.3;
-cov_tongues = [[-80 + ex, -56 + ex, 1.2], [bat_x[1] + 1.7 + rib_t / 2 + cov_gap, 55.2 + ex, 3.2]];
-// each tongue: behind the strip's inner face below z_split (cov_gap clear of it; 0.05 before
-// 2026-11-21), joined to the cover above it, which starts cov_gap over the strip
-module cover_tongues() for (x = cov_tongues) {
-    translate([x[0], box_back - back_t - cov_gap - x[2], z_split - 4]) cube([x[1] - x[0], x[2], 6]);
-    translate([x[0], box_back - back_t - cov_gap - x[2], z_split + cov_gap]) cube([x[1] - x[0], x[2] + cov_gap + 0.5, 2.3 - cov_gap]);
+// the main board's lowest screw lies below z_split, behind the strip: a hole in the strip in
+// front of it, for the screw's head and the screwdriver [given 2026-11-15: all screws
+// reachable] (until 2026-11-24 that piece of the strip was the cover's; it would have to
+// slide along the whole strip now). Head d 3.8 (ISO 7045 M2). Out through the jack's bulge
+// too, whose lower part (the case's) stands outside it, and 0.5 in, through the outer rib's
+// sliver at the back wall (the head touched it); at 4.0 it stays clear of the jack's room
+scr_hole_d = 4.0;
+module screw_hole() let(b = screw_cover_box())
+    translate([b[0][0] + b[1][0] / 2, ramp_y - 0.5, b[0][2] + b[1][2] / 2]) rotate([-90, 0, 0]) cylinder(d = scr_hole_d, h = 12.5);
+// the way of the cover's bulge as it slides in from -x, cov_gap round it: outside the plate,
+// over the level split; the overload stops' blocks are cut back under it (link.scad's mount)
+module bulge_sweep() let(b = jack_cover_box(), j = jack_bump_yzr())
+    translate([b[0][0] + b[1][0] - 400, 0, 0]) rotate([90, 0, 90]) linear_extrude(400)
+        intersection() {
+            translate([j[0], j[1]]) circle(r = j[2] + cov_gap, $fn = 64);
+            translate([box_back - 0.01, split_out]) square([20, 30]);
+        }
+
+// THE JACK'S CRADLE [given 2026-11-24: the jack holds 20 N across the plug]: on its own the
+// jack's bushing bends the 1.5 mm wall it is clamped in (about 45 MPa at 20 N, 25 mm out
+// [estimate], partly across the layers). So its body bears on a cradle as far from the wall
+// as it can: between its lugs and where its flange stands before it is slid in (x 93.3 ..
+// 101.1), and the plug's moment becomes two forces, at the wall and at the cradle.
+//   the case's saddle under it: down and to the back (from the plate's inner face, just
+//     past the body's lowest line, out to the split, else the jack would not get in from
+//     behind); to the front (towards the board) nothing: inside the plate the saddle
+//     would hang free in print;
+//   the cover's rib over it: up and to the back. The rib slides in over the lugs, so it
+//     clears their envelope (r 4.0 [estimated]), 0.3 off the body.
+// cradle_c: the saddle round the body (d 7.7 [datasheet]); printed concave faces come out
+// small. cradle_y0: its inner edge, clear of the main board's parts under the jack
+cradle_c  = 0.1;
+cradle_rib_c = 0.15;             // the rib over the lugs' envelope: 0.3 off the body, for the arch's sag in print
+cradle_y0 = ramp_y;               // only from the plate's inner face out: inside it the saddle would hang
+                                 // free in print (the case stands on its hand face) [2026-11-25]
+function cradle_x() = let(d = jack_dims()) [d[1] + 0.3, d[2] - d[6] - 0.3];
+module cradle_extrude() let(x = cradle_x()) translate([x[0], 0, 0]) rotate([90, 0, 90]) linear_extrude(x[1] - x[0]) children();
+module jack_cradle() let(j = jack_bump_yzr(), d = jack_dims()) difference() {
+    cradle_extrude() difference() {
+        intersection() {
+            union() { translate([j[0], j[1]]) circle(r = d[5], $fn = 64); translate([j[0] - 20, j[1] - d[5]]) square([20, d[5]]); }
+            translate([cradle_y0, j[1] - d[5] - 0.01]) square([30, d[5] + 0.01]);   // below the axis
+        }
+        translate([j[0], j[1]]) circle(r = d[3] + cradle_c, $fn = 64);
+    }
+    intersection() { split_above(); translate([-500, ramp_y, -500]) cube(1000); }   // the cover's share
+}
+module cover_rib() let(j = jack_bump_yzr(), d = jack_dims()) intersection() {
+    cradle_extrude() difference() {
+        intersection() { translate([j[0], j[1]]) circle(r = d[5] + 0.01, $fn = 64); translate([ramp_y, -400]) square([30, 800]); }
+        translate([j[0], j[1]]) circle(r = max(d[3], d[4]) + cradle_rib_c, $fn = 64);
+    }
+    split_above(cov_gap);
 }
 
 module body() {
@@ -301,6 +360,7 @@ module body() {
         // and the boards' pilots (elec.scad)
         mount_cuts();
         elec_cuts();
+        screw_hole();
         strap_slots3d();
         strap_room();
         // the hand plate: a shallow recess with rounded corners (none now: recess 0)
@@ -315,7 +375,8 @@ echo(str("box below the deck: y ", plate_y[0], " .. ", box_back, ", x ", deck_x,
 part = "case";                   // "case", "back_cover", "cover_screws", "strap" or "battery"
 if (part == "case") {
     difference() { intersection() { body(); outer3d(); } cover_slab(); }
-    mount();
+    jack_cradle();
+    difference() { mount(); bulge_sweep(); }
     store_socket();
 }
 if (part == "battery") battery();
@@ -339,7 +400,7 @@ module strap() {
 }
 if (part == "strap") strap();
 if (part == "back_cover") difference() {
-    union() { intersection() { body(); outer3d(); cover_slab_cover(); } cover_tongues(); }
+    union() { intersection() { body(); outer3d(); cover_slab_cover(); } cover_rib(); }
     // cov_gap clear of the mount, whose overload stops' blocks stand up past z_split outside
     // the cover's bottom edge (link.scad) [2026-11-21: they touched its outer face]
     minkowski() { mount(); cube(2 * cov_gap, center = true); }

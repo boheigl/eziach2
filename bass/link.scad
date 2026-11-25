@@ -92,6 +92,8 @@ module contact_chan() translate([0, cav[0] + 2, gz + chan_dz]) rotate([-90, 0, 0
 // tongue's insert, tip up against the slot's roof, turned through a slot in the floor open
 // to the front (the screw's foot slides in with the tongue). Both from below. The blocks
 // reach from the box's bottom (the holders' bottoms) to stop_top.
+// case.scad cuts their back part (y < 4.7, by the box) 2.3 lower, for the back cover's
+// bulge sliding past [2026-11-24]; the roof over the slot (y > 6.2) stays whole.
 st       = gauge_stop();         // [x, y, z, screws' x, S1 y, S2 y, insert]
 stop_gap = 0.8;                  // the slot round the tongue, above and below, before the screws are set
 stop_c   = 0.4;                  // clearances: to the outer holder, and round the tongue's end and edge
