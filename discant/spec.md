@@ -285,17 +285,18 @@ git history.
   underside at the middle of its back edge (`../hall_pcb/spec.md` §3a); the link board
   in a pocket beside the pad, its lid and the plug from J1 are gone. Analog beside the
   board's digital parts is checked there. The pad now runs x = −46 … 46.
-- **Wire ways:** the gauges' leads leave the plates towards the pad and run in a
-  3.2 × 1.5 mm groove in it, from each plate's middle, behind the inner strip, to a
-  channel at x = ∓8 (about 17 mm each). Each channel (3 mm wide) runs from the groove
-  through pad and back wall under the board's back edge, from 0.3 into the floor to just
-  under the board, and there widens out to under the pad row at x = ∓12: the gauge plane
-  lies at the gap under the board, so the channels run straight in, and the wires go up
-  through the pads J2 / J3 and are soldered on the top. [2026-11-25: the channels were at
-  x = ∓12, behind the strip, so the groove's turn into them lay in a closed tunnel, and
-  the test print's three loose leads could not be threaded round it. At ∓8 the groove is
-  open to the pad's face (the strips start at 9.6): the turn can be reached with
-  tweezers, and it has a 1.5 mm 45° chamfer on its inside.] Under the
+- **Wire ways:** the gauges' leads leave the plates towards the pad, into a 3.2 × 1.5 mm
+  groove in it, open to the pad's face there (between the strips). From the groove at
+  each plate's middle (x = ∓25) a channel 3 mm wide runs **straight**, slanting through pad
+  and back wall under the board's back edge to under the pad row at x = ∓12 (about 15 mm
+  of lead each), from 0.3 into the floor to just under the board: the gauge plane lies at
+  the gap under the board, so the leads are pushed in where they leave the plate and come
+  out under J2 / J3, go up through the pads and are soldered on the top. It passes the
+  board's screw boss at x = ±20 0.13 clear and takes the ledge under the board's back edge
+  from x ≈ ±10.5 to ±21. [2026-11-25: the channels were at x = ∓12, behind the strip, so
+  the groove's turn into them lay in a closed tunnel, and the test print's three loose
+  leads could not be threaded round it; then at ∓8 with a chamfer at the turn, still two
+  turns out of sight.] Under the
   plates' edges the groove runs behind a 1 mm strip, the plates' stop; elsewhere it
   is open to the pad's face or the holders. The cover has a 0.8 mm recess over the
   pad rows for the joints. The NAU7802 (1.75 high) stands 0.4 into the tray's floor
