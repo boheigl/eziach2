@@ -89,8 +89,11 @@ keys: `../BOM.md`.
   to F × 125 mm (its top). It reaches them through the mount at the box's bottom. A thin
   floor and back wall would carry it in bending (about 100 MPa), so behind the mount the
   box is a solid **foot** from the battery's shelf down to 2.65 mm above the floor (x
-  −51.6 … 48.1), joined to front and back wall, with the wires' slot under it; the ribs
-  reach the back wall in the mount's strip. The moment goes into the walls as tension
+  −51.6 … 48.1), joined to front and back wall, with the wires' slot under it (2.65 high, closed
+  all round); a 14 mm **window** through foot and battery shelf over the bore's mouth
+  (x −2 … 12, between the holders) reaches the slot from above [2026-11-25: the nine
+  wires had to turn 90° in the closed slot out of sight]; the ribs reach the back wall
+  in the mount's strip. The moment goes into the walls as tension
   and compression: a few MPa. The inner holders' walls are 4.5 mm [given: thicker], their
   bending stress about 44 % of before (15–25 MPa). Hand plate about 8 MPa at 200 N under a
   palm. The gauge plates: 100 N is 0.9–1.8 × the bought cells' rated moment (2 × 3430 N·mm), up
@@ -247,7 +250,16 @@ keys: `../BOM.md`.
   12 and the discant's 27 key board screws are reachable (the keys in place).
 - **Wires** (`elec.scad`: `wires()`, `wires.stl`): the nine pins' wires leave the mount's
   cavity through the back wall's ⌀2.6 bore as one bundle and run along the bottom, under
-  the battery's shelf, through notches in the ribs, right to the main board. The
+  the battery's shelf, through notches in the ribs, right to the main board; the key
+  board's five run beside them, two bundles [2026-11-25: modelled as one from the bore's
+  mouth on]: under the foot side by side (the slot 6.6 deep, 2.65 high; the upright ribs'
+  bases at the battery's ends cut away below the foot, which left 3.1 × 2.65 for both),
+  under the main board beside each other below its parts, and through the right outer
+  rib's notch the five over the nine's shoulder (the notches 4 high, were 3). The bore
+  ends in the middle of the closed slot under the foot: with the back cover and the
+  battery out, the wires are pulled round the corner through the foot's window (reached
+  from above, 4.8 mm below the split) and pushed on to the slot's right end; the key
+  board's bundle goes through the slot from its left end to the window and on. The
   notches are 3 deep at the ribs' back edges, open to the back cover (the wires go in
   from there), so 3.4 mm of every rib stays whole along the front wall [given
   2026-11-15: the wires' way cut the ribs through, the cross ribs beside the battery

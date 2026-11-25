@@ -28,7 +28,7 @@
 // ribs) right to the main board (3.3 V, GND, SDA, SCL, INT, DET). The key board's bus
 // wires (3.3 V, GND, SDA, SCL, INT) drop from its connector J1, which hangs over the box,
 // straight down into it, run along under the strap bar's block and down beside the
-// battery to the bottom, where they join the first bundle to the main board.
+// battery to the bottom, and beside the first bundle to the main board.
 //
 // The main board lies flat against the front wall's inside (0.47 above it), on three
 // pads with M2 pilots into the front wall, placed clear of the former hand plate recess; with the
@@ -200,21 +200,29 @@ plug_out = [hall_conn[0], hall_conn[1], board_bot - 6.0];
 wire_zb = z_bot + 3.3;                  // the bore and the slot under the case's foot (link.scad, case.scad)
 // the wires' ways as point lists, so the cable list (../assembly/spec.md, Wiring) takes its lengths from them
 function pins_pts() = [[-1.748 + ex, 4.19, z_bot + 5.9], [-1.748 + ex, 4.19, wire_zb], [-1.748 + ex, wire_y, wire_zb]];   // all nine, out of the mount
-// to the main board: along the bottom to below its solder pads (P1..P18, X 1..17), then up to
-// them; kept off the lowest screw's way [given 2026-11-15: all screws reachable]
-function main_leg_pts() = [pins_pts()[2], [mx(9), wire_y, wire_zb], [mx(9), brd_y[1] + 1.2, mz(1.9)]];
-// the key board's bus: straight down from J1's plug, over the strap bar's block (top -44.5),
-// down beside the battery, to the bottom bundle (listed from the join up to the plug)
-function key_pts() = [pins_pts()[2], [-54.7 + ex, wire_y, wire_zb], [-54.7 + ex, wire_y, -43], [plug_out[0], wire_y, -41.5],
-                      [plug_out[0], plug_out[1], plug_out[2] - 2], plug_out];
+// [2026-11-25: drawn as one bundle from the bore's mouth on, though the key board's five run
+// beside the nine there; now two, side by side along the bottom (under the foot the slot is
+// 6.6 deep, 2.65 high), the five over the nine's shoulder through the right outer rib's notch
+// (3.1 deep, 4 high, case.scad)]
+wire_fl = z_bot + 2;                    // the floor's top (case.scad: floor_b)
+main_end = [mx(9), brd_y[1] + 1.2, mz(1.9)];   // under the main board's solder pads (P1..P18, X 1..17)
+// the nine, to the main board: along the bottom at the back, to below its solder pads, then up
+// to them; kept off the lowest screw's way [given 2026-11-15: all screws reachable]
+function main_leg_pts() = [pins_pts()[2], [pins_pts()[2][0] + 3, -3.95, wire_fl + 1.0], [mx(9) - 3, -3.95, wire_fl + 1.0], main_end];
+// the key board's bus, from the main board's pads: along the bottom over the nine's shoulder,
+// under the foot in front of them, up beside the battery, over the strap bar's block (top
+// -44.5), straight up to J1's plug
+function key_pts() = [main_end, [mx(9) - 3, -5.1, wire_fl + 2.9], [rib_r - 4, -5.1, wire_fl + 2.9], [rib_r - 6, -7.0, wire_fl + 0.9], [-45.0, -7.0, wire_fl + 0.9], [-54.7 + ex, -4.5, wire_fl + 2.0],
+                      [-54.7 + ex, wire_y, -43], [plug_out[0], wire_y, -41.5], [plug_out[0], plug_out[1], plug_out[2] - 2], plug_out];
+rib_r = 88;                             // the right outer rib (case.scad: rib_out[1]), its notch 3.1 x 4: over the
+                                        //   nine's shoulder only there; elsewhere beside them, under the main board's parts
 function path_len(p) = len(p) < 2 ? 0 : norm(p[1] - p[0]) + path_len([for (i = [1 : len(p) - 1]) p[i]]);
 module wires() {
     bundle(pins_pts(), 2.0);
-    bundle(main_leg_pts(), 1.8);
+    bundle(main_leg_pts(), 2.0);
     bundle(key_pts(), 1.8);
     echo(str("wire lengths: contacts to main board ", path_len(pins_pts()) + path_len(main_leg_pts()),
-             ", key board J1 to main board ", path_len(key_pts()) + path_len(main_leg_pts()),
-             " (shared leg ", path_len(main_leg_pts()), ")"));
+             ", key board J1 to main board ", path_len(key_pts())));
 }
 
 part = "elec";

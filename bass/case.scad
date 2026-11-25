@@ -66,6 +66,8 @@ recess_r = 6;
 floor_b  = 2;                    // the box's bottom, closed [given: access by the back cover]
 rib_t    = 1.6;                  // the front wall's ribs
 rib_gap  = 0.2;                  //   short of the back cover
+wire_h   = floor_b + 4;          // the wires' notches at the bottom, from z_bot [2026-11-25: 3 over the
+                                 //   floor, now 4: two bundles, the nine and the key board's five]
 z_split  = z_bot + 12.5;         // the back cover from here up (its ramp's inner edge); below, the mount's strip stays
 cov_screws = [[-45 + ex, -21], [ex, -21], [45 + ex, -21]];   // the back cover's screws: above the stored caps (z < -38)
 pillar_d = 6;
@@ -134,7 +136,10 @@ module battery() translate([bat_xy[0], bat_xy[1], bat_z]) cube(bat);
 module cradle() {
     x0 = bat_xy[0] - bat_gap; x1 = bat_xy[0] + bat[0] + bat_gap;
     y0 = plate_y[1] - 0.01; y1 = box_back - back_t - rib_gap;   // short of the back cover
-    translate([x0 - cradle_t, y0, bat_z - bat_gap - cradle_t]) cube([x1 - x0 + 2 * cradle_t, y1 - y0, cradle_t]);   // shelf
+    difference() {   // shelf, open over the foot's window (foot_win)
+        translate([x0 - cradle_t, y0, bat_z - bat_gap - cradle_t]) cube([x1 - x0 + 2 * cradle_t, y1 - y0, cradle_t]);
+        translate([foot_win[0], y0 - 1, bat_z - bat_gap - cradle_t - 0.01]) cube([foot_win[1] - foot_win[0], y1 - y0 + 2, cradle_t + 0.02]);
+    }
     for (x = [x0 - cradle_t, x1]) translate([x, y0, bat_z - bat_gap - cradle_t]) cube([cradle_t, y1 - y0, 20]);       // end stops
     translate([x0 + 10, y0, bat_z + bat[2] + bat_gap]) cube([x1 - x0 - 20, y1 - y0, cradle_t]);                       // lip over the top
 }
@@ -161,14 +166,18 @@ module ribs() intersection() {
                 translate([-61 + ex, rib_y[0], z - 3]) cube([11, rib_y[1] - rib_y[0], 6]);
             translate([-56 + ex, rib_y[0], -36 - 3]) cube([6, rib_y[1] - rib_y[0], 6]);
             for (x = [rib_out[0], bat_x[0] - 1.7, bat_x[1] + 1.7, rib_out[1]])
-                translate([x - 3, rib_y[0], z_bot]) cube([6, rib_y[1] - rib_y[0], floor_b + 3 + 3]);
+                translate([x - 3, rib_y[0], z_bot]) cube([6, rib_y[1] - rib_y[0], wire_h + 3]);
         }
         // the wires: along the bottom (from the contacts' bore to the power board and
         // left), and up left of the battery to the key board; notches 3 deep at the ribs'
         // back edges, open to the back cover (the wires go in from there), so 3.4 of each
         // rib stays whole along the front wall [given 2026-11-15: not cut through]
-        translate([-200, wire_y - 1.5, z_bot]) cube([400, 20, floor_b + 3]);
+        translate([-200, wire_y - 1.5, z_bot]) cube([400, 20, wire_h]);
         translate([-58 + ex, wire_y - 1.5, z_bot]) cube([5, 20, 120]);
+        // under the foot the slot keeps its whole depth: the bases of the upright ribs at the
+        // battery's ends (6 thick, x bat_x +- 1.7 +- 3) cut away below the foot's underside,
+        // where the foot carries [2026-11-25: they left 3.1 x 2.65 for both bundles]
+        translate([bat_x[0] - 1.7 - 3.01, rib_y[0] - 1, z_bot - 1]) cube([bat_x[1] - bat_x[0] + 3.4 + 6.02, 20, foot_z[0] - z_bot + 1]);
         // the boards and the key board's FFCs
         main_board_room();   // the main board (elec.scad)
         translate([-107 + ex, rib_y[0] - 1, -47]) cube([51, 20, 41 + 10]);
@@ -182,12 +191,22 @@ module ribs() intersection() {
 // wall and back wall: the moment goes into the walls as tension and compression (a few
 // MPa). Under it the slot for the wires' bundles. In the mount's strip the ribs reach the
 // back wall too.
+// [2026-11-25: the slot is closed all round, 102 long; the contacts' nine wires come out of
+// the bore into its middle and had to turn 90 deg there out of sight, towards the main
+// board.] A window through the foot over the bore's mouth (the mount's middle, between
+// the holders): with the back cover and the battery out, reached from above, 4.8 below
+// the split; the wires are pulled round the corner there, and the key board's bundle
+// pushed through the slot in two halves. The battery covers it.
 foot_x = [bat_x[0] - 2.5, bat_x[1] + 2.5];
 foot_z = [z_bot + floor_b + 2.65, bat_z - bat_gap];
+foot_win = [for (s = [-1, 1]) (plate_x[0] + plate_x[1]) / 2 + s * 7];   // x, about the bore (link.scad: at, contact_chan)
 module foot() {
-    translate([foot_x[0], plate_y[1] - 0.01, foot_z[0]]) cube([foot_x[1] - foot_x[0], box_back - back_t - plate_y[1] + 0.02, foot_z[1] - foot_z[0]]);
+    difference() {
+        translate([foot_x[0], plate_y[1] - 0.01, foot_z[0]]) cube([foot_x[1] - foot_x[0], box_back - back_t - plate_y[1] + 0.02, foot_z[1] - foot_z[0]]);
+        translate([foot_win[0], plate_y[1] - 1, foot_z[0] - 0.01]) cube([foot_win[1] - foot_win[0], box_back - back_t - plate_y[1] + 2, foot_z[1] - foot_z[0] + 0.02]);
+    }
     for (x = [rib_out[0], bat_x[0] - 1.7, bat_x[1] + 1.7, rib_out[1]])
-        translate([x - rib_t / 2, rib_y[1] - 0.05, z_bot + floor_b + 3]) cube([rib_t, box_back - back_t - rib_y[1] + 0.06, z_split - 0.01 - (z_bot + floor_b + 3)]);
+        translate([x - rib_t / 2, rib_y[1] - 0.05, z_bot + wire_h]) cube([rib_t, box_back - back_t - rib_y[1] + 0.06, z_split - 0.01 - (z_bot + wire_h)]);
 }
 // STRAP [given: the heel of the hand presses about 11 cm below the bass keys; the strap
 // at least 40 mm wide]: a strap across the back of the hand, level with its middle
