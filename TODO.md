@@ -67,8 +67,9 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
        place, drops into the saddle and slides into the hole (the window is narrow);
      - the cover's rib sits about 0.3 mm over the jack body: if it binds on the lugs,
        sand it; if it rattles, tape on the body;
-     - pulled towards the main board the jack has only the 1.5 mm wall (about 45 MPa at
-       20 N, estimated): try it by hand on the print.
+     - tap the jack's hole M6 × 0.75 (wall and boss, 3.5 thick) and screw the jack in;
+       pulled towards the main board it has wall and boss alone (about 19 MPa at 20 N,
+       estimated): try it by hand on the print.
 
 ## To measure on the bought parts
 

@@ -62,16 +62,22 @@ pilots  = [for (h = main_holes) [mx(h[0]), mz(h[1])]];
 wall_t  = 2;                     // the side wall (case.scad: wall)
 // EARPHONE JACK [given 2026-11-15: a panel jack held by the case; a 5 mm bulge in the
 // back cover for it]: Switchcraft 35PRM3 [datasheet: drawing 35PRM3 rev 0A], from inside
-// through the side wall, a knurled nut outside. Its body lies over the main board (1.0
+// screwed into a tapped M6 x 0.75 hole in the side wall and its boss [2026-11-25: was
+// through the 2 mm wall with its knurled nut outside, the wall 1.5 under the nut; too weak
+// for 20 N across the plug, and no 3.5 mm jack with a longer thread was found]. Its body lies over the main board (1.0
 // clear under the flange), three wires down to the board's pads P19..P21.
 jack_z    = mz(main_jack_y);     // its axis
 jack_fl   = [9.5, 2.1];          // flange: diameter, length (against the wall's inside)
 jack_body = [7.7, 13.4];         // body behind the flange
 jack_lugs = [8.0, 5.8];          // solder lugs beyond the body [envelope estimated]
 jack_thr  = [6.0, 3.5];          // M6 x 0.75, length: wall + nut at most 3.5
-jack_nut  = [9.5, 2.0];          // knurled nut
-jack_hole = 6.2;
-jack_cb   = 0.5;                 // the nut's counterbore: the wall 1.5 there
+jack_tap  = 5.3;                 // tap drill for M6 x 0.75 (5.25), printed holes come out small; tapped after printing
+// THE BOSS [2026-11-25]: outside on the side wall round the hole, jack_boss_t proud, so the
+// thread (3.5) has wall + boss = 3.5 to bite into and ends flush with the boss. Round the
+// jack's axis (jack_boss_r), inside the bulge's outline, and clear of the USB plug's
+// overmold above it (usb_rec, 0.25 more each side)
+jack_boss_t = 1.5;
+jack_boss_r = 6.5;
 jack_gap  = 1.0;                 // the flange over the board's top [given 2026-11-15: more than 0.3]
 jack_yc   = brd_y[1] + jack_gap + jack_fl[0] / 2;   // its axis
 jack_x1   = box_x[1] - wall_t;   // the wall's inside: the flange against it
@@ -129,28 +135,31 @@ module jack() translate([0, jack_yc, jack_z]) rotate([0, 90, 0]) {
     translate([0, 0, jack_x0 + jack_lugs[1]]) cylinder(d = jack_body[0], h = jack_body[1] + 0.01, $fn = 32);
     translate([0, 0, jack_x1 - jack_fl[1]]) cylinder(d = jack_fl[0], h = jack_fl[1], $fn = 32);
     translate([0, 0, jack_x1]) cylinder(d = jack_thr[0], h = jack_thr[1], $fn = 32);
-    translate([0, 0, box_x[1] - jack_cb]) cylinder(d = jack_nut[0], h = jack_nut[1], $fn = 32);
 }
 // added to the case's outline: the bulge, round the jack's axis down into the box
 module jack_bump() hull() {
     translate([jack_bump_x0, jack_yc, jack_z]) rotate([0, 90, 0]) cylinder(r = jack_bump_r, h = box_x[1] - jack_bump_x0, $fn = 48);
     translate([jack_bump_x0, brd_y[1], jack_z - jack_bump_r]) cube([box_x[1] - jack_bump_x0, 1, 2 * jack_bump_r]);
 }
-// cut from the case: the room in the bulge, the hole and the nut's counterbore
+// added to the case's outline: the boss round the tapped hole
+module jack_boss() translate([box_x[1] - 0.01, 0, 0]) rotate([90, 0, 90]) linear_extrude(jack_boss_t + 0.01) difference() {
+    translate([jack_yc, jack_z]) circle(r = jack_boss_r, $fn = 64);
+    translate([usb_yc - usb_rec[1] / 2 - 0.25, usb_z - usb_rec[0] / 2 - 0.25]) square([usb_rec[1] + 0.5, 50]);
+}
+// cut from the case: the room in the bulge and the tapped hole through wall and boss
 module jack_cuts() translate([0, jack_yc, jack_z]) rotate([0, 90, 0]) {
     hull() {
         translate([0, 0, jack_bump_x0 + 1.6]) cylinder(r = jack_room_r, h = jack_x1 - jack_bump_x0 - 1.6, $fn = 48);
         // down to the board, not into the front wall
         translate([0, -(jack_yc - jack_room_r - brd_y[0]), jack_bump_x0 + 1.6]) cylinder(r = jack_room_r, h = jack_x1 - jack_bump_x0 - 1.6, $fn = 48);
     }
-    translate([0, 0, jack_x1 - 1]) cylinder(d = jack_hole, h = wall_t + 2, $fn = 32);
+    translate([0, 0, jack_x1 - 1]) cylinder(d = jack_tap, h = wall_t + jack_boss_t + 2, $fn = 32);
     // the thread's way down, jack_slide short of the wall: through the side wall's inner
     // corner rounding above the bulge, inside the back wall's line (the cover's stays whole)
     intersection() {
         hull() for (u = [0, 9]) translate([-u, 0, jack_x1 - jack_slide - 0.3]) cylinder(r = jack_thr[0] / 2 + 0.4, h = jack_slide + 0.31, $fn = 32);
         translate([-20, -20, jack_x1 - jack_slide - 1]) cube([20.01, -(jack_yc - (box_back - back_t)) + 20, jack_slide + 2]);
     }
-    translate([0, 0, box_x[1] - jack_cb]) cylinder(d = jack_nut[0] + 1, h = 2, $fn = 32);
 }
 // which of the bulge is the back cover's: all but the side wall, which carries the jack
 // (so the cover comes off with the jack in place)
@@ -162,10 +171,7 @@ function jack_bump_yzr() = [jack_yc, jack_z, jack_bump_r];
 // flange's start, body r, lugs r, room r, jack_slide]
 function jack_dims() = [jack_x0, jack_x0 + jack_lugs[1], jack_x1 - jack_fl[1], jack_body[0] / 2, jack_lugs[0] / 2, jack_room_r, jack_slide];
 // the jack without its nut, for the checks of putting it in
-module jack_bare() {
-    intersection() { jack(); translate([0, -50, -200]) cube([jack_x1 + wall_t - jack_cb, 100, 400]); }
-    translate([jack_x1, jack_yc, jack_z]) rotate([0, 90, 0]) cylinder(d = jack_thr[0], h = jack_thr[1], $fn = 32);
-}
+module jack_bare() jack();   // it has no nut any more
 module jack_cover_zone() translate(jack_cover_box()[0]) cube(jack_cover_box()[1]);
 // the main board's lowest screw lies below z_split, behind the case's strip: case.scad
 // cuts a hole in the strip in front of it, so a screwdriver reaches it [given 2026-11-15:

@@ -85,7 +85,8 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 - **Earphone jack in the case** [given 2026-11-15: a panel jack fixed in the case, a
   bulge in the back cover allowed]: Switchcraft 35PRM3 (metal, M6 × 0.75, knurled
   nut; flange ⌀9.5, body ⌀7.7, 21.3 behind the wall [datasheet: drawing 35PRM3]),
-  through the side wall from inside, its body over the board 1.0 above it, three
+  from inside screwed into a tapped hole in the side wall, the nut unused
+  (`../bass/spec.md`), its body over the board 1.0 above it, three
   wires to P19–P21 under its lugs. Plugging loads the case, not the board. Under the
   jack (`JACK_ZONE`) the parts stay low; on its axis the body clears 1.9 mm, the
   flange at the board's edge 1.0 (`gen_pcb.py` lists the parts there, the bass's

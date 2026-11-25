@@ -55,7 +55,7 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 | Pan head screw **M2 × 3**, ISO 7045, stainless A2 | 3 | main board: board (1.0) and pad (0.47) into ⌀1.7 pilots 2 mm into the front wall: 2.0 mm of thread, the tip 0.5 above the pilot's end, 1 mm of wall left to the hand's face; × 4 would go too deep. Head ⌀4 × 1.6 in the ⌀4.4 copper keepout, 3.5 short of the back cover |
 | LiPo cell 1S, pouch 606090, 4000 mAh, with PCM and 10k NTC, 3 wires (e.g. DNK606090; 92 × 60 × 6.0 with the PCM) | 1 | [checked 2026-11-15: datasheet] |
 | or: the same cell with 2 wires (e.g. EREMIT 606090) plus a 10k NTC, B 3435, bead ⌀1.5–2 or 0603, and Kapton tape | 1 | variant, `bass/spec.md` |
-| Panel jack **Switchcraft 35PRM3** | 1 | |
+| Panel jack **Switchcraft 35PRM3** | 1 | screwed into the case's tapped hole, its nut unused; tap **M6 × 0.75** (fine) for the ⌀5.3 hole, threadlocker |
 | Hand strap, leather 40 × 2–3 mm, with buckle | 1 | [assumed] |
 | Main board, Hall board bass (assembled) | 1 + 1 | `main_pcb`, `hall_pcb/bass` |
 | Pin board (assembled) | 1 | half of the contacts' panel, `contact_pcb` |

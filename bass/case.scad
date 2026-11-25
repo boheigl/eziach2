@@ -116,6 +116,7 @@ module outer3d() {
     slanted(z_bot - 1, z_floor + 0.01) { box2d(box_x); box2d(box_x_at(z_floor + 0.01)); }
     translate([0, 0, z_floor]) linear_extrude(60) rounded(deck_x, [plate_y[0], deck_y[1]]);
     jack_bump();                 // the earphone jack's bulge in the back (elec.scad)
+    jack_boss();                 // its boss outside on the side wall (elec.scad)
 }
 // the box is wider than the deck: beside the deck its top is a wall, under the deck
 // the cavity reaches up to the deck's underside
@@ -297,8 +298,9 @@ module bulge_sweep() let(b = jack_cover_box(), j = jack_bump_yzr())
         }
 
 // THE JACK'S CRADLE [given 2026-11-24: the jack holds 20 N across the plug]: on its own the
-// jack's bushing bends the 1.5 mm wall it is clamped in (about 45 MPa at 20 N, 25 mm out
-// [estimate], partly across the layers). So its body bears on a cradle as far from the wall
+// jack bends the wall it is screwed into (wall and boss 3.5, elec.scad; about 19 MPa past the
+// boss at 20 N, 25 mm out [estimate], partly across the layers; 45 MPa in the 1.5 mm wall
+// under the nut it had before). So its body bears on a cradle as far from the wall
 // as it can: between its lugs and where its flange stands before it is slid in (x 93.3 ..
 // 101.1), and the plug's moment becomes two forces, at the wall and at the cradle.
 //   the case's saddle under it: down and to the back (from the plate's inner face, just

@@ -186,9 +186,14 @@ keys: `../BOM.md`.
     the socket in a 0.95 mm pocket of the wall; outside, a 0.2 mm recess round the port (12.85 × 7.0, for the USB Type-C spec's largest overmold, 12.35 × 6.5) so a plug's overmold reaches the socket's face [given 2026-11-20: 0 mm], leaving 0.85 mm of wall over the pocket; see
     `../main_pcb/spec.md`), the charge light (red charging or battery low, green full) and
     the earphone jack [given 2026-11-15: a panel jack in the case, a bulge in the back
-    cover allowed]: Switchcraft 35PRM3, from inside through the side wall (⌀6.2, the
-    wall 1.5 at a ⌀10.5 counterbore for its knurled nut), its body over the main board
-    and wired to it. 1.0 mm over the board. The back cover bulges 5.7 mm round it (⌀13.3 about the jack's axis,
+    cover allowed]: Switchcraft 35PRM3, from inside screwed into a tapped M6 × 0.75 hole
+    in the side wall and a boss on it [2026-11-25: was through the 2 mm wall with its
+    knurled nut, the wall 1.5 under the nut; no 3.5 mm jack with a longer thread was
+    found]: the boss stands 1.5 proud outside, ⌀13 round the axis, cut back under the USB
+    plug's overmold (to 4.8 above the axis there), so wall and boss are 3.5 thick, the
+    thread's length, and it ends flush; tap drill ⌀5.3 printed, tapped after printing;
+    the nut is not used. Its body lies over the main board
+    and is wired to it. 1.0 mm over the board. The back cover bulges 5.7 mm round it (⌀13.3 about the jack's axis,
     from the side wall 28.7 mm inwards); outside the plate the bulge is the cover's above
     z −128.6, the case's below, and the side wall round the hole stays the case's, so
     the cover slides off with the jack in place.
@@ -196,16 +201,20 @@ keys: `../BOM.md`.
     longer goes in from behind at its place]: with the main board in and the cover off,
     from behind, 5 mm short of the wall and 2.4–3.0 mm higher than its place (its flange
     over the trough's rim at z −128.6, under the USB socket J1 2.3 mm above it), down into
-    the trough, then slid +x through the hole, the nut on from outside. The bulge is 5 mm
+    the trough, then slid +x and screwed into the tapped hole (about 5 turns, flange
+    tight against the wall, a drop of threadlocker), then its wires soldered (its lugs
+    are open from behind, the cover off). The bulge is 5 mm
     longer for it (`elec.scad`: `jack_slide`); more than 5.15 mm short of the wall its lugs
     would touch the ESP32 module. The side wall's inner corner rounding over the bulge is
     cut back for the thread on the way down (inside the back wall's line). Checked (solids,
     jack without nut, in 0.5–10 mm steps): clear of case, main board's parts and wires
     along the whole way; at 2.0–2.2 mm it touches the rim.
-    **Cradle** [given 2026-11-24: the jack holds 20 N across the plug]. Clamped alone,
-    its bushing bends the 1.5 mm wall: 20 N, 25 mm out of the wall, is about 520 N·mm,
-    about 45 MPa in the wall round the nut [estimate: rigid boss in a plate], partly
-    across the layers (PETG about 20–30 MPa there). So the body bears on a cradle as far
+    **Cradle** [given 2026-11-24: the jack holds 20 N across the plug]. Clamped in the
+    1.5 mm wall under the nut, as it was, 20 N 25 mm out of the wall (about 520 N·mm)
+    gave about 45 MPa round the nut [estimate: rigid boss in a plate], partly across the
+    layers (PETG about 20–30 MPa there). In wall and boss, 3.5 thick, it is about 8 MPa at
+    the flange's edge and about 19 MPa past the boss's edge (r 6.5, the wall 2 there),
+    25 MPa where the boss is cut back under the USB plug [estimates, ±2×]. So the body bears on a cradle as far
     from the wall as it can, x 93.3 … 101.1 (between its lugs and where its flange stands
     before it is slid in): the plug's moment becomes about 42 N at the cradle and 62 N
     across the wall (bearing about 7 MPa on the thread). The case's saddle (0.1 round the
@@ -213,7 +222,8 @@ keys: `../BOM.md`.
     (y −2.9, just past the body's lowest line) out to z −128.6 (else the jack would not
     get in). Not to the front (towards the board) [2026-11-25]: inside the plate a saddle
     would hang free in print (the case stands on its hand face; it started at y −6.45 in
-    the air); that direction stays on the wall alone, about 45 MPa at 20 N [estimate].
+    the air); that direction stays on wall and boss alone, about 19 MPa at 20 N
+    [estimate].
     The cover's rib takes up and to the back: over the body from y −2.9 out and down to
     the split; it slides in over the lugs, so it clears their envelope (r 4.0
     [estimated]) by 0.15, 0.3 off the body, for the arch's sag in print (the cover prints
@@ -221,9 +231,7 @@ keys: `../BOM.md`.
     they bear, the jack turns 0.5° (saddle) or 1.4° (rib) in the wall: about 6–17 MPa
     there [estimate, ±2×]. On the rib an upward 42 N goes through the cover's bulge to its
     screws, about 15 MPa in the bulge's shell with the rib [estimate]. If the rib shows
-    play, a turn of tape on the body takes it up. Stiffening the wall round the clamp
-    does not help: the section at the flange's edge stays 1.5–2 mm (the thread's length),
-    and a stiffer wall takes more of the moment before saddle or rib bear. Printing: the
+    play, a turn of tape on the body takes it up. Printing: the
     saddle starts with the strip's first layer (y −2.9) and grows out with the bulge's
     shell (checked by slices along y). Checked (solids): the jack still goes in as above,
     the cover still slides in with it in place. Checked: clear of case, cover, board, battery and wires, and
