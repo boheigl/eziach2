@@ -11,17 +11,20 @@
 // section; the bought plate can be tried in the slot (0.15 mm a face) before the 101 mm
 // housing is printed. The slot is the same: the cut lies only in the pad, below the holder.
 //
-// "inner_lock", "inner_detent" [given 2026-11-22: the test with the latches]: the bass's
-// inner holder (../strain_gauge/inner_holder.scad) with its spring tongues, the playing
-// position's lock and the stored position's detent, standing on its bridge (-y) with the
-// mouth up, as in the bass's print (it stands on its hand face) and as the holder's own
-// file recommends: the plate's W slides in from above and the tongues click into it.
+// "inner_cam", "inner_detent" [given 2026-11-22: the test with the latches; 2026-11-25: the
+// cam's shoe instead of the spring lock]: the bass's inner holder
+// (../strain_gauge/inner_holder.scad), the playing position's with its cam's shoe and lugs,
+// the stored position's with its detent, standing on its bridge (-y) with the mouth up, as in
+// the bass's print (it stands on its hand face) and as the holder's own file recommends.
+// "lever_one": one cam with its arm and grip for that holder; "lever": the bass's, for both
+// (../bass/link.scad); both upside down, on their flat tops.
 //
 // make (Makefile) writes ../build/discant/print_<part>.stl; plate.py puts them on the plate.
 
 use <gauge_link.scad>
+use <../bass/link.scad>
 
-part = "holder_test";            // "holder_test", "inner_lock", "inner_detent" or "housing"
+part = "holder_test";            // "holder_test", "inner_cam", "inner_detent", "lever_one", "lever" or "housing"
 
 tilt   = atan(3 / 16);           // the slope (gauge_link.scad, gauge_tilt)
 test_x = [5.5, 56];              // the test piece in the gauge frame: from inside the holder (5.8; the
@@ -38,5 +41,8 @@ if (part == "holder_test") standing() intersection() {
 
 // the inner holder on its bridge: its -y down, its lowest point on the bed
 module on_bridge(f) translate([0, 0, 16.7]) rotate([90, 0, 0]) import(f);
-if (part == "inner_lock")   on_bridge("../build/strain_gauge/inner_holder.stl");
+if (part == "inner_cam")    on_bridge("../build/strain_gauge/inner_holder.stl");
 if (part == "inner_detent") on_bridge("../build/strain_gauge/inner_holder_detent.stl");
+// the levers upside down, on their tops (lever_z[1], 9.0 in the holder's frame)
+if (part == "lever_one") rotate([180, 0, 0]) translate([0, 0, -9.0]) cam_lever_one();
+if (part == "lever")     rotate([180, 0, 0]) translate([0, 0, -9.0]) cam_lever_flat();

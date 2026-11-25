@@ -49,13 +49,19 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
 
 ## To check on the printed parts
 
-15. Plate fits: 0.15 mm in the discant housing, and the inner holders in the large
-    bass print. Print the discant's test piece first (`discant/`: `make bambu`,
-    `holder_test_x2d.3mf`, with the bass's two inner holders and their latches, about
-    46 min, 15 g; 2026-11-22).
+15. ~~Plate fits~~ printed 2026-11-22: the plate rattled in both holders, the inner holder
+    tipped on the W, the spring lock neither clicked in nor held. Since 2026-11-25: crush
+    ribs in both holders, a cam lever clamping the playing holders, a 1.5 mm detent tongue
+    for storing (`strain_gauge/spec.md`, `assembly/spec.md` Latches).
+15a. **Second holder test print** (`discant/`: `make bambu`, `holder_test_x2d.3mf`: the
+    outer holder's corner, the cam's inner holder with `lever_one`, the detent's): the
+    plate in without play and without force; the lever, with the grub screw set, snaps
+    down firmly and the holder does not pull off by hand; the detent clicks in and holds;
+    the three leads go along the groove and round into the channel (now at x 8, open to
+    the pad's face; it ends at the test piece's cut).
 16. Stiffness of the PETG inner holders: if they yield, the calibration shifts.
-17. Latches: root strain (1.1–1.3 %, estimated) and the stored hold (about 15 N,
-    estimated).
+17. Detent: root strain (1.6–2.0 %, estimated) and the stored hold (about 30 N,
+    estimated); the cam's hold in play (about 55 N, estimated).
 18. Room for the JST cable's splice in the bass's tunnel.
 18a. Standing print of the discant housing: stable at 101 mm on its front edge
      (`discant/spec.md`, Printing).

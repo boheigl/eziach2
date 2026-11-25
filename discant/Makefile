@@ -68,12 +68,14 @@ $(B)/view3d.html: view3d.html embed_parts.py viewer_nav.js $(BODY_STL) $(B)/boar
 # needs Bambu Studio: the AppImage or the Flathub app; not part of all)
 $(B)/print_holder_test.stl: print.scad $(B)/housing.stl
 	$(call scad,$<,-D 'part="holder_test"')
-# the bass's inner holders with their latches, the lock and the detent [2026-11-22]
-$(B)/print_inner_lock.stl: print.scad $(GAUGE_STL)
-	$(call scad,$<,-D 'part="inner_lock"')
+# the bass's inner holders, the cam's and the detent's, and one cam lever [2026-11-22; cam 2026-11-25]
+$(B)/print_inner_cam.stl: print.scad $(GAUGE_STL)
+	$(call scad,$<,-D 'part="inner_cam"')
+$(B)/print_lever_one.stl: print.scad ../bass/link.scad ../strain_gauge/inner_holder.scad
+	$(call scad,$<,-D 'part="lever_one"')
 $(B)/print_inner_detent.stl: print.scad $(GAUGE_STL) ../build/strain_gauge/inner_holder_detent.stl
 	$(call scad,$<,-D 'part="inner_detent"')
-$(B)/holder_test.3mf: plate.py ../key_proto/plate.py $(B)/print_holder_test.stl $(B)/print_inner_lock.stl $(B)/print_inner_detent.stl
+$(B)/holder_test.3mf: plate.py ../key_proto/plate.py $(B)/print_holder_test.stl $(B)/print_inner_cam.stl $(B)/print_inner_detent.stl $(B)/print_lever_one.stl
 	@echo "  PLATE    $@" && $(PYTHON) plate.py $(B)
 # the AppImage if there is one, else the Flathub app (bambu.py)
 BAMBU ?= $(if $(wildcard $(HOME)/Applications/BambuStudio.AppImage),$(HOME)/Applications/BambuStudio.AppImage,flatpak)

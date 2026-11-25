@@ -19,21 +19,23 @@ use <../strain_gauge/inner_holder.scad>
 
 // --- as gauge_link.scad (discant frame)
 gauge_x = 0;
+gauge_dx = 25;                   // each gauge's centre from gauge_x (as gauge_link.scad, whose variables use<> does not bring)
 gz      = 1.6;
 link_y  = 91.5;                  // the inner holders' backs
 half_h  = 5.4;
 // the inner holder (../strain_gauge/inner_holder.scad, walls 4.5): below the plate's middle
-// 5.9, above it the latches' lugs to latch_top() (9.0), which carry the rod (below)
+// 5.9, above it the cam's lugs to latch_top() (9.0), which carry the axle (below)
 hold_lo = 5.9;
 hold_hi = latch_top();
-// --- THE ROD [chosen 2026-11-15: all four lugs at once; the bass prints standing on its
-// hand face]: a stock steel rod (rod_d, 68 mm) pressed through the four latches' lugs
-// (../strain_gauge/inner_holder.scad, latch = "lock"): one finger lifts it between the
-// holders, and so all four tongues, while the other hand slides the bass off. The four
-// tongues share their root line and length and both holders sit on the one mount, so
-// their ends move alike and the rod bends none of them; each lug's ear ends the lift.
-// The rod runs rod_gap over the holders' top faces and the contacts' block (5.0), the
-// discant's boss and outer holders (5.0, 5.4).
+// --- THE CAM LEVER [2026-11-25: the test print's spring latches held nothing and the plates
+// rattled; replaces the rod that lifted them]: one printed part for both inner holders, two
+// cams joined by their arms and a crossbar, on a stock steel axle (rod_d, rod_l) pressed
+// through the four lugs (inner_holder.scad, latch = "cam"). Locked, it lies flat on the
+// holders, the arms towards their mouths, and each cam presses its holder's shoe onto the
+// plate through the M3 grub screw in the shoe, a little over centre, so it stays; one finger
+// lifts the crossbar between the holders, 90 deg up, and the bass slides off. Over the
+// discant's boss and outer holders (5.0, 5.4) and the contacts' block (5.5) the axle runs
+// at 6.2 .. 8.2, the arms and crossbar at lever_z.
 rod_l = 68;
 
 // --- the mount
@@ -137,9 +139,63 @@ module mount() to_bass() {
     }
     for (d = [-1, 1]) at_gauge(d) import("../build/strain_gauge/inner_holder.stl");
 }
-// the rod, along x through the lugs: in each holder's frame (latch_rod(): y, z of its axis, d)
-module latch_rod_body() let(r = latch_rod()) hull() for (d = [-1, 1]) at_gauge(d)
+// the axle, along x through the lugs: in each holder's frame (cam_axle(): y, z of its axis, d)
+module latch_rod_body() let(r = cam_axle()) hull() for (d = [-1, 1]) at_gauge(d)
     translate([-(rod_l / 2 - 25), r[0], r[1]]) rotate([0, 90, 0]) cylinder(d = r[2], h = rod_l - 50, $fn = 24);
+// the lever, locked, in each holder's frame (y towards its mouth, z up from the plate's middle)
+lever_z  = [5.95, 9.0];          // arms and crossbar: flush with the hubs' tops; locked, the arms rest
+                                 //   on the holders' top faces (5.9): the stop just past over centre
+lever_y  = 2.0;                  // the crossbar's back edge, holder y (the holders' fronts at 4.5)
+lever_w  = 2.0;                  // the crossbar's depth (y)
+arm_w    = 4.0;                  // the arms' width (x), between the lugs
+cam_hump = 0.05;                 // over centre: the cam's radius this much more just before locked
+// the cam's outline in y-z about the axle, locked: theta from +y towards +z; the part that faces
+// down (-z) is theta -90 locked, -180 released (the arm up). Released radius r0 under the
+// axle, rising to the locked r1 (+ the hump just before it), the hub's r0 elsewhere
+function cam_r(t, r0, r1) = t <= -180 || t >= -60 ? r0
+    : t < -100 ? r0 + (r1 + cam_hump - r0) * (t + 180) / 80
+    : t < -90 ? r1 + cam_hump * (-90 - t) / 10
+    : r1 - (r1 - r0) * (t + 90) / 30;
+module cam2d() let(c = cam_axle())
+    polygon([for (t = [-270 : 2.5 : 89.9]) let(r = cam_r(t > 90 ? t - 360 : t, c[4], c[5])) [c[0] + r * cos(t), c[1] + r * sin(t)]]);
+// the lever in the +x holder's frame (at_gauge(1)): the other holder at x 2 gauge_dx there
+module cam_lever_flat() {
+    c = cam_axle();
+    difference() {
+        union() {
+            for (x = [0, 2 * gauge_dx]) translate([x, 0, 0]) {
+                // the hub with its cam, between the lugs; flat on top over the axle, so the
+                // lever lies flat as it prints (upside down)
+                translate([-c[3], 0, 0]) rotate([90, 0, 90]) linear_extrude(2 * c[3]) cam2d();
+                translate([-c[3], c[0] - c[4], c[1]]) cube([2 * c[3], 2 * c[4], lever_z[1] - c[1]]);
+                // the arm, from the hub to the crossbar
+                translate([-arm_w / 2, c[0], lever_z[0]]) cube([arm_w, lever_y + lever_w - c[0], lever_z[1] - lever_z[0]]);
+            }
+            translate([-arm_w / 2, lever_y, lever_z[0]]) cube([2 * gauge_dx + arm_w, lever_w, lever_z[1] - lever_z[0]]);
+        }
+        // the axle's hole, a running fit, pointed at -z (up as it prints, upside down)
+        translate([-c[3] - 1, c[0], c[1]]) rotate([0, 90, 0]) linear_extrude(2 * gauge_dx + 2 * c[3] + 2)
+            hull() { circle(d = c[2] + 0.15, $fn = 32); translate([rod_hole_up(c[2] + 0.15), 0]) square(0.01, center = true); }
+    }
+}
+// placed, turned phi about the axle (0 locked, 90 released, the arms up)
+module cam_lever(phi = 0) let(c = cam_axle()) at_gauge(1)
+    translate([0, c[0], c[1]]) rotate([phi, 0, 0]) translate([0, -c[0], -c[1]]) cam_lever_flat();
+function rod_hole_up(d) = d / 2 * sqrt(2);
+// one cam with its arm and a grip, for one holder (the holder test print), in its frame
+module cam_lever_one() {
+    c = cam_axle();
+    difference() {
+        union() {
+            translate([-c[3], 0, 0]) rotate([90, 0, 90]) linear_extrude(2 * c[3]) cam2d();
+            translate([-c[3], c[0] - c[4], c[1]]) cube([2 * c[3], 2 * c[4], lever_z[1] - c[1]]);
+            translate([-arm_w / 2, c[0], lever_z[0]]) cube([arm_w, lever_y + lever_w - c[0], lever_z[1] - lever_z[0]]);
+            translate([-c[3], lever_y, lever_z[0]]) cube([2 * c[3], lever_w, lever_z[1] - lever_z[0]]);
+        }
+        translate([-c[3] - 1, c[0], c[1]]) rotate([0, 90, 0]) linear_extrude(2 * c[3] + 2)
+            hull() { circle(d = c[2] + 0.15, $fn = 32); translate([rod_hole_up(c[2] + 0.15), 0]) square(0.01, center = true); }
+    }
+}
 // cut from the case: the wires' bore through the back wall
 module mount_cuts() to_bass() gauge_tilt_frame() contact_chan();
 // the pin board with its three strips, mated (for the page and the checks): the strip's
@@ -221,11 +277,13 @@ module store_pocket() to_store() difference() {
 
 echo(str("gauge mount on the plate at ", at, "; stored discant at ", store_at));
 
-part = "mount";                   // "mount", "discant", "socket", "pocket", "rod", "pins" or "stops" (the grub screws)
+part = "mount";                   // "mount", "discant", "socket", "pocket", "rod", "lever", "pins" or "stops" (the grub screws)
 if (part == "mount") mount();
 if (part == "pins") contact_pins();
 if (part == "stops") stop_screws();
 if (part == "rod") to_bass() latch_rod_body();
+phi = 0;                          // the lever: 0 locked, 90 released
+if (part == "lever") to_bass() cam_lever(phi);
 if (part == "discant") discant_side();
 if (part == "socket") store_socket();
 if (part == "pocket") store_pocket();

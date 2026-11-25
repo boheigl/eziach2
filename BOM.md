@@ -48,8 +48,9 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 
 | Part | Count | |
 |---|---|---|
-| Case (with inner holders, latches, contacts' block), cover, back cover | 1 + 1 + 1 | printed, PETG |
-| Latch rod ⌀2 × 68, stainless or silver steel | 1 | bar stock, cut to length, pressed into the lugs |
+| Case (with inner holders, the cam's shoes and lugs, contacts' block), cover, back cover, cam lever | 1 + 1 + 1 + 1 | printed, PETG; the lever upside down |
+| Cam lever's axle ⌀2 × 68, **silver steel** (hardened, e.g. 115CrV3 h8) | 1 | bar stock, cut to length, through the four lugs and the lever; soft stainless bends [estimate, `assembly/spec.md` Latches] |
+| Grub screw **M3 × 3**, ISO 4026, flat point | 2 | in the cams' shoes (tapped M3), sets the clamping force |
 | Countersunk screw **M2 × 6**, DIN 965, brass (as the discant's) | 12 | cover (2.4) and board (1.67) into ⌀1.7 pilots in the case: 1.9 mm of thread, the tip 0.5 above the pilot's end; × 8 would be too long |
 | Countersunk screw M2 × 6, DIN 965 | 3 | back cover |
 | Pan head screw **M2 × 3**, ISO 7045, stainless A2 | 3 | main board: board (1.0) and pad (0.47) into ⌀1.7 pilots 2 mm into the front wall: 2.0 mm of thread, the tip 0.5 above the pilot's end, 1 mm of wall left to the hand's face; × 4 would go too deep. Head ⌀4 × 1.6 in the ⌀4.4 copper keepout, 3.5 short of the back cover |

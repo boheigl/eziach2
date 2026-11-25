@@ -115,9 +115,26 @@ module jaw() {
     }
 }
 
+// CRUSH RIBS [2026-11-25: the test print's plate rattled in the jaws]: half-round ribs
+// along y, rib_p proud, so they stand rib_p - clearance into the arm's way and give as the
+// plate goes in: on each jaw's floor under the arm (0.1 into the 0.15) and on its outboard
+// face (0.05 into the 0.2). They start at nothing at the jaw's -y end, where the plate enters
+rib_r  = 0.4;
+rib_p  = 0.25;
+rib_in = 1.5;
+module jaw_ribs() {
+    y0 = y_mouth + 0.2;                          // past the dowel pin's hole
+    y1 = plate_top - 0.5;
+    for (r = [[[pin_x, -z_in], [0, -1]], [[x_pocket, 0], [1, 0]]]) let(p = r[0], a = r[1]) hull()
+        for (e = [[y0, 0], [y0 + rib_in, 1], [y1, 1]])
+            translate([p[0] + a[0] * (rib_r - rib_p * e[1]), e[0], p[1] + a[1] * (rib_r - rib_p * e[1])])
+                rotate([-90, 0, 0]) cylinder(r = rib_r, h = 0.01, $fn = 16);
+}
 module outer_holder() {
-    jaw();
-    mirror([1, 0, 0]) jaw();
+    for (m = [0, 1]) mirror([m, 0, 0]) {
+        jaw();
+        intersection() { jaw_ribs(); translate([x_jaw, y_back, -z_out]) cube([x_out - x_jaw, y_front - y_back, 2 * z_out]); }
+    }
 
     // yokes over and under the plate, with the lead gap left between them
     for (s = [0, 1])

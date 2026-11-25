@@ -405,7 +405,9 @@ if (part == "back_cover") difference() {
     union() { intersection() { body(); outer3d(); cover_slab_cover(); } cover_rib(); }
     // cov_gap clear of the mount, whose overload stops' blocks stand up past z_split outside
     // the cover's bottom edge (link.scad) [2026-11-21: they touched its outer face]
-    minkowski() { mount(); cube(2 * cov_gap, center = true); }
+    // (the Minkowski sum with a cube, as the mount at the cube's eight corners: CGAL's sum fails
+    // since the inner holders' cams and crush ribs [2026-11-25])
+    for (i = [-1, 1], j = [-1, 1], k = [-1, 1]) translate(cov_gap * [i, j, k]) mount();
     for (p = cov_screws) translate([p[0], box_back - back_t - 1, p[1]]) rotate([-90, 0, 0]) {
         cylinder(d = 2.2, h = back_t + 2, $fn = 16);
         translate([0, 0, back_t + 1 - csk_h]) cylinder(d1 = 2.2, d2 = csk_d, h = csk_h + 0.01, $fn = 24);   // countersink

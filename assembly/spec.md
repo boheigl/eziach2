@@ -42,34 +42,31 @@ stay under the back row's springs. Package **282.9 × 44.9 × 151.8 mm (1.9 L)**
 `../bass/link.scad`: `to_store()`, `store_socket()`, `store_pocket()`; the page's Stored
 switch shows it.
 
-## Latches [given: in both positions]
+## Latches [given: in both positions; 2026-11-25: a lever or cam, by hand]
 
-Both are in the inner holders (`../strain_gauge/inner_holder.scad`): a spring tongue in
-each holder's top wall either side, its tooth in the plate's inner slot between web and
-column, behind the slot's closed end. Sliding on, the tooth rides over the W's bottom
-block and drops into the slot. It touches only the W, never the column or the fixed
-arms, so the force still runs through the gauges' columns.
+Both are in the inner holders (`../strain_gauge/inner_holder.scad`, `../strain_gauge/spec.md`
+Latch and clamp). The first test print (2026-11-22) showed the spring lock neither clicking
+in nor holding and the plates rattling, so:
 
-- **Playing** (mount on the box's back wall): square tooth, a positive lock that holds
-  the strap's pull. To take the bass off, lift the rod with one finger and slide the
-  bass off with the other hand. **Rod** [chosen 2026-11-15: the four lugs could not be
-  lifted at once by hand; the bass prints standing on its hand face (y −12.5)]: a stock
-  steel rod ⌀2 × 68 mm (stainless or silver steel, cut to length) pressed through the
-  four latches' lugs after printing (`../bass/link.scad`, `latch_rod_body()`), 0.3 mm
-  over the holders' top faces. The four tongues share their root line and length and
-  both holders stand on the one mount, so their ends move alike and the rod bends none
-  of them. Each lug rises from its tongue at 45° and carries an ear in a pocket of the
-  slot's wall, which ends the lift (`../strain_gauge/spec.md`, Latch), so all of it
-  prints in the bass's orientation without support. Lifting takes a few newtons; the
-  rod bends about 0.03 mm under it [estimate]. Checked 2026-11-15 against the discant as
-  played and the case: the rod is clear of the contacts' block, the discant's boss,
-  outer holders and pad; rod and lugs lifted 2 mm (more than the stop's 1.8) are clear
-  of everything; controls (rod moved against the lugs) overlap. Printed
-  in PETG [given 2026-11-15].
-- **Stored** (socket under the deck): 45° tooth, a detent; four of them hold about 15 N
-  [estimate: tongue 3 × 1.2 mm, its tooth 9.2 mm from the root, PETG E 2000 MPa, 0.6 mm
-  deflection, friction 0.3; the 1.0 mm tongue gave about half, so the detent's is 1.2
-  (2026-11-15)]
+- **Playing** (mount on the box's back wall): **a cam lever.** Each holder has a pressure
+  shoe in its top wall over the W's bottom block; one printed lever with a cam over each
+  holder (`../bass/link.scad`, `cam_lever()`, `lever.stl`) turns on a stock steel axle
+  ⌀2 × 68 mm through the four lugs (two per holder), where the rod was. Locked, it lies
+  flat on the holders, arms towards their mouths, the crossbar between them; each cam
+  presses its shoe 0.25 mm onto the plate through an M3 × 3 grub screw in the shoe, a little
+  over centre (0.05), and the arms rest on the holders' tops just past it, so it stays.
+  The screws set the clamping force (about 45 N a holder: firm to snap down). Lift the
+  crossbar with one finger, 90° up, and slide the bass off with the other hand. The joint
+  holds by friction, no tooth [estimate: about 55 N for both holders against pulling off,
+  PETG on steel μ 0.3; finger force about 6 N at the crossbar]. **Axle: silver steel**
+  (hardened, e.g. 115CrV3 h8 ⌀2): 45 N between lugs 14.5 apart bends it at about 210 MPa
+  [estimate], too much for soft stainless; it deflects about 0.02 mm. Checked 2026-11-25
+  (solids): the lever clear of case, discant (played), axle and back cover from locked to
+  90° up, in 10–15° steps; it prints upside down on its flat top, the hubs' holes pointed
+  upwards.
+- **Stored** (socket under the deck): a spring tongue each side with a 45° tooth, a
+  detent; tongue 1.5 mm (was 1.2), so four hold about 30 N [estimate] against the
+  discant's 3.5 N, and crush ribs on the socket's floor take out the play.
   against the discant's weight (about 3.5 N [estimate]); a firm pull down releases it.
 
 Checked: seated, teeth and plates clear; moved 0.3 mm in the pull-off direction, the
@@ -180,8 +177,8 @@ holders, plates and pad board when mated, the pins 0.02 mm off the pads in the m
 (control: 0.2 mm larger overlaps); the stored discant's contact boss fits the deck's
 pocket; the boards clear case, battery, back cover and covers.
 
-Open: the latch tongue's root strain is 1.1–1.3 % [estimate, `../strain_gauge/spec.md`],
-fine for PETG, too much for PLA. The wires are listed under Wiring.
+Open: the detent tongue's root strain is 1.6–2.0 % [estimate, `../strain_gauge/spec.md`],
+fine for PETG, too much for PLA; whether the cam's friction holds in play (test print). The wires are listed under Wiring.
 
 ## Wiring [chosen 2026-11-15: loose stranded wire, no FFC; the halves meet only at the spring pins]
 

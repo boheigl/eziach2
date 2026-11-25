@@ -137,7 +137,7 @@ Grips the W-shaped inner part and introduces the load. **23 × 21.2 × 11.8 mm**
 | Slides on from −y | mouth faces +y | the slots are open at that edge |
 | Wall above and below | 4.5 mm | [given: thicker for strength under a strong push; was 3] |
 | Closed box | side walls run inside the open slots at \|x\| = 9.2…11.5 | far stiffer than a bare C, and the slots are the only through-opening available |
-| Fit to the W | 0.2 mm per side, 0.15 mm per face | FDM; the walls guide along 17 mm of web, so tighter binds rather than grips |
+| Fit to the W | 0.2 mm per side, 0.15 mm per face, and crush ribs | FDM; the walls guide along 17 mm of web, so tighter binds rather than grips. [2026-11-25: the test print rattled across and sideways and the holder tipped on the W] Half-round ribs (r 0.4) along y, 0.25 proud, on both side walls (0.05 into the plate's way) and, for the detent, on the floor over the webs (0.1); they give as the plate goes in. Across, the cam's shoe clamps the plate (Latch) |
 | Clearance to the outer arms | 0.5 mm | must never touch — they are the fixed side |
 | Mouth corners | R2 on the two vertical edges | [given] |
 | Lead-in flare | 0.6 mm over 1.5 mm | printed parts catch on the first layer otherwise |
@@ -157,42 +157,43 @@ the holder's back (y = −16.7), the latch tongue's root and the bass's socket s
 act as cantilevers. The flexing members become the column and the arms. The
 gauge placement is unaffected — the column flexes either way.
 
-**Latch** [given: in both positions of the bass]: a spring tongue in the top wall each
-side (3 × 1 mm, from its root in the bridge at y = −15.5 to its tip at −4.2, in a
-0.5 mm slot, bending into a relief in its own wall), its tooth (1 × 1.3 mm, 0.6 mm into
-the plate's thickness) at x = 4.2 … 5.2 in the inner slot between web and column, its
-retaining face at y = −6.28, just ahead of the slot's closed end (−6.33 … −6.47 across
-the tooth). Sliding on, a ramp lifts it over the bottom block; at the end it drops into
-the slot. It touches only the W (1.0 mm clear of the column), so the measured path is
-unchanged. Variants (`latch`): `"lock"`, square face and a lug for a rod (below; the bass's playing
-mount); `"detent"`, 45° face, no lug (the stored
-position's socket, `../build/strain_gauge/inner_holder_detent.stl`); `"none"`.
-Checked: seated, clear of the plate; 0.3 mm towards pull-off, the teeth meet the plate.
-**Material: PETG** [given 2026-11-15]. **Root and stop** [chosen 2026-11-15]: the bridge
-used to stand solid under the tongue's first 2.8 mm, so it bent only from the pocket's
-edge (8.5 mm, about 1.25 % at the root, at a sharp corner on the tension side). A 0.4 mm
-slot under the root now frees all 11.3 mm; the slot ends round and the corner above the
-root has an R0.5 fillet. Root strains [estimate: cantilever loaded where it is lifted,
-the tooth 9.2 mm from the root; PETG takes about 2–3 % repeated; corrected 2026-11-15,
-earlier figures took the tip's 11.3 mm and came out about 1.5 times too low]:
-- **Detent:** tongue 1.2 mm thick; 1.3 % at the tooth's 0.6 mm lift, 1.8 % at its stop,
-  a bar across the slot 0.85 mm over the tongue. Four hold the stored discant with about
-  15 N [estimate: 2.0 N spring force per tooth, 45°, friction 0.3] against its 3.5 N
-  weight [chosen 2026-11-15: 1.2, the 1.0 tongue gave half].
-- **Lock** [chosen 2026-11-15: one rod lifts all four lugs of the bass's mount; the bass
-  prints standing on its hand face, so the holder stands on its bridge and grows in +y]:
-  tongue 1.0 mm. Its lug rises from the tongue at 45° from y −7.4, runs on past the tip
-  in the slot (lengthened to y 2.3) and carries a ⌀2.0 cross hole at y 0, z 7.2 for a
-  stock ⌀2 steel rod through all four lugs (`../bass/link.scad`), pressed in; its top is
-  at z 9.0. The tongue bends over its first 8.1 mm, rigid past the lug's foot: 1.1 % at
-  the tooth's 0.6 mm lift. The stop is an ear on the lug's outer side (1.2 mm, 0.7 into
-  the wall) in a pocket of the slot's wall, 1.6 mm under the wall's ledge: the rod lifts
-  1.8 mm and the tooth 0.85 before it stops, 1.3 % at the root. No bar over the tongue,
-  so the lug can grow at 45°; everything prints without support standing on the bridge
-  (overhangs at most 0.7 mm, bridges at most 4 mm). Checked again 2026-11-15: seated clear, 0.3 mm towards pull-off the teeth
-meet the plate (lock and detent), the bass's case clear of plates and outer holders;
-the lock's tongue with lug and ear clear of the holder at rest and lifted 1.5 mm, the
-ear meeting its ledge at 2.0 mm (control).
+**Latch and clamp** [given: in both positions of the bass; 2026-11-25: the test print's
+spring tongues neither clicked in nor held, tongue and tooth small and limp, and the plate
+rattled; given: a lever or cam, by hand]. `latch`:
+- **`"cam"`, playing:** a pressure shoe in the top wall over the W's bottom block (x ±5.5,
+  y −11.0 … −6.6), hanging back to the bridge on a 0.8 mm flexure (4.5 long, its root at
+  y −15.5, a 0.4 slot under it, R0.5 above); the top wall's rails either side (|x| 6 … 11.5)
+  stay whole. At rest its underside stands 0.1 over the pocket's ceiling; a cam pushes it
+  0.25 onto the plate and clamps the block between shoe and floor: no play across, and the
+  holder cannot tip on the W. The cam presses on an **M3 × 3 grub screw** (ISO 4026) in a
+  ⌀2.5 tap drill in the shoe at y −9.3 (0.6 of shoe left under it, so it never reaches the
+  plate; its top 0.5 over the shoe's): its height sets the clamping force, so the print's
+  tolerances do not. The cam is one of the bass's lever (`../bass/link.scad`) on a ⌀2
+  steel axle through two lugs on the rails (x 6 … 8.5, axle at y −9.3, z 7.2, top 9.0),
+  their underside rising at 45°, the hole pointed upwards in the print. Over the glued lead
+  the shoe is cut back as the top wall is, by the 0.25 stroke more. Over the recess the
+  shoe clears the lead by 0.45 when pressed. A tooth as well was given up: it needs 0.7 of
+  travel, the clamp 0.25, and a shoe hinged at its back tips by 10° over 0.7 and then
+  bears on its front edge. So the playing joint holds by friction [estimates: the screw set
+  for about 45 N, PETG on steel μ 0.3, both faces: about 27 N per holder against pulling
+  off, 55 N for both; the flexure 0.6 % at the stroke; the lugs about 3 MPa].
+- **`"detent"`, stored:** a spring tongue in the top wall each side (3 × **1.5** mm
+  [2026-11-25: was 1.2], from its root in the bridge at y −15.5 to its tip at −4.2, in a
+  0.5 mm slot, bending into a relief in its own wall), its tooth (1 × 1.3 mm, 0.6 mm into
+  the plate's thickness) at x = 4.2 … 5.2 in the inner slot between web and column, its
+  retaining face at 45°, y = −6.28, just ahead of the slot's closed end. Sliding on, a
+  ramp lifts it over the bottom block; at the end it drops into the slot. It touches only
+  the W (1.0 mm clear of the column), so the measured path is unchanged. A bar across the
+  slot 0.75 over the tongue is its stop [2026-11-25: 0.85]. Root strain 1.6 % at the
+  tooth's 0.6 lift, 1.95 % at the stop [estimate: cantilever loaded at the tooth, 9.2 mm
+  from the root; PETG takes about 2–3 % repeated]. Four hold the stored discant with
+  about 30 N [estimate: twice the 1.2 tongue's 15 N, (1.5 / 1.2)³] against its 3.5 N
+  weight. With the floor's crush ribs it sits without play.
+- `"none"`: neither.
+
+Checked 2026-11-25 (solids): in the bass, the plates touch the holders only at the crush
+ribs (0.05 at the sides; the floor's 0.1 in the stored socket); the lever clear of case,
+discant, axle and back cover from locked to 90° up. **Material: PETG** [given 2026-11-15].
 
 ## 6. Outer holder — `outer_holder.scad`
 
@@ -210,7 +211,7 @@ nothing fixes it there, and it cannot slide on. The plate slides in instead.
 | Lead gap between yokes | 6.4 mm, 1.95 mm clear of each plate face | the leads pass through here; the bought cell's glued lead (1.5 proud of one face) runs under them, 0.45 clear [measured 2026-11-21; was 4.8] |
 | Stop | the plate's +y edge on the pad, on strips either side of each jaw | replaces the earlier stop wall at −y |
 | Retention | a dowel pin ⌀1.5 × 10 (ISO 2338) across each jaw, 0.05 mm beyond the arm's tip | [chosen]; keeps the plate from pulling out |
-| Plate fits | as the inner holder | same process |
+| Plate fits | as the inner holder, with crush ribs | same process. [2026-11-25: the test print rattled] Half-round ribs (r 0.4) along y in each jaw, 0.25 proud: on the floor under the arm (0.1 into the plate's way) and on the outboard face (0.05); they start at nothing where the plate enters |
 
 The yokes sit **across** the plate rather than beyond it, so nothing projects
 past the +y edge. In y they occupy the one stretch of plate that neither the
@@ -239,8 +240,9 @@ This order is forced by the geometry, not a preference.
 ## 8. Manufacturing [given]
 
 Both holders are FDM printed. All plate clearances are set for that: 0.2 mm per
-side, 0.15 mm per face. For precision machining use 0.05–0.1 mm per side; for
-SLA, 0.15.
+side, 0.15 mm per face, and crush ribs take up the play [2026-11-25: the test print on
+the X2D rattled with the clearances alone]. For precision machining use 0.05–0.1 mm per
+side and no ribs; for SLA, 0.15.
 
 **Print the inner holder standing on its closed end, mouth up.** The pocket is
 then a blind slot opening upwards — nothing to bridge or support — and both

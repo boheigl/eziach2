@@ -16,7 +16,7 @@ scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
 
 KEY_STL   := $(addprefix $(KEY)/,$(foreach r,0 1,$(foreach p,cap plunger magnet oring stop,bass$(r)_$(p).stl bass$(r)_$(p)_down.stl) bass$(r)_tube_body.stl bass$(r)_tube_cut.stl))
 
-all: $(B)/strap.stl $(B)/elec.stl $(B)/wires.stl $(B)/case.stl $(B)/cover.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(B)/keys.stl $(B)/boards.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/contact_pins.stl $(B)/view3d.html
+all: $(B)/strap.stl $(B)/elec.stl $(B)/wires.stl $(B)/case.stl $(B)/cover.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(B)/keys.stl $(B)/boards.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/lever.stl $(B)/contact_pins.stl $(B)/view3d.html
 
 $(B)/back_cover.stl: case.scad layout.scad elec.scad
 	$(call scad,$<,-D 'part="back_cover"')
@@ -34,6 +34,9 @@ $(B)/latch_rod.stl: link.scad layout.scad ../discant/gauge_link.scad ../strain_g
 	$(call scad,$<,-D 'part="rod"')
 $(B)/contact_pins.stl: link.scad layout.scad ../discant/gauge_link.scad
 	$(call scad,$<,-D 'part="pins"')
+# the cam lever on the inner holders, locked [2026-11-25]
+$(B)/lever.stl: link.scad layout.scad ../discant/gauge_link.scad ../strain_gauge/inner_holder.scad
+	$(call scad,$<,-D 'part="lever"')
 
 $(B)/case.stl $(B)/cover.stl: $(B)/%.stl: %.scad layout.scad
 	$(call scad,$<)
@@ -66,9 +69,9 @@ key:
 VIEW_PARTS := CASE_TRIS=$(B)/case.stl COVER_TRIS=$(B)/cover.stl BOARDS_TRIS=$(B)/boards.stl \
                CONN_TRIS=$(B)/connectors.stl ELEC_TRIS=$(B)/elec.stl WIRES_TRIS=$(B)/wires.stl STRAP_TRIS=$(B)/strap.stl \
                $(foreach r,0 1,$(foreach p,CAP PLUNGER MAGNET ORING STOP,$(p)$(r)_TRIS=$(KEY)/bass$(r)_$(shell echo $(p) | tr A-Z a-z).stl)) \
-               LINK_TRIS=$(B)/discant_link.stl ROD_TRIS=$(B)/latch_rod.stl PINS_TRIS=$(B)/contact_pins.stl LID_TRIS=$(B)/back_cover.stl CSCREW_TRIS=$(B)/cover_screws.stl BATTERY_TRIS=$(B)/battery.stl
+               LINK_TRIS=$(B)/discant_link.stl ROD_TRIS=$(B)/latch_rod.stl LEVER_TRIS=$(B)/lever.stl PINS_TRIS=$(B)/contact_pins.stl LID_TRIS=$(B)/back_cover.stl CSCREW_TRIS=$(B)/cover_screws.stl BATTERY_TRIS=$(B)/battery.stl
 $(B)/view3d.html: view3d.html ../discant/embed_parts.py ../discant/viewer_nav.js $(B)/case.stl $(B)/cover.stl $(B)/boards.stl \
-                 $(B)/connectors.stl $(B)/elec.stl $(B)/wires.stl $(B)/strap.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/contact_pins.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(KEY_STL)
+                 $(B)/connectors.stl $(B)/elec.stl $(B)/wires.stl $(B)/strap.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/lever.stl $(B)/contact_pins.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(KEY_STL)
 	@echo "  EMBED    $@"
 	@$(PYTHON) ../discant/embed_parts.py $< $@ $(VIEW_PARTS)
 

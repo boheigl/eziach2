@@ -290,9 +290,10 @@ keys: `../BOM.md`.
   bass's z; the plates stand in the step behind the thin box; the gauges reach 11 mm past the
   deck's back line, which a thinner battery would shorten.
 - **Joining:** the bass goes on by sliding its inner holders onto the plates' W, as the
-  holder is meant to, and comes off the same way. Latches keep them on: locked for playing, released by
-  one steel rod through all four lugs; a detent when stored (`../assembly/spec.md`,
-  Latches). Printed with the bass standing on its hand face [given 2026-11-15], so the
+  holder is meant to, and comes off the same way. Playing, a cam lever clamps both
+  holders on (one printed part on a ⌀2 steel axle through four lugs; lift the crossbar
+  between the holders to release); stored, a detent holds (`../assembly/spec.md`,
+  Latches) [2026-11-25: the cam replaces the spring lock and its rod]. Printed with the bass standing on its hand face [given 2026-11-15], so the
   holders stand on their bridges as `../strain_gauge` recommends. [unverified: the
   holder's fits, printed as part of the large case]
 - **Contacts** [chosen 2026-11-15]: the pin half of `../contact_pcb/` (three strips of
@@ -328,7 +329,7 @@ touch nothing at rest and pressed 2.9 mm.
 | `layout.scad` | key arrangement, heights, boards, plate: shared by all |
 | `case.scad` → `case.stl`, `back_cover.stl`, `battery.stl` | the box: deck, hand plate with its ribs, battery cradle, cable tunnels, the gauges' inner holders and the contacts' block; the back cover; the battery |
 | `elec.scad` → `elec.stl` | the power and key boards, the charging port |
-| `link.scad` | the gauges' inner holders on their mount with the contacts' block, the latches' rod (`latch_rod.stl`), the spring-pin board (`contact_pins.stl`), and the discant's side (plates, pins, outer holders: `discant_link.stl`) |
+| `link.scad` | the gauges' inner holders on their mount with the contacts' block, the cam lever's axle (`latch_rod.stl`) and the lever (`lever.stl`, locked), the spring-pin board (`contact_pins.stl`), and the discant's side (plates, pins, outer holders: `discant_link.stl`) |
 | `cover.scad` → `cover.stl` | the cover, one piece |
 | `keys.scad` → `keys.stl` | the 18 keys at rest |
 | `array.scad`, `lam.scad` | the boards, their copper and connectors |

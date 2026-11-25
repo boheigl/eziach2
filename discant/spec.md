@@ -177,14 +177,19 @@ z −19 (the old foot below, which held the old cover, left out): 0.2 mm rms, 0.
    Print the test piece first (Printing): `make bambu` writes `holder_test_x2d.3mf`,
    one gauge's corner of the housing standing as in the whole print (outer holder with
    its slot, dowel pin holes, the stop's tongue, cut level in the pad), 47 × 11 × 30 mm,
-   and beside it the bass's two inner holders with their latches [given 2026-11-22], the
-   lock (playing) and the detent (stored), each 23 × 15 × 21 mm standing on its bridge as in
-   the bass's print; all three about 46 min and 15.2 g [Bambu Studio 02.09.01.70,
-   2026-11-22]. The bought plate should slide in to the pad with no play to feel and no
-   force; the pin then goes through. Its W slides into each inner holder from above until
-   the tongues click into the inner slots; the lock then holds against a pull, the detent
-   lets go to a firm pull (about 15 N for all four tongues [estimated], so about 7 N for
-   one holder with its two).
+   and beside it the bass's two inner holders [given 2026-11-22], the playing one with the
+   cam's shoe and lugs and the stored one with the detent, each 23 × 15 × 21 mm standing
+   on its bridge as in the bass's print, and one cam lever for the first (`lever_one`,
+   upside down) [2026-11-25]. **First print (2026-11-22, the spring lock):** the plate
+   rattled in both holders, across and sideways, the inner holder tipped on the W, and the
+   lock's tongue neither clicked in nor held. Now crush ribs in both holders, the cam's
+   clamp for playing and a 1.5 mm detent tongue for storing (`../strain_gauge/spec.md`).
+   The bought plate should go in to the pad with a firm push and no play after; the pin
+   then goes through. Into the cam's holder: the W from above, the axle (⌀2) through lugs
+   and lever, an M3 × 3 grub screw into the shoe's hole (tap M3 first), then turn the screw
+   until the lever snaps down firmly and the plate sits without play; it should not pull
+   off by hand. Into the detent's: the tongues click in; it lets go to a firm pull (about
+   15 N for one holder with its two [estimated]). Print with `make bambu` again.
 2. **Thumb bar lobes:** supports when printing the cover (§3.2) [unverified].
 3. **Standing print's stability** (below) [unverified]: 101 mm tall on a narrow edge.
 
@@ -281,11 +286,16 @@ git history.
   in a pocket beside the pad, its lid and the plug from J1 are gone. Analog beside the
   board's digital parts is checked there. The pad now runs x = −46 … 46.
 - **Wire ways:** the gauges' leads leave the plates towards the pad and run in a
-  3.2 × 1.5 mm groove in it, from each plate's middle to a channel at x = ∓12 (about
-  19 mm each). Each channel (3 mm wide) runs from the groove through pad and back wall
-  under the board's back edge, from 0.3 into the floor to just under the board: the
-  gauge plane lies at the gap under the board, so the channels run straight in, and
-  the wires go up through the pads J2 / J3 and are soldered on the top. Under the
+  3.2 × 1.5 mm groove in it, from each plate's middle, behind the inner strip, to a
+  channel at x = ∓8 (about 17 mm each). Each channel (3 mm wide) runs from the groove
+  through pad and back wall under the board's back edge, from 0.3 into the floor to just
+  under the board, and there widens out to under the pad row at x = ∓12: the gauge plane
+  lies at the gap under the board, so the channels run straight in, and the wires go up
+  through the pads J2 / J3 and are soldered on the top. [2026-11-25: the channels were at
+  x = ∓12, behind the strip, so the groove's turn into them lay in a closed tunnel, and
+  the test print's three loose leads could not be threaded round it. At ∓8 the groove is
+  open to the pad's face (the strips start at 9.6): the turn can be reached with
+  tweezers, and it has a 1.5 mm 45° chamfer on its inside.] Under the
   plates' edges the groove runs behind a 1 mm strip, the plates' stop; elsewhere it
   is open to the pad's face or the holders. The cover has a 0.8 mm recess over the
   pad rows for the joints. The NAU7802 (1.75 high) stands 0.4 into the tray's floor

@@ -109,6 +109,14 @@ function gauge_stop() = [stop_x, stop_y, stop_z, stop_sx, stop_s1, stop_s2, stop
 /* [Wires into the tray: a channel each from the groove under the board's back edge] */
 lead_d   = 1.2;                  // a gauge's three leads, AWG 30 PTFE, bundled
 chan_w   = 3.0;                  // the channels' width (x)
+// [2026-11-25: in the test print the leads could not be threaded: their channels at x +-12
+// (under the pad rows J2 / J3) began behind the strip, the plates' stop, so the turn from
+// the groove into the channel lay inside a closed tunnel, and loose wires pushed along ran
+// past it.] The gauges' channels now leave the groove at x +-chan_x, where it is open to the
+// pad's face between the strips: the turn can be reached with tweezers, a 45 deg chamfer on
+// its inside; under the board they widen out to under the pad row (x +-12).
+chan_x   = 8.0;                  // between the contact boss and the strips (inner edge 9.6)
+chan_c   = 1.5;                  // the chamfer at the turn
 
 $fa = 2; $fs = 0.2;
 
@@ -173,8 +181,9 @@ module gauge_contact_boss() gauge_tilt_frame() difference() {
 g_y = back_y + pad_t - strip_t;                 // the groove's front, behind the strips
 // a wire's way from the groove at x0 along it to the board's pad row r, through its
 // channel under the board, to below the pads (they go up through them)
-function to_pads(x0, r) = let(w = wires(r), u = under_board(w[1], w[2] - 0.4))
-    [[x0, g_y - groove_d / 2, gz], [w[1], g_y - groove_d / 2, gz], [w[1], g_y - groove_d / 2, u[2]], u];
+function chan_at(r) = r == "J1" ? 0 : sign(wires(r)[1]) * chan_x;   // the channel's x
+function to_pads(x0, r) = let(w = wires(r), u = under_board(w[1], w[2] - 0.4), c = chan_at(r))
+    [[x0, g_y - groove_d / 2, gz], [c, g_y - groove_d / 2, gz], [c, g_y - groove_d / 2, u[2]], [c, u[1] + 0.5, u[2]], u];
 // the contacts' wires (3.3 V, GND, SDA, SCL, INT; DET stays on the board): down the boss's
 // bore into the groove, to J1, the board's bus pads
 function contact_pts() = concat([[0, contact_y - contact_t - 0.2, gz]], to_pads(0, "J1"));
@@ -208,9 +217,15 @@ module gauge_housing_cuts() gauge_tilt_frame() {
     translate([0, g_y - groove_d, gz]) rotate([-90, 0, 0]) cylinder(d = contact_bore, h = pad_t + 2);
     // a channel from the groove through pad and back wall under the board, below each pad row:
     // from 0.3 into the floor up to 0.05 under the board's underside
-    for (r = ["J1", "J2", "J3"]) let(w = wires(r), u = under_board(w[1], w[2] - 1.2),
-                                     z0 = slab_local([0, 0, w_ft - 0.3])[2], z1 = slab_local([0, 0, -hall_t - 0.05])[2])
-        box([w[1] - chan_w / 2, w[1] + chan_w / 2], [u[1], g_y - groove_d / 2], [z0, z1]);
+    for (r = ["J1", "J2", "J3"]) let(w = wires(r), u = under_board(w[1], w[2] - 1.2), c = chan_at(r),
+                                     z0 = slab_local([0, 0, w_ft - 0.3])[2], z1 = slab_local([0, 0, -hall_t - 0.05])[2]) {
+        box([c - chan_w / 2, c + chan_w / 2], [u[1], g_y - groove_d / 2], [z0, z1]);
+        // under the pad row: out from the channel to under the row's middle
+        box([min(c, w[1]) - chan_w / 2, max(c, w[1]) + chan_w / 2], [u[1], u[1] + chan_w], [z0, z1]);
+        // the chamfer on the turn's inside (towards the gauge), in the groove's back wall
+        if (c != 0) let(s = sign(c)) translate([c + s * chan_w / 2, g_y - groove_d, 0]) linear_extrude(gz + groove_h) mirror([s < 0 ? 1 : 0, 0])
+            polygon([[0.01, 0.01], [-0.01, -chan_c - 0.01], [chan_c + 0.01, 0.01]]);
+    }
 }
 
 echo(str("gauge frame on the tray's back face: pad face's middle at ", pivot_new, " (was [0, ", pivot_y, ", ", gz,
