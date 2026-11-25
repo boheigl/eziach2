@@ -24,11 +24,11 @@ parts:
 	@$(MAKE) --no-print-directory -C ../discant
 	@$(MAKE) --no-print-directory -C ../bass
 
-VIEW_PARTS := B_CASE=$(BB)/case.stl B_LID=$(BB)/back_cover.stl B_CSCREW=$(BB)/cover_screws.stl B_BAT=$(BB)/battery.stl B_COVER=$(BB)/cover.stl B_BOARD=$(BB)/boards.stl B_CONN=$(BB)/connectors.stl B_ELEC=$(BB)/elec.stl B_WIRES=$(BB)/wires.stl B_STRAP=$(BB)/strap.stl B_ROD=$(BB)/latch_rod.stl B_PINS=$(BB)/contact_pins.stl \
+VIEW_PARTS := B_CASE=$(BB)/case.stl B_LID=$(BB)/back_cover.stl B_CSCREW=$(BB)/cover_screws.stl B_BAT=$(BB)/battery.stl B_COVER=$(BB)/cover.stl B_BOARD=$(BB)/boards.stl B_CONN=$(BB)/connectors.stl B_ELEC=$(BB)/elec.stl B_WIRES=$(BB)/wires.stl B_STRAP=$(BB)/strap.stl B_ROD=$(BB)/latch_rod.stl B_LEVER=$(BB)/lever.stl B_PINS=$(BB)/contact_pins.stl \
                D_HOUSING=$(B)/d_housing.stl D_COVER=$(B)/d_cover.stl D_BOARDS=$(B)/d_boards.stl D_PARTS=$(B)/d_parts.stl \
                D_CABLES=$(B)/d_cables.stl \
                KEYS_B=$(B)/keys_bass.stl KEYS_D=$(B)/keys_discant.stl
-BASS_STL := $(addprefix $(BB)/,case.stl back_cover.stl cover_screws.stl battery.stl cover.stl boards.stl connectors.stl elec.stl wires.stl strap.stl latch_rod.stl contact_pins.stl)
+BASS_STL := $(addprefix $(BB)/,case.stl back_cover.stl cover_screws.stl battery.stl cover.stl boards.stl connectors.stl elec.stl wires.stl strap.stl latch_rod.stl lever.stl contact_pins.stl)
 $(BASS_STL): parts ;
 $(B)/view3d.html: view3d.html ../discant/embed_parts.py ../discant/viewer_nav.js $(PIECES) $(BASS_STL)
 	@echo "  EMBED    $@"

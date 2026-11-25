@@ -32,11 +32,11 @@ hold_hi = latch_top();
 // cams joined by their arms and a crossbar, on a stock steel axle (rod_d, rod_l) pressed
 // through the four lugs (inner_holder.scad, latch = "cam"). Locked, it lies flat on the
 // holders, the arms towards their mouths, and each cam presses its holder's shoe onto the
-// plate through the M3 grub screw in the shoe, a little over centre, so it stays; one finger
+// plate through the M2 grub screw in the shoe, a little over centre, so it stays; one finger
 // lifts the crossbar between the holders, 90 deg up, and the bass slides off. Over the
 // discant's boss and outer holders (5.0, 5.4) and the contacts' block (5.5) the axle runs
 // at 6.2 .. 8.2, the arms and crossbar at lever_z.
-rod_l = 68;
+rod_l = 73;                      // through the lugs' outer faces (inner_holder.scad: lug_x, 11.5 from each gauge)
 
 // --- the mount
 mount_x = 38;                    // half width, over both inner holders
@@ -145,9 +145,12 @@ module latch_rod_body() let(r = cam_axle()) hull() for (d = [-1, 1]) at_gauge(d)
 // the lever, locked, in each holder's frame (y towards its mouth, z up from the plate's middle)
 lever_z  = [5.95, 9.0];          // arms and crossbar: flush with the hubs' tops; locked, the arms rest
                                  //   on the holders' top faces (5.9): the stop just past over centre
-lever_y  = 2.0;                  // the crossbar's back edge, holder y (the holders' fronts at 4.5)
-lever_w  = 2.0;                  // the crossbar's depth (y)
-arm_w    = 4.0;                  // the arms' width (x), between the lugs
+// [2026-11-25: 2 x 3 over the 50 between the holders, the arms 4 wide, looked flimsy; no
+// thicker than 3.05 without raising hold_hi and so lengthening the box, so wider instead]
+lever_y  = -3.0;                 // the crossbar's back edge, holder y: just in front of the shoe's
+                                 //   slot (-3.5), over the holders' top walls
+lever_w  = 7.5;                  // the crossbar's depth (y): to the holders' fronts (4.5)
+arm_w    = 8.0;                  // the arms' width (x), over the shoe, between the lugs (|x| 9)
 cam_hump = 0.05;                 // over centre: the cam's radius this much more just before locked
 // the cam's outline in y-z about the axle, locked: theta from +y towards +z; the part that faces
 // down (-z) is theta -90 locked, -180 released (the arm up). Released radius r0 under the

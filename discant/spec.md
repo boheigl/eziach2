@@ -186,7 +186,7 @@ z −19 (the old foot below, which held the old cover, left out): 0.2 mm rms, 0.
    clamp for playing and a 1.5 mm detent tongue for storing (`../strain_gauge/spec.md`).
    The bought plate should go in to the pad with a firm push and no play after; the pin
    then goes through. Into the cam's holder: the W from above, the axle (⌀2) through lugs
-   and lever, an M3 × 3 grub screw into the shoe's hole (tap M3 first), then turn the screw
+   and lever, an M2 × 3 grub screw into the shoe's hole (tap M2 first), then turn the screw
    until the lever snaps down firmly and the plate sits without play; it should not pull
    off by hand. Into the detent's: the tongues click in; it lets go to a firm pull (about
    15 N for one holder with its two [estimated]). Print with `make bambu` again.

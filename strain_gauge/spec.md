@@ -160,18 +160,25 @@ gauge placement is unaffected — the column flexes either way.
 **Latch and clamp** [given: in both positions of the bass; 2026-11-25: the test print's
 spring tongues neither clicked in nor held, tongue and tooth small and limp, and the plate
 rattled; given: a lever or cam, by hand]. `latch`:
-- **`"cam"`, playing:** a pressure shoe in the top wall over the W's bottom block (x ±5.5,
-  y −11.0 … −6.6), hanging back to the bridge on a 0.8 mm flexure (4.5 long, its root at
-  y −15.5, a 0.4 slot under it, R0.5 above); the top wall's rails either side (|x| 6 … 11.5)
-  stay whole. At rest its underside stands 0.1 over the pocket's ceiling; a cam pushes it
-  0.25 onto the plate and clamps the block between shoe and floor: no play across, and the
-  holder cannot tip on the W. The cam presses on an **M3 × 3 grub screw** (ISO 4026) in a
-  ⌀2.5 tap drill in the shoe at y −9.3 (0.6 of shoe left under it, so it never reaches the
+- **`"cam"`, playing:** a pressure shoe in the top wall, a **U across the plate** (x ±8.5,
+  y −11.0 … −4.0): solid over the W's bottom block, its legs over the webs (|x| 4.5 … 8.5)
+  and its middle bridging the clearance over the glued lead. It hangs back to the bridge
+  on a 0.8 mm flexure, narrower (x ±5.5, 4.5 long, its root at y −15.5, a 0.4 slot under it,
+  R0.5 above); the top wall's rails either side (|x| 9 … 11.5) stay whole and join the side
+  walls to the front. At rest its underside stands 0.1 over the pocket's ceiling; a cam
+  pushes it 0.25 onto the plate and clamps block and webs between shoe and floor over 7 mm
+  of their length: no play across, and the holder cannot tip on the W. [2026-11-25: the
+  first shoe (x ±5.5, to y −6.6) clamped the block alone, over 4.4 mm.] The cam presses on an **M2 × 3 grub screw** (ISO 4026) in a
+  ⌀1.6 tap drill in the shoe at y −9.0 (0.6 of shoe left under it, so it never reaches the
   plate; its top 0.5 over the shoe's): its height sets the clamping force, so the print's
-  tolerances do not. The cam is one of the bass's lever (`../bass/link.scad`) on a ⌀2
-  steel axle through two lugs on the rails (x 6 … 8.5, axle at y −9.3, z 7.2, top 9.0),
+  tolerances do not. [2026-11-25: an M3 at y −9.3 left 0.2 of wall behind its thread's root
+  to the shoe's back and broke into the clearance over the lead; the shoe is solid from
+  y −11.0 to −7.0, the M2's tap drill 1.2 from either end.] The cam is one of the bass's
+  lever (`../bass/link.scad`) on a ⌀2 steel axle through two lugs on the rails (|x| 9 … 11.5,
+  axle at y −9.0, z 7.2, top 9.0),
   their underside rising at 45°, the hole pointed upwards in the print. Over the glued lead
-  the shoe is cut back as the top wall is, by the 0.25 stroke more. Over the recess the
+  the shoe is cut back as the top wall is, by the 0.25 stroke more, but only from y −7.0
+  (the top wall's recess from −8): the glue reaches −6.5 at most. Over the recess the
   shoe clears the lead by 0.45 when pressed. A tooth as well was given up: it needs 0.7 of
   travel, the clamp 0.25, and a shoe hinged at its back tips by 10° over 0.7 and then
   bears on its front edge. So the playing joint holds by friction [estimates: the screw set

@@ -74,10 +74,12 @@ gauge_y    = -3.5;   // gauge centre, for reference only
 // sideways, the holder tipping on the W, and the spring tongue's latch neither clicking in
 // nor holding; tongue and tooth were small and limp.]
 //   "cam"     the playing position: a pressure shoe in the top wall over the W's bottom
-//             block, pressed onto it by a cam: no play across the plate, and the clamp's
-//             friction on both faces holds the holder on. The cam is one of a lever's
-//             (../bass/link.scad: cam_lever(), one part for both of the bass's holders) on a
-//             steel axle (rod_d) through two lugs on the top face; an M3 grub screw in the
+//             block and the webs, pressed onto them by a cam: no play across the plate, and
+//             the clamp's friction on both faces holds the holder on. [2026-11-25: a U across
+//             the plate, its legs over the webs to y shoe_y1 and its middle clear of the lead,
+//             longer against tipping than the first shoe over the block alone (to -6.6)]
+//             The cam is one of a lever's (../bass/link.scad: cam_lever(), one part for both
+//             of the bass's holders) on a steel axle (rod_d) through two lugs on the rails; an M2 grub screw in the
 //             shoe, under the cam, sets the clamping force, so the print's tolerances do not.
 //             (A tooth as well was given up: it needs 0.7 of travel, the clamp 0.25, and a
 //             shoe hinged at its back tips by 10 deg over 0.7 and bears on its front edge.)
@@ -113,21 +115,28 @@ stop_gap = 0.75;
 stop_y   = [-7.0, -5.6]; // behind the tongue's tip, over the tooth
 
 // --- the cam's shoe, lugs and axle
-shoe_x   = 5.5;      // half width: over the column and the inner slots; the top wall's rails
-                     //   either side (|x| 6 .. 11.5) carry the lugs
-shoe_y1  = -6.6;     // its front: just short of the bottom block's edge (-6.33 .. -6.47)
+shoe_x   = 8.5;      // half width: over the webs (6 .. 9) to 0.6 short of the side walls; the
+                     //   top wall's rails outside (|x| 9 .. 11.5) stay whole and carry the lugs
+flex_x   = 5.5;      // the flexure's half width (narrower: less of the screw's force goes into it)
+shoe_y1  = -4.0;     // its front: the legs over the webs (to 3.5); in the middle the U's top
+                     //   bridges the lead's clearance
 shoe_gap = 0.1;      // at rest its underside stands this over the pocket's ceiling: the
                      //   cam's stroke onto the plate is shoe_gap + fit / 2 = 0.25
 shoe_top = 4.6;
 flex_t   = 0.8;      // the strip it hangs from, back to the bridge (tongue_y[0])
-scr_d    = 2.5;      // tap drill for the M3 grub screw (M3 x 3, ISO 4026), from the top
+// the screw [2026-11-25: an M3 at y -9.3 left 0.2 behind the thread's root to the shoe's
+// back, and its thread broke into the clearance over the lead; the shoe is solid only
+// from y_mouth to shoe_clr]
+scr_d    = 1.6;      // tap drill for the M2 grub screw (M2 x 3, ISO 4026), from the top
+shoe_clr = -7.0;     // the shoe's clearance over the lead from here (the top wall's from
+                     //   recess_back, -8): the glue reaches y -6.5 at most, 0.5 behind
 scr_keep = 0.6;      // shoe left under the screw's hole: the screw never reaches the plate
 scr_proud = 0.5;     // the screw's top over the shoe's at rest, where the cam meets it
 rod_d    = 2.0;      // steel axle, e.g. stainless 2 mm, cut to length [stock]
 rod_hole = 2.0;      // printed undersize by a little: the axle a light fit; ream if tight
 ax_z     = 7.2;      // the axle's height
 lug_wall = 0.8;      // round the axle's hole: lug top 9.0, the old lugs' (link.scad hold_hi)
-lug_x    = [6.0, 8.5];
+lug_x    = [9.0, 11.5];   // on the rails, outside the shoe
 cam_rel  = 0.3;      // released, the cam this far over the screw
 
 /* [Preview] */
@@ -236,8 +245,8 @@ if (latch == "detent") echo(str("detent tongue: free ", tongue_y[1] - tongue_y[0
 
 // --- the cam's shoe (see [Latch and clamp])
 shoe_bot = z_high + shoe_gap;                     // its underside at rest
-scr_y    = (y_mouth + shoe_y1) / 2 - 0.5;        // the screw and the axle: over the shoe's
-                                                  //   middle, a little back, off the recess (-8)
+scr_y    = (y_mouth + shoe_clr) / 2;              // the screw and the axle: midway in the
+                                                  //   shoe's solid part (-11 .. shoe_clr)
 scr_top  = shoe_top + scr_proud;                  // the screw's top at rest, where the cam meets it
 stroke   = shoe_gap + fit / 2;                    // onto the plate
 lug_r    = rod_hole / 2 + lug_wall;
@@ -249,29 +258,32 @@ lug_y0   = scr_y - lug_r - (ax_z - top_z) - 0.1;  // the lug's underside rises a
 function cam_axle() = [scr_y, ax_z, rod_d, lug_x[0] - 0.3,
                        ax_z - scr_top - cam_rel, ax_z - (scr_top - stroke)];
 function latch_top() = latch == "cam" ? lug_top : top_z;
-// the shoe's room: from the flexure's root to past its front, through the top wall
+// the shoe's room through the top wall: the flexure's from its root, the shoe's from
+// cut_w behind the bridge's face to past its front
 module shoe_cuts() {
-    translate([-shoe_x - cut_w, tongue_y[0], z_high - 0.01])
-        cube([2 * (shoe_x + cut_w), shoe_y1 + cut_w - tongue_y[0], wall + 1]);
+    translate([-flex_x - cut_w, tongue_y[0], z_high - 0.01])
+        cube([2 * (flex_x + cut_w), y_mouth - tongue_y[0] + 0.01, wall + 1]);
+    translate([-shoe_x - cut_w, y_mouth - cut_w, z_high - 0.01])
+        cube([2 * (shoe_x + cut_w), shoe_y1 + 2 * cut_w - y_mouth, wall + 1]);
     // the slot under the flexure, back to its root, its end round
-    translate([-shoe_x, tongue_y[0] + under_h / 2, shoe_bot - under_h]) {
-        cube([2 * shoe_x, y_mouth - tongue_y[0] - under_h / 2 + 0.01, under_h + 0.01]);
-        translate([0, 0, under_h / 2]) rotate([0, 90, 0]) cylinder(d = under_h, h = 2 * shoe_x, $fn = 16);
+    translate([-flex_x, tongue_y[0] + under_h / 2, shoe_bot - under_h]) {
+        cube([2 * flex_x, y_mouth - tongue_y[0] - under_h / 2 + 0.01, under_h + 0.01]);
+        translate([0, 0, under_h / 2]) rotate([0, 90, 0]) cylinder(d = under_h, h = 2 * flex_x, $fn = 16);
     }
 }
 module shoe_parts() {
     difference() {
         union() {
             translate([-shoe_x, y_mouth, shoe_bot]) cube([2 * shoe_x, shoe_y1 - y_mouth, shoe_top - shoe_bot]);
-            translate([-shoe_x, tongue_y[0] - 0.01, shoe_bot]) cube([2 * shoe_x, y_mouth - tongue_y[0] + 0.02, flex_t]);
+            translate([-flex_x, tongue_y[0] - 0.01, shoe_bot]) cube([2 * flex_x, y_mouth - tongue_y[0] + 0.02, flex_t]);
             // the fillet above the flexure's root
-            translate([-shoe_x, tongue_y[0] - 0.01, shoe_bot + flex_t - 0.01]) difference() {
-                cube([2 * shoe_x, root_r + 0.01, root_r + 0.01]);
-                translate([-0.01, root_r + 0.01, root_r + 0.01]) rotate([0, 90, 0]) cylinder(r = root_r, h = 2 * shoe_x + 0.02);
+            translate([-flex_x, tongue_y[0] - 0.01, shoe_bot + flex_t - 0.01]) difference() {
+                cube([2 * flex_x, root_r + 0.01, root_r + 0.01]);
+                translate([-0.01, root_r + 0.01, root_r + 0.01]) rotate([0, 90, 0]) cylinder(r = root_r, h = 2 * flex_x + 0.02);
             }
         }
-        // over the recess the shoe clears the glued lead as the top wall does, when pressed down
-        translate([-recess_w / 2, recess_back, shoe_bot - 0.01]) cube([recess_w, 10, z_high + recess_d + stroke - shoe_bot + 0.01]);
+        // the U's inside: over the recess it clears the glued lead as the top wall does, when pressed down
+        translate([-recess_w / 2, shoe_clr, shoe_bot - 0.01]) cube([recess_w, 10, z_high + recess_d + stroke - shoe_bot + 0.01]);
         // the screw's tapped hole, blind: scr_keep left under it
         translate([0, scr_y, shoe_bot + scr_keep]) cylinder(d = scr_d, h = 10, $fn = 24);
     }
@@ -285,7 +297,7 @@ module shoe_parts() {
     }
 }
 if (latch == "cam") echo(str("cam: axle at y ", scr_y, " z ", ax_z, ", lug top ", lug_top, "; the cam's radius under the axle ",
-    cam_axle()[4], " released, ", cam_axle()[5], " locked; stroke ", stroke, "; flexure ", y_mouth - tongue_y[0], " long, ", flex_t));
+    cam_axle()[4], " released, ", cam_axle()[5], " locked; stroke ", stroke, "; flexure ", y_mouth - tongue_y[0], " long, ", flex_t, "; the screw's walls ", scr_y - scr_d / 2 - y_mouth, " / ", shoe_clr - scr_y - scr_d / 2, " to its tap drill"));
 
 // --- crush ribs (see [Latch and clamp]): along y from the back to the mouth, rib_in to come up
 module rib(p, axis) hull() {   // p: a point on the face it stands on; axis: its outward normal (x or z, +-1)

@@ -49,11 +49,11 @@ Latch and clamp). The first test print (2026-11-22) showed the spring lock neith
 in nor holding and the plates rattling, so:
 
 - **Playing** (mount on the box's back wall): **a cam lever.** Each holder has a pressure
-  shoe in its top wall over the W's bottom block; one printed lever with a cam over each
+  shoe in its top wall, a U over the W's bottom block and webs; one printed lever with a cam over each
   holder (`../bass/link.scad`, `cam_lever()`, `lever.stl`) turns on a stock steel axle
-  ⌀2 × 68 mm through the four lugs (two per holder), where the rod was. Locked, it lies
+  ⌀2 × 73 mm through the four lugs (two per holder), where the rod was. Locked, it lies
   flat on the holders, arms towards their mouths, the crossbar between them; each cam
-  presses its shoe 0.25 mm onto the plate through an M3 × 3 grub screw in the shoe, a little
+  presses its shoe 0.25 mm onto the plate through an M2 × 3 grub screw in the shoe, a little
   over centre (0.05), and the arms rest on the holders' tops just past it, so it stays.
   The screws set the clamping force (about 45 N a holder: firm to snap down). Lift the
   crossbar with one finger, 90° up, and slide the bass off with the other hand. The joint
