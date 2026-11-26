@@ -24,7 +24,7 @@ LAYERS = ["F_Cu", "B_Cu", "In1_Cu", "In2_Cu", "F_Mask", "B_Mask", "F_Silkscreen"
 # angles count counter-clockwise, so a part shown 90 deg counter-clockwise off gets 270.
 ROT_FIX = {
     ("ADS7128IRTER", "bottom"): 180,      # U1..U6, hall boards
-    ("NAU7802SGI", "bottom"): 270,        # U7, discant
+    ("NAU7802SGI", "bottom"): 90,         # U7, discant [2026-11-26: 270 first, then seen 180 off by its pin 1]
     ("BAT54C", "top"): 180,               # D2, main board
     ("AO3401A", "top"): 180,              # Q2, Q3
     ("DMG1012T", "top"): 180,             # Q5 seen, Q4 the same part and angle
