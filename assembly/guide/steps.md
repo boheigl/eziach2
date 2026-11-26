@@ -453,7 +453,7 @@ Die Reserven von #4 (etwa 50 mm) und #5 (etwa 20 mm) als stehende Schlaufen in d
 
 ### Handriemen
 
-Bei offenem Rückdeckel den Lederriemen (40 mm) an jedem Ende durch den inneren Schlitz hinein, um den Steg im Kasten und durch den äußeren Schlitz wieder hinaus fädeln, umschlagen und schnallen.
+Bei offenem Rückdeckel den Klettriemen (51 × 2 mm) an jedem Ende durch den inneren Schlitz hinein, um den Steg im Kasten und durch den äußeren Schlitz wieder hinaus fädeln, umschlagen und auf sich selbst festkletten. Die Länge so einstellen, dass die Hand fest, aber ohne Druck auf dem Handrücken anliegt.
 
 ```view
 frame: bass

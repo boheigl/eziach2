@@ -76,12 +76,12 @@ keys: `../BOM.md`.
   ending 100 mm out, 1.5 mm inside the face's rounded edge where the box is narrowest; a
   5 mm bar between) [given: further out, so the hand slides far enough along the rows]: in through the
   inner one, round the bar inside the box, out through the outer one, folded back and
-  buckled [assumed: 40 × 2–3 mm leather, buckle on the strap]. It lies flat on the front
+  fastened [given 2026-11-26: the strap in hand is a hook-and-loop strap 51 × 2 mm, its ends folded back onto themselves; the slots 53 high, 4 wide (up to 3 thick); a 40 × 2–3 mm leather strap with a buckle assumed before]. It lies flat on the front
   face, untwisted (slots and strap stand upright), adds nothing to the package, and is
   threaded with the back cover off; about 174 mm between the inner slots (the hand plate
   is 131.5 wide), so the hand can slide along the rows. The bar is the front wall between the slots and a block behind
-  it, 5 × 6.5 mm; a 100 N pull on each end puts 200 N round it: about 30 MPa [estimate,
-  PETG]. The outer upright ribs stand at 83 mm from the middle, inside the slots. (Bars on the slanted side
+  it, 5 × 6.5 mm; a 100 N pull on each end puts 200 N round it: about 38 MPa [estimate,
+  PETG; 30 with the 40 mm strap, the bar now spans 53 instead of 42], 6–11 MPa when played. The outer upright ribs stand at 83 mm from the middle, inside the slots. (Bars on the slanted side
   walls, tried first, would have twisted a level strap by 31.6° and took only 25 mm.)
   `strap.stl` shows it on the page.
 - **Strength under a strong push** [given: statically stable] (estimates, 100 N; PLA/PETG

@@ -227,18 +227,19 @@ module foot() {
 // (strap_z; the heel at about z -105, the knuckles just below the deck). Each end goes
 // through a pair of upright slots in the front wall beside the hand plate: in through the
 // outer one, round the bar between them inside the box, out through the inner one,
-// folded back and buckled. Flat on the front face: no twist (the slots stand upright, the
+// folded back and fastened (a hook-and-loop strap, 51 x 2 [given 2026-11-26]). Flat on the front face: no twist (the slots stand upright, the
 // strap's width too), nothing standing out, the package unchanged; threaded with the back
 // cover off. The bar: the front wall between the slots and a block behind it, 5 x 6.5;
 // a 100 N pull on each end puts 200 N round the bar: about 30 MPa [estimate]. That is the
 // extreme case (200 N on the strap, the gauges' full scale); playing hard pulls about
 // 30-60 N [estimate, not measured], about 5-9 MPa, against PETG's 45-50 MPa along the
-// layers (the bending runs along them: the bass prints on its hand face). Kept as is
+// layers (the bending runs along them: the bass prints on its hand face). [2026-11-26: with the
+// 51 mm strap the bar spans 53 instead of 42, so about 1.26 x: 38 MPa at 200 N, 6-11 playing] Kept as is
 // [given 2026-11-20]: the block cannot get deeper (6.6 inside, 3.1 of it the strap's way
 // behind the bar), nor the bar wider without narrower slots (thinner strap). The slots'
 // ends are fully round already.
 strap_z  = -67;
-strap_w  = 40;
+strap_w  = 51;                   // [given 2026-11-26: the strap in hand is 51 wide; 40 before]
 slot_w   = 4;                    // for a strap up to 3 thick
 slot_h   = strap_w + 2;
 slot_in  = 87;                   // from the deck's middle: the inner slot's inner edge [given: further out, so the
@@ -415,9 +416,9 @@ if (part == "case") {
     store_socket();
 }
 if (part == "battery") battery();
-// the strap, for the page: 40 x 2, over the back of a hand (its back about 33 mm off the
+// the strap, for the page: strap_w x 2, over the back of a hand (its back about 33 mm off the
 // plate), each end in through the inner slot, round the bar, out through the outer slot
-// and folded back towards the buckle
+// and folded back onto itself (hook and loop)
 strap_c  = (deck_x[0] + deck_x[1]) / 2;
 strap_yb = plate_y[0] - 33;
 function strap_side(s) = let(xi = slot_in + slot_w / 2, xo = slot_in + 1.5 * slot_w + bar_w)
