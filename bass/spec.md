@@ -91,7 +91,7 @@ keys: `../BOM.md`.
   box is a solid **foot** from the battery's shelf down to 2.65 mm above the floor (x
   −51.6 … 48.1), joined to front and back wall, with the wires' slot under it (2.65 high, closed
   all round); a 14 mm **window** through foot and battery shelf over the bore's mouth
-  (x −2 … 12, between the holders) reaches the slot from above [2026-11-25: the nine
+  (x −2 … 12, between the holders) reaches the slot from above [2026-11-25: the
   wires had to turn 90° in the closed slot out of sight]; the ribs reach the back wall
   in the mount's strip. The moment goes into the walls as tension
   and compression: a few MPa. The inner holders' walls are 4.5 mm [given: thicker], their
@@ -166,8 +166,17 @@ keys: `../BOM.md`.
   is 92 × 60 × 6.0 (some list 92.5); the cradle takes 93 [chosen 2026-11-15; was 90].
   Between front wall and back cover, 0.3 clear each side: a shelf under it, stops at its
   ends, a lip over its top. Clear of case, board, wires, back cover and screws (the
-  control, a 93 mm cell in the old 90 mm cradle, overlapped by 255 mm³). Not modelled:
-  where the leads leave the PCM.
+  control, a 93 mm cell in the old 90 mm cradle, overlapped by 255 mm³). **Its leads**
+  [2026-11-25: the compartment was closed all round, the leads had no way out]: the cell
+  lies with its PCM to the right; its leads leave at the top of that end [unverified:
+  where the bought cell's leave its PCM] through a notch in the upright rib beside it
+  (z −80 … −72, 3 deep at the back edge, the rib 6 thick round it) into the field over the
+  main board, where its JST PH 2-pin plug meets a tail from the main board; the tail goes
+  down through a notch in the rib over the power board (x 58.6 … 66.6) and the column
+  left of the main board, and along the bottom in front of the other two bundles to its
+  pads. So the battery is changed with no soldering (`../assembly/spec.md`, Wiring:
+  Bass, order). Modelled: leads, plugs and tail (`elec.scad`, `bat_wires()`), clear of
+  case, boards, battery, the other bundles and both covers.
   - **Variant: a 2-wire cell with a taped-on NTC** [chosen 2026-11-15]: a 10k NTC
     (B 3435) on the cell's top edge, 3–5 mm from the end away from the PCM. That is the
     only place with room: the broad faces have 0.3 to front wall and back cover, the
@@ -175,8 +184,9 @@ keys: `../BOM.md`.
     are clear of the lip, about 2.9 mm up to the rib over the battery, 6.6 wide.
     Wires (AWG 30, joints in heat-shrink, twisted) extended first, then the NTC laid
     flat and held by Kapton tape, the wires taped to the cell as strain relief; no glue
-    or solder on the pouch. Its two wires run with the cell's to the main board (P17,
-    P16).
+    or solder on the pouch. Its two wires run with the cell's, to a JST SH 2-pin plug
+    beside the cell's in the field over the main board, and from there in the tail to
+    TS and the spare GND. A new cell gets the NTC moved over.
 - **Electronics** (`elec.scad`) [given: charging in the bass by its own USB socket; the
   contacts switch the system on; the electronics moved from the discant to the bass]:
   - **Main board**, 45.5 × 33 mm at the bottom on the +x side, between the outer rib and
@@ -248,18 +258,20 @@ keys: `../BOM.md`.
   screwdriver reach it [given 2026-11-15: all screws reachable].
   Checked with a 3 mm shaft and a 16 mm handle: all three main board screws, the bass's
   12 and the discant's 27 key board screws are reachable (the keys in place).
-- **Wires** (`elec.scad`: `wires()`, `wires.stl`): the nine pins' wires leave the mount's
+- **Wires** (`elec.scad`: `wires()`, `wires.stl`): the six pins' wires leave the mount's
   cavity through the back wall's ⌀2.6 bore as one bundle and run along the bottom, under
   the battery's shelf, through notches in the ribs, right to the main board; the key
   board's five run beside them, two bundles [2026-11-25: modelled as one from the bore's
   mouth on]: under the foot side by side (the slot 6.6 deep, 2.65 high; the upright ribs'
   bases at the battery's ends cut away below the foot, which left 3.1 × 2.65 for both),
   under the main board beside each other below its parts, and through the right outer
-  rib's notch the five over the nine's shoulder (the notches 4 high, were 3). The bore
+  rib's notch the five over the six's shoulder (the notches 4 high, were 3). The bore
   ends in the middle of the closed slot under the foot: with the back cover and the
   battery out, the wires are pulled round the corner through the foot's window (reached
   from above, 4.8 mm below the split) and pushed on to the slot's right end; the key
-  board's bundle goes through the slot from its left end to the window and on. The
+  board's bundle goes through the slot from its left end to the window and on. Nothing
+  is soldered inside the box: the order, and where the wires' reserves go (a column left
+  of the main board), in `../assembly/spec.md`, Wiring. The
   notches are 3 deep at the ribs' back edges, open to the back cover (the wires go in
   from there), so 3.4 mm of every rib stays whole along the front wall [given
   2026-11-15: the wires' way cut the ribs through, the cross ribs beside the battery
@@ -308,12 +320,14 @@ keys: `../BOM.md`.
   Latches) [2026-11-25: the cam replaces the spring lock and its rod]. Printed with the bass standing on its hand face [given 2026-11-15], so the
   holders stand on their bridges as `../strain_gauge` recommends. [unverified: the
   holder's fits, printed as part of the large case]
-- **Contacts** [chosen 2026-11-15]: the pin half of `../contact_pcb/` (three strips of
-  three spring pins) in a pocket of a block on the mount between the inner holders,
-  against the discant's pad board. Its nine wires are soldered to its back first and
+- **Contacts** [chosen 2026-11-15]: the pin half of `../contact_pcb/` (two strips of
+  three spring pins, one per net [2026-11-25: three strips, nine pins]) in a pocket of a
+  block on the mount between the inner holders, against the discant's pad board; the
+  cavity behind it 7.2 × 6.0, the ledge round it 1.4 at the sides and 0.5 above and
+  below. Its six wires are soldered to its back first and
   threaded through the cavity behind it and the ⌀2.6 bore through the back wall into
   the box; then the board goes into the pocket from the front, where the pins' force
-  (about 8.5 N, 0.8 mm pressed) holds it on the ledge round the cavity; a drop of
+  (about 6 N, 0.8 mm pressed) holds it on the ledge round the cavity; a drop of
   neutral-curing silicone at two corners keeps it in while the halves are apart
   [given 2026-11-20: glue only, no detent; review/contact_pcb.md MINOR 5]
   (`link.scad`, `../assembly/spec.md`).

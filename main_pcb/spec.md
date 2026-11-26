@@ -80,7 +80,7 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 | 3 solder pads P19–P21 | the earphone jack's wires (tip, ring, sleeve); 2 × 100 µF coupling caps per channel on the board (one cut off at about 140 Hz into 16 Ω, derated by its DC bias; two at about 70 Hz) [2026-11-19, review MINOR 5] |
 | SRV05-4 | ESD on the contacts' SDA, SCL, INT |
 | PTC 1206, 1.5 A hold | in the battery's plus lead |
-| 18 solder pads 1.5 × 1.5 | the wires (§4) |
+| 15 wire pads, plated holes (ring ⌀1.5, hole ⌀0.7) | the wires (§4) |
 
 - **Earphone jack in the case** [given 2026-11-15: a panel jack fixed in the case, a
   bulge in the back cover allowed]: Switchcraft 35PRM3 (metal, M6 × 0.75, knurled
@@ -109,15 +109,13 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
     [USB Type-C spec, vRd], then EN2 high, EN1 low: ILIM's 1.0 A. A PC's port or an A-to-C
     cable (0.25–0.61 V) stays at 500 mA; charging then takes longer than the 9.1 h timer
     allows for a flat 4 Ah cell (the charger stops; unplugging restarts it).
-  - **TS to the cell's 10k NTC** [chosen 2026-11-15] on pad P17 (the former spare
-    3.3 V), the NTC's other end on the cell's minus; the fixed 10k (R5) is gone. The
+  - **TS to the cell's 10k NTC** [chosen 2026-11-15] on the TS pad (P14), the NTC's other end on the cell's minus; the fixed 10k (R5) is gone. The
     charger then charges only within about 0–50 °C (the cell allows 0–45). Without the
     NTC wire TS floats high and the charger does not charge.
   - **Variant for a 2-wire cell** [chosen 2026-11-15]: a separate 10k NTC (B 3435, as
     the BQ24074's 103AT; a ⌀1.5–2 bead, or an 0603 NTC on two enamelled wires) taped
-    to the cell, both its wires to the board: P17 (TS) and P16 (the spare GND, then the
-    NTC's return). Nothing is soldered at the cell or its PCM. Check: about 10 kΩ from
-    P17 to GND at room temperature.
+    to the cell, both its wires to the board: TS (P14) and its own GND pad (P13, the NTC's return). Nothing is soldered at the cell or its PCM. Check: about 10 kΩ from
+    TS to GND at room temperature.
   - **TMR 68k** [chosen 2026-11-15; was 75k, outside the 18–72k the datasheet
     specifies]: t_MAXCHG = 10 × 68k × K_TMR (36/48/60 s/kΩ) = 9.1 h (6.8–11.3 h), against
     about 5–6 h for a full charge at 0.89 A.
@@ -160,7 +158,7 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
   contact board when the halves are plugged for playing. Pulled low:
   - **Q2** (AO3401A, from VSYS) drives the regulator's EN: the system is on;
   - **Q3** (AO3401A, from 3.3 V) passes 3.3 V to the contacts for the discant.
-- **Delay and ramp** [chosen 2026-11-15; was 10k, about 1 ms]: the nine spring pins are
+- **Delay and ramp** [chosen 2026-11-15; was 10k, about 1 ms]: the six spring pins are
   alike, so DET may close while a 3.3 V pin is still open; the discant's capacitors
   would then charge with a spark through the last pin to touch and pull the bass's
   3.3 V down. R14 100k and C9 100 nF make the gate fall with τ ≈ 9 ms (100k ∥ 1M ×
@@ -191,10 +189,22 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 The module's pins face the parts on its long side (27–40) and its top end (15–26);
 I²S drops straight from pins 18–21 to the DAC above them.
 
-**Solder pads** along the bottom edge, two rows of nine at 2 mm, where the wires
-arrive (elec.scad `wires()`): the contacts' nine (3.3 V × 2, GND × 3, SDA, SCL, INT,
-DET), the bass key board's five (3.3 V, GND, SDA, SCL, INT), the battery (+ via the
-fuse, −, NTC to TS), a spare GND. The wires and their lengths: `../assembly/spec.md`, Wiring. Test pads for boot, reset and GND at the top; TX and RX
+**Wire pads** along the bottom edge, where the wires arrive (elec.scad `wires()`):
+15 plated holes (ring ⌀1.5, hole ⌀0.7) staggered in two rows [2026-11-26: were 18 SMD
+pads 1.5 × 1.5 in two rows at 2 mm, with 0.5 mm between pads and 0.35 between the rows,
+which invited bridges]. The pads step 1.25 mm in X from X 1.2 to 18.7, every other one in
+the upper row (Y 3.45, the lower at 1.05): within a row 2.5 apart (1.0 between the rings),
+and a wire to the upper row rises between two of the lower. The wire goes in from the
+parts' side and is soldered there; its end is cut flush below, since the underside lies
+only 0.47 over the front wall. In groups along X from the side wall:
+
+| pads | X | wires |
+|---|---|---|
+| P1–P6 | 1.2–7.45 | the contacts' six: 3.3 V (+3V3_D), GND, SDA, SCL, INT, DET [2026-11-25: were nine, 3.3 V × 2 and GND × 3] |
+| P7–P11 | 8.7–13.7 | the bass key board's five: 3.3 V, GND, SDA, SCL, INT |
+| P12–P15 | 14.95–18.7 | the battery's tail: − (GND), the NTC's return (GND), the NTC (TS), + (BATP, next to the fuse F1) |
+
+The contacts' bundle comes furthest along the bottom, the battery's tail ends first. The wires and their lengths: `../assembly/spec.md`, Wiring. Test pads for boot, reset and GND at the top; TX and RX
 at (10.4, 11.4 / 13.5), halfway to the module's pins 36/37 (no room beside them), so
 their tracks stay short. EN_SYS's pull-down R16 sits beside D2, so that net needs one
 track, D2 to the regulator.
@@ -225,9 +235,12 @@ track, D2 to the regulator.
   no drill in or within 0.15 mm of an SMD pad (5 in thermal pads); power nets wide on
   40–72 % of their length (VBAT 72 %, VSYS 61 %, +3V3 52 %), the rest the necks at
   fine-pitch pads; only +3V3 (15 mm) and VBUS (6 mm) on the inner layer; L1/L2 2.2 mm
-  each (were 4.1 and 6.1 with two vias). What the DRC still lists: courtyards (wire pads,
-  module antenna keepout), silkscreen, two GND pads with one thermal spoke (C4, P21) and
-  five fan-out vias left unused. In the bass: no clash with case, back cover, battery or
+  each (were 4.1 and 6.1 with two vias). What the DRC still lists: courtyards (module antenna keepout), silkscreen, two GND pads with one thermal spoke (C4, P21) and
+  five fan-out vias left unused. [2026-11-26, with the 15 through-hole wire pads: routed
+  anew (DET routed first), again 0 open, no clearance, edge or short errors. The GND wire
+  pads P2, P8, P12 and P13 are tied solid to the GND plane on In1 (the outer layers only
+  by thermal spokes; the DRC calls P8 and P12 starved there, and U3's pad 4 on top): a
+  hotter iron for them.] In the bass: no clash with case, back cover, battery or
   wires (shifted controls overlap).
 - The DAC's speaker outputs are left open (earphones only).
 - **The DAC's thermal pad** [checked 2026-11-22 against SLAS671C, RHB0032E, pp. 108–110]:

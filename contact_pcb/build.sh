@@ -16,6 +16,6 @@ kicad-cli pcb export pos --side front --units mm --format csv -o fab/contact-pos
 # BOM (JLCPCB's columns); the pad board and the wire pads carry no parts
 cat > fab/contact-bom.csv << 'EOF'
 "Comment","Designator","Footprint","LCSC","Quantity"
-"PG2541-03-003P","J1,J2,J3","PG2541-03-003P (3 x pad D2.2, 2.54)","C49451741","3"
+"PG2541-03-003P","J1,J2","PG2541-03-003P (3 x pad D2.2, 2.54)","C49451741","2"
 EOF
 echo "fab/: gerbers, drill, contact-pos.csv, contact-bom.csv"

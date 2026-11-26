@@ -133,13 +133,14 @@ the tongue stands out sideways and has a 45° gusset under it, in front of the b
   [chosen 2026-11-15; the link board beside the gauges is gone].
 - **Contacts** [chosen 2026-11-15: spring pins on a small board; blade and card-edge
   contacts were looked at and set aside, below]: two small boards, one panel
-  (`../contact_pcb/`). The bass's carries three PG2541-03-003P strips (CHIN-BAN, LCSC
+  (`../contact_pcb/`). The bass's carries two PG2541-03-003P strips (CHIN-BAN, LCSC
   C49451741: 3 spring pins each at 2.54 mm, SMD, gold, 1.2 N at the working height, 1 mm
-  travel, 10 000 cycles [datasheet]), the strips 3.0 mm apart: nine pins. It sits in a
+  travel, 10 000 cycles [datasheet]), the strips 3.0 mm apart: six pins, one per net
+  [2026-11-25: was nine, the 3.3 V doubled and GND tripled]. It sits in a
   pocket of a block on the bass's playing mount between the inner holders
   (`../bass/link.scad`), reaching between the discant's outer holders (5.8 mm off the
   middle; the block 5.5 there, wider behind their tips, where its walls locate the
-  board); the pins press it onto the pocket's ledge. The discant's board carries nine
+  board); the pins press it onto the pocket's ledge. The discant's board carries six
   gold pads ⌀2.2 on the same grid, on a boss on the discant's pad
   (`../discant/gauge_link.scad`, face at gauge y 85). They meet head on as the bass
   slides on, the pins 4.7 high when latched (0.8 pressed, not the working height 4.5:
@@ -150,7 +151,7 @@ the tongue stands out sideways and has a 45° gusset under it, in front of the b
   layer of slow epoxy, wires soldered and led down the bore first, pressed flat until it
   sets (a glue line changes the pins' compression: keep it thin, 0.1 mm at most); the pin
   board held in its pocket by the pins' force while mated, and by a drop of
-  neutral-curing silicone at two corners while apart (it comes off again). Pads: 3.3 V × 2, GND × 3,
+  neutral-curing silicone at two corners while apart (it comes off again). Pads: 3.3 V, GND,
   SDA, SCL, INT (the discant's ADCs, open drain, wired), DET. The NAU7802 is polled over
   I2C.
 - **Not chosen** [2026-11-15]: blade contacts (a flat tab between two spring leaves,
@@ -163,7 +164,7 @@ the tongue stands out sideways and has a 45° gusset under it, in front of the b
   A cable or a rigid connector would be a second, stiff force path.
 - **Power switched by plugging:** DET, pulled to ground by the discant's contact board,
   switches the bass's system supply on (ESP32, both halves' 3.3 V). Apart or stored only
-  the charger works: the pins carry nothing, the battery is not drained. The nine pins
+  the charger works: the pins carry nothing, the battery is not drained. The six pins
   are alike, so DET may close before the others: the discant's 3.3 V comes on 3–7 ms
   after DET and is fully on after about 12 ms (Q3's gate on the main board, R14 100k,
   C9 100 nF; `../main_pcb/spec.md` §3), so all pins touch first [chosen 2026-11-15].
@@ -186,22 +187,23 @@ Every run is loose wire, bundled and lightly twisted, soldered to pads except at
 Hall board's J1 (JST SH, 1.0 mm, 5 pins: INT, 3V3, SDA, SCL, GND). Model lengths are
 echoed by `../bass/elec.scad` (`wires()`, `path_len()`) and `../discant/gauge_link.scad`
 (`contact_pts()`, `lead_pts()`), so they follow the geometry. Cut length = model length
-+ 20 mm per end (stripping, strain relief), rounded up to 10 mm.
++ 20 mm per end (stripping, strain relief), rounded up to 10 mm; #4 30 mm more, for
+soldering the pin board in front of the mount (Bass, order, below).
 
 | # | Half | From → to | Wires | Ends | Model | Cut |
 |---|---|---|---|---|---|---|
 | 1 | discant | — (gone 2026-11-15 with the link board) | | | | |
 | 2 | discant | pad board's back pads → down the boss, through the channel at x = 0 → Hall board's J1, up through its pads | 5: 3V3, GND, SDA, SCL, INT (DET tied to GND on the pad board) | pads / pads | 28 mm | 70 mm |
 | 3 | discant | gauge plates → into the pad's groove at x = ∓25, straight through the slanting channels → Hall board's J2 / J3 at x = ∓12 (NAU7802) | 2 half bridges, 3 each | pads / pads | 15 mm each | 60 mm each |
-| 4 | bass | spring-pin board's back pads → main board's pads, out of the mount's cavity and bore, round the corner at the foot's window, along the bottom at the back | 9: 3V3 × 2, GND × 3, SDA, SCL, INT, DET | pads / pads | 108 mm | 150 mm |
-| 5 | bass | bass Hall board J1 → down its shaft, over the strap bar's block, beside the battery, along the bottom beside #4 (in front of it, over its shoulder through the right outer rib's notch) → main board's pads | 5: 3V3, GND, SDA, SCL, INT | SH plug / pads | 295 mm | 340 mm |
-| 6 | bass | battery → main board (+ through the PTC, −, NTC to TS) | 3; 4 with a 2-wire cell and a taped-on NTC (its two wires to P17 TS and P16 GND, twisted) | the cell's leads / pads | about 50 mm [estimate, not modelled] | the cell's own leads, cut to fit |
+| 4 | bass | spring-pin board's back pads → main board's pads, out of the mount's cavity and bore, round the corner at the foot's window, along the bottom at the back | 6: 3V3, GND, SDA, SCL, INT, DET | pads / pads | 114 mm | 180 mm |
+| 5 | bass | bass Hall board J1 → down its shaft, over the strap bar's block, beside the battery, along the bottom beside #4 (in front of it, over its shoulder through the right outer rib's notch) → main board's pads | 5: 3V3, GND, SDA, SCL, INT | SH plug / pads | 297 mm | 350 mm |
+| 6 | bass | battery: its own leads (+, −) and the taped-on NTC's two, out of the cell's compartment through the notch in the rib right of it, to their plugs in the field over the main board; from there a tail down through the rib over the power board and the column left of the main board, along the bottom in front of #5 and #4, up to the pads (+ BATP through the PTC, − GND, the NTC to TS and the spare GND) | 2 + 2 | JST PH 2-pin (the cell's) and JST SH 2-pin (the NTC) / pads | cell to plug 13 mm (its leads looped in the field), tail 81 mm | tail 130 mm |
 | 7 | bass | earphone jack's lugs → P19–P21 | 3: tip, ring, sleeve | lugs / pads | about 15 mm [estimate: the jack lies over the board] | 50 mm |
 
 - **Wire** [chosen]: AWG 30 stranded (7 × 0.1), PTFE thin wall, outside ⌀ ≤ 0.55 mm
-  [unverified: the supplier's figure]. Five such wires bundle to about ⌀1.4 (2.70 d), nine
-  to about ⌀2.0 (3.61 d) [circle packing], inside the modelled bundles (⌀1.8 for five,
-  ⌀2.0 for nine) and the ⌀2.6 / ⌀3 bores and shafts. Silicone wire of the same gauge
+  [unverified: the supplier's figure]. Five such wires bundle to about ⌀1.4 (2.70 d), six
+  to about ⌀1.65 (3.0 d) [circle packing], inside the modelled bundles (⌀1.8 for five,
+  ⌀1.7 for six) and the ⌀2.6 / ⌀3 bores and shafts. Silicone wire of the same gauge
   (⌀0.8–0.9) would make the five-wire bundles ⌀2.2–2.4: too thick for the ⌀1.8 ways.
 - **One gauge, AWG 30** [chosen 2026-11-15]: AWG 32 would be thinner (conductor ⌀0.20
   instead of 0.26 mm, 0.032 instead of 0.051 mm², about 0.54 instead of 0.34 Ω/m, PTFE
@@ -217,6 +219,39 @@ echoed by `../bass/elec.scad` (`wires()`, `path_len()`) and `../discant/gauge_li
   pigtail back to about 15 mm behind the plug and splice to the PTFE wire under heat
   shrink, so only the splice is thick (#5: in the deck's tunnel
   [unverified: room for a ⌀2.5 splice there]).
+- **Bass, order: nothing soldered inside the box** [2026-11-25: the main board's wire
+  pads lie below the split, behind the case's strip, where no iron reaches once
+  the board is in; JST SH sockets there were looked at and do not fit: 3 mm under the
+  board's edge, the jack's zone above, the antenna's keepout beside]. Every run has one
+  end on a part that is still loose, or a plug:
+  1. On the bench: the wires of #4 and #5 and the battery's tail (#6, with the
+     counterparts of the cell's PH plug and the NTC's SH plug on its end) soldered to the
+     loose main board; #4's and #5's free ends bundled to a point with a short piece of
+     heat shrink.
+  2. Back cover and battery out. The main board in (2 mm to the left, slid right into
+     the port, screwed); the tail laid along the bottom in front, up the column left of
+     the main board and through the notch in the rib over the power board into the
+     field above it.
+  3. #4 along the bottom at the back to the left, through the slot under the foot to its
+     window, round the corner there into the bore and out into the mount's cavity; pulled
+     about 30 mm out in front of the mount and soldered to the loose pin board there
+     (`../bass/spec.md`, Contacts); the board pressed into its pocket and the 30 mm pulled
+     back into the box.
+  4. #5 along the bottom in front of #4, through the slot, up beside the battery and on
+     to J1, plugged in.
+  5. **The reserves:** a loop each, upright, in the free column between the right outer
+     rib's thick base and the main board's edge (x 58.5 … 62.4, the box's whole depth
+     6.6, from the floor to the cross rib at z ≈ −99, about 37 mm; checked free of case,
+     boards, battery, connectors and covers), reached from the back above the split.
+     About 50 mm of #4 and 20 of #5 [estimate]: a hairpin of the ⌀2 bundle takes 4 of
+     the 6.6, so the two lie one behind the other in x (3.8 of 3.9) or #5's loop goes up
+     beside the battery.
+  6. Battery in, its PCM to the right; its leads and the NTC's laid into the notch at
+     the top of the rib beside it (open to the back) and plugged in the field over the
+     main board; what is left of the cell's leads looped there. Back cover on.
+  The main board then comes out again only by unsoldering its wires. **The battery**
+  comes out without: cover off, both plugs pulled, the leads lifted out of the notch
+  (a new cell gets the NTC moved over, `../bass/spec.md`, Battery).
 - **Discant key board:** runs #2 and #3 come up from under the board through plated
   holes (J1 bus, J2/J3 gauges) and are soldered on the top after the board is screwed
   in; the cover has a recess over the joints.
@@ -229,4 +264,7 @@ echoed by `../bass/elec.scad` (`wires()`, `path_len()`) and `../discant/gauge_li
 
 **Order list** [estimate: quantities with spare]: AWG 30 PTFE stranded, 2 m each of red,
 black, blue, yellow, white, 1 m green; 1 pre-crimped JST SH 5-pin cable (or SHR-05V-S + SSH-003T-P0.2-H
-and the crimp tool); heat shrink ⌀1.5 and ⌀3 (2:1).
+and the crimp tool); heat shrink ⌀1.5 and ⌀3 (2:1); for the battery's tail AWG 26 PTFE,
+0.3 m each of red and black [chosen 2026-11-25 for up to 1.5 A, the fuse: about 0.13 Ω/m],
+the counterpart of the cell's plug (a JST PH 2-pin wire-to-wire pair, as sold for LiPo
+cells [unverified: a matching one]) and a pre-crimped JST SH 2-pin pair for the NTC.

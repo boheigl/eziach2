@@ -99,7 +99,7 @@ part("U2", "USBLC6-2SC6", SOT236,
 # saw VBUS beyond its 7 V abs. max]: pulled to 500 mA (EN2 low, EN1 high, SLUS810 Table 7-2)
 # until the firmware reads CC1/CC2 (IO2, IO4) and finds a source offering 1.5 A or more,
 # then EN2 high, EN1 low: input current set by ILIM (1.5k: about 1.0 A); ISET 1k: about 0.9 A charge; TS to the cell's
-# own 10k NTC (a 3-wire cell, third wire on pad P17): charging only within 0 ... 50 C;
+# own 10k NTC (a 3-wire cell, third wire on the TS pad, P14): charging only within 0 ... 50 C;
 # TMR 68k: fast-charge timer 10 x 68k x K_TMR 48 s/kOhm = 9.1 h (6.8 ... 11.3 h; TMR is
 # specified for 18 ... 72k only) against about 5 ... 6 h for a full charge; ITERM open:
 # 10 % termination.
@@ -247,14 +247,25 @@ part("U8", "SRV05-4", SOT236, {"1": "SDA1_C", "2": "GND", "3": "SCL1_C", "4": "I
      (17.8, 13.4, 0), pinfo={"1": "IO1", "2": "VN", "3": "IO2", "4": "IO3", "5": "VP", "6": "IO4"}, group="i2c")
 
 # --- wires: solder pads at the bottom edge --------------------------------------------
-WIRES = [("+3V3_D", "contacts 3.3 V"), ("+3V3_D", "contacts 3.3 V"), ("GND", "contacts GND"), ("GND", "contacts GND"),
-         ("GND", "contacts GND"), ("SDA1_C", "contacts SDA"), ("SCL1_C", "contacts SCL"), ("INT1_C", "contacts INT"),
-         ("GND", "battery -"),
-         ("DET", "contacts DET"), ("+3V3", "bass keys 3.3 V"), ("GND", "bass keys GND"), ("SDA2", "bass keys SDA"),
-         ("SCL2", "bass keys SCL"), ("INT2", "bass keys INT"), ("GND", "spare GND / NTC return"), ("TS", "battery NTC"),
-         ("BATP", "battery +")]
+# [2026-11-25: the contacts six, was nine (3.3 V doubled, GND tripled): one pin per net,
+# ../contact_pcb]
+# [2026-11-26: through-hole pads (ring 1.5, hole 0.7), staggered in two rows, were 18 SMD
+# pads 1.5 x 1.5 in rows at 2.0 (0.5 between pads, 0.35 between the rows invited bridges):
+# in a row 2.5 apart (1.0 between the rings), the rows 2.4 apart with the upper row shifted
+# by half a pitch, so a wire to the upper row rises between two of the lower. The wire goes
+# in from the parts' side, its end cut flush below (the underside lies 0.47 over the wall).
+# In groups along X from the side wall: the contacts' six (their bundle comes furthest), the
+# key board's five, the battery's four (its tail arrives first; BATP next to the fuse F1)]
+WIRE_PAD = "TestPoint:TestPoint_THTPad_D1.5mm_Drill0.7mm"
+WIRE_X0, WIRE_DX, WIRE_Y = 1.2, 1.25, (1.05, 3.45)  # X of the first, the step, the rows' Y
+WIRES = [("+3V3_D", "contacts 3.3 V"), ("GND", "contacts GND"), ("SDA1_C", "contacts SDA"), ("SCL1_C", "contacts SCL"),
+         ("INT1_C", "contacts INT"), ("DET", "contacts DET"),
+         ("+3V3", "bass keys 3.3 V"), ("GND", "bass keys GND"), ("SDA2", "bass keys SDA"),
+         ("SCL2", "bass keys SCL"), ("INT2", "bass keys INT"),
+         ("GND", "battery -"), ("GND", "NTC return"), ("TS", "battery NTC"), ("BATP", "battery +")]
+WIRE_GROUPS = {"contacts": range(0, 6), "keys": range(6, 11), "battery": range(11, 15)}
 for i, (net, name) in enumerate(WIRES):
-    part(f"P{i + 1}", name, PAD, {"1": net}, (1.2 + 2.0 * (i % 9), 1.0 + 1.85 * (i // 9), 0), group="wires",
+    part(f"P{i + 1}", name, WIRE_PAD, {"1": net}, (WIRE_X0 + WIRE_DX * i, WIRE_Y[i % 2], 0), group="wires",
          title="Wires")
 
 # JLCPCB / LCSC part numbers for the BOM, by (value, footprint) [checked 2026-11-15 at jlcpcb.com:

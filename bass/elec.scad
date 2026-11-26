@@ -12,7 +12,7 @@
 // power path, a fuse (the cell carries its own protection), and the 3.3 V supply for
 // both halves. The system runs when the contacts' DET pin is tied to ground by the
 // discant's contact board (plugged for playing) or when USB is plugged in; 3.3 V goes to
-// the discant over the contacts only with DET. The nine spring pins are alike, so DET
+// the discant over the contacts only with DET. The six spring pins are alike, so DET
 // may close before the others: the 3.3 V to the discant ramps up after DET (main board,
 // Q3's gate) [open: about 10 ms, more than the 1 ms now, to cover the pins' spread]. The USB socket and the jack are in the +x side wall, in its
 // straight part, free both stored (the discant covers only the box's back) and played; a
@@ -23,7 +23,7 @@
 // three ADS7128 ADCs at 10h..12h on the ESP32's second I2C bus (the discant's six use
 // 10h..15h on the first, through the contacts).
 //
-// WIRES (wires()): the nine pins' wires leave the mount's cavity through the back wall's
+// WIRES (wires()): the six pins' wires leave the mount's cavity through the back wall's
 // bore as one bundle and run along the bottom under the battery's shelf (notches in the
 // ribs) right to the main board (3.3 V, GND, SDA, SCL, INT, DET). The key board's bus
 // wires (3.3 V, GND, SDA, SCL, INT) drop from its connector J1, which hangs over the box,
@@ -199,30 +199,63 @@ module bundle(p, d) for (i = [0 : len(p) - 2]) hull() {
 plug_out = [hall_conn[0], hall_conn[1], board_bot - 6.0];
 wire_zb = z_bot + 3.3;                  // the bore and the slot under the case's foot (link.scad, case.scad)
 // the wires' ways as point lists, so the cable list (../assembly/spec.md, Wiring) takes its lengths from them
-function pins_pts() = [[-1.748 + ex, 4.19, z_bot + 5.9], [-1.748 + ex, 4.19, wire_zb], [-1.748 + ex, wire_y, wire_zb]];   // all nine, out of the mount
+function pins_pts() = [[-1.748 + ex, 3.89, z_bot + 5.9], [-1.748 + ex, 1.9, wire_zb], [-1.748 + ex, wire_y, wire_zb]];   // all six: from the pin board's back (y 4.79) down into the bore (from y 2.79, link.scad), out of the mount
 // [2026-11-25: drawn as one bundle from the bore's mouth on, though the key board's five run
-// beside the nine there; now two, side by side along the bottom (under the foot the slot is
-// 6.6 deep, 2.65 high), the five over the nine's shoulder through the right outer rib's notch
+// beside the six there; now two, side by side along the bottom (under the foot the slot is
+// 6.6 deep, 2.65 high), the five over the six's shoulder through the right outer rib's notch
 // (3.1 deep, 4 high, case.scad)]
 wire_fl = z_bot + 2;                    // the floor's top (case.scad: floor_b)
-main_end = [mx(9), brd_y[1] + 1.2, mz(1.9)];   // under the main board's solder pads (P1..P18, X 1..17)
-// the nine, to the main board: along the bottom at the back, to below its solder pads, then up
+// [2026-11-25, with the battery's tail: three lanes along the bottom, front to back the tail
+// (from the column left of the main board on), the key board's five, the contacts' six; past the
+// main board (x 62.5) the five climb over the six at the back and stay there, under the
+// module's edge (x 64 .. 81.75, its underside 3.5 over the floor); past the module the tail
+// climbs over the right outer rib's stump (x 85 .. 91, 2 over the floor in front)]
+// [2026-11-26: the main board's through-hole wire pads, staggered in two rows (Y 1.05 and
+// 3.45), in groups along X (../main_pcb/design.py WIRES): each bundle ends at its group's middle]
+end4 = [mx(4.3), brd_y[1] + 1.2, mz(2.25)];   // the contacts' six, X 1.2 .. 7.45
+end5 = [mx(11.2), brd_y[1] + 1.2, mz(2.25)];  // the key board's five, X 8.7 .. 13.7
+endb = [mx(16.8), brd_y[1] + 1.2, mz(2.25)];  // the battery's four, X 14.95 .. 18.7
+// the contacts' six, to the main board: along the bottom at the back, to below its solder pads, then up
 // to them; kept off the lowest screw's way [given 2026-11-15: all screws reachable]
-function main_leg_pts() = [pins_pts()[2], [pins_pts()[2][0] + 3, -3.95, wire_fl + 1.0], [mx(9) - 3, -3.95, wire_fl + 1.0], main_end];
-// the key board's bus, from the main board's pads: along the bottom over the nine's shoulder,
+function main_leg_pts() = [pins_pts()[2], [pins_pts()[2][0] + 3, -4.1, wire_fl + 1.0], [93, -4.1, wire_fl + 1.0],
+                           [95, -6.9, wire_fl + 1.0], [end4[0], -6.9, wire_fl + 1.0], end4];
+// the key board's bus, from the main board's pads: along the bottom over the six's shoulder,
 // under the foot in front of them, up beside the battery, over the strap bar's block (top
 // -44.5), straight up to J1's plug
-function key_pts() = [main_end, [mx(9) - 3, -5.1, wire_fl + 2.9], [rib_r - 4, -5.1, wire_fl + 2.9], [rib_r - 6, -7.0, wire_fl + 0.9], [-45.0, -7.0, wire_fl + 0.9], [-54.7 + ex, -4.5, wire_fl + 2.0],
+function key_pts() = [end5, [end5[0], -3.85, wire_fl + 3.3], [63.0, -3.85, wire_fl + 3.3], [61.8, -6.2, wire_fl + 3.3],
+                      [60.5, -6.2, wire_fl + 0.9], [58, -6.9, wire_fl + 0.9],
+                      [-45.0, -6.9, wire_fl + 0.9], [-54.7 + ex, -4.5, wire_fl + 2.0],
                       [-54.7 + ex, wire_y, -43], [plug_out[0], wire_y, -41.5], [plug_out[0], plug_out[1], plug_out[2] - 2], plug_out];
-rib_r = 88;                             // the right outer rib (case.scad: rib_out[1]), its notch 3.1 x 4: over the
-                                        //   nine's shoulder only there; elsewhere beside them, under the main board's parts
+// THE BATTERY [2026-11-25]: a 2-wire cell (with its 10k NTC taped on, bass/spec.md), its PCM at
+// the right end; its leads and the NTC's leave at the top of that end (x 51.5) through the
+// upright rib's notch (case.scad: bat_notch_z) into the field over the main board, where the
+// cell's 2-pin JST PH plug and a 2-pin plug for the NTC meet a tail soldered to the main board;
+// the tail goes down through the rib over the power board (tail_notch_x) and the column left
+// of the main board, along the bottom in front, and up to its pads
+ph_box = [[58.6, 63.1], [-9.2, -3.2], [-93.5, -81.0]];   // PH, mated, upright [estimate: 4.5 x 6.0 x 12.5]
+ntc_box = [[63.6, 66.6], [-8.2, -4.2], [-93.5, -85.0]];  // the NTC's (JST SH 2-pin) [estimate]
+// the cell's leads start 1.2 off its end (they leave it there); in the notches the wires keep
+// to its back part (y > -6), where the rib is cut
+function cell_pts() = [[52.7, -4.5, -76], [59.6, -4.5, -76], [60.85, -6.2, -78.5], [60.85, -6.2, ph_box[2][1]]];
+function ntc_pts()  = [[59.6, -4.5, -76], [65.1, -6.2, -79.5], [65.1, -6.2, ntc_box[2][1]]];
+function tail_pts() = [[60.85, -6.2, ph_box[2][0]], [60.0, -4.5, -94.6], [60.0, -4.5, -102.5], [60.0, -8.35, -108],
+                       [60.0, -8.35, wire_fl + 1.15], [82, -8.35, wire_fl + 1.15], [83, -6.85, wire_fl + 1.15],
+                       [83.5, -6.85, wire_fl + 3.2], [89, -6.85, wire_fl + 3.2], endb];
+function ntc_tail_pts() = [[65.1, -6.2, ntc_box[2][0]], [62.5, -4.5, -94.6], [60.0, -4.5, -94.6]];
+module bat_wires() {
+    bundle(cell_pts(), 2.4); bundle(ntc_pts(), 1.0);
+    for (b = [ph_box, ntc_box]) bx(b[0], b[1], b[2]);
+    bundle(tail_pts(), 2.2); bundle(ntc_tail_pts(), 1.0);
+}
 function path_len(p) = len(p) < 2 ? 0 : norm(p[1] - p[0]) + path_len([for (i = [1 : len(p) - 1]) p[i]]);
 module wires() {
-    bundle(pins_pts(), 2.0);
-    bundle(main_leg_pts(), 2.0);
+    bundle(pins_pts(), 1.7);   // six AWG 30 PTFE (3.0 d) [2026-11-25: nine, 2.0]
+    bundle(main_leg_pts(), 1.7);
     bundle(key_pts(), 1.8);
+    bat_wires();
     echo(str("wire lengths: contacts to main board ", path_len(pins_pts()) + path_len(main_leg_pts()),
-             ", key board J1 to main board ", path_len(key_pts())));
+             ", key board J1 to main board ", path_len(key_pts()), ", the cell's leads to its plug ", path_len(cell_pts()),
+             ", the battery's tail ", path_len(tail_pts())));
 }
 
 part = "elec";

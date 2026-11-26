@@ -12,7 +12,7 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
 
 1. ~~**Cradle 90 → 93 mm**~~ done 2026-11-15 (`bass/case.scad`, specs, BOM).
 2. ~~**R8 (TMR) 75k → 68k**~~ done (C36871); routed 2026-11-16.
-3. ~~**NTC on TS**~~ done: P17 = TS, R5 gone, P16 the NTC's return for a taped-on NTC;
+3. ~~**NTC on TS**~~ done: P14 = TS, R5 gone, P13 the NTC's return for a taped-on NTC;
    main board routed 2026-11-16, all nets, no clearance errors.
 
 ## Electronics
@@ -95,7 +95,7 @@ JST-PH ([example](https://zaitronics.com.au/products/3-7v-4000mah-lipo-battery-l
     estimated 2190 counts/N on the way. `firmware/spec.md` §4, §6.
 22. **Spring force** of a built key: 119 g at rest, 149 g at the bottom [from the
     catalogue's rate, ±10 %]. `switch_hall/spec.md` §5.
-23. **Battery NTC**: about 10 kΩ from P17 to GND at room temperature, falling when warmed.
+23. **Battery NTC**: about 10 kΩ from P14 (TS) to GND at room temperature, falling when warmed.
     `main_pcb/spec.md` §2.
 24. **Discant 3.3 V on plugging**: with a scope on DET and the contacts' 3.3 V, check that
     Q3 comes on only after all pins touch (expected 3–7 ms after DET, fully at about

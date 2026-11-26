@@ -151,6 +151,15 @@ rib_out = [for (s = [-1, 1]) (deck_x[0] + deck_x[1]) / 2 + s * 83];   // the out
 module rib_x(x, z0, z1) translate([x - rib_t / 2, rib_y[0], z0]) cube([rib_t, rib_y[1] - rib_y[0], z1 - z0]);
 module rib_z(z, x0, x1) translate([x0, rib_y[0], z - rib_t / 2]) cube([x1 - x0, rib_y[1] - rib_y[0], rib_t]);
 bat_x = [bat_xy[0] - bat_gap - cradle_t, bat_xy[0] + bat[0] + bat_gap + cradle_t];   // the cradle's ends
+// THE BATTERY'S LEADS [2026-11-25: the cell's compartment was closed all round, its leads
+// had no way out]: the cell lies with its PCM to the right; its leads leave at the top of
+// that end through a notch in the upright rib beside it (bat_notch_z) into the field over
+// the main board, where its plug meets a short tail from the main board (elec.scad:
+// bat_wires()); the tail goes down through a notch in the rib over the power board
+// (tail_notch_x) and the column left of the main board to the bottom. Both notches 3 deep at
+// the rib's back edge, the rib 6 thick round them, as at the other wires' notches.
+bat_notch_z  = [-80, -72];
+tail_notch_x = [58.6, 66.6];
 module ribs() intersection() {
     difference() {
         union() {
@@ -167,6 +176,8 @@ module ribs() intersection() {
             translate([-56 + ex, rib_y[0], -36 - 3]) cube([6, rib_y[1] - rib_y[0], 6]);
             for (x = [rib_out[0], bat_x[0] - 1.7, bat_x[1] + 1.7, rib_out[1]])
                 translate([x - 3, rib_y[0], z_bot]) cube([6, rib_y[1] - rib_y[0], wire_h + 3]);
+            translate([bat_x[1] + 1.7 - 3, rib_y[0], bat_notch_z[0] - 3]) cube([6, rib_y[1] - rib_y[0], bat_notch_z[1] - bat_notch_z[0] + 6]);
+            translate([tail_notch_x[0] - 3, rib_y[0], -88 + ez - 3]) cube([tail_notch_x[1] - tail_notch_x[0] + 6, rib_y[1] - rib_y[0], 6]);
         }
         // the wires: along the bottom (from the contacts' bore to the power board and
         // left), and up left of the battery to the key board; notches 3 deep at the ribs'
@@ -174,6 +185,9 @@ module ribs() intersection() {
         // rib stays whole along the front wall [given 2026-11-15: not cut through]
         translate([-200, wire_y - 1.5, z_bot]) cube([400, 20, wire_h]);
         translate([-58 + ex, wire_y - 1.5, z_bot]) cube([5, 20, 120]);
+        // the battery's leads and the tail (see bat_notch_z)
+        translate([bat_x[1] - 3, wire_y - 1.5, bat_notch_z[0]]) cube([9.5, 20, bat_notch_z[1] - bat_notch_z[0]]);
+        translate([tail_notch_x[0], wire_y - 1.5, -88 + ez - 3.1]) cube([tail_notch_x[1] - tail_notch_x[0], 20, 6.2]);
         // under the foot the slot keeps its whole depth: the bases of the upright ribs at the
         // battery's ends (6 thick, x bat_x +- 1.7 +- 3) cut away below the foot's underside,
         // where the foot carries [2026-11-25: they left 3.1 x 2.65 for both bundles]

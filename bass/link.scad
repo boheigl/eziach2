@@ -57,14 +57,15 @@ module box(x, y, z) translate([x[0], y[0], z[0]]) cube([x[1] - x[0], y[1] - y[0]
 // --- CONTACTS [given: power and I2C cross by contacts closing as the bass slides on;
 // the bass's battery switched on by them; chosen 2026-11-15: spring pins on a small board]:
 // a block on the mount between the inner holders, reaching between the discant's outer
-// holders, holds the pin half of ../contact_pcb: three PG2541-03-003P strips (3 spring
-// pins each, 2.54 apart, strips 3.0 apart: nine pins) against the discant's pad board
+// holders, holds the pin half of ../contact_pcb: two PG2541-03-003P strips (3 spring
+// pins each, 2.54 apart, strips 3.0 apart: six pins, one per net [2026-11-25: was nine,
+// 3.3 V doubled and GND tripled]) against the discant's pad board
 // (../discant/gauge_link.scad, face at gauge y 84). The board sits in a pocket open to the
-// front; the pins' force (9 x about 1 N) presses it onto the pocket's ledge. Its nine wires
+// front; the pins' force (6 x about 1 N) presses it onto the pocket's ledge. Its six wires
 // are soldered to its back before, and run through the cavity behind it and a bore through
 // the back wall into the box (elec.scad).
 pin_px   = 2.54;  pin_pz = 3.0;  // as ../contact_pcb/gen_pcb.py (PX, PZ)
-pcb      = [5.0, 4.5, 1.6];      // the board: half width (x), half height (z), thickness
+pcb      = [5.0, 3.5, 1.6];      // the board: half width (x), half height (z), thickness
 pin_work = 4.5;                  // the pins' working height, 1.0 short of free 5.5; limit 4.2 [datasheet]
 // [chosen 2026-11-18, review/contact_pcb.md MAJOR 1]: 4.7, 0.8 pressed, not the working
 // height: the stack's tolerances (both boards' thickness ±0.16, the printed ledge and boss)
@@ -81,8 +82,8 @@ blk_y    = [pad_y + 1, link_y];  // the block's face, 1 mm off the pad board, to
 tip_y    = 89.6 + 0.3;
 blk_hw   = 5.5;                  // between the outer holders
 blk_hw2  = pcb[0] + pcb_c + 1.0; // behind them: walls 1.0 round the board
-blk_hh   = pcb[1] + pcb_c + 0.9; //   0.9 above and below: 5.5, under the latches' rod (6.2)
-cav      = [pcb_y + pcb[2], 3.6];  // the cavity behind the board, for the wires' joints: from y, half size; the ledge round it carries the board
+blk_hh   = pcb[1] + pcb_c + 0.9; //   0.9 above and below: 4.5, under the lever's axle (6.2)
+cav      = [pcb_y + pcb[2], 3.6, 3.0];  // the cavity behind the board, for the wires' joints: from y, half width, half height; the ledge round it (1.4 at the sides, 0.5 above and below) carries the board
 chan_d   = 2.6;  chan_dz = -2.6; // the wires' bore through mount and back wall: at z_bot + 3.3, the middle of the slot under the case's foot
 module contact_chan() translate([0, cav[0] + 2, gz + chan_dz]) rotate([-90, 0, 0]) cylinder(d = chan_d, h = 14);
 
@@ -132,7 +133,7 @@ module mount() to_bass() {
         }
         gauge_tilt_frame() {
             box([-pcb[0] - pcb_c, pcb[0] + pcb_c], [blk_y[0] - 1, cav[0] + 0.01], [gz - pcb[1] - pcb_c, gz + pcb[1] + pcb_c]);   // the pocket
-            box([-cav[1], cav[1]], [cav[0], link_y + mount_t - 1.5], [gz - cav[1], gz + cav[1]]);
+            box([-cav[1], cav[1]], [cav[0], link_y + mount_t - 1.5], [gz - cav[2], gz + cav[2]]);
             contact_chan();
             stop_cuts();
         }
@@ -208,9 +209,9 @@ pin_barrel = 1.5;
 pin_plunger = 0.9;
 module contact_pins() to_bass() gauge_tilt_frame() {
     box([-pcb[0], pcb[0]], [pcb_y, pcb_y + pcb[2]], [gz - pcb[1], gz + pcb[1]]);                     // the board
-    for (j = [-1 : 1]) {
-        box([-3.8, 3.8], [pcb_y - 1.5, pcb_y], [gz + j * pin_pz - 1.25, gz + j * pin_pz + 1.25]);    // a strip's housing
-        for (i = [-1 : 1]) translate([i * pin_px, 0, gz + j * pin_pz]) rotate([-90, 0, 0]) {
+    for (j = [-1, 1]) {
+        box([-3.8, 3.8], [pcb_y - 1.5, pcb_y], [gz + j * pin_pz / 2 - 1.25, gz + j * pin_pz / 2 + 1.25]);    // a strip's housing
+        for (i = [-1 : 1]) translate([i * pin_px, 0, gz + j * pin_pz / 2]) rotate([-90, 0, 0]) {
             translate([0, 0, pcb_y - 4.0]) cylinder(d = pin_barrel, h = 2.5, $fn = 16);                 // barrel
             translate([0, 0, (pad_y + 0.02) + pin_plunger / 2]) cylinder(d = pin_plunger, h = pcb_y - 4.0 - (pad_y + 0.02) - pin_plunger / 2 + 0.01, $fn = 12);
             translate([0, 0, (pad_y + 0.02) + pin_plunger / 2]) sphere(d = pin_plunger, $fn = 12);           // tip

@@ -36,9 +36,9 @@
 // the board (hall_wires, board.scad).
 //
 // CONTACTS [given: power and I2C cross by contacts that close when the bass slides on]:
-// a boss between the outer holders carries a small board with nine gold pads, 3 x 3 at
+// a boss between the outer holders carries a small board with six gold pads, 2 x 3 at
 // 2.54 across and 3.0 up, facing the bass's spring pins (../bass/link.scad), the pad half
-// of ../contact_pcb. Pads: 3.3 V x 2, GND x 3, SDA, SCL, INT, DET; DET is tied to GND on
+// of ../contact_pcb [2026-11-25: was nine]. Pads: 3.3 V, GND, SDA, SCL, INT, DET; DET is tied to GND on
 // this board, which switches the bass's system on (../assembly/spec.md). Five wires are
 // soldered to its back, in a recess of the boss, and go down a bore into the groove.
 //
@@ -77,11 +77,11 @@ pivot_y  = back_y + pad_t;               // the tilt's axis: the pad face's midd
 contact_y  = 85;                 // the pads' face (the outer holders' tips: 89.6): the bass's pin board sits behind those tips
 contact_t  = 1.6;                // ../contact_pcb (gen_pcb.py: W, H, T, PX, PZ, PAD_D)
 contact_hw = 5.0;                // half width (x) and half height (z) of boss and board
-contact_hh = 4.5;
+contact_hh = 3.5;
 contact_px = 2.54;               // the pads: across (x)
 contact_pz = 3.0;                //   and up (z)
 contact_pad = 2.2;
-contact_rec = [3.6, 1.5];        // the recess behind the board for the wires' joints: half size, depth
+contact_rec = [3.6, 1.5, 2.6];   // the recess behind the board for the wires' joints: half width, depth, half height
 contact_bore = 2.2;
 contact_wire_d = 1.4;            // five AWG 30 PTFE (⌀0.55 each) bundled (../assembly/spec.md, Wiring)
 
@@ -169,14 +169,14 @@ function wires(r) = [for (w = hall_wires) if (w[0] == r) w][0];
 // the contact board; pads as thin discs on its face
 module contact_board() gauge_tilt_frame() {
     box([-contact_hw, contact_hw], [contact_y - contact_t, contact_y - 0.035], [gz - contact_hh, gz + contact_hh]);
-    for (i = [-1 : 1], j = [-1 : 1]) translate([i * contact_px, contact_y - 0.035, gz + j * contact_pz])
+    for (i = [-1 : 1], j = [-1, 1]) translate([i * contact_px, contact_y - 0.035, gz + j * contact_pz / 2])
         rotate([-90, 0, 0]) cylinder(d = contact_pad, h = 0.035, $fn = 20);
 }
 // part of the housing: the boss under the contact board, with the wires' bore
 module gauge_contact_boss() gauge_tilt_frame() difference() {
     box([-contact_hw, contact_hw], [back_y + pad_t - 0.5, contact_y - contact_t], [gz - contact_hh, gz + contact_hh]);
     translate([0, back_y + pad_t - 1, gz]) rotate([-90, 0, 0]) cylinder(d = contact_bore, h = contact_y - back_y);
-    box([-contact_rec[0], contact_rec[0]], [contact_y - contact_t - contact_rec[1], contact_y - contact_t + 0.01], [gz - contact_rec[0], gz + contact_rec[0]]);
+    box([-contact_rec[0], contact_rec[0]], [contact_y - contact_t - contact_rec[1], contact_y - contact_t + 0.01], [gz - contact_rec[2], gz + contact_rec[2]]);
 }
 g_y = back_y + pad_t - strip_t;                 // the groove's front, behind the strips
 // a wire's way from the groove at x0 to the board's pad row r: the contacts' along the groove

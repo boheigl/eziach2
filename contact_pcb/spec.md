@@ -9,22 +9,23 @@ not blade or card-edge contacts: `../assembly/spec.md`, Contacts.
 
 | | |
 |---|---|
-| Panel | 17.2 × 26.8 mm, 2 layers, 1.6 mm, **ENIG** (the pads are contacts): both boards in a 2 mm frame, 1.6 mm milled gaps round them (1.0 before 2026-11-19: JLCPCB's least slot; 1.6–2 advised), each held by a 5 mm tab on either side (JLCPCB's minimum with mouse bites; 2 mm before 2026-11-18, review/contact_pcb.md) with seven ⌀0.5 mouse-bite holes at 0.75 along the board's edge, the nearest 0.45 mm from a via's copper [given 2026-11-15: tabs, not V-cut] |
-| Each board | 10.0 × 9.0 mm |
-| Grid | 3 × 3: 2.54 mm across (x), 3.0 mm up (z); the strips are 2.5 wide, so 3.0 leaves them 0.5 apart |
+| Panel | 17.2 × 22.8 mm, 2 layers, 1.6 mm, **ENIG** (the pads are contacts): both boards in a 2 mm frame, 1.6 mm milled gaps round them (1.0 before 2026-11-19: JLCPCB's least slot; 1.6–2 advised), each held by a 5 mm tab on either side (JLCPCB's minimum with mouse bites; 2 mm before 2026-11-18, review/contact_pcb.md) with seven ⌀0.5 mouse-bite holes at 0.75 along the board's edge, the nearest 0.68 mm from a via's copper (the tabs in the boards' middle) [given 2026-11-15: tabs, not V-cut] |
+| Each board | 10.0 × 7.0 mm [2026-11-25: 10 × 9 with nine pins] |
+| Grid | 2 × 3: 2.54 mm across (x), 3.0 mm up (z), the rows at ±1.5; the strips are 2.5 wide, so 3.0 leaves them 0.5 apart [2026-11-25: six pins, one per net; was 3 × 3, the 3.3 V doubled and GND tripled, so nine wires ran to the main board] |
 | Pads | ⌀2.2 on both boards (the strip's recommended pad) |
 | Vias | 0.45 / 0.2, in the gaps between four pads (0.64 mm clear of each) or beside the middle row; tented |
 | Tracks | 0.2, supply 0.3; clearance 0.15 |
-| Wire pads | 1.2 × 1.4 mm on the back, within ±3.4 mm, so the joints sit in the cavity (bass) or recess (discant) behind the board; each net's name below its pad on the back silkscreen, mirrored so it reads from the back [2026-11-19, review MINOR 1] |
+| Wire pads | 1.2 × 1.4 mm on the back, at z ±1.6 (to ±2.3), so the joints sit in the cavity (bass) or recess (discant) behind the board; each net's name below its pad on the back silkscreen, mirrored so it reads from the back [2026-11-19, review MINOR 1] |
 
 ## Pin board (bass)
 
 | Part | Count | |
 |---|---|---|
-| PG2541-03-003P (CHIN-BAN), LCSC **C49451741** | 3 (J1–J3) | 3 spring pins each at 2.54, SMD; plunger ⌀0.9, barrel ⌀1.5; free height 5.5, working height 4.5 (1.0 travel), limit 4.2; 120 ± 20 gf there; used at 4.7 (0.8 pressed, about 100 gf), so the stack's tolerances stay clear of the limit (`../bass/link.scad`, pin_h) [2026-11-18]; gold over nickel; 10 000 cycles; 1 A [datasheet]. 50 in stock 2026-11-15, $0.53 each |
+| PG2541-03-003P (CHIN-BAN), LCSC **C49451741** | 2 (J1, J2) | 3 spring pins each at 2.54, SMD; plunger ⌀0.9, barrel ⌀1.5; free height 5.5, working height 4.5 (1.0 travel), limit 4.2; 120 ± 20 gf there; used at 4.7 (0.8 pressed, about 100 gf), so the stack's tolerances stay clear of the limit (`../bass/link.scad`, pin_h) [2026-11-18]; gold over nickel; 10 000 cycles; 1 A [datasheet]. 50 in stock 2026-11-15, $0.53 each |
 
-Nine wire pads on the back, one per pin, because the main board takes nine wires
-(`../main_pcb/design.py`, WIRES).
+Six wire pads on the back, one per pin (`../main_pcb/design.py`, WIRES). Each pin has
+its via beside it (the outer columns, x ±4.1) or between the rows (the middle column,
+x ±1.27).
 
 **Supply** [checked 2026-11-15 at lcsc.com]: 50 in stock, enough for 16 instruments. Buy
 what the planned instruments need now (into JLCPCB's private parts library, so the
@@ -37,10 +38,9 @@ pins, so no three at 2.54 in a row), it would need a new grid, e.g. five strips 
 
 ## Pad board (discant)
 
-Nine bare pads on the front. On the back: the 3.3 V pair, the three GND and DET are
-tied (DET to GND: switches the bass's system on), and five wire pads carry 3V3, GND,
-SDA, SCL and INT to the Hall board's J1. The left GND pad joins the middle one on the
-front, so its via would not cut the 3.3 V pair's track.
+Six bare pads on the front. On the back DET is tied to GND, its neighbour (switches
+the bass's system on), and five wire pads carry 3V3, GND, SDA, SCL and INT to the Hall
+board's J1.
 
 ## Pin assignment
 
@@ -49,13 +49,19 @@ board, seen from the bass, shows it mirrored.
 
 | z \ x | −2.54 | 0 | +2.54 |
 |---|---|---|---|
-| +3 | 3V3 | SDA | SCL |
-| 0 | GND | GND | GND |
-| −3 | 3V3 | INT | DET |
+| +1.5 | 3V3 | SDA | SCL |
+| −1.5 | GND | DET | INT |
 
 ## Open
 
-- DET closes no later than the other pins: all nine pins are alike. The main board turns
+- **Built from `gen_pcb.py` only on a machine with KiCad** (its Python module `pcbnew` and
+  `kicad-cli`): the six-pin boards [2026-11-25] are written but not yet built or checked by
+  DRC; run `build.sh` and look at the DRC line.
+- **One GND pin** [2026-11-25: there were three]: as the discant comes off, its ground may
+  part before its 3.3 V, and the return current then runs through the bus; the 33 R in
+  the bus lines on the main board limit it (`../main_pcb/spec.md`, review/contact_pcb.md
+  MINOR 4). Before, two more GND pins made that less likely.
+- DET closes no later than the other pins: all six pins are alike. The main board turns
   the discant's 3.3 V on 3–7 ms after DET, fully after about 12 ms, which covers the pins'
   spread as the bass slides on (`../main_pcb/spec.md` §3).
 - **Ordering** [checked 2026-11-15, jlcpcb.com]: JLCPCB cuts V-grooves only in panels of
