@@ -257,22 +257,27 @@ function key_pts() = [end5, [end5[0], -3.85, wire_fl + 3.3], [63.0, -3.85, wire_
 // THE BATTERY [2026-11-25]: a 2-wire cell (with its 10k NTC taped on, bass/spec.md), its PCM at
 // the right end; its leads and the NTC's leave at the top of that end (x 51.5) through the
 // upright rib's notch (case.scad: bat_notch_z) into the field over the main board, where the
-// cell's 2-pin JST PH plug and a 2-pin plug for the NTC meet a tail soldered to the main board;
+// cell's 2-pin JST PH plug meets a tail soldered to the main board; the NTC's two wires run on
+// past it unbroken, no plug [chosen 2026-11-26: the NTC is taped on and moves to a new cell
+// anyway; a JST SH pair came only in large packs, and a second PH would take the cell's plug];
 // the tail goes down through the rib over the power board (tail_notch_x) and the column left
 // of the main board, along the bottom in front, and up to its pads
 ph_box = [[58.6, 63.1], [-9.2, -3.2], [-93.5, -81.0]];   // PH, mated, upright [estimate: 4.5 x 6.0 x 12.5]
-ntc_box = [[63.6, 66.6], [-8.2, -4.2], [-93.5, -85.0]];  // the NTC's (JST SH 2-pin) [estimate]
+ntc_z   = ph_box[2][0];        // where the NTC's two join the tail, level with the PH plug's lower end
+ntc_cell = 88;                  // the NTC's wires along the cell, from 3 .. 5 mm off its far end [estimate]
 // the cell's leads start 1.2 off its end (they leave it there); in the notches the wires keep
 // to its back part (y > -6), where the rib is cut
 function cell_pts() = [[52.7, -4.5, -76], [59.6, -4.5, -76], [60.85, -6.2, -78.5], [60.85, -6.2, ph_box[2][1]]];
-function ntc_pts()  = [[59.6, -4.5, -76], [65.1, -6.2, -79.5], [65.1, -6.2, ntc_box[2][1]]];
+function ntc_pts()  = [[59.6, -4.5, -76], [65.1, -6.2, -79.5], [65.1, -6.2, ntc_z]];
 function tail_pts() = [[60.85, -6.2, ph_box[2][0]], [60.0, -4.5, -94.6], [60.0, -4.5, -102.5], [60.0, -8.35, -108],
                        [60.0, -8.35, wire_fl + 1.15], [82, -8.35, wire_fl + 1.15], [83, -6.85, wire_fl + 1.15],
                        [83.5, -6.85, wire_fl + 3.2], [89, -6.85, wire_fl + 3.2], endb];
-function ntc_tail_pts() = [[65.1, -6.2, ntc_box[2][0]], [62.5, -4.5, -94.6], [60.0, -4.5, -94.6]];
+function ntc_tail_pts() = [[65.1, -6.2, ntc_z], [62.5, -4.5, -94.6], [60.0, -4.5, -94.6]];
+// an NTC wire from the bead to its pad: along the cell, out through the notch, past the plug, in the tail
+function ntc_len() = ntc_cell + path_len(ntc_pts()) + path_len(ntc_tail_pts()) + path_len([for (i = [1 : len(tail_pts()) - 1]) tail_pts()[i]]);
 module bat_wires() {
     bundle(cell_pts(), 2.4); bundle(ntc_pts(), 1.0);
-    for (b = [ph_box, ntc_box]) bx(b[0], b[1], b[2]);
+    bx(ph_box[0], ph_box[1], ph_box[2]);
     bundle(tail_pts(), 2.2); bundle(ntc_tail_pts(), 1.0);
 }
 function path_len(p) = len(p) < 2 ? 0 : norm(p[1] - p[0]) + path_len([for (i = [1 : len(p) - 1]) p[i]]);
@@ -319,12 +324,12 @@ key_pin = [2, 5, 3, 4, 1];
 function key_end(k) = let(x = plug_out[0] + (key_pin[k] - 3) * 1.0) [[x, plug_out[1], plug_out[2] - 0.8], [x, plug_out[1], plug_out[2]]];   // [2026-11-26: -2, level with the bundle's end: the wires fanned out at one height]
 module key_strands() strands(mid(key_pts()), 5, awg30, [for (k = [0 : 4]) from_wpad(k_wpad[k])], [for (k = [0 : 4]) key_end(k)], colours = sig_col,
                              slot_of = k_slot, spread = 1.3);   // [2026-11-26: 1.15, the fan off the pads touched (0.36)]
-// #6 the battery: the cell's two leads to its PH plug (pins 2.0 apart), the NTC's two to its
-// plug; the tail's four from the plugs to P12 .. P15 (-, the NTC's return, TS, +)
+// #6 the battery: the cell's two leads to its PH plug (pins 2.0 apart), the NTC's two past it,
+// unbroken; the tail's four from there to P12 .. P15 (-, the NTC's return, TS, +)
 module bat_strands() {
     strands(cell_pts(), 2, awg26, spread = 1.1, colours = ["red", "black"]);
     strands(ntc_pts(), 2, awg30, spread = 1.1, colours = ["purple", "black"]);
-    if (show_colour("white")) for (b = [ph_box, ntc_box]) bx(b[0], b[1], b[2]);
+    if (show_colour("white")) bx(ph_box[0], ph_box[1], ph_box[2]);
     core = mid(tail_pts());
     starts = [[[59.85, -6.2, ph_box[2][0]]], [ntc_tail_pts()[0] - [0.4, 0, 0], ntc_tail_pts()[1] - [0, 0, 0.4]],
               [ntc_tail_pts()[0] + [0.4, 0, 0], ntc_tail_pts()[1] + [0, 0, 0.4]], [[61.85, -6.2, ph_box[2][0]]]];

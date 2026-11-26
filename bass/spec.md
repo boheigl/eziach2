@@ -184,9 +184,13 @@ keys: `../BOM.md`.
     are clear of the lip, about 2.9 mm up to the rib over the battery, 6.6 wide.
     Wires (AWG 30, joints in heat-shrink, twisted) extended first, then the NTC laid
     flat and held by Kapton tape, the wires taped to the cell as strain relief; no glue
-    or solder on the pouch. Its two wires run with the cell's, to a JST SH 2-pin plug
-    beside the cell's in the field over the main board, and from there in the tail to
-    TS and the spare GND. A new cell gets the NTC moved over.
+    or solder on the pouch. Its two wires run with the cell's through the notch, past the
+    cell's plug in the field over the main board, unbroken, and in the tail to TS and the
+    spare GND [chosen 2026-11-26: no plug of its own; a JST SH pair came only in large
+    packs, and a second PH would take the cell's plug, putting the cell on TS]. A new
+    cell gets the NTC moved over: unplug the cell, peel the tape, the NTC stays on its
+    wires in the case. NTC: MF52-103, B 3950 [chosen 2026-11-26; B 3435 designed, the
+    charger's TS window then about 4 … 46 °C instead of 0 … 50 °C, `../BOM.md`].
 - **Electronics** (`elec.scad`) [given: charging in the bass by its own USB socket; the
   contacts switch the system on; the electronics moved from the discant to the bass]:
   - **Main board**, 45.5 × 33 mm at the bottom on the +x side, between the outer rib and

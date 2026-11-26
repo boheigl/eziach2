@@ -69,7 +69,6 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 |---|---|---|
 | Stranded wire AWG 30, 7 × 0.1, thin-wall PTFE (⌀ ≤ 0.55) | about 3.7 m cut (runs 2–5, 7 and the NTC's) | by the metre: red 1 m, black 2 m, blue, yellow, green, white, purple 1 m each [2026-11-26; `assembly/spec.md`, Order list] [unverified: outside ⌀] |
 | JST PH 2-pin pair, pre-crimped, leads AWG 26 or 28 at least 130 mm | 1 | the cell's plug's counterpart; its leads are the battery's tail + and − to P15 / P12 [chosen 2026-11-26, no AWG 26 by the metre] |
-| JST SH 2-pin pair, pre-crimped | 1 | the NTC's plug |
 | JST SH cable, 5 pins, pre-crimped | 1 | the bass Hall board's J1 plug, spliced to PTFE wire |
 | Heat shrink for the splice | about 3 cm | |
 

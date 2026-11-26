@@ -147,10 +147,11 @@ Zuschnitt = Länge im Modell + 20 mm je Ende zum Abisolieren und als Zugentlastu
 | 3 | Diskant | Messplatten → J2 / J3 | 2 × 3: rot, gelb, schwarz | {{scad:discant/gauge_link.scad:path_len(lead_pts(-1))}} mm | {{cut:discant/gauge_link.scad:path_len(lead_pts(-1))}} mm je |
 | 4 | Bass | Stiftplatine → Hauptplatine P1–P6 | 6: 3,3 V, GND, SDA, SCL, INT, DET | {{scad:bass/elec.scad:path_len(pins_pts()) + path_len(main_leg_pts())}} mm | {{cut:bass/elec.scad:path_len(pins_pts()) + path_len(main_leg_pts()):30}} mm |
 | 5 | Bass | Bass-Tastenplatine J1 → P7–P11 | 5: 3,3 V, GND, SDA, SCL, INT | {{scad:bass/elec.scad:path_len(key_pts())}} mm | {{cut:bass/elec.scad:path_len(key_pts())}} mm |
-| 6 | Bass | Akku-Stecker → P12–P15 | 4: −, NTC-Rückleitung, TS, + | {{scad:bass/elec.scad:path_len(tail_pts())}} mm | {{cut:bass/elec.scad:path_len(tail_pts())}} mm |
+| 6 | Bass | Akku-Stecker → P12, P15 | 2: −, + (Adern des JST-PH-Gegensteckers) | {{scad:bass/elec.scad:path_len(tail_pts())}} mm | {{cut:bass/elec.scad:path_len(tail_pts())}} mm |
+| 6 | Bass | NTC am Akku → P13, P14, ohne Stecker | 2: Rückleitung, TS | {{scad:bass/elec.scad:ntc_len()}} mm | {{cut:bass/elec.scad:ntc_len()}} mm |
 | 7 | Bass | Klinke → P19–P21 | 3: Spitze, Ring, Hülse | {{scad:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))])}} mm | {{cut:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))]) + jack_slack}} mm |
 
-Teile: Litze AWG 30, 7 × 0,1, PTFE dünnwandig (⌀ ≤ 0,55), rot 1 m, schwarz 2 m, blau, gelb, grün, weiß und lila je 1 m; JST-SH-Kabel 5-polig, vorgecrimpt; JST-PH-2-Paar vorgecrimpt mit mindestens 130 mm langen Adern (AWG 26 oder 28; sie sind die Akkuleitungen + und − bis zur Hauptplatine); JST-SH-2-Paar (NTC); Schrumpfschlauch ⌀1,5 und ⌀3
+Teile: Litze AWG 30, 7 × 0,1, PTFE dünnwandig (⌀ ≤ 0,55), rot 1 m, schwarz 2 m, blau, gelb, grün, weiß und lila je 1 m; JST-SH-Kabel 5-polig, vorgecrimpt; JST-PH-2-Paar vorgecrimpt mit mindestens 130 mm langen Adern (AWG 26 oder 28; sie sind die Akkuleitungen + und − bis zur Hauptplatine); Schrumpfschlauch ⌀1,5 und ⌀3
 
 ### Farben und Löten
 
@@ -244,7 +245,7 @@ caption: Lauf #5 vom Stecker oben links hinunter und unten entlang
 
 ### #6 Bass: Akku
 
-Die Akkuleitungen und die des NTC gehen durch die Kerbe der Rippe rechts neben dem Akku zu ihren Steckern im Feld über der Hauptplatine. Von dort läuft der Schwanz durch die Kerbe der Rippe über dem Netzteilbereich, die Spalte links neben der Hauptplatine hinunter und unten vorn entlang zu P12–P15. + und − sind die Adern des vorgecrimpten JST-PH-Gegensteckers (AWG 26 oder 28).
+Die Akkuleitungen und die des NTC gehen durch die Kerbe der Rippe rechts neben dem Akku ins Feld über der Hauptplatine, die Akkuleitungen dort in den JST-PH-Stecker. Die beiden NTC-Drähte laufen ohne Stecker daran vorbei durch bis zur Hauptplatine: Der NTC ist nur aufgeklebt und zieht bei einem Akkuwechsel auf die neue Zelle um. Vom Feld läuft der Schwanz durch die Kerbe der Rippe über dem Netzteilbereich, die Spalte links neben der Hauptplatine hinunter und unten vorn entlang zu P12–P15. + und − sind die Adern des vorgecrimpten JST-PH-Gegensteckers (AWG 26 oder 28).
 
 ```view
 frame: bass
@@ -376,7 +377,7 @@ Im Kasten wird nichts gelötet: Die Drahtpads der Hauptplatine liegen später hi
 
 - **#4 Kontakte**, 6 Drähte zu je {{cut:bass/elec.scad:path_len(pins_pts()) + path_len(main_leg_pts()):30}} mm, an P1–P6: INT grün, 3,3 V rot, SCL gelb, GND schwarz, DET weiß, SDA blau.
 - **#5 Tastenbus**, 5 Drähte zu je {{cut:bass/elec.scad:path_len(key_pts())}} mm, an P7–P11: 3,3 V, GND, INT, SCL, SDA. Ans andere Ende kommt der JST-SH-Stecker (vorgecrimptes Kabel, kurz hinter dem Stecker an den PTFE-Draht gespleißt, Schrumpfschlauch).
-- **#6 Akku-Schwanz**, {{cut:bass/elec.scad:path_len(tail_pts())}} mm, an P12–P15 (− schwarz, NTC-Rückleitung schwarz, TS lila, + rot): + und − sind die Adern des vorgecrimpten JST-PH-Gegensteckers, auf Länge gekürzt; die beiden NTC-Drähte aus AWG 30 bekommen am Ende den JST-SH-Gegenstecker.
+- **#6 Akku-Schwanz**, {{cut:bass/elec.scad:path_len(tail_pts())}} mm, an P12–P15 (− schwarz, NTC-Rückleitung schwarz, TS lila, + rot): + und − sind die Adern des vorgecrimpten JST-PH-Gegensteckers, auf Länge gekürzt. Die beiden NTC-Drähte (AWG 30, je {{cut:bass/elec.scad:ntc_len()}} mm) gehen ohne Stecker bis zum NTC: Am anderen Ende die Perle anlöten (Lötstellen in Schrumpfschlauch, die Drähte verdrillt); sie wird erst beim Einlegen des Akkus aufgeklebt.
 - **#7 Klinke**, 3 × {{cut:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))]) + jack_slack}} mm, auf die SMD-Pads P19–P21: Spitze weiß, Ring rot, Hülse schwarz. Die Drähte bleiben bewusst lang; gekürzt wird erst an der Klinke.
 
 Die freien Enden von #4 und #5 jeweils mit einem Stück Schrumpfschlauch zu einer Spitze bündeln.
@@ -465,7 +466,7 @@ caption: Der Riemen über dem Handrücken, jedes Ende durch zwei Schlitze
 
 ### Akku
 
-Den Akku mit der Schutzplatine nach rechts einlegen. Seine Leitungen und die des NTC in die Kerbe oben in der Rippe daneben legen und im Feld über der Hauptplatine einstecken; was von den Akkuleitungen übrig ist, dort in eine Schlaufe legen.
+Den Akku mit der Schutzplatine nach rechts einlegen. Den NTC 3–5 mm vom Ende ohne Schutzplatine flach auf die obere Kante legen und mit Kaptonband festkleben, seine Drähte mit Band an der Zelle entlang zur Schutzplatine führen. Akku- und NTC-Leitungen in die Kerbe oben in der Rippe daneben legen und den Akku im Feld über der Hauptplatine einstecken; was von den Akkuleitungen übrig ist, dort in eine Schlaufe legen.
 
 ```view
 frame: bass
@@ -476,7 +477,7 @@ focus: case
 caption: Der Akku zwischen Vorderwand und Rückdeckel, Stecker rechts oben
 ```
 
-> Der Akku kommt später ohne Löten wieder heraus: Deckel ab, beide Stecker ziehen, Leitungen aus der Kerbe heben. Ein 2-Draht-Akku bekommt den NTC mit Kaptonband auf die obere Kante, 3–5 mm vom Ende ohne Schutzplatine (`bass/spec.md`, Battery).
+> Der Akku kommt später ohne Löten wieder heraus: Deckel ab, den JST-PH-Stecker ziehen, das Kaptonband lösen und den NTC von der Zelle nehmen (er bleibt an seinen Drähten im Gehäuse), Leitungen aus der Kerbe heben. Die neue Zelle bekommt denselben NTC (`bass/spec.md`, Battery).
 
 ### Rückdeckel
 

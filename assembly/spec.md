@@ -211,7 +211,7 @@ models on every build [2026-11-26: #4 was 180, #5 350, from older ways].
 | 3 | discant | gauge plates → into the pad's groove at x = ∓25, straight through the slanting channels → Hall board's J2 / J3 at x = ∓12 (NAU7802) | 2 half bridges, 3 each | pads / pads | 15 mm each | 60 mm each |
 | 4 | bass | spring-pin board's back pads → main board's pads, out of the mount's cavity and bore, round the corner at the foot's window, along the bottom at the back | 6: 3V3, GND, SDA, SCL, INT, DET | pads / pads | 114 mm | 190 mm |
 | 5 | bass | bass Hall board J1 → down its shaft, over the strap bar's block, beside the battery, along the bottom beside #4 (in front of it, over its shoulder through the right outer rib's notch) → main board's pads | 5: 3V3, GND, SDA, SCL, INT | SH plug / pads | 297 mm | 340 mm |
-| 6 | bass | battery: its own leads (+, −) and the taped-on NTC's two, out of the cell's compartment through the notch in the rib right of it, to their plugs in the field over the main board; from there a tail down through the rib over the power board and the column left of the main board, along the bottom in front of #5 and #4, up to the pads (+ BATP through the PTC, − GND, the NTC to TS and the spare GND) | 2 + 2 | JST PH 2-pin (the cell's) and JST SH 2-pin (the NTC) / pads | cell to plug 13 mm (its leads looped in the field), tail 81 mm | tail 130 mm |
+| 6 | bass | battery: its own leads (+, −) and the taped-on NTC's two, out of the cell's compartment through the notch in the rib right of it, the cell's to its plug in the field over the main board, the NTC's on past it unbroken [2026-11-26: no plug]; from there a tail down through the rib over the power board and the column left of the main board, along the bottom in front of #5 and #4, up to the pads (+ BATP through the PTC, − GND, the NTC to TS and the spare GND) | 2 + 2 | JST PH 2-pin (the cell's) / pads; the NTC's: bead / pads | cell to plug 13 mm (its leads looped in the field), tail 81 mm; NTC 193 mm (88 along the cell [estimate]) | tail 130 mm; NTC 240 mm |
 | 7 | bass | earphone jack's lugs → P19–P21 (the pads under the lugs); the lugs' angle is set by screwing the jack in, so 10 mm more, trimmed at the lugs | 3: tip, ring, sleeve | lugs / pads | 10 mm | 70 mm |
 
 - **Wire** [chosen]: AWG 30 stranded (7 × 0.1), PTFE thin wall, outside ⌀ ≤ 0.55 mm
@@ -239,7 +239,8 @@ models on every build [2026-11-26: #4 was 180, #5 350, from older ways].
   board's edge, the jack's zone above, the antenna's keepout beside]. Every run has one
   end on a part that is still loose, or a plug:
   1. On the bench: the wires of #4 and #5 and the battery's tail (#6, with the
-     counterparts of the cell's PH plug and the NTC's SH plug on its end) soldered to the
+     counterpart of the cell's PH plug on its end, and the NTC's two wires with the bead
+     soldered on their far end) soldered to the
      loose main board; #4's and #5's free ends bundled to a point with a short piece of
      heat shrink.
   2. Back cover and battery out. The main board in (2 mm to the left, slid right into
@@ -277,13 +278,13 @@ models on every build [2026-11-26: #4 was 180, #5 350, from older ways].
   shielding, no twisted pairs needed.
 
 **Order list** [2026-11-26: from the cut lengths by colour, with spare; the gauges' run #3
-on their own leads]: AWG 30 PTFE stranded, by the metre: red 1 m (0.67 cut), black 2 m (0.95,
-with about 0.15 for the NTC's leads along the cell [estimate]), blue, yellow, green 1 m each
-(0.60), white 1 m (0.26), purple 1 m (0.28); 1 pre-crimped JST SH 5-pin cable (or SHR-05V-S +
+on their own leads]: AWG 30 PTFE stranded, by the metre: red 1 m (0.67 cut), black 2 m (0.91,
+with the NTC's return, 0.24, bead to pad), blue, yellow, green 1 m each (0.60), white 1 m
+(0.26), purple 1 m (0.24, the NTC's TS); 1 pre-crimped JST SH 5-pin cable (or SHR-05V-S +
 SSH-003T-P0.2-H and the crimp tool); heat shrink ⌀1.5 and ⌀3 (2:1); the counterpart of the
 cell's plug, a **pre-crimped JST PH 2-pin pair whose leads (AWG 26 or 28) are at least 130 mm
 long**: its leads are the battery's + and − tail, soldered straight to P15 / P12, so no AWG 26
 by the metre [chosen 2026-11-26; AWG 26 was chosen 2026-11-25 for up to 1.5 A, the fuse,
 about 0.13 Ω/m; AWG 30 there would drop about 80 mV while charging at 0.89 A, so the charger
 would stop a few per cent early] [unverified: such leads are often PVC, ⌀1.1–1.3, the model
-has ⌀0.9 for them through the ribs' notches]; and a pre-crimped JST SH 2-pin pair for the NTC.
+has ⌀0.9 for them through the ribs' notches]; the NTC needs no plug [2026-11-26].
