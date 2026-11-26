@@ -31,8 +31,9 @@ In the text, values come from the sources, so they follow them too:
 Tables in the text are Markdown's (| a | b |).
 
 Caches every rendered picture and every module's STL under build/assembly/guide/ by a
-hash of what goes in (the STLs' size and time, the sources' times), so a rebuild renders
-only what changed."""
+hash of what goes in (the contents of its STLs, and of a module's source with everything
+that source includes, uses or imports), so a rebuild renders only the pictures whose parts
+really changed."""
 import os, re, sys, ast, json, html, glob, base64, hashlib, shutil, subprocess, datetime, io
 from multiprocessing import Pool
 import numpy as np
@@ -77,16 +78,48 @@ def openscad(args, cwd=None):
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd)
     return r
 
+HASHES = None
 def stamp(path):
-    s = os.stat(path); return f"{s.st_size}:{int(s.st_mtime)}"
+    """a file's content hash [2026-11-26: was size and time, so a file rebuilt the same, or only
+    saved again, rendered its pictures again]; kept by size and time, so each is read once"""
+    global HASHES
+    if HASHES is None:
+        try: HASHES = json.load(open(os.path.join(CACHE, "hashes.json")))
+        except Exception: HASHES = {}
+    st = os.stat(path); k = f"{path}|{st.st_size}|{st.st_mtime_ns}"
+    if k not in HASHES:
+        h = hashlib.sha1()
+        with open(path, "rb") as f:
+            for b in iter(lambda: f.read(1 << 20), b""): h.update(b)
+        HASHES[k] = h.hexdigest()[:20]
+    return HASHES[k]
 
-SCAD_STAMP = None
-def scad_stamp():
-    global SCAD_STAMP
-    if SCAD_STAMP is None:
-        fs = sorted(glob.glob(os.path.join(ROOT, "**/*.scad"), recursive=True))
-        SCAD_STAMP = hashlib.sha1("".join(f + stamp(f) for f in fs if "/build/" not in f).encode()).hexdigest()
-    return SCAD_STAMP
+def save_hashes():
+    if HASHES is not None:
+        os.makedirs(CACHE, exist_ok=True)
+        json.dump({k: v for k, v in HASHES.items() if os.path.exists(k.split("|")[0])}, open(os.path.join(CACHE, "hashes.json"), "w"))
+
+DEPS = {}
+def deps(path):
+    """the files a source depends on: itself, what it includes and uses (recursively) and the
+    STLs it imports by a literal path"""
+    path = os.path.normpath(path)
+    if path in DEPS: return DEPS[path]
+    DEPS[path] = {path}
+    try: text = open(path).read()
+    except OSError: return DEPS[path]
+    d = os.path.dirname(path)
+    for m in re.finditer(r"^\s*(?:include|use)\s*<([^>]+)>", text, re.M):
+        DEPS[path] |= deps(os.path.join(d, m.group(1)))
+    for m in re.finditer(r'import\(\s*"([^"]+)"', text):
+        DEPS[path].add(os.path.normpath(os.path.join(d, m.group(1))))
+    return DEPS[path]
+
+def src_stamp(src):
+    """changes when the source or anything it depends on changes [2026-11-26: was every .scad of
+    the repo, so any change rendered all pictures of modules again]"""
+    fs = sorted(deps(os.path.join(ROOT, src)))
+    return hashlib.sha1("".join(f + (stamp(f) if os.path.exists(f) else "-") for f in fs).encode()).hexdigest()
 
 # --- parts -> STL files ------------------------------------------------------------
 def parse_item(s, frame):
@@ -104,7 +137,7 @@ def stl_files(name, frame, ws=1.0):
         out = []
         for c in (WIRE_COLS if wires else [None]):
             w = ws if wires else 1.0
-            key = hashlib.sha1(f"{src}|{call}|{c}|{w}|{scad_stamp()}".encode()).hexdigest()[:16]
+            key = hashlib.sha1(f"{src}|{call}|{c}|{w}|{src_stamp(src)}".encode()).hexdigest()[:16]
             f = os.path.join(CACHE, "parts", key + ".stl")
             if not os.path.exists(f) and not os.path.exists(f + ".empty"):
                 os.makedirs(os.path.dirname(f), exist_ok=True)
@@ -215,14 +248,15 @@ def render(job):
 
 # --- values from the sources ---------------------------------------------------------
 def scad_values(exprs):
-    """{(file, expr): value} by OpenSCAD's echo, cached by the sources' stamp"""
+    """{(file, expr): value} by OpenSCAD's echo, cached by the file's stamp (with what it depends on)"""
     cf = os.path.join(CACHE, "values.json")
     try: cache = json.load(open(cf))
     except Exception: cache = {}
-    if cache.get("stamp") != scad_stamp(): cache = {"stamp": scad_stamp()}
+    ck = lambda f, e: f"{f}|{e}|{src_stamp(f)}"
+    cache = {k: v for k, v in cache.items() if k in {ck(f, e) for f, e in exprs}}
     by_file = {}
     for f, e in exprs:
-        if f"{f}|{e}" not in cache: by_file.setdefault(f, []).append(e)
+        if ck(f, e) not in cache: by_file.setdefault(f, []).append(e)
     for f, es in by_file.items():
         sc = os.path.join(CACHE, "values.scad")
         with open(sc, "w") as fh:
@@ -232,9 +266,9 @@ def scad_values(exprs):
         got = dict(re.findall(r'ECHO: "GUIDE(\d+)=([^"]*)"', open(sc[:-5] + ".echo").read() if os.path.exists(sc[:-5] + ".echo") else ""))
         for n, e in enumerate(es):
             if str(n) not in got: raise SystemExit(f"guide: {f}: {e} gives nothing\n{r.stderr[-600:]}")
-            cache[f"{f}|{e}"] = float(got[str(n)])
+            cache[ck(f, e)] = float(got[str(n)])
     json.dump(cache, open(cf, "w"))
-    return {k: cache[f"{k[0]}|{k[1]}"] for k in exprs}
+    return {k: cache[ck(*k)] for k in exprs}
 
 SIG_COL = [(r"^(\+3V3|3V3|BATP)", "rot"), (r"^GND", "schwarz"), (r"^SDA", "blau"), (r"^SCL", "gelb"), (r"^INT", "grün"),
            (r"^DET", "weiß"), (r"^TS", "orange"), (r"^EAR_L", "weiß"), (r"^EAR_R", "rot")]
@@ -354,6 +388,7 @@ def main():
         text, cam, st = scene(v, nview)
         key = hashlib.sha1((text + cam + st + str((W, H))).encode()).hexdigest()[:16]
         jobs.append((nview, text, cam, key, os.path.join(CACHE, "img", key + ".webp")))
+    save_hashes()
     todo = [j for j in jobs if not os.path.exists(j[4])]
     print(f"guide: {nview} views, {len(todo)} to render", flush=True)
     imgs, errs = {}, []
