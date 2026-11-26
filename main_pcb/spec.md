@@ -10,7 +10,9 @@ the bottom of the bass box on the +x side (`../bass/elec.scad`). Tags:
 (board), `route.py` (routing, up to three tries scored by KiCad's DRC) and `gen_sch.py`
 (schematic), then writes the fabrication files to `fab/`. `export_scad.py` writes
 `board.scad` (outline, screw holes, every part as a box), which `../bass/elec.scad`
-includes. The scripts come from `../hall_pcb/` and from the discant's old main board
+includes. `pads_page.py` (run by `build.sh`, or `make pads`) writes
+`../build/main_pcb/pads.html`, the wire pads' page (zoomed, labelled, with the table and
+the starved thermals), read from the board and `drc.json`. The scripts come from `../hall_pcb/` and from the discant's old main board
 (git history: `discant/main_pcb`), whose module, DAC and USB circuit this board keeps.
 
 ## 1. Place and size [given: elec.scad]

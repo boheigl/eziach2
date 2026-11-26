@@ -36,3 +36,4 @@ kicad-cli pcb export drill -o fab/ main_pcb.kicad_pcb > /dev/null
 kicad-cli pcb export pos --side front --units mm --format csv -o fab/main_pcb-pos.csv main_pcb.kicad_pcb > /dev/null
 kicad-cli sch export bom -o fab/main_pcb-bom.csv --group-by Value,Footprint --fields 'Value,Reference,Footprint,LCSC,${QUANTITY}' --labels 'Comment,Designator,Footprint,LCSC,Quantity' --exclude-dnp main_pcb.kicad_sch > /dev/null
 kicad-cli pcb drc --format json -o drc.json main_pcb.kicad_pcb > /dev/null 2>&1 || true
+python3 pads_page.py > /dev/null   # the page of the wire pads, ../build/main_pcb/pads.html
