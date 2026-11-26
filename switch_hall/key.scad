@@ -74,10 +74,11 @@ stroke   = 3;        // [given]
 rod_d    = 3;        // a stock dowel pin ISO 2338 3 h8, stainless A1 (not magnetic) [given 2026-11-21]
 rod_l0   = 14;       //   its stock length; the bass's back row (riser) 24
 bush_d   = 3;        // sintered bronze sleeve bearing, oil-impregnated: d3 x D5 x 4 [stock]
-bush_od  = 5;
+bush_od  = 5.05;     // nominal D5, the bought ones measure 5.05 [given 2026-11-26]
 bush_l   = 4;        // [given: 4, not 3: margin when it runs dry]
-bush_fit = 0.05;     // pressed into the printed tube: its seat 0.05 under D
-bush_slip = 0.1;     // the bore below the seat: the bushing slides through it
+bush_fit = 0.05;     // pressed into the printed tube: its seat 0.05 under D (5.0)
+bush_slip = 0.15;    // the bore below the seat: the bushing slides through it [2026-11-26: 0.1 over
+                     // a nominal 5 did not let the 5.05 ones in; printed holes come out small]
 rim_t    = 0.8;      // the tube's top rim over the bushing: its stop against the collar's pull
 rod_clear = 0.2;     // radial, the rod above the bushing, where it does not guide
 pin_d    = rod_d;    // (the rod, as the cap and the O-ring see it)
@@ -227,11 +228,11 @@ echo(str("height: cap top ", z_ct, " .. board underside ", z_bot, " = ", z_ct - 
          "; sensor reaches ", z_bot - sens_h));
 
 assert(e_dry >= cap_d / 2, "guide too short: a press at the cap's edge can jam it once the bushing runs dry");
-assert((tube_od - bush_od) / 2 >= 0.8 - 1e-6, "tube wall too thin round the bushing");
+assert((tube_od - (bush_od - bush_fit)) / 2 >= 0.8 - 1e-6, "tube wall too thin round the bushing");
 assert(l_bot >= spring_lmin, "spring too short at the lower stop");
 assert(l_rest < spring_l0, "spring has no preload");
 assert(tube_od <= spring_od - 2 * spring_wd - 0.5, "tube too wide for the spring");
-assert((tube_od - bore_lo) / 2 >= 0.75 - 1e-6, "tube wall too thin round the bushing's way in");
+assert((tube_od - bore_lo) / 2 >= 0.7 - 1e-6, "tube wall too thin round the bushing's way in");   // no load there; 0.75 before 2026-11-26
 assert(z_seat >= z_seat_min - 1e-6, "spring seat too deep: the plate under it too thin");
 assert(bore_lo > collar_d + 0.4, "collar touches the lower bore");
 assert(z_tt > z_seat + 1, "tube does not rise above the cover");

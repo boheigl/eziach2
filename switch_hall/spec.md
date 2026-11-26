@@ -30,12 +30,13 @@ is above the board, and **the board has no key holes**.
 
 - **Tube:** the cover plate (2.4 mm on the board's top, as in
   `../discant/cover.scad`) carries a fixed tube at every key, with a sintered bronze
-  sleeve bearing (d3 × D5 × 4, oil-impregnated, stock) in it.
+  sleeve bearing (d3 × D5 × 4, oil-impregnated, stock; the bought ones measure D5.05
+  [given 2026-11-26]) in it.
 - **Plunger:** a stock dowel pin ISO 2338 ⌀3 h8 × 14, stainless A1 (× 24 in the bass's
   back row) [given 2026-11-21: stock lengths, no cutting], runs in the bushing; a printed collar on
   its lower end carries the magnet and the stop washer and touches nothing.
 - **Bushing from below, against a rim** [given 2026-11-15]: the tube's lower bore
-  (⌀5.1) lets the bushing slide in from below; it is pressed into its seat (⌀4.95) up
+  (⌀5.2) lets the bushing slide in from below; it is pressed into its seat (⌀5.0) up
   against a 0.8 mm rim at the tube's top. At rest the spring pulls the collar up
   against the bushing (1.2 N, and a knock when a key is let go): the rim takes that
   by its shape, with no glue and no screw. Screwing from above, as on an acoustic
@@ -91,7 +92,7 @@ is above the board, and **the board has no key holes**.
    calibrated once at rest and once pressed.
 
 **Taking a key apart** [2026-11-23] (to change a spring, a bushing or a damaged key): the
-collar cannot be reached; it runs inside the tube's ⌀5.1 bore, its lower face 3.75 above
+collar cannot be reached; it runs inside the tube's ⌀5.2 bore, its lower face 3.75 above
 the tube's bottom at rest and still 0.75 pressed, and from below a drill meets the rod's
 steel end first. Cutting the cap is awkward too: its skirt (⌀12.4, 0.8 wall, about 6.5
 long) runs 0.3 over the shroud, so no jaw gets inside, and any cut through its 3.2 mm disc
@@ -106,7 +107,7 @@ ends at the steel rod. So the key is pulled apart [estimated, to try on the prot
 3. Rod and cap come out at the top, with spring and O-ring; collar, magnet and stop
    washer drop out below. Nothing is cut; clean the glue off the rod's end and the collar.
    Should the cap's joint give instead, the rod stays: pull it down and out with collar,
-   magnet and washer (the collar passes the ⌀5.1 bore, the rod the bushing).
+   magnet and washer (the collar passes the ⌀5.2 bore, the rod the bushing).
 4. Only if pulling fails: heat. A soldering iron pressed through the cap's 0.5 mm roof
    onto the rod's end softens epoxy and PETG, and the spring helps lift the cap. A few
    seconds only: the rod carries the heat towards the magnet, and N52 loses strength for
@@ -141,9 +142,9 @@ the collar, where the magnet is, with a groove turned into every dowel pin.
     **Or a stock O-ring 2.5 × 1** [2026-11-23: no punching; NBR 70 or silicone]:
     1 mm high like the washer, so the rest position stays; stretched onto the ⌀3
     rod it sits tight and grows to about ⌀4.9 outside [estimated], 0.1 inside the
-    tube's ⌀5.1 bore, and bears on the bushing's face (⌀3 … 5) as before. Its round
+    tube's ⌀5.2 bore, and bears on the bushing's face (⌀3 … 5) as before. Its round
     section gives softer at first, if anything quieter on release. Not 3 × 1: ⌀5
-    outside is too close to the bore's 5.1 and may rub. Whether it sets more than the
+    outside is too close to the bore's 5.2 and may rub. Whether it sets more than the
     sheet washer the prototype shows.
   - **Rest position drift:** if the washer sets over time, the key rests a
     little lower. The firmware should keep tracking each key's rest reading
@@ -172,7 +173,7 @@ both rows as `bass0_*` / `bass1_*`.
 | Hall sensor, underside | −1.935 … −0.835 | element assumed 0.55 below its mounting face [unverified; the datasheet's Figure 6-5 gives 0.65 ± 0.08 in the SOT-23, about 0.1 mm off, not acted on] |
 | Cover plate | 0.8 … 3.2 | |
 | Spring seat, between tube and shroud | 4.25 (§5) | |
-| Tube ⌀6.6: lower bore ⌀5.1, bushing seat ⌀4.95, rim with ⌀3.4 | 0.8 … 13.35; bushing 8.55 … 12.55, rim 12.55 … 13.35 | |
+| Tube ⌀6.6: lower bore ⌀5.2, bushing seat ⌀5.0, rim with ⌀3.4 | 0.8 … 13.35; bushing 8.55 … 12.55, rim 12.55 … 13.35 | |
 | Collar ⌀4.4 × 3 with magnet ⌀3 × 1 and a 0.5 web over it | 4.55 … 7.55 | 0.3 above the tilted board at its edge, lower stop |
 | Rod ⌀3 × 14 (dowel pin) | 6.05 … 20.05 | 1.5 into the collar, 2.7 into the cap |
 | Silicone washer ⌀4.5 / ⌀2.5 × 1 on the collar | 7.55 … 8.55 | upper stop |
@@ -205,8 +206,9 @@ both rows as `bass0_*` / `bass1_*`.
 - **One bushing is the whole guide** [given 2026-11-14]: steel in oiled sintered bronze,
   μ about 0.1 [estimated]. A press jams only beyond bush_l / (2 μ) = 20 mm off the
   axis, and still beyond 8 mm dry (μ 0.25); the cap's edge is at 7.5.
-- The collar runs in the ⌀5.1 bore with 0.35 mm round it and touches nothing.
-- The tube's wall is 0.8 mm round the bushing and 0.75 round the lower bore, where
+- The collar runs in the ⌀5.2 bore with 0.4 mm round it and touches nothing.
+- The tube's wall is 0.8 mm round the bushing and 0.7 round the lower bore [2026-11-26:
+  0.75 before, the bore ⌀5.1 then; the bushings measure 5.05 and did not go in], where
   the spring stands round it; that part carries no load.
 
 ## 5. Spring
