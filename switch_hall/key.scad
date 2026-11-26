@@ -299,9 +299,18 @@ module tube_body() {
     translate([0, 0, z_top]) cylinder(d = tube_od, h = z_tt - z_top);
     translate([0, 0, z_top]) cylinder(d = shroud_od, h = z_sht - z_top);
 }
+// [given 2026-11-26: the bushing is hard to start, the bore leaning against the plate's
+// underside] lead-ins: a 45 deg funnel at the way in, entry_c wide where the bore meets the
+// board's top on its high side (the plane leans by board_tilt, so it reaches entry_lean
+// further up there), and a 45 deg lead-in into the seat instead of a step
+entry_c    = 0.5;
+entry_lean = (bore_lo / 2 + entry_c) * tan(board_tilt);
 module tube_cut() {
     translate([0, 0, z_top - 0.01]) cylinder(d = bore_lo, h = z_step - z_top + 0.01);
+    let(z1 = z_top + entry_lean + entry_c, z0 = z_top - entry_lean - 1)
+        translate([0, 0, z0]) cylinder(d1 = bore_lo + 2 * (z1 - z0), d2 = bore_lo, h = z1 - z0);
     translate([0, 0, z_bush[0] - 0.01]) cylinder(d = bush_od - bush_fit, h = bush_l + 0.01);   // the bushing's seat
+    translate([0, 0, z_bush[0] - 0.01]) cylinder(d1 = bore_lo, d2 = bush_od - bush_fit - 0.02, h = (bore_lo - bush_od + bush_fit) / 2 + 0.02);
     translate([0, 0, z_top]) cylinder(d = bore_hi, h = z_tt);   // through the rim
     translate([0, 0, z_seat]) difference() {   // the spring's room above the seat
         cylinder(d = shroud_id, h = z_sht);
