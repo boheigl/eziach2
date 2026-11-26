@@ -173,7 +173,8 @@
     ['part bodies', function () { grp('pcb').add(mesh('PARTS_TRIS', 0x2b2f33)); }],
     ['housing', function () { grp('housing').add(mesh('HOUSING_TRIS', 0xd9a441)); }],
     ['cover', function () { grp('cover').add(mesh('COVER_TRIS', 0x5b6f86)); }],
-    ['gauges and wires', function () { grp('cable').add(mesh('LINK_TRIS', 0x8a8f96)); }],
+    ['gauges and wires', function () { grp('cable').add(mesh('LINK_TRIS', 0x8a8f96));
+      [['red', 0xc8322b], ['black', 0x26292b], ['blue', 0x2a62c9], ['yellow', 0xe0b521], ['green', 0x2e9e4a]].forEach(function (c) { grp('cable').add(mesh('W_' + c[0], c[1])); }); }],
     ['caps', function () { keyPart('CAP_TRIS', 0x4a6fa5); }],
     ['plungers', function () { keyPart('PLUNGER_TRIS', 0xe8e2d2); }],
     ['magnets', function () { keyPart('MAGNET_TRIS', 0x7a8a99); }],

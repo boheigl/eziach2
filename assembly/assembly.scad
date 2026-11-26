@@ -37,13 +37,15 @@ module keys_discant() for (k = [0 : 3], i = [0 : 12 - k]) translate([-120 + 20 *
 // the bass's 18: the back row's 10 higher (key_riser), skirt 7.3 (key.scad, board flat)
 module keys_bass() for (k = [0, 1], i = [0 : n_row - 1]) translate(at_key(k, i)) key(b_cap_top + k * key_riser, 7.3);
 
-module d_all() for (f = ["housing", "cover", "board", "board_parts", "gauge_link"]) import(str(D, f, ".stl"));
+module d_all() for (f = ["housing", "cover", "board", "board_parts", "gauge_link", "wires"]) import(str(D, f, ".stl"));
 
 if (part == "d_housing") to_bass() import(str(D, "housing.stl"));
 if (part == "d_cover")   to_bass() import(str(D, "cover.stl"));
 if (part == "d_boards")  to_bass() import(str(D, "board.stl"));
 if (part == "d_parts")   to_bass() import(str(D, "board_parts.stl"));
-if (part == "d_cables")  to_bass() import(str(D, "gauge_link.stl"));  // gauges, link board, wires
+if (part == "d_cables")  to_bass() import(str(D, "gauge_link.stl"));  // gauges, contact board
+// the discant's wires, one colour each [2026-11-26]
+for (c = ["red", "black", "blue", "yellow", "green"]) if (part == str("d_wires_", c)) to_bass() import(str(D, "wires_", c, ".stl"));
 if (part == "keys_discant") to_bass() keys_discant();
 if (part == "keys_bass") keys_bass();
 // for the clash checks: the whole discant, played and stored

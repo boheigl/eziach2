@@ -40,6 +40,7 @@
 include <layout.scad>
 include <../main_pcb/board.scad>
 use <link.scad>
+use <../strands.scad>
 
 pcb_tk  = 1.0;
 brd_y   = [plate_y[1] + 0.47, plate_y[1] + 0.47 + pcb_tk];   // -9.03 .. -8.03
@@ -248,11 +249,58 @@ module bat_wires() {
     bundle(tail_pts(), 2.2); bundle(ntc_tail_pts(), 1.0);
 }
 function path_len(p) = len(p) < 2 ? 0 : norm(p[1] - p[0]) + path_len([for (i = [1 : len(p) - 1]) p[i]]);
+// --- SINGLE WIRES [given 2026-11-26: every wire of every run modelled on its own, as the
+// loose single wires they are] (../strands.scad): along each run's way above they lie side by
+// side, and each has its own end at its pad or pin. The ways and their lengths (the cable
+// list) stay the bundles' above.
+awg30 = 0.55;                           // AWG 30 PTFE, thin wall (../assembly/spec.md, Wiring)
+awg26 = 0.9;                            // AWG 26 PTFE, the battery's tail [estimate: outside d]
+// the main board's wire pads (../main_pcb/design.py WIRES): pad n (1 .. 15) at X, Y
+function wpad(n) = [1.2 + 1.25 * (n - 1), n % 2 == 0 ? 3.45 : 1.05];
+// a wire's end at pad n: down onto the board from the parts' side and through, cut flush below
+function to_wpad(n, h = 1.2) = let(w = wpad(n)) [[mx(w[0]), brd_y[1] + h, mz(w[1])], [mx(w[0]), brd_y[0] - 0.05, mz(w[1])]];
+function from_wpad(n, h = 1.2) = let(e = to_wpad(n, h)) [e[1], e[0]];
+function mid(p) = [for (i = [1 : len(p) - 2]) p[i]];
+// #4 the contacts' six: from the pin board's back pads (../contact_pcb: x 2.54 apart, z +-1.6;
+// mirrored in the bass) to P1 .. P6: 3.3 V, GND, SDA, SCL, INT, DET
+pin_pad = [[-1, 1], [-1, -1], [0, 1], [1, 1], [1, -1], [0, -1]];   // the pin board's columns, rows per wire
+function pin_start(k) = let(c = pins_pts()[0], q = pin_pad[k]) [[c[0] - q[0] * 2.54, 4.79, c[2] + q[1] * 1.6], [c[0] - q[0] * 2.54, 3.89, c[2] + q[1] * 1.6]];
+// colours by signal [given 2026-11-26]: 3.3 V red, GND black, SDA blue, SCL yellow, INT green,
+// DET white; the battery's + red, - black, the NTC's TS orange and its return brown; the
+// jack's tip white, ring red, sleeve black. The JST plugs' housings are drawn with the white.
+sig_col = ["red", "black", "blue", "yellow", "green", "white"];   // 3.3 V, GND, SDA, SCL, INT, DET
+module contact_strands() let(core = concat([for (i = [1 : 2]) pins_pts()[i]], mid(main_leg_pts())))
+    strands(core, 6, awg30, [for (k = [0 : 5]) pin_start(k)], [for (k = [0 : 5]) to_wpad(k + 1)], colours = sig_col);
+// #5 the key board's five: from P7 .. P11 (3.3 V, GND, SDA, SCL, INT) to J1's plug, its pins 1.0
+// apart (INT, 3V3, SDA, SCL, GND: pins 1 .. 5)
+key_pin = [2, 5, 3, 4, 1];
+function key_end(k) = let(x = plug_out[0] + (key_pin[k] - 3) * 1.0) [[x, plug_out[1], plug_out[2] - 2], [x, plug_out[1], plug_out[2]]];
+module key_strands() strands(mid(key_pts()), 5, awg30, [for (k = [0 : 4]) from_wpad(k + 7)], [for (k = [0 : 4]) key_end(k)], colours = sig_col,
+                             by_ends = true);   // in the bundle in the plug's order: its pins are 1.0 apart
+// #6 the battery: the cell's two leads to its PH plug (pins 2.0 apart), the NTC's two to its
+// plug; the tail's four from the plugs to P12 .. P15 (-, the NTC's return, TS, +)
+module bat_strands() {
+    strands(cell_pts(), 2, awg26, spread = 1.1, colours = ["red", "black"]);
+    strands(ntc_pts(), 2, awg30, spread = 1.1, colours = ["orange", "brown"]);
+    if (show_colour("white")) for (b = [ph_box, ntc_box]) bx(b[0], b[1], b[2]);
+    core = mid(tail_pts());
+    starts = [[[59.85, -6.2, ph_box[2][0]]], [ntc_tail_pts()[0] - [0.4, 0, 0], ntc_tail_pts()[1] - [0, 0, 0.4]],
+              [ntc_tail_pts()[0] + [0.4, 0, 0], ntc_tail_pts()[1] + [0, 0, 0.4]], [[61.85, -6.2, ph_box[2][0]]]];
+    tail_col = ["black", "brown", "orange", "red"];   // P12 -, P13 the NTC's return, P14 TS, P15 +
+    for (k = [0 : 3]) cstrand(strand_pts(core, 4, awg26, k, starts, [for (j = [0 : 3]) to_wpad(j + 12)]), k == 1 || k == 2 ? awg30 : awg26, tail_col[k]);
+}
+// #7 the earphone jack: from its three lugs (tip, ring, sleeve: their places estimated) down
+// beside its lugs' end and along under its body, 1.0 over the board, to P19 .. P21 (SMD, on top)
+jack_pads = [[15.6, 9.8], [17.7, 9.8], [19.8, 9.8]];   // ../main_pcb (X, Y)
+jack_col = ["white", "red", "black"];   // tip, ring, sleeve
+module jack_strands() for (k = [0 : 2]) let(p = jack_pads[k], dz = (1 - k) * 0.7, zl = jack_z + (1 - k) * 1.8)
+    cstrand([[jack_x0 + 1.0, jack_yc - 2.6, zl], [jack_x0 - 0.8, jack_yc - 2.6, zl], [jack_x0 - 0.8, brd_y[1] + 0.3, mz(p[1]) + dz],
+            [mx(p[0]) - 0.3, brd_y[1] + 0.3, mz(p[1]) + dz]], awg30, jack_col[k]);
 module wires() {
-    bundle(pins_pts(), 1.7);   // six AWG 30 PTFE (3.0 d) [2026-11-25: nine, 2.0]
-    bundle(main_leg_pts(), 1.7);
-    bundle(key_pts(), 1.8);
-    bat_wires();
+    contact_strands();
+    key_strands();
+    bat_strands();
+    jack_strands();
     echo(str("wire lengths: contacts to main board ", path_len(pins_pts()) + path_len(main_leg_pts()),
              ", key board J1 to main board ", path_len(key_pts()), ", the cell's leads to its plug ", path_len(cell_pts()),
              ", the battery's tail ", path_len(tail_pts())));

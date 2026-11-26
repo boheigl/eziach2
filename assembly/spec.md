@@ -184,7 +184,19 @@ fine for PETG, too much for PLA; whether the cam's friction holds in play (test 
 ## Wiring [chosen 2026-11-15: loose stranded wire, no FFC; the halves meet only at the spring pins]
 
 Every run is loose wire, bundled and lightly twisted, soldered to pads except at the bass
-Hall board's J1 (JST SH, 1.0 mm, 5 pins: INT, 3V3, SDA, SCL, GND). Model lengths are
+Hall board's J1 (JST SH, 1.0 mm, 5 pins: INT, 3V3, SDA, SCL, GND). Every wire is modelled on
+its own [given 2026-11-26] (`../strands.scad`): along a run's way the wires lie side by side
+(packed round the way, carried along it without twisting, mitred at the bends), and each
+has its own end at its pad, pin or lug; where they fan out from a row of pads into the
+bundle they may cross, as loose wires do (the model's strands touch there, at most about
+0.15 mm³ a pair).
+
+**Wire colours** [given 2026-11-26], by signal, in the model and for buying the wire:
+3.3 V and the battery's + red; GND, the battery's − and the jack's sleeve black; SDA blue;
+SCL yellow; INT green; DET and the jack's tip white; the jack's ring red; the NTC's TS
+orange and its return brown; the gauges' half bridges as the bought cell's (AVDD red, the
+middle yellow, GND black). The JST plugs' housings are drawn white. The builds write one STL
+per colour (`wires_<colour>.stl`), so the 3D views show each in its own. Model lengths are
 echoed by `../bass/elec.scad` (`wires()`, `path_len()`) and `../discant/gauge_link.scad`
 (`contact_pts()`, `lead_pts()`), so they follow the geometry. Cut length = model length
 + 20 mm per end (stripping, strain relief), rounded up to 10 mm; #4 30 mm more, for

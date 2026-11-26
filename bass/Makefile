@@ -16,7 +16,11 @@ scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
 
 KEY_STL   := $(addprefix $(KEY)/,$(foreach r,0 1,$(foreach p,cap plunger magnet oring stop,bass$(r)_$(p).stl bass$(r)_$(p)_down.stl) bass$(r)_tube_body.stl bass$(r)_tube_cut.stl))
 
-all: $(B)/strap.stl $(B)/elec.stl $(B)/wires.stl $(B)/case.stl $(B)/cover.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(B)/keys.stl $(B)/boards.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/lever.stl $(B)/contact_pins.stl $(B)/view3d.html
+# the wires one colour each, for the 3D views [2026-11-26] (elec.scad, ../strands.scad)
+WIRE_COLS := red black blue yellow green white orange brown
+WIRE_STL  := $(foreach c,$(WIRE_COLS),$(B)/wires_$(c).stl)
+
+all: $(B)/strap.stl $(B)/elec.stl $(B)/wires.stl $(WIRE_STL) $(B)/case.stl $(B)/cover.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(B)/keys.stl $(B)/boards.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/lever.stl $(B)/contact_pins.stl $(B)/view3d.html
 
 $(B)/back_cover.stl: case.scad layout.scad elec.scad
 	$(call scad,$<,-D 'part="back_cover"')
@@ -47,9 +51,11 @@ $(B)/strap.stl: case.scad layout.scad
 	$(call scad,$<,-D 'part="strap"')
 $(B)/wires.stl: elec.scad layout.scad
 	$(call scad,$<,-D 'part="wires"')
+$(WIRE_STL): $(B)/wires_%.stl: elec.scad layout.scad ../strands.scad
+	$(call scad,$<,-D 'part="wires"' -D '$$wire_color="$*"')
 $(B)/case.stl $(B)/battery.stl $(B)/elec.stl: elec.scad
 GAUGE_DEPS := link.scad ../discant/gauge_link.scad $(addprefix ../build/strain_gauge/,inner_holder.stl inner_holder_detent.stl outer_holder.stl strain_gauge_plate.stl)
-$(B)/case.stl $(B)/battery.stl $(B)/elec.stl $(B)/wires.stl $(B)/back_cover.stl: $(GAUGE_DEPS)
+$(B)/case.stl $(B)/battery.stl $(B)/elec.stl $(B)/wires.stl $(WIRE_STL) $(B)/back_cover.stl: $(GAUGE_DEPS)
 $(B)/discant_link.stl: $(GAUGE_DEPS)
 
 
@@ -67,11 +73,11 @@ key:
 	@$(MAKE) --no-print-directory -C ../switch_hall
 
 VIEW_PARTS := CASE_TRIS=$(B)/case.stl COVER_TRIS=$(B)/cover.stl BOARDS_TRIS=$(B)/boards.stl \
-               CONN_TRIS=$(B)/connectors.stl ELEC_TRIS=$(B)/elec.stl WIRES_TRIS=$(B)/wires.stl STRAP_TRIS=$(B)/strap.stl \
+               CONN_TRIS=$(B)/connectors.stl ELEC_TRIS=$(B)/elec.stl $(foreach c,$(WIRE_COLS),W_$(c)=$(B)/wires_$(c).stl) STRAP_TRIS=$(B)/strap.stl \
                $(foreach r,0 1,$(foreach p,CAP PLUNGER MAGNET ORING STOP,$(p)$(r)_TRIS=$(KEY)/bass$(r)_$(shell echo $(p) | tr A-Z a-z).stl)) \
                LINK_TRIS=$(B)/discant_link.stl ROD_TRIS=$(B)/latch_rod.stl LEVER_TRIS=$(B)/lever.stl PINS_TRIS=$(B)/contact_pins.stl LID_TRIS=$(B)/back_cover.stl CSCREW_TRIS=$(B)/cover_screws.stl BATTERY_TRIS=$(B)/battery.stl
 $(B)/view3d.html: view3d.html ../discant/embed_parts.py ../discant/viewer_nav.js $(B)/case.stl $(B)/cover.stl $(B)/boards.stl \
-                 $(B)/connectors.stl $(B)/elec.stl $(B)/wires.stl $(B)/strap.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/lever.stl $(B)/contact_pins.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(KEY_STL)
+                 $(B)/connectors.stl $(B)/elec.stl $(WIRE_STL) $(B)/strap.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/lever.stl $(B)/contact_pins.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(KEY_STL)
 	@echo "  EMBED    $@"
 	@$(PYTHON) ../discant/embed_parts.py $< $@ $(VIEW_PARTS)
 

@@ -150,6 +150,7 @@
       b.setAttribute('aria-pressed', on ? 'true' : 'false'); showParts();
     });
   });
+  var WIRE_COLS = [['red', 0xc8322b], ['black', 0x26292b], ['blue', 0x2a62c9], ['yellow', 0xe0b521], ['green', 0x2e9e4a], ['white', 0xe9e9e4], ['orange', 0xe8792a], ['brown', 0x7a4a2a]];
   var LOAD = [
     ['bass boards', function () { grp('pcb').add(mesh('B_BOARD', 0x2f7a4f), mesh('B_CONN', 0x2b2f33), mesh('B_ELEC', 0x2f7a4f), mesh('B_PINS', 0xd4af37)); }],
     ['discant board', function () { grp('pcb').add(mesh('D_BOARDS', 0x2f7a4f), mesh('D_PARTS', 0x2b2f33)); }],
@@ -160,7 +161,11 @@
     ['bass cover', function () { grp('bcover').add(mesh('B_COVER', 0x5b6f86)); }],
     ['discant cover', function () { grp('dcover').add(mesh('D_COVER', 0x5b6f86)); }],
     ['keys', function () { keysB = mesh('KEYS_B', 0x4a6fa5); keysD = mesh('KEYS_D', 0x4a6fa5); grp('keys').add(keysB, keysD); }],
-    ['cables and gauges', function () { grp('cables').add(mesh('D_CABLES', 0xd8c08a), mesh('B_WIRES', 0xd8c08a), mesh('B_STRAP', 0x6b4a32), mesh('B_ROD', 0xb8bcc2), mesh('B_LEVER', 0x3f7f6a)); }]
+    ['cables and gauges', function () {
+      // the wires one mesh per colour (../strands.scad): the bass's eight, the discant's five
+      WIRE_COLS.forEach(function (c) { grp('cables').add(mesh('B_W_' + c[0], c[1])); });
+      WIRE_COLS.slice(0, 5).forEach(function (c) { grp('cables').add(mesh('D_W_' + c[0], c[1])); });
+      grp('cables').add(mesh('D_CABLES', 0x8a8f96), mesh('B_STRAP', 0x6b4a32), mesh('B_ROD', 0xb8bcc2), mesh('B_LEVER', 0x3f7f6a)); }]
   ];
   scene.add(buttonGrp);
 
@@ -336,7 +341,8 @@
     }
     add('bcase', 'B_CASE', 0xd9a441, PACK_B); add('blid', 'B_LID', 0xc99430, PACK_B); add('blid', 'B_CSCREW', 0x5d6166, PACK_B); add('bcover', 'B_COVER', 0x5b6f86, PACK_B); add('keys', 'KEYS_B', 0x4a6fa5, PACK_B);
     add('dhousing', 'D_HOUSING', 0xd9a441, PACK_D); add('dcover', 'D_COVER', 0x5b6f86, PACK_D);
-    add('keys', 'KEYS_D', 0x4a6fa5, PACK_D); add('cables', 'D_CABLES', 0xd8c08a, PACK_D);
+    add('keys', 'KEYS_D', 0x4a6fa5, PACK_D); add('cables', 'D_CABLES', 0x8a8f96, PACK_D);
+    WIRE_COLS.slice(0, 5).forEach(function (c) { add('cables', 'D_W_' + c[0], c[1], PACK_D); });
     add('pcb', 'D_BOARDS', 0x2f7a4f, PACK_D); add('pcb', 'D_PARTS', 0x2b2f33, PACK_D);
     packedBuilt = true;
   }

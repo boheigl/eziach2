@@ -20,7 +20,11 @@ BODY_STL := $(addprefix $(B)/,housing.stl cover.stl gauge_link.stl)
 KEY_STL  := $(addprefix $(KEY)/,cap.stl plunger.stl magnet.stl oring.stl stop.stl \
                                 cap_down.stl plunger_down.stl magnet_down.stl oring_down.stl stop_down.stl)
 
-all: $(BODY_STL) $(B)/board.stl $(B)/board_parts.stl $(B)/keys.stl $(B)/keys_down.stl $(B)/view3d.html
+# the wires one colour each, for the 3D views [2026-11-26] (gauge_link.scad, ../strands.scad)
+WIRE_COLS := red black blue yellow green
+WIRE_STL  := $(B)/wires.stl $(foreach c,$(WIRE_COLS),$(B)/wires_$(c).stl)
+
+all: $(BODY_STL) $(WIRE_STL) $(B)/board.stl $(B)/board_parts.stl $(B)/keys.stl $(B)/keys_down.stl $(B)/view3d.html
 
 # $(call scad,source,extra options)
 scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
@@ -28,11 +32,15 @@ scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
 
 $(BODY_STL): $(B)/%.stl: %.scad
 	$(call scad,$<)
+$(B)/wires.stl: gauge_link.scad ../strands.scad
+	$(call scad,$<,-D 'part="wires"')
+$(B)/wires_%.stl: gauge_link.scad ../strands.scad
+	$(call scad,$<,-D 'part="wires"' -D '$$wire_color="$*"')
 
 # gauge_link.scad imports the gauge's STLs, built in ../strain_gauge/; the outer
 # holders are part of the housing
 GAUGE_STL := $(addprefix ../build/strain_gauge/,outer_holder.stl inner_holder.stl strain_gauge_plate.stl)
-$(B)/gauge_link.stl $(B)/housing.stl: $(GAUGE_STL)
+$(B)/gauge_link.stl $(B)/housing.stl $(WIRE_STL): $(GAUGE_STL)
 $(GAUGE_STL) ../build/strain_gauge/inner_holder_detent.stl: gauge ;
 gauge:
 	@$(MAKE) --no-print-directory -C ../strain_gauge
@@ -56,10 +64,10 @@ key:
 # --- 3D view: view3d.html with every part embedded (embed_parts.py), one
 # file that loads nothing else; NAME=stl as the page reads them
 VIEW_PARTS := BOARD_TRIS=$(B)/board.stl PARTS_TRIS=$(B)/board_parts.stl \
-               HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl LINK_TRIS=$(B)/gauge_link.stl \
+               HOUSING_TRIS=$(B)/housing.stl COVER_TRIS=$(B)/cover.stl LINK_TRIS=$(B)/gauge_link.stl $(foreach c,$(WIRE_COLS),W_$(c)=$(B)/wires_$(c).stl) \
                CAP_TRIS=$(KEY)/cap.stl PLUNGER_TRIS=$(KEY)/plunger.stl MAGNET_TRIS=$(KEY)/magnet.stl \
                ORING_TRIS=$(KEY)/oring.stl STOP_TRIS=$(KEY)/stop.stl
-$(B)/view3d.html: view3d.html embed_parts.py viewer_nav.js $(BODY_STL) $(B)/board.stl $(B)/board_parts.stl $(KEY_STL) ../hall_pcb/discant/board.scad
+$(B)/view3d.html: view3d.html embed_parts.py viewer_nav.js $(BODY_STL) $(WIRE_STL) $(B)/board.stl $(B)/board_parts.stl $(KEY_STL) ../hall_pcb/discant/board.scad
 	@echo "  EMBED    $@"
 	@$(PYTHON) embed_parts.py $< $@ --keys ../hall_pcb/discant/board.scad $(VIEW_PARTS)
 

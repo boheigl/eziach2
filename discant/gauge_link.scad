@@ -48,6 +48,7 @@
 // housing.scad uses gauge_housing_pads(), gauge_holders() and gauge_housing_cuts().
 
 include <hall.scad>
+use <../strands.scad>
 
 /* [The gauge frame: local numbers, as before; do not change (../bass/link.scad)] */
 back_y   = 59.3;                 // the pad's back, local
@@ -191,15 +192,39 @@ function contact_pts() = concat([[0, contact_y - contact_t - 0.2, gz]], to_pads(
 // a gauge's three leads (E+, E-, middle): from the plate's middle at the pad, to J2 / J3
 function lead_pts(d) = to_pads(gauge_x + d * gauge_dx, d < 0 ? "J2" : "J3");
 module wire(p, dw) for (i = [0 : len(p) - 2]) hull() { translate(p[i]) sphere(d = dw, $fn = 12); translate(p[i + 1]) sphere(d = dw, $fn = 12); }
-module contact_wires() gauge_tilt_frame() wire(contact_pts(), contact_wire_d);
-module lead_wires() gauge_tilt_frame() for (d = [-1, 1]) wire(lead_pts(d), lead_d);
+// SINGLE WIRES [given 2026-11-26: every wire modelled on its own] (../strands.scad): along the
+// ways above side by side, each with its own end at its pad. AWG 30 PTFE, d 0.55.
+awg30 = 0.55;
+// a wire's end at the board's wire pad X of row r: from under the board up through it
+function up_pad(x, r) = let(w = wires(r)) [under_board(x, w[2] - 0.4), slab_local([x, w[2], 0.4])];   // 0.4 over the board: the joint, under the cover's recess
+// the contacts' five: from the pad board's back pads (x 2.54 apart, z +-1.6; DET stays on the
+// board) to J1, its pads 2.0 apart: INT, 3.3 V, SDA, SCL, GND (pins 1 .. 5)
+c_pad = [[-1, 1], [-1, -1], [0, 1], [1, 1], [1, -1]];   // 3.3 V, GND, SDA, SCL, INT
+c_pin = [2, 5, 3, 4, 1];
+module contact_wires() gauge_tilt_frame() let(c = contact_pts(), w = wires("J1"))
+    // [2026-11-26: each from its pad straight back, then to its own place in the bundle, which
+    // starts at the bore (they all ran through the bore's first point before, into each other)]
+    // the bundle from the bore's entry on (the recess behind the board, contact_rec, is where
+    // they come together)
+    strands(concat([[0, contact_y - contact_t - contact_rec[1], gz]], [for (i = [1 : len(c) - 2]) c[i]]), 5, awg30,
+            [for (k = [0 : 4]) let(q = [c_pad[k][0] * contact_px, contact_y - contact_t - 0.05, gz + c_pad[k][1] * 1.6]) [q, q - [0, 0.3, 0]]],
+            [for (k = [0 : 4]) up_pad(w[1] + (c_pin[k] - 3) * 2.0, "J1")], colours = ["red", "black", "blue", "yellow", "green"],
+            by_ends = true);   // in the bundle in J1's order: its fan is the tight one
+// a gauge's three leads: off the plate's edge at its column (glued along it, ../strain_gauge) into
+// the groove, to J2 / J3, its pads 2.0 apart (AVDD, the middle, GND)
+module lead_wires() gauge_tilt_frame() for (d = [-1, 1]) let(c = lead_pts(d), r = d < 0 ? "J2" : "J3", w = wires(r))
+    strands([for (i = [0 : len(c) - 2]) c[i]], 3, awg30,
+            [for (k = [0 : 2]) [[c[0][0] + (k - 1) * 0.7, back_y + pad_t + 1.5, gz]]],
+            [for (k = [0 : 2]) up_pad(w[1] + (k - 1) * 2.0, r)], colours = ["red", "yellow", "black"]);   // AVDD (E+), the middle, GND: as the bought cell's
 // the cable list (../assembly/spec.md, Wiring) takes its lengths from the point lists
 function path_len(p) = len(p) < 2 ? 0 : norm(p[1] - p[0]) + path_len([for (i = [1 : len(p) - 1]) p[i]]);
 echo(str("wire lengths: contacts to J1 ", path_len(contact_pts()), "; gauge leads to J2 ", path_len(lead_pts(-1)),
          ", to J3 ", path_len(lead_pts(1))));
 
-module gauge_link() { gauge(); contact_board(); contact_wires(); lead_wires(); }
-part = "link";   // "link": the gauges, boards and wires
+// [2026-11-26: the wires apart, in their colours: part "wires" with $wire_color]
+module gauge_link() { gauge(); contact_board(); }
+module gauge_wires() { contact_wires(); lead_wires(); }
+part = "link";   // "link": the gauges and the contact board; "wires": their wires
 
 // added to the housing: the gauge pad on the back face
 module gauge_housing_pads() gauge_tilt_frame()
@@ -233,3 +258,4 @@ echo(str("gauge frame on the tray's back face: pad face's middle at ", pivot_new
          "]), moved by ", gauge_shift));
 
 if (part == "link") gauge_link();
+if (part == "wires") gauge_wires();
