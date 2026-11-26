@@ -87,7 +87,8 @@ cannot drive one — assume the render is schematic.
 ## 4a. The bought load cell [given 2026-11-15]
 
 The plate with its gauges is a stock part: the half-bridge load cell of bathroom
-scales, sold in fours with an HX711 board (unused here). The seller's data:
+scales, from a bathroom-scale set of four plates (two used, two spare)
+[given 2026-11-26]. The seller's data:
 
 | | |
 |---|---|

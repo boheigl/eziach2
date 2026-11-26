@@ -194,7 +194,7 @@ bundle they may cross, as loose wires do (the model's strands touch there, at mo
 **Wire colours** [given 2026-11-26], by signal, in the model and for buying the wire:
 3.3 V and the battery's + red; GND, the battery's − and the jack's sleeve black; SDA blue;
 SCL yellow; INT green; DET and the jack's tip white; the jack's ring red; the NTC's TS
-orange and its return brown; the gauges' half bridges as the bought cell's (AVDD red, the
+purple and its return black (it is GND) [2026-11-26: orange and brown before, the wire bought has neither]; the gauges' half bridges as the bought cell's (AVDD red, the
 middle yellow, GND black). The JST plugs' housings are drawn white. The builds write one STL
 per colour (`wires_<colour>.stl`), so the 3D views show each in its own. Model lengths are
 echoed by `../bass/elec.scad` (`wires()`, `path_len()`) and `../discant/gauge_link.scad`
@@ -276,9 +276,14 @@ models on every build [2026-11-26: #4 was 180, #5 350, from older ways].
   150 mA per half drops about 10 mV over 0.3 m of AWG 30 (0.34 Ω/m) [estimate]. No
   shielding, no twisted pairs needed.
 
-**Order list** [estimate: quantities with spare]: AWG 30 PTFE stranded, 2 m each of red,
-black, blue, yellow, white, 1 m green; 1 pre-crimped JST SH 5-pin cable (or SHR-05V-S + SSH-003T-P0.2-H
-and the crimp tool); heat shrink ⌀1.5 and ⌀3 (2:1); for the battery's tail AWG 26 PTFE,
-0.3 m each of red and black [chosen 2026-11-25 for up to 1.5 A, the fuse: about 0.13 Ω/m],
-the counterpart of the cell's plug (a JST PH 2-pin wire-to-wire pair, as sold for LiPo
-cells [unverified: a matching one]) and a pre-crimped JST SH 2-pin pair for the NTC.
+**Order list** [2026-11-26: from the cut lengths by colour, with spare; the gauges' run #3
+on their own leads]: AWG 30 PTFE stranded, by the metre: red 1 m (0.67 cut), black 2 m (0.95,
+with about 0.15 for the NTC's leads along the cell [estimate]), blue, yellow, green 1 m each
+(0.60), white 1 m (0.26), purple 1 m (0.28); 1 pre-crimped JST SH 5-pin cable (or SHR-05V-S +
+SSH-003T-P0.2-H and the crimp tool); heat shrink ⌀1.5 and ⌀3 (2:1); the counterpart of the
+cell's plug, a **pre-crimped JST PH 2-pin pair whose leads (AWG 26 or 28) are at least 130 mm
+long**: its leads are the battery's + and − tail, soldered straight to P15 / P12, so no AWG 26
+by the metre [chosen 2026-11-26; AWG 26 was chosen 2026-11-25 for up to 1.5 A, the fuse,
+about 0.13 Ω/m; AWG 30 there would drop about 80 mV while charging at 0.89 A, so the charger
+would stop a few per cent early] [unverified: such leads are often PVC, ⌀1.1–1.3, the model
+has ⌀0.9 for them through the ribs' notches]; and a pre-crimped JST SH 2-pin pair for the NTC.

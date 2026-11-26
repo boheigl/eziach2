@@ -150,11 +150,11 @@ Zuschnitt = Länge im Modell + 20 mm je Ende zum Abisolieren und als Zugentlastu
 | 6 | Bass | Akku-Stecker → P12–P15 | 4: −, NTC-Rückleitung, TS, + | {{scad:bass/elec.scad:path_len(tail_pts())}} mm | {{cut:bass/elec.scad:path_len(tail_pts())}} mm |
 | 7 | Bass | Klinke → P19–P21 | 3: Spitze, Ring, Hülse | {{scad:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))])}} mm | {{cut:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))]) + jack_slack}} mm |
 
-Teile: Litze AWG 30, 7 × 0,1, PTFE dünnwandig (⌀ ≤ 0,55), je 2 m rot, schwarz, blau, gelb, weiß, 1 m grün; AWG 26 PTFE je 0,3 m rot und schwarz (Akku); JST-SH-Kabel 5-polig, vorgecrimpt; JST-PH-2-Paar (Akku) und JST-SH-2-Paar (NTC); Schrumpfschlauch ⌀1,5 und ⌀3
+Teile: Litze AWG 30, 7 × 0,1, PTFE dünnwandig (⌀ ≤ 0,55), rot 1 m, schwarz 2 m, blau, gelb, grün, weiß und lila je 1 m; JST-SH-Kabel 5-polig, vorgecrimpt; JST-PH-2-Paar vorgecrimpt mit mindestens 130 mm langen Adern (AWG 26 oder 28; sie sind die Akkuleitungen + und − bis zur Hauptplatine); JST-SH-2-Paar (NTC); Schrumpfschlauch ⌀1,5 und ⌀3
 
 ### Farben und Löten
 
-Die Farbe folgt dem Signal, auf beiden Hälften gleich: **3,3 V rot, GND schwarz, SDA blau, SCL gelb, INT grün, DET weiß**; Akku + rot, − schwarz, NTC orange (TS) und braun (Rückleitung); Klinke Spitze weiß, Ring rot, Hülse schwarz; die Messplatten wie gekauft (rot, gelb, schwarz).
+Die Farbe folgt dem Signal, auf beiden Hälften gleich: **3,3 V rot, GND schwarz, SDA blau, SCL gelb, INT grün, DET weiß**; Akku + rot, − schwarz, NTC lila (TS) und schwarz (Rückleitung, GND); Klinke Spitze weiß, Ring rot, Hülse schwarz; die Messplatten wie gekauft (rot, gelb, schwarz).
 
 1. Etwa 2 mm abisolieren, verdrillen, verzinnen; PTFE verträgt den Lötkolben, schmilzt also nicht zurück.
 2. Die Drähte eines Laufs leicht miteinander verdrillen. Silikonlitze derselben Stärke ist zu dick für die Kanäle.
@@ -244,7 +244,7 @@ caption: Lauf #5 vom Stecker oben links hinunter und unten entlang
 
 ### #6 Bass: Akku
 
-Die Akkuleitungen und die des NTC gehen durch die Kerbe der Rippe rechts neben dem Akku zu ihren Steckern im Feld über der Hauptplatine. Von dort läuft der Schwanz durch die Kerbe der Rippe über dem Netzteilbereich, die Spalte links neben der Hauptplatine hinunter und unten vorn entlang zu P12–P15. + und − in AWG 26.
+Die Akkuleitungen und die des NTC gehen durch die Kerbe der Rippe rechts neben dem Akku zu ihren Steckern im Feld über der Hauptplatine. Von dort läuft der Schwanz durch die Kerbe der Rippe über dem Netzteilbereich, die Spalte links neben der Hauptplatine hinunter und unten vorn entlang zu P12–P15. + und − sind die Adern des vorgecrimpten JST-PH-Gegensteckers (AWG 26 oder 28).
 
 ```view
 frame: bass
@@ -376,7 +376,7 @@ Im Kasten wird nichts gelötet: Die Drahtpads der Hauptplatine liegen später hi
 
 - **#4 Kontakte**, 6 Drähte zu je {{cut:bass/elec.scad:path_len(pins_pts()) + path_len(main_leg_pts()):30}} mm, an P1–P6: INT grün, 3,3 V rot, SCL gelb, GND schwarz, DET weiß, SDA blau.
 - **#5 Tastenbus**, 5 Drähte zu je {{cut:bass/elec.scad:path_len(key_pts())}} mm, an P7–P11: 3,3 V, GND, INT, SCL, SDA. Ans andere Ende kommt der JST-SH-Stecker (vorgecrimptes Kabel, kurz hinter dem Stecker an den PTFE-Draht gespleißt, Schrumpfschlauch).
-- **#6 Akku-Schwanz**, {{cut:bass/elec.scad:path_len(tail_pts())}} mm, an P12–P15 (− schwarz, NTC-Rückleitung braun, TS orange, + rot; AWG 26 für + und −), am Ende die Gegenstecker zum JST-PH des Akkus und zum JST-SH des NTC.
+- **#6 Akku-Schwanz**, {{cut:bass/elec.scad:path_len(tail_pts())}} mm, an P12–P15 (− schwarz, NTC-Rückleitung schwarz, TS lila, + rot): + und − sind die Adern des vorgecrimpten JST-PH-Gegensteckers, auf Länge gekürzt; die beiden NTC-Drähte aus AWG 30 bekommen am Ende den JST-SH-Gegenstecker.
 - **#7 Klinke**, 3 × {{cut:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))]) + jack_slack}} mm, auf die SMD-Pads P19–P21: Spitze weiß, Ring rot, Hülse schwarz. Die Drähte bleiben bewusst lang; gekürzt wird erst an der Klinke.
 
 Die freien Enden von #4 und #5 jeweils mit einem Stück Schrumpfschlauch zu einer Spitze bündeln.
