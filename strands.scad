@@ -97,7 +97,7 @@ function _lift_start(st, w) = let(n = len(st)) n < 2 ? st :
 // COLOURS [given 2026-11-26]: each wire has a colour (a name, as wire_colours lists them); the
 // builds draw one colour at a time ($wire_color, set on the command line), so the 3D views can
 // show each in its own: no $wire_color (or "") draws all
-wire_colours = ["red", "black", "blue", "yellow", "green", "white", "orange", "brown"];
+wire_colours = ["red", "black", "blue", "yellow", "green", "white", "purple"];
 function show_colour(c) = is_undef($wire_color) || $wire_color == "" || c == $wire_color;
 // a wire through points: round, d thick
 module strand(p, d, fn = 8) for (i = [0 : len(p) - 2]) hull() {

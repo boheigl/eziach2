@@ -46,9 +46,9 @@ OUT = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else os.path.join(BUILD, 
 CACHE = os.path.join(os.path.dirname(OUT), "guide")
 W, H = 1600, 1000                     # rendered; stored at half the size, smoothed
 ACCENT = "#E8701A"                    # the step's new parts; the page uses the same
-WIRE_COLS = ["red", "black", "blue", "yellow", "green", "white", "orange", "brown"]
+WIRE_COLS = ["red", "black", "blue", "yellow", "green", "white", "purple"]
 WIRE_RGB = {"red": "#D2302C", "black": "#2A2A2A", "blue": "#2F6FD0", "yellow": "#E6C21E", "green": "#2E9E4A",
-            "white": "#F4F4F0", "orange": "#F08A24", "brown": "#7B4A26"}
+            "white": "#F4F4F0", "purple": "#7A3FA0"}
 # own colours of parts by name (first match), for show; ghost is always light grey
 COLOURS = [("wires_", None), ("case", "#D9C7A2"), ("housing", "#D9C7A2"), ("d_housing", "#D9C7A2"),
            ("back_cover", "#C9B48C"), ("cover_screws", "#B08D57"), ("cover", "#EDE3CC"), ("d_cover", "#EDE3CC"),
@@ -159,6 +159,7 @@ def stl_files(name, frame, ws=1.0):
     for f in files:
         b = os.path.basename(f)[:-4]
         wc = re.match(r"(?:d_)?wires_(\w+)$", b)
+        if wc and wc.group(1) not in WIRE_RGB: continue   # a colour no longer used, left in build/
         out.append((f, WIRE_RGB.get(wc.group(1)) if wc else None))
     return out
 
@@ -271,9 +272,9 @@ def scad_values(exprs):
     return {k: cache[ck(*k)] for k in exprs}
 
 SIG_COL = [(r"^(\+3V3|3V3|BATP)", "rot"), (r"^GND", "schwarz"), (r"^SDA", "blau"), (r"^SCL", "gelb"), (r"^INT", "grün"),
-           (r"^DET", "weiß"), (r"^TS", "orange"), (r"^EAR_L", "weiß"), (r"^EAR_R", "rot")]
+           (r"^DET", "weiß"), (r"^TS", "lila"), (r"^EAR_L", "weiß"), (r"^EAR_R", "rot")]
 def colour_of(net, name=""):
-    if "NTC return" in name: return "braun"
+    if "NTC return" in name: return "schwarz"
     for p, c in SIG_COL:
         if re.match(p, net): return c
     return ""

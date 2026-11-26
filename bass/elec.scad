@@ -301,7 +301,7 @@ k_wpad  = [7, 8, 11, 10, 9];    // the key board's five (3.3 V, GND, SDA, SCL, I
 k_slot  = [0, 2, 4, 3, 1];
 function pin_start(k) = let(c = pins_pts()[0], q = pin_pad[k]) [[c[0] - q[0] * 2.54, 4.79, c[2] + q[1] * 1.6], [c[0] - q[0] * 2.54, 3.89, c[2] + q[1] * 1.6]];
 // colours by signal [given 2026-11-26]: 3.3 V red, GND black, SDA blue, SCL yellow, INT green,
-// DET white; the battery's + red, - black, the NTC's TS orange and its return brown; the
+// DET white; the battery's + red, - black, the NTC's TS purple and its return black [2026-11-26: were orange and brown, the wire bought has neither]; the
 // jack's tip white, ring red, sleeve black. The JST plugs' housings are drawn with the white.
 sig_col = ["red", "black", "blue", "yellow", "green", "white"];   // 3.3 V, GND, SDA, SCL, INT, DET
 // the bundle ends at x C_END, before the pads (x 100.6 .. 106.85), so all six fan out forward
@@ -323,12 +323,12 @@ module key_strands() strands(mid(key_pts()), 5, awg30, [for (k = [0 : 4]) from_w
 // plug; the tail's four from the plugs to P12 .. P15 (-, the NTC's return, TS, +)
 module bat_strands() {
     strands(cell_pts(), 2, awg26, spread = 1.1, colours = ["red", "black"]);
-    strands(ntc_pts(), 2, awg30, spread = 1.1, colours = ["orange", "brown"]);
+    strands(ntc_pts(), 2, awg30, spread = 1.1, colours = ["purple", "black"]);
     if (show_colour("white")) for (b = [ph_box, ntc_box]) bx(b[0], b[1], b[2]);
     core = mid(tail_pts());
     starts = [[[59.85, -6.2, ph_box[2][0]]], [ntc_tail_pts()[0] - [0.4, 0, 0], ntc_tail_pts()[1] - [0, 0, 0.4]],
               [ntc_tail_pts()[0] + [0.4, 0, 0], ntc_tail_pts()[1] + [0, 0, 0.4]], [[61.85, -6.2, ph_box[2][0]]]];
-    tail_col = ["black", "brown", "orange", "red"];   // P12 -, P13 the NTC's return, P14 TS, P15 +
+    tail_col = ["black", "black", "purple", "red"];   // P12 -, P13 the NTC's return, P14 TS, P15 +
     for (k = [0 : 3]) cstrand(strand_pts(core, 4, awg26, k, starts, [for (j = [0 : 3]) to_wpad(j + 12)]), k == 1 || k == 2 ? awg30 : awg26, tail_col[k]);
 }
 // #7 the earphone jack: from its three lugs (rev B) down to P19 .. P21 (SMD, on top, under the

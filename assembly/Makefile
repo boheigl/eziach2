@@ -13,7 +13,7 @@ B  := ../build/assembly
 BB := ../build/bass
 
 D_COLS := red black blue yellow green
-B_COLS := red black blue yellow green white orange brown
+B_COLS := red black blue yellow green white purple
 PIECES := $(addprefix $(B)/,d_housing.stl d_cover.stl d_boards.stl d_parts.stl d_cables.stl \
                            keys_bass.stl keys_discant.stl store_discant.stl $(foreach c,$(D_COLS),d_wires_$(c).stl))
 

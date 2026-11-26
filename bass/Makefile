@@ -17,7 +17,7 @@ scad = @mkdir -p $(B)/.deps && echo "  OPENSCAD $@" && \
 KEY_STL   := $(addprefix $(KEY)/,$(foreach r,0 1,$(foreach p,cap plunger magnet oring stop,bass$(r)_$(p).stl bass$(r)_$(p)_down.stl) bass$(r)_tube_body.stl bass$(r)_tube_cut.stl))
 
 # the wires one colour each, for the 3D views [2026-11-26] (elec.scad, ../strands.scad)
-WIRE_COLS := red black blue yellow green white orange brown
+WIRE_COLS := red black blue yellow green white purple
 WIRE_STL  := $(foreach c,$(WIRE_COLS),$(B)/wires_$(c).stl)
 
 all: $(B)/strap.stl $(B)/elec.stl $(B)/wires.stl $(WIRE_STL) $(B)/case.stl $(B)/cover.stl $(B)/back_cover.stl $(B)/cover_screws.stl $(B)/battery.stl $(B)/keys.stl $(B)/boards.stl $(B)/discant_link.stl $(B)/latch_rod.stl $(B)/lever.stl $(B)/contact_pins.stl $(B)/view3d.html
