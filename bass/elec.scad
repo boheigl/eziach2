@@ -62,15 +62,23 @@ function mz(Y) = pwr_z[0] + Y;
 pilots  = [for (h = main_holes) [mx(h[0]), mz(h[1])]];
 wall_t  = 2;                     // the side wall (case.scad: wall)
 // EARPHONE JACK [given 2026-11-15: a panel jack held by the case; a 5 mm bulge in the
-// back cover for it]: Switchcraft 35PRM3 [datasheet: drawing 35PRM3 rev 0A], from inside
+// back cover for it]: Switchcraft 35PRM3 [datasheet: customer drawing 35PRM3 rev B, 2025-07-23], from inside
 // screwed into a tapped M6 x 0.75 hole in the side wall and its boss [2026-11-25: was
 // through the 2 mm wall with its knurled nut outside, the wall 1.5 under the nut; too weak
 // for 20 N across the plug, and no 3.5 mm jack with a longer thread was found]. Its body lies over the main board (1.0
 // clear under the flange), three wires down to the board's pads P19..P21.
 jack_z    = mz(main_jack_y);     // its axis
 jack_fl   = [9.5, 2.1];          // flange: diameter, length (against the wall's inside)
-jack_body = [7.7, 13.4];         // body behind the flange
-jack_lugs = [8.0, 5.8];          // solder lugs beyond the body [envelope estimated]
+jack_body = [7.9, 14.2];         // body behind the flange [rev B: 7.9; length 26.1 overall less thread, flange, sleeve lug]
+// solder lugs beyond the body [rev B]: tip and ring two flat blades 3.5 long, 3.0 high, 0.4
+// thick, 3.5 apart either side of the axis, a 1.2 hole on the axis 2.6 behind the body;
+// the sleeve a 2.2 wide tab 6.3 long, about 2.5 .. 3.2 off the axis on the third side, its
+// hole near its end. No anti-rotation feature: screwed in, the lugs stand at any angle
+// [2026-11-26], so the envelope is a cylinder, r 4.0 for the lugs (about 3.5) and the
+// soldered wire ends
+jack_lugs = [8.0, 6.3];
+jack_tr_l = 3.5;                 // the tip and ring blades' length
+jack_hole = 2.6;                 // their holes behind the body
 jack_thr  = [6.0, 3.5];          // M6 x 0.75, length: wall + nut at most 3.5
 jack_tap  = 5.3;                 // tap drill for M6 x 0.75 (5.25), printed holes come out small; tapped after printing
 // THE BOSS [2026-11-25]: outside on the side wall round the hole, jack_boss_t proud, so the
@@ -89,9 +97,12 @@ jack_bump_r = jack_room_r + 1.6;
 // the jack goes in from inside [2026-11-24: since the bulge's lower half is the case's,
 // case.scad]: from behind, its bottom over the bulge's lower half, down into it jack_slide
 // short of the wall, then slid +x through the hole. jack_slide: its thread (3.5) out of the
-// hole, and its lugs clear of the main board's tall part at x 81.75 (more than 5.15 would
-// touch it); the bulge is jack_slide longer for it
-jack_slide = 5;
+// hole (3.5 + 0.3), and its lugs 0.3 clear of the main board's tall part U1 (x 81.75):
+// with rev B's longer body [2026-11-26] that leaves 3.85, so 3.8; the bulge is jack_slide
+// longer for it
+jack_u1_x  = mx([for (p = main_parts) if (p[0] == "U1") p][0][1]);   // 81.75
+jack_slide = jack_thr[1] + 0.3;
+assert(jack_x0 - jack_slide >= jack_u1_x + 0.3, str("the jack's lugs hit U1 as it goes in: ", jack_x0 - jack_slide));
 jack_bump_x0 = jack_x0 - 0.8 - 1.6 - jack_slide;
 pad_d   = 4.5;
 
@@ -131,8 +142,19 @@ module elec_cuts() {
     for (p = pilots) translate([p[0], plate_y[1] - 2.0, p[1]]) rotate([-90, 0, 0]) cylinder(d = 1.7, h = 3, $fn = 16);
 }
 // the jack: lugs, body, flange inside; thread through the wall; the nut outside
+// the lugs as drawn [rev B], in the angle the wires are drawn for (jack_lug): tip and ring
+// blades either side of the axis, the sleeve's tab towards the back cover (local x is -z,
+// local y is y); the checks use the envelope (jack_lugs) instead
 module jack() translate([0, jack_yc, jack_z]) rotate([0, 90, 0]) {
-    translate([0, 0, jack_x0]) cylinder(d = jack_lugs[0], h = jack_lugs[1] + 0.01, $fn = 24);
+    xb = jack_x0 + jack_lugs[1];
+    difference() {
+        union() {
+            for (s = [-1, 1]) translate([s * 1.75 - 0.2, -1.5, xb - jack_tr_l]) cube([0.4, 3.0, jack_tr_l + 0.01]);
+            translate([-1.1, 2.5, jack_x0]) cube([2.2, 0.4, jack_lugs[1] + 0.01]);
+        }
+        translate([-5, 0, xb - jack_hole]) rotate([0, 90, 0]) cylinder(d = 1.2, h = 10, $fn = 12);
+        translate([0, 0, jack_x0 + 0.8]) rotate([-90, 0, 0]) cylinder(d = 1.2, h = 10, $fn = 12);
+    }
     translate([0, 0, jack_x0 + jack_lugs[1]]) cylinder(d = jack_body[0], h = jack_body[1] + 0.01, $fn = 32);
     translate([0, 0, jack_x1 - jack_fl[1]]) cylinder(d = jack_fl[0], h = jack_fl[1], $fn = 32);
     translate([0, 0, jack_x1]) cylinder(d = jack_thr[0], h = jack_thr[1], $fn = 32);
@@ -172,7 +194,12 @@ function jack_bump_yzr() = [jack_yc, jack_z, jack_bump_r];
 // flange's start, body r, lugs r, room r, jack_slide]
 function jack_dims() = [jack_x0, jack_x0 + jack_lugs[1], jack_x1 - jack_fl[1], jack_body[0] / 2, jack_lugs[0] / 2, jack_room_r, jack_slide];
 // the jack without its nut, for the checks of putting it in
-module jack_bare() jack();   // it has no nut any more
+module jack_bare() translate([0, jack_yc, jack_z]) rotate([0, 90, 0]) {   // its envelope (no nut any more)
+    translate([0, 0, jack_x0]) cylinder(d = jack_lugs[0], h = jack_lugs[1] + 0.01, $fn = 24);
+    translate([0, 0, jack_x0 + jack_lugs[1]]) cylinder(d = jack_body[0], h = jack_body[1] + 0.01, $fn = 32);
+    translate([0, 0, jack_x1 - jack_fl[1]]) cylinder(d = jack_fl[0], h = jack_fl[1], $fn = 32);
+    translate([0, 0, jack_x1]) cylinder(d = jack_thr[0], h = jack_thr[1], $fn = 32);
+}
 module jack_cover_zone() translate(jack_cover_box()[0]) cube(jack_cover_box()[1]);
 // the main board's lowest screw lies below z_split, behind the case's strip: case.scad
 // cuts a hole in the strip in front of it, so a screwdriver reaches it [given 2026-11-15:
@@ -304,14 +331,19 @@ module bat_strands() {
     tail_col = ["black", "brown", "orange", "red"];   // P12 -, P13 the NTC's return, P14 TS, P15 +
     for (k = [0 : 3]) cstrand(strand_pts(core, 4, awg26, k, starts, [for (j = [0 : 3]) to_wpad(j + 12)]), k == 1 || k == 2 ? awg30 : awg26, tail_col[k]);
 }
-// #7 the earphone jack: from its three lugs (tip, ring, sleeve: their places estimated) down
-// beside its lugs' end and along under its body, 1.0 over the board, to P19 .. P21 (SMD, on top)
-// [2026-11-26: the pads under the lugs (../main_pcb JACK_PADS), the wires straight down from the
-// lugs; were under the jack's body, the wires along under it with 1.0 mm for their 0.55]
+// #7 the earphone jack: from its three lugs (rev B) down to P19 .. P21 (SMD, on top, under the
+// lugs: ../main_pcb JACK_PADS) [2026-11-26]. The lugs stand at any angle once the jack is
+// screwed in, so the wires are cut long (jack_slack) and trimmed at the lugs; drawn with the
+// sleeve's tab towards the back cover, its wire down past the blades' ends, the tip's blade
+// on the pads' side (+z), the ring's below
 jack_pads = [[20.1, 10.35], [18.25, 9.45], [20.1, 8.55]];   // ../main_pcb (X, Y): tip, ring, sleeve
 jack_col = ["white", "red", "black"];   // tip, ring, sleeve
-function jack_pts(k) = let(p = jack_pads[k], zl = jack_z + (1 - k) * 1.8)
-    [[jack_x0 + 1.0, jack_yc - 2.6, zl], [mx(p[0]), jack_yc - 4.0, mz(p[1])], [mx(p[0]), brd_y[1] + 0.3, mz(p[1])]];
+jack_slack = 10;
+jack_lug = [[jack_x0 + jack_lugs[1] - jack_hole, jack_yc, jack_z + 1.75],    // tip
+            [jack_x0 + jack_lugs[1] - jack_hole, jack_yc, jack_z - 1.75],    // ring
+            [jack_x0 + 0.8, jack_yc + 2.85, jack_z]];                         // sleeve
+function jack_pts(k) = let(p = jack_pads[k], l = jack_lug[k])
+    [l, [l[0], jack_yc - jack_lugs[0] / 2 - 0.3, l[2]], [mx(p[0]), jack_yc - jack_lugs[0] / 2 - 0.3, mz(p[1])], [mx(p[0]), brd_y[1] + 0.3, mz(p[1])]];
 module jack_strands() for (k = [0 : 2]) cstrand(jack_pts(k), awg30, jack_col[k]);
 module wires() {
     contact_strands();

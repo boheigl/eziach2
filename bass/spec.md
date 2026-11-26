@@ -207,20 +207,26 @@ keys: `../BOM.md`.
     thread's length, and it ends flush; tap drill ⌀5.3 printed, tapped after printing;
     the nut is not used. Its body lies over the main board
     and is wired to it. 1.0 mm over the board. The back cover bulges 5.7 mm round it (⌀13.3 about the jack's axis,
-    from the side wall 28.7 mm inwards); outside the plate the bulge is the cover's above
+    from the side wall 28.8 mm inwards); outside the plate the bulge is the cover's above
     z −128.6, the case's below, and the side wall round the hole stays the case's, so
     the cover slides off with the jack in place.
     **Putting the jack in** [2026-11-24: since the bulge's lower part is the case's, it no
     longer goes in from behind at its place]: with the main board in and the cover off,
-    from behind, 5 mm short of the wall and 2.4–3.0 mm higher than its place (its flange
+    from behind, 3.8 mm short of the wall and 2.4–3.0 mm higher than its place (its flange
     over the trough's rim at z −128.6, under the USB socket J1 2.3 mm above it), down into
     the trough, then slid +x and screwed into the tapped hole (about 5 turns, flange
     tight against the wall, a drop of threadlocker), then its wires soldered (its lugs
-    are open from behind, the cover off). The bulge is 5 mm
-    longer for it (`elec.scad`: `jack_slide`); more than 5.15 mm short of the wall its lugs
-    would touch the ESP32 module. The side wall's inner corner rounding over the bulge is
+    are open from behind, the cover off). It has no anti-rotation feature, so its lugs
+    stand at any angle [2026-11-26]: the wires are cut 10 mm long and trimmed at the lugs;
+    tip and ring are blades close to the axis (holes on it, 1.75 off), only the sleeve's
+    tab goes round (about 2.5–3.2 off), and it reaches 2.8 mm past the blades, so all
+    three are solderable from behind at any angle. The bulge is 3.8 mm
+    longer for it (`elec.scad`: `jack_slide`, the thread's 3.5 and 0.3); more than 3.85 mm
+    short of the wall its lugs would touch U1 [2026-11-26: was 5 and 5.15, before rev B's
+    1.3 mm longer jack]. The side wall's inner corner rounding over the bulge is
     cut back for the thread on the way down (inside the back wall's line). Checked (solids,
-    jack without nut, in 0.5–10 mm steps): clear of case, main board's parts and wires
+    jack without nut, in 0.5–10 mm steps; again for rev B 2026-11-26, swept: in from
+    behind 2.4 and 3.0 higher, down, slid in; the back cover sliding in over it): clear of case, main board's parts and wires
     along the whole way; at 2.0–2.2 mm it touches the rim.
     **Cradle** [given 2026-11-24: the jack holds 20 N across the plug]. Clamped in the
     1.5 mm wall under the nut, as it was, 20 N 25 mm out of the wall (about 520 N·mm)
@@ -228,18 +234,18 @@ keys: `../BOM.md`.
     layers (PETG about 20–30 MPa there). In wall and boss, 3.5 thick, it is about 8 MPa at
     the flange's edge and about 19 MPa past the boss's edge (r 6.5, the wall 2 there),
     25 MPa where the boss is cut back under the USB plug [estimates, ±2×]. So the body bears on a cradle as far
-    from the wall as it can, x 93.3 … 101.1 (between its lugs and where its flange stands
+    from the wall as it can, x 92.5 … 102.3 (between its lugs and where its flange stands
     before it is slid in): the plug's moment becomes about 42 N at the cradle and 62 N
     across the wall (bearing about 7 MPa on the thread). The case's saddle (0.1 round the
-    body, ⌀7.7 [datasheet]) takes down and to the back: from the plate's inner face
+    body, ⌀7.9 [datasheet rev B; ⌀7.7 before, which would have left it no play]) takes down and to the back: from the plate's inner face
     (y −2.9, just past the body's lowest line) out to z −128.6 (else the jack would not
     get in). Not to the front (towards the board) [2026-11-25]: inside the plate a saddle
     would hang free in print (the case stands on its hand face; it started at y −6.45 in
     the air); that direction stays on wall and boss alone, about 19 MPa at 20 N
     [estimate].
     The cover's rib takes up and to the back: over the body from y −2.9 out and down to
-    the split; it slides in over the lugs, so it clears their envelope (r 4.0
-    [estimated]) by 0.15, 0.3 off the body, for the arch's sag in print (the cover prints
+    the split; it slides in over the lugs, so it clears their envelope (r 4.0: the
+    lugs about 3.5 [rev B], and the wires' ends) by 0.15, 0.3 off the body, for the arch's sag in print (the cover prints
     on its inner face; the rib is an arch of ⌀8.3 over the body, no supports). Before
     they bear, the jack turns 0.5° (saddle) or 1.4° (rib) in the wall: about 6–17 MPa
     there [estimate, ±2×]. On the rib an upward 42 N goes through the cover's bulge to its

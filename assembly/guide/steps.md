@@ -148,7 +148,7 @@ Zuschnitt = Länge im Modell + 20 mm je Ende zum Abisolieren und als Zugentlastu
 | 4 | Bass | Stiftplatine → Hauptplatine P1–P6 | 6: 3,3 V, GND, SDA, SCL, INT, DET | {{scad:bass/elec.scad:path_len(pins_pts()) + path_len(main_leg_pts())}} mm | {{cut:bass/elec.scad:path_len(pins_pts()) + path_len(main_leg_pts()):30}} mm |
 | 5 | Bass | Bass-Tastenplatine J1 → P7–P11 | 5: 3,3 V, GND, SDA, SCL, INT | {{scad:bass/elec.scad:path_len(key_pts())}} mm | {{cut:bass/elec.scad:path_len(key_pts())}} mm |
 | 6 | Bass | Akku-Stecker → P12–P15 | 4: −, NTC-Rückleitung, TS, + | {{scad:bass/elec.scad:path_len(tail_pts())}} mm | {{cut:bass/elec.scad:path_len(tail_pts())}} mm |
-| 7 | Bass | Klinke → P19–P21 | 3: Spitze, Ring, Hülse | {{scad:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))])}} mm | {{cut:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))])}} mm |
+| 7 | Bass | Klinke → P19–P21 | 3: Spitze, Ring, Hülse | {{scad:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))])}} mm | {{cut:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))]) + jack_slack}} mm |
 
 Teile: Litze AWG 30, 7 × 0,1, PTFE dünnwandig (⌀ ≤ 0,55), je 2 m rot, schwarz, blau, gelb, weiß, 1 m grün; AWG 26 PTFE je 0,3 m rot und schwarz (Akku); JST-SH-Kabel 5-polig, vorgecrimpt; JST-PH-2-Paar (Akku) und JST-SH-2-Paar (NTC); Schrumpfschlauch ⌀1,5 und ⌀3
 
@@ -258,7 +258,7 @@ caption: Akkuleitungen, Stecker und der Schwanz zur Hauptplatine
 
 ### #7 Bass: Klinke
 
-Drei kurze Drähte von den Lötfahnen gerade hinunter auf die SMD-Pads P19–P21: Spitze weiß, Ring rot, Hülse schwarz. Die Pad-Seite wird auf dem Tisch gelötet, die Lötfahnen erst, wenn die Klinke eingeschraubt ist.
+Drei kurze Drähte von den SMD-Pads P19–P21 hinauf zu den Lötfahnen: Spitze weiß, Ring rot, Hülse schwarz. Die Pad-Seite wird auf dem Tisch gelötet, die Lötfahnen erst, wenn die Klinke eingeschraubt ist. Die Klinke hat keine Verdrehsicherung; wie ihre Fahnen am Ende stehen, ergibt sich beim Einschrauben. Darum sind die Drähte {{scad:bass/elec.scad:jack_slack}} mm länger zugeschnitten und werden an der Klinke gekürzt. Spitze und Ring sind zwei flache Fahnen dicht neben der Achse, die Hülse eine längere Fahne außen; das Bild zeigt eine der möglichen Lagen.
 
 ```view
 frame: bass
@@ -288,7 +288,7 @@ caption: Die beiden Zungen (orange) an den äußeren Haltern, von unten
 
 1. Fünf Drähte (AWG 30 PTFE, je {{cut:discant/gauge_link.scad:path_len(contact_pts())}} mm) an die Pads auf der Rückseite der Padplatine löten: 3,3 V rot, GND schwarz, SDA blau, SCL gelb, INT grün. DET ist auf der Platine mit GND verbunden.
 2. Die Drähte durch die Bohrung im Sockel nach unten in die Nut und weiter durch den mittleren Kanal unter die Platinenauflage führen.
-3. Die Platine mit einer dünnen Schicht langsamem Epoxid kantenbündig auf den Sockel kleben und flach andrücken, bis es fest ist. Die Klebefuge darf höchstens 0,1 mm dick werden, sonst ändert sich der Federweg der Kontaktstifte.
+3. Nur einen dünnen Film langsames Epoxid auf den Sockel streichen, die Platine kantenbündig auflegen und satt andrücken, bis am Rand etwas Kleber austritt; abwischen und angedrückt halten, bis es fest ist. Die Fuge muss so dünn bleiben (unter 0,1 mm), weil sie die Padfläche den Federstiften des Bass entgegenhebt: Bei dicker Fuge gehen die Stifte auf Block, und ein Teil der Kraft läuft an den Messplatten vorbei. Kontrolle mit dem Tiefenmaß des Messschiebers: Die Spitzen der äußeren Halter stehen 4,6 mm vor der Padfläche, nach dem Kleben sollen es noch mindestens 4,5 mm sein.
 
 ```view
 frame: discant
@@ -377,7 +377,7 @@ Im Kasten wird nichts gelötet: Die Drahtpads der Hauptplatine liegen später hi
 - **#4 Kontakte**, 6 Drähte zu je {{cut:bass/elec.scad:path_len(pins_pts()) + path_len(main_leg_pts()):30}} mm, an P1–P6: INT grün, 3,3 V rot, SCL gelb, GND schwarz, DET weiß, SDA blau.
 - **#5 Tastenbus**, 5 Drähte zu je {{cut:bass/elec.scad:path_len(key_pts())}} mm, an P7–P11: 3,3 V, GND, INT, SCL, SDA. Ans andere Ende kommt der JST-SH-Stecker (vorgecrimptes Kabel, kurz hinter dem Stecker an den PTFE-Draht gespleißt, Schrumpfschlauch).
 - **#6 Akku-Schwanz**, {{cut:bass/elec.scad:path_len(tail_pts())}} mm, an P12–P15 (− schwarz, NTC-Rückleitung braun, TS orange, + rot; AWG 26 für + und −), am Ende die Gegenstecker zum JST-PH des Akkus und zum JST-SH des NTC.
-- **#7 Klinke**, 3 × {{cut:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))])}} mm, auf die SMD-Pads P19–P21: Spitze weiß, Ring rot, Hülse schwarz.
+- **#7 Klinke**, 3 × {{cut:bass/elec.scad:max([for (k = [0 : 2]) path_len(jack_pts(k))]) + jack_slack}} mm, auf die SMD-Pads P19–P21: Spitze weiß, Ring rot, Hülse schwarz. Die Drähte bleiben bewusst lang; gekürzt wird erst an der Klinke.
 
 Die freien Enden von #4 und #5 jeweils mit einem Stück Schrumpfschlauch zu einer Spitze bündeln.
 
@@ -406,15 +406,18 @@ caption: Die Hauptplatine an ihrem Platz, der Akku-Schwanz nach oben ins Feld ü
 
 ### Klinke einsetzen
 
-Von hinten, 5 mm vor der Wand und 2,4–3 mm höher als ihr Platz, die Klinke in die Mulde senken, nach rechts schieben und etwa 5 Umdrehungen in das Gewinde der Seitenwand schrauben, bis der Flansch anliegt; ein Tropfen Schraubensicherung. Dann die drei Drähte von P19–P21 gerade nach oben an ihre Lötfahnen löten (Spitze, Ring, Hülse).
+Von hinten, knapp 4 mm vor der Wand und 2,4–3 mm höher als ihr Platz, die Klinke in die Mulde senken; die drei Drähte dabei zur Seite biegen. Nach rechts schieben und knapp 5 Umdrehungen in das Gewinde der Seitenwand schrauben, bis der Flansch anliegt; ein Tropfen Schraubensicherung.
+
+Dann die Drähte an die Fahnen löten, wie diese gerade stehen: Spitze (weiß) und Ring (rot) an die beiden flachen Fahnen dicht an der Achse, Hülse (schwarz) an die längere äußere Fahne. Von den Fahnen her gesehen, mit der Hülsenfahne oben, liegt die Spitze rechts und der Ring links; im Zweifel zeigt es ein Durchgangsprüfer mit eingestecktem Stecker. Jeden Draht in einem lockeren Bogen bis an sein Loch führen, dort kürzen, durchstecken, umbiegen und löten. Der Kolben kommt von hinten an alle Fahnen heran, auch wenn die Hülsenfahne zur Platine zeigt: Sie ragt 2,8 mm über die flachen Fahnen hinaus, ihr Loch liegt dort frei. Die Drähte dürfen nicht mehr als 4 mm von der Achse abstehen, sonst stößt die Rippe des Rückdeckels an.
 
 ```view
 frame: bass
 show: case elec
 new: bass/elec.scad:jack() bass/elec.scad:jack_strands()
-cam: 150 25 0.45
+cam: 250 45 1.0
 focus: bass/elec.scad:jack()
-caption: Die Klinke in ihrer Wiege, die Drähte gerade hinunter auf die Pads
+wire: 1.6
+caption: Die Klinke in ihrer Wiege, von hinten bei abgenommenem Rückdeckel; die Drähte von den Pads zu den Fahnen (eine der möglichen Lagen)
 ```
 
 ### Kontaktdrähte und Stiftplatine

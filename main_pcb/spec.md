@@ -84,16 +84,17 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 
 - **Earphone jack in the case** [given 2026-11-15: a panel jack fixed in the case, a
   bulge in the back cover allowed]: Switchcraft 35PRM3 (metal, M6 × 0.75, knurled
-  nut; flange ⌀9.5, body ⌀7.7, 21.3 behind the wall [datasheet: drawing 35PRM3]),
+  nut; flange ⌀9.5, body ⌀7.9, 22.6 behind the wall [datasheet: customer drawing 35PRM3 rev B; rev A's 7.7 and 21.3 before 2026-11-26]),
   from inside screwed into a tapped hole in the side wall, the nut unused
   (`../bass/spec.md`), its body over the board 1.0 above it, three
   wires to P19–P21 under its lugs [2026-11-26: there, X 18.25–20.1, Y 8.55–10.35, tip at
-  the top, ring in the middle towards the body, sleeve at the bottom, as the lugs; 1.75 mm
+  the top, ring in the middle towards the body, sleeve at the bottom (the lugs' angle is set by screwing the jack in, it has no
+  anti-rotation feature: the wires are cut long and trimmed at the lugs); 1.75 mm
   between the lugs' envelope and the board; 1.0 pads, as F1 below and U8 above leave the
   rows 1.8 apart; were 1.5 pads under the body at X 15.6–19.8, where the wires ran in its
   1.0 mm gap; the row of wire pads past the battery's was looked at, but the lowest screw
   and the antenna's keepout are there]. Plugging loads the case, not the board. Under the
-  jack (`JACK_ZONE`) the parts stay low; on its axis the body clears 1.9 mm, the
+  jack (`JACK_ZONE`) the parts stay low; on its axis the body clears 1.8 mm, the
   flange at the board's edge 1.0 (`gen_pcb.py` lists the parts there, the bass's
   clash check proves them). The on-board SJ-3523-SMT before stood 5.2–5.37 high
   [distributors], more than the 5.13 to the back cover.
