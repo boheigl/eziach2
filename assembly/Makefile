@@ -1,6 +1,8 @@
 # Discant and bass together: the discant's parts moved into the bass's frame
 # (assembly.scad), the 3D view view3d.html. Builds discant/ and bass/ first.
-#   make        everything
+#   make        everything, with the assembly guide build/assembly/guide.html (guide/guide.py:
+#               steps.md and pictures rendered from the built parts; only changed pictures
+#               are rendered again)
 #   make clean  deletes ../build/assembly/
 #   make promo  the promo video, ../build/assembly/eziach_promo.webm and .mp4 (video/promo.py;
 #               about an hour, not part of all; needs the parts built)
@@ -15,7 +17,7 @@ B_COLS := red black blue yellow green white orange brown
 PIECES := $(addprefix $(B)/,d_housing.stl d_cover.stl d_boards.stl d_parts.stl d_cables.stl \
                            keys_bass.stl keys_discant.stl $(foreach c,$(D_COLS),d_wires_$(c).stl))
 
-all: $(B)/view3d.html
+all: $(B)/view3d.html $(B)/guide.html
 
 # the discant's pieces come in as its built STLs
 D_STL := $(wildcard ../build/discant/*.stl)
@@ -36,9 +38,16 @@ $(B)/view3d.html: view3d.html ../discant/embed_parts.py ../discant/viewer_nav.js
 	@echo "  EMBED    $@"
 	@$(PYTHON) ../discant/embed_parts.py $< $@ $(VIEW_PARTS)
 
+# the guide: rendered from the built parts (bass, discant, assembly, the key) and the sources'
+# modules its views name; guide.py caches each picture by what goes into it
+$(B)/guide.html: guide/guide.py guide/steps.md guide/page.html $(PIECES) $(BASS_STL) $(D_STL) $(wildcard ../switch_hall/*.scad ../bass/*.scad ../discant/*.scad)
+	@echo "  GUIDE    $@"
+	@$(PYTHON) guide/guide.py $@
+guide: $(B)/guide.html
+
 promo: $(PIECES) $(BASS_STL) $(BB)/discant_link.stl video/promo.py video/promo.scad video/frames.scad
 	$(PYTHON) video/promo.py $(B)/eziach_promo.webm
 
 clean:
 	rm -rf $(B)
-.PHONY: all clean parts promo
+.PHONY: all clean parts promo guide

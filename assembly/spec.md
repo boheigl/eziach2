@@ -200,17 +200,19 @@ per colour (`wires_<colour>.stl`), so the 3D views show each in its own. Model l
 echoed by `../bass/elec.scad` (`wires()`, `path_len()`) and `../discant/gauge_link.scad`
 (`contact_pts()`, `lead_pts()`), so they follow the geometry. Cut length = model length
 + 20 mm per end (stripping, strain relief), rounded up to 10 mm; #4 30 mm more, for
-soldering the pin board in front of the mount (Bass, order, below).
+soldering the pin board in front of the mount (Bass, order, below). The assembly guide
+(`guide/steps.md`, built into `../build/assembly/guide.html`) computes both columns from the
+models on every build [2026-11-26: #4 was 180, #5 350, from older ways].
 
 | # | Half | From → to | Wires | Ends | Model | Cut |
 |---|---|---|---|---|---|---|
 | 1 | discant | — (gone 2026-11-15 with the link board) | | | | |
 | 2 | discant | pad board's back pads → down the boss, through the channel at x = 0 → Hall board's J1, up through its pads | 5: 3V3, GND, SDA, SCL, INT (DET tied to GND on the pad board) | pads / pads | 28 mm | 70 mm |
 | 3 | discant | gauge plates → into the pad's groove at x = ∓25, straight through the slanting channels → Hall board's J2 / J3 at x = ∓12 (NAU7802) | 2 half bridges, 3 each | pads / pads | 15 mm each | 60 mm each |
-| 4 | bass | spring-pin board's back pads → main board's pads, out of the mount's cavity and bore, round the corner at the foot's window, along the bottom at the back | 6: 3V3, GND, SDA, SCL, INT, DET | pads / pads | 114 mm | 180 mm |
-| 5 | bass | bass Hall board J1 → down its shaft, over the strap bar's block, beside the battery, along the bottom beside #4 (in front of it, over its shoulder through the right outer rib's notch) → main board's pads | 5: 3V3, GND, SDA, SCL, INT | SH plug / pads | 297 mm | 350 mm |
+| 4 | bass | spring-pin board's back pads → main board's pads, out of the mount's cavity and bore, round the corner at the foot's window, along the bottom at the back | 6: 3V3, GND, SDA, SCL, INT, DET | pads / pads | 114 mm | 190 mm |
+| 5 | bass | bass Hall board J1 → down its shaft, over the strap bar's block, beside the battery, along the bottom beside #4 (in front of it, over its shoulder through the right outer rib's notch) → main board's pads | 5: 3V3, GND, SDA, SCL, INT | SH plug / pads | 297 mm | 340 mm |
 | 6 | bass | battery: its own leads (+, −) and the taped-on NTC's two, out of the cell's compartment through the notch in the rib right of it, to their plugs in the field over the main board; from there a tail down through the rib over the power board and the column left of the main board, along the bottom in front of #5 and #4, up to the pads (+ BATP through the PTC, − GND, the NTC to TS and the spare GND) | 2 + 2 | JST PH 2-pin (the cell's) and JST SH 2-pin (the NTC) / pads | cell to plug 13 mm (its leads looped in the field), tail 81 mm | tail 130 mm |
-| 7 | bass | earphone jack's lugs → P19–P21, straight down (the pads under the lugs) | 3: tip, ring, sleeve | lugs / pads | about 5 mm [model] | 50 mm |
+| 7 | bass | earphone jack's lugs → P19–P21, straight down (the pads under the lugs) | 3: tip, ring, sleeve | lugs / pads | 4 mm | 50 mm |
 
 - **Wire** [chosen]: AWG 30 stranded (7 × 0.1), PTFE thin wall, outside ⌀ ≤ 0.55 mm
   [unverified: the supplier's figure]. Five such wires bundle to about ⌀1.4 (2.70 d), six
@@ -267,8 +269,8 @@ soldering the pin board in front of the mount (Bass, order, below).
 - **Discant key board:** runs #2 and #3 come up from under the board through plated
   holes (J1 bus, J2/J3 gauges) and are soldered on the top after the board is screwed
   in; the cover has a recess over the joints.
-- **Colours** [chosen]: 3V3 red, GND black, SDA blue, SCL yellow, INT white, DET green;
-  the contacts' second 3V3 and the extra GNDs the same colours.
+- **Colours:** as under Wire colours above (INT green, DET white) [2026-11-26: here INT
+  white and DET green before, older than that list].
 - **Electrically:** I²C at 400 kHz over at most about 0.4 m per bus (bus 1: #2 + #4,
   about 0.13 m; bus 2: #5) with 2k2 pull-ups is well inside the 400 pF limit; 3V3 at about
   150 mA per half drops about 10 mV over 0.3 m of AWG 30 (0.34 Ω/m) [estimate]. No

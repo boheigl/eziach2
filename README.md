@@ -45,7 +45,8 @@ halves together and packing away (1 min). Click the preview for the full video.
 ```sh
 make                    # switch_hall, discant, strain_gauge and key_proto into build/
 make -C bass            # the bass and its 3D view
-make -C assembly        # both halves together, build/assembly/view3d.html
+make -C assembly        # both halves together, build/assembly/view3d.html, and the
+                        # illustrated assembly guide build/assembly/guide.html (assembly/guide/)
 make -C key_proto       # the 8-key test print, build/key_proto/plate.3mf
 make -C firmware/test   # the firmware's host tests (the firmware itself: idf.py build in firmware/)
 make -C switch_hall video   # the key video (about half an hour)

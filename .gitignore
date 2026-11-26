@@ -12,3 +12,4 @@ fp-info-cache
 
 # Bambu Studio command line: status report written to the working directory
 result.json
+__pycache__/

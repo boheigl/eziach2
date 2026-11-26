@@ -310,8 +310,9 @@ module bat_strands() {
 // lugs; were under the jack's body, the wires along under it with 1.0 mm for their 0.55]
 jack_pads = [[20.1, 10.35], [18.25, 9.45], [20.1, 8.55]];   // ../main_pcb (X, Y): tip, ring, sleeve
 jack_col = ["white", "red", "black"];   // tip, ring, sleeve
-module jack_strands() for (k = [0 : 2]) let(p = jack_pads[k], zl = jack_z + (1 - k) * 1.8)
-    cstrand([[jack_x0 + 1.0, jack_yc - 2.6, zl], [mx(p[0]), jack_yc - 4.0, mz(p[1])], [mx(p[0]), brd_y[1] + 0.3, mz(p[1])]], awg30, jack_col[k]);
+function jack_pts(k) = let(p = jack_pads[k], zl = jack_z + (1 - k) * 1.8)
+    [[jack_x0 + 1.0, jack_yc - 2.6, zl], [mx(p[0]), jack_yc - 4.0, mz(p[1])], [mx(p[0]), brd_y[1] + 0.3, mz(p[1])]];
+module jack_strands() for (k = [0 : 2]) cstrand(jack_pts(k), awg30, jack_col[k]);
 module wires() {
     contact_strands();
     key_strands();
