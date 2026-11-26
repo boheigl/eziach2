@@ -62,13 +62,13 @@ belongs to one key and one direction, so the tuner knows its chord; the table he
 
 A key goes on a fixed distance above its rest reading and off below a smaller one [given
 2026-11-20: switching at the top of the stroke only; before: at 20 % / 10 % of the
-calibrated travel]: 9 and 5 ADC counts, about 0.5 and 0.27 mT, about 0.15 and 0.08 mm at
+calibrated travel]: 18 and 10 ADC counts (DRV5055A2, 30 mV/mT [2026-11-26: 9 and 5 with the A3]), about 0.48 and 0.27 mT, about 0.19 and 0.11 mm at
 rest (`[keys]` in `config/eziach.toml`). So the switching does not depend on the bottom:
 a key that is calibrated short, or a sensor that runs into its limit at the bottom, still
 switches at the same place. The rest follows drift while the key is up (below half the
 release distance), slowly — a time constant of about 5 s — so a key pressed slowly is not
-followed. The span (bottom − rest, from a calibration pass, kept in NVS; until then 600
-counts, the estimate from the field: 32 mT × 15 mV/mT over 0.806 mV per count) gives only
+followed. The span (bottom − rest, from a calibration pass, kept in NVS; until then 930
+counts, the estimate from the field: 25 mT × 30 mV/mT over 0.806 mV per count) gives only
 the direction a press moves the reading (the magnet's pole) and the travel `keys` shows.
 [chosen; the counts to tune on the prototype: noise, drift, the soft stop's return]
 

@@ -125,7 +125,7 @@ A retaining ring instead of the glued collar (DIN 6799) does not fit [checked 20
 size 2.3 for a 3 mm shaft is ⌀6.3 outside, more than the tube (⌀6.6) leaves inside it; it
 goes on sideways, but the rod's end never leaves the tube; and it would have to sit under
 the collar, where the magnet is, with a groove turned into every dowel pin.
-- **Sensor:** a linear ratiometric Hall sensor in SOT-23 (e.g. DRV5055A3,
+- **Sensor:** a linear ratiometric Hall sensor in SOT-23 (e.g. DRV5055A2,
   ±85 mT) sits on the board's **underside, exactly on the key's axis**, and
   senses through the board. A magnet magnetised along its axis is glued into
   the collar's lower face.
@@ -260,9 +260,13 @@ Before: a spring-steel ⌀8 × 0.4 × 25 with 8 coils, 105 → 128 g (+22 %).
   (Taking a key apart). Its
   lower face is 6.0 mm from the sensor element at rest and 3.0 mm at the bottom (along
   the axis, through the tilted board).
-- **Field:** 5.6 mT at rest, 30.8 mT at the bottom (7.6 and 39.9 with ⌀3 × 1.5), inside
-  the DRV5055A3's ±85 mT range [given 2026-11-23: the A3 stays; the A2's ±42 mT would
-  now fit and double the resolution, with little margin].
+- **Field:** discant 5.9 mT at rest, 32.4 mT at the bottom (the magnets' measured ⌀3.1;
+  5.6 and 30.8 for ⌀3.0, 7.6 and 39.9 with ⌀3 × 1.5), inside the DRV5055A2's ±42 mT
+  range; the bass, its board flat, the magnet 0.45 closer: 7.3 and 45.7 mT, past 42 mT in
+  the last 0.1 mm of the stroke, where the sensor clips [chosen 2026-11-26: the A2, twice
+  the A3's 15 mV/mT; the A3 (±85 mT) kept on 2026-11-23 for its margin. The clipping is
+  harmless: the keys switch at the top (`../firmware/spec.md` §3); key.scad checks the
+  range up to 90 % of the stroke].
 - **Calibration:** the field rises monotonically but not linearly with travel.
   The firmware stores each key's rest and bottom readings and maps the reading
   back to travel. Switching itself does not use it [given 2026-11-20]: a key goes
@@ -271,8 +275,8 @@ Before: a spring-steel ⌀8 × 0.4 × 25 with 8 coils, 105 → 128 g (+22 %).
   actuation; `../firmware/spec.md` §3).
 - **Early actuation:** at rest the field rises by 2.5 mT/mm (3.3 with ⌀3 × 1.5);
   0.1 / 0.2 / 0.5 mT above the rest reading are reached after 40 / 79 / 191 µm
-  (30 / 60 / 146). One ADC step (12 bit, DRV5055A3 at 3.3 V) is about 0.05 mT, about
-  20 µm here (15). The limit is
+  (30 / 60 / 146). One ADC step (12 bit, DRV5055A2 at 3.3 V) is about 0.027 mT, about
+  11 µm here (0.05 mT and 20 µm with the A3). The limit is
   not the field but noise, temperature drift and how exactly the key returns to
   its rest on the soft washer: the firmware tracks each key's rest reading while
   the key is up and triggers a little above it, e.g. on at 0.15 mm and off at

@@ -145,12 +145,12 @@ JST5 = "Connector_JST:JST_SH_BM05B-SRSS-TB_1x05-1MP_P1.00mm_Vertical"
 # side entry, about 2.95 high [unverified]: the discant's housing stays thin under it
 JST5_SIDE = "Connector_JST:JST_SH_SM05B-SRSS-TB_1x05-1MP_P1.00mm_Horizontal"
 
-# sensors: DRV5055A3 (+-85 mT), SOT-23: 1 VCC, 2 OUT, 3 GND [datasheet]; 100 nF beside it
+# sensors: DRV5055A2 (+-42 mT; A3 +-85 before 2026-11-26), SOT-23: 1 VCC, 2 OUT, 3 GND [datasheet]; 100 nF beside it
 # (the datasheet asks for at least 10 nF)
 def key_net(k, h): return f"KEY{k}_{h}"
 for n, (k, h) in enumerate(KEYS):
     x, y = key_xy(k, h)
-    part(f"U{100 + n + 1}", "DRV5055A3QDBZR", SOT23, {"1": "+3V3", "2": key_net(k, h), "3": "GND"},
+    part(f"U{100 + n + 1}", "DRV5055A2QDBZR", SOT23, {"1": "+3V3", "2": key_net(k, h), "3": "GND"},
          (x, y + SENS_DY), group="sensors", pinfo={"1": "VCC", "2": "OUT", "3": "GND"},
          title=f"row {k}, key {h}")
     part(f"C{100 + n + 1}", "100n", C0402, {"1": "+3V3", "2": "GND"}, (x + 2.7, y + SENS_DY), rot=90,
@@ -293,7 +293,7 @@ POWER = {"+3V3"}
 # JLCPCB / LCSC part numbers for the BOM, by (value, footprint) [checked 2026-11-15 at jlcpcb.com:
 # all in stock; "basic" parts need no extended-part fee]
 LCSC = {
-    ("DRV5055A3QDBZR", SOT23): "C266128",
+    ("DRV5055A2QDBZR", SOT23): "C266131",
     ("ADS7128IRTER", WQFN16): "C2867992",
     ("NAU7802SGI", SOIC16): "C2614351",
     ("SRV05-4", SOT236): "C85364",                 # ProTek SRV05-4-P-T7, as on the main board

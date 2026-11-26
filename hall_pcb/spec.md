@@ -62,7 +62,7 @@ JLCPCB/LCSC part numbers: `LCSC` in `design.py`, into the schematic and the BOM
 
 | Part | Count | What for |
 |---|---|---|
-| DRV5055A3QDBZR, SOT-23 | 46 | linear Hall sensor, 15 mV/mT and ±88 mT at 3.3 V, ratiometric; pins 1 VCC, 2 OUT, 3 GND [datasheet: SBAS640C, checked 2026-11-15] |
+| DRV5055A2QDBZR (C266131), SOT-23 | 46 | linear Hall sensor, 30 mV/mT and ±44 mT at 3.3 V [chosen 2026-11-26; the A3, 15 mV/mT and ±88 mT, before], ratiometric; pins 1 VCC, 2 OUT, 3 GND [datasheet: SBAS640C, checked 2026-11-15] |
 | 100 nF 0402 | 46 | one beside every sensor (datasheet: at least 10 nF) |
 | ADS7128IRTER, WQFN-16 3 × 3 | 6 | 8 channels, 12 bit, I²C [datasheet SBAS868A] |
 | 1 µF 0402 | 18 | AVDD, DVDD and DECAP of every ADC [datasheet] |

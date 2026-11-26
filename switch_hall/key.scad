@@ -30,7 +30,7 @@
 // cap's underside round the pin and lands on the tube's top; it also centres
 // the spring's top coil.
 //
-// SENSING. A ratiometric linear Hall sensor (SOT-23, e.g. DRV5055A3, +-85 mT)
+// SENSING. A ratiometric linear Hall sensor (SOT-23, DRV5055A2, +-42 mT)
 // sits on the board's underside, exactly on the key's axis, and senses through
 // the board. An axially magnetised magnet is glued into the collar's lower
 // face. Rest and bottom readings are calibrated per key; the actuation point
@@ -141,7 +141,7 @@ mag_l    = 1;
 mag_web  = 0.5;      // the collar's floor between the magnet's pocket and the rod
 mag_seat = mag_l + mag_web;   // where the rod's end sits, over the collar's lower face
 mag_Br   = 1.44;     // T
-sens_range = 85;     // mT, DRV5055A3
+sens_range = 42;     // mT, DRV5055A2 [2026-11-26; 85, the A3, before]
 
 /* [Position and output] */
 travel   = 0;        // 0 .. stroke
@@ -245,7 +245,10 @@ assert(stop_id < pin_d && stop_id >= pin_d - 0.5, "stop washer must sit a little
 assert(stop_od > bush_d + 0.8, "stop washer hardly meets the bushing's face");
 assert(mag_pocket <= collar_d - 1.1 && mag_seat <= collar_h - 1.5, "magnet does not fit the collar, or the rod's glued length is short");
 assert(mag_web >= 0.4, "the web over the magnet is too thin to print (two layers)");
-assert(b_bot <= sens_range, "field beyond the sensor's range at the lower stop");
+// [2026-11-26, the A2's +-42 mT]: the keys switch near the top, so only the stroke's top part
+// must stay inside the range; the bass's flat board brings the magnet 0.45 closer, and its
+// field passes 42 mT in the last 0.1 mm (45.7 at the stop), where the sensor clips, harmlessly
+assert(bz(s_rest - 0.9 * stroke) <= sens_range, "field beyond the sensor's range before 90 % of the stroke");
 assert(sens_l / 2 < margin_n, "sensor beyond the board's edge");
 // staircase: the next board's caps and cover must stay clear of this cap
 assert(stair[1] - margin_n - cap_d / 2 >= 0.5, "cap runs into the next board's front edge");

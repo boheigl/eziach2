@@ -57,17 +57,18 @@ sign = 1                  # +1 or -1: which way is push, set once by pressing (s
 # reading and off again below a smaller one, in ADC counts, whatever its full travel
 # [given 2026-11-20: switching at the top only]. At rest the field rises by 2.5 mT/mm
 # [estimated; 3 x 1 magnets since 2026-11-23, 3.2 with 3 x 1.5], one count is about
-# 0.054 mT (DRV5055A3 at 3.3 V, 15 mV/mT, over 0.806 mV per count): 9 counts are about
-# 0.2 mm of travel, 5 counts about 0.11 mm (0.15 and 0.08 with the thicker magnet; the
-# counts kept for the noise's sake, 0.2 mT peak to peak is about 4). How small they may be
-# (noise, drift, the soft stop's return) is to be measured on the prototype.
-actuate_counts = 9
-release_counts = 5
-# rest-to-bottom change in ADC counts before a key is calibrated: 25 mT x 15 mV/mT
-# over 0.806 mV per count [estimated; 3 x 1 magnets, 32 mT with 3 x 1.5]; its sign follows the magnets' pole and gives the
+# 0.027 mT (DRV5055A2 at 3.3 V, 30 mV/mT, over 0.806 mV per count [2026-11-26: A2 instead
+# of the A3, 15 mV/mT, which had 9 and 5 counts here]): 18 counts are about 0.19 mm of
+# travel, 10 counts about 0.11 mm, the same places as before with twice the counts above the
+# noise (0.2 mT peak to peak is about 7). How small they may be (noise, drift, the soft
+# stop's return) is to be measured on the prototype.
+actuate_counts = 18
+release_counts = 10
+# rest-to-bottom change in ADC counts before a key is calibrated: 25 mT x 30 mV/mT
+# over 0.806 mV per count [estimated; 3 x 1 magnets, DRV5055A2; 470 with the A3]; its sign follows the magnets' pole and gives the
 # direction a press moves the reading (calibration sets it per key); the span itself only
 # scales the travel `keys` shows
-default_span = 470
+default_span = 930
 # portion of a new reading taken into the rest value while a key is up: slow, so that a
 # key pressed slowly is not followed (about one reading per ms: 0.0002 is a time constant
 # of about 5 s; temperature drifts over minutes)

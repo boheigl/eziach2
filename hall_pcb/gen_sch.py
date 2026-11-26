@@ -91,7 +91,7 @@ def instance(c, x, y):
 def text(s, x, y, size=3):
     items.append(f'(text {q(s)} (exclude_from_sim no) (at {x:.2f} {y:.2f} 0) (effects (font (size {size} {size})) (justify left)) (uuid {U("t" + s)}))\n')
 
-TITLES = {"sensors": "Hall sensors DRV5055A3 under every key, 100 nF each (title: row, key)",
+TITLES = {"sensors": "Hall sensors DRV5055A2 under every key, 100 nF each (title: row, key)",
           "adc": f"ADS7128: 8-channel 12-bit ADCs on I2C, addresses 10h..{0x10 + len(d.GROUPS) - 1:02X}h; ALERTs wired together to INT",
           "bus": d.BUS_TITLE + (": wire pads" if d.BOARD == "discant" else ": JST SH, as on the switch boards"),
           "gauge": "Strain gauges: NAU7802 reads both half bridges, against a 10k/10k divider each"}

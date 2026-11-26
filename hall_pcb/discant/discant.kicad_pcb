@@ -168,7 +168,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "b90613d3-6cbb-4144-a562-4baf39968135")
@@ -1095,7 +1095,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "54426198-8b73-4435-9358-f808be6b12ec")
@@ -1969,7 +1969,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "a4ba653e-dbb8-4a47-8a5c-70ed254d773d")
@@ -2757,7 +2757,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "d1a984b1-cde3-49c4-8ef3-1d2adec6c5c5")
@@ -4570,7 +4570,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "f252ed3b-a6d1-44c4-9a94-025fc172c3e9")
@@ -5358,7 +5358,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "3c94b4b8-5820-4818-8b14-cef7c320b1d4")
@@ -6001,7 +6001,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "980bb23e-8780-40b8-8aad-dc4d330e78de")
@@ -6362,7 +6362,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "a3963161-ed2a-42ae-91c4-0ea89774148c")
@@ -6864,7 +6864,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "d5f81346-287b-4395-921c-75add03db426")
@@ -7650,7 +7650,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "88e17947-38cb-4efe-b188-e88be95c796b")
@@ -8011,7 +8011,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "07942a71-da56-4152-8bb2-5a7abd36c6ec")
@@ -8372,7 +8372,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "b2ab8ec5-635b-409e-a753-e6889cd90773")
@@ -9442,7 +9442,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "030e5e92-231c-4504-acdb-c4b11bf497e7")
@@ -10354,7 +10354,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "2b05e8cc-711e-4841-ae12-14977ce696bc")
@@ -10856,7 +10856,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "74c648eb-f5ac-47ab-8390-702170d658f5")
@@ -11217,7 +11217,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "f99028ba-1f0a-4141-8cf1-e7cee83a563a")
@@ -11719,7 +11719,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "f42aa2cc-4a4e-4f26-b903-f2b46e693c08")
@@ -12080,7 +12080,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "cb5f4c3b-9430-4f56-a638-e8e64e461105")
@@ -12723,7 +12723,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "d550ee79-4c7d-415d-9e14-52af26f4a800")
@@ -13227,7 +13227,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "04d68094-2350-4877-b715-729da0367bc3")
@@ -13588,7 +13588,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "46f5f9a6-03bd-432b-9dd3-e28f4ddd82f5")
@@ -13949,7 +13949,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "f3ab70fe-5b47-41ea-b748-67daffbd741c")
@@ -14878,7 +14878,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "20ca7108-4420-4dc1-9f84-bbc8363a7d47")
@@ -15239,7 +15239,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "5e906550-5d2f-45b8-bbde-159422b345b9")
@@ -16307,7 +16307,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "2cb8eb38-a6b3-4d76-8adb-86e42100cc75")
@@ -16809,7 +16809,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "050b5515-70d9-4fb8-bc76-c2eeae1ffc35")
@@ -17864,7 +17864,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "7364c180-843f-4ad1-b2ac-55c6cf64de7f")
@@ -18368,7 +18368,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "ab5606c6-bc2b-4ce5-83bc-e9af647e4aac")
@@ -19011,7 +19011,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "c03c29f6-4fb4-4fd1-ba89-ceeb673c2f8e")
@@ -19654,7 +19654,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "d738fbd4-6e07-46c5-928b-f1cb1189f40d")
@@ -21538,7 +21538,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "5cee1036-395d-4735-ae5f-97329affcfeb")
@@ -22040,7 +22040,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "660d0ff6-a614-492e-914e-58229d006507")
@@ -22401,7 +22401,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "64bccaad-a9ef-4d2b-a73d-4403db265c13")
@@ -23044,7 +23044,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "159d8adb-9a52-4b5f-af61-e9261d6286d2")
@@ -23546,7 +23546,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "f72aab29-dcee-4aff-b910-0da0f723068c")
@@ -24473,7 +24473,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "787b59b6-b5ac-4e02-ba7e-05f50a622102")
@@ -25118,7 +25118,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "ca739139-fcf1-412a-92b6-c7d8d2099d2b")
@@ -26043,7 +26043,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "29de7269-3c8b-494c-bf98-35df08ce499d")
@@ -27080,7 +27080,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "0e442a95-28cd-48cf-ac54-504ffa38e0ac")
@@ -27441,7 +27441,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "cf87a10c-79a2-42d1-adf8-6f8d1fcfd926")
@@ -27943,7 +27943,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "b6e135e0-1c63-4749-a96f-b5246f41d338")
@@ -28586,7 +28586,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "d03ed437-ccb0-4b26-97d8-d25331ea7fbf")
@@ -30900,7 +30900,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(uuid "b467024d-df3c-4bab-9f8d-9c2dfdc16a65")
@@ -32466,7 +32466,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "3168175a-007a-45e7-a557-1210aa804807")
@@ -33252,7 +33252,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "58d5f76a-7f8a-406e-97a8-b1e3bf9d207f")
@@ -34036,7 +34036,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "DRV5055A3QDBZR"
+		(property "Value" "DRV5055A2QDBZR"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "6ca79983-7816-4629-bdb5-4d6d9d715447")
