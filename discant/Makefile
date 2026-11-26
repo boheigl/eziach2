@@ -86,7 +86,7 @@ $(B)/print_inner_detent.stl: print.scad $(GAUGE_STL) ../build/strain_gauge/inner
 $(B)/holder_test.3mf: plate.py ../key_proto/plate.py $(B)/print_holder_test.stl $(B)/print_inner_cam.stl $(B)/print_inner_detent.stl $(B)/print_lever_one.stl
 	@echo "  PLATE    $@" && $(PYTHON) plate.py $(B)
 # the AppImage if there is one, else the Flathub app (bambu.py)
-BAMBU ?= $(if $(wildcard $(HOME)/Applications/BambuStudio.AppImage),$(HOME)/Applications/BambuStudio.AppImage,flatpak)
+BAMBU ?= $(firstword $(wildcard $(HOME)/Applications/BambuStudio.AppImage $(HOME)/.local/bin/bambu-studio) flatpak)
 bambu: $(B)/holder_test_x2d.3mf
 $(B)/holder_test_x2d.3mf: ../key_proto/bambu.py $(B)/holder_test.3mf
 	@$(PYTHON) ../key_proto/bambu.py $(BAMBU) $(B) holder_test

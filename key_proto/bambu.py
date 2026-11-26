@@ -4,7 +4,7 @@ PETG, sliced, so they open without the "not from Bambu Lab" note and print as th
 
     python3 bambu.py BAMBU BUILD_DIR [NAME ...]
 
-BAMBU is the Bambu Studio AppImage, or "flatpak" for the Flathub app com.bambulab.BambuStudio
+BAMBU is the Bambu Studio AppImage, an extracted one's AppRun (or a link to it), or "flatpak" for the Flathub app com.bambulab.BambuStudio
 [2026-11-22: the AppImage wants ffmpeg 7 and WebKitGTK, which Ubuntu 24.04 lacks]. The
 Flatpak's bambu-studio is run directly with its runtime's loader and libraries, not through
 `flatpak run`, which needs user namespaces and a D-Bus session (both missing in containers).
@@ -73,6 +73,9 @@ def studio(bambu, work):
         loader = os.path.join(runtime, "lib", "x86_64-linux-gnu", "ld-linux-x86-64.so.2")
         return [loader, "--library-path", libs, os.path.join(app, "bin", "bambu-studio")], \
             os.path.join(app, "share", "BambuStudio", "profiles", "BBL")
+    real = os.path.realpath(bambu)
+    if os.path.basename(real) == "AppRun":        # an AppImage already extracted (squashfs-root/AppRun)
+        return [bambu], os.path.join(os.path.dirname(real), "resources", "profiles", "BBL")
     subprocess.run([bambu, "--appimage-extract", "resources/profiles/BBL/*"], cwd=work,
                    check=True, stdout=subprocess.DEVNULL)
     return [bambu], os.path.join(work, "squashfs-root", "resources", "profiles", "BBL")
