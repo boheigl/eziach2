@@ -32,10 +32,13 @@ BACK = (1.2, 1.4)            # the wire pads on the back: x, z (room for an AWG 
 VIA, VIA_DR = 0.45, 0.2
 TW, TW_P = 0.2, 0.3          # tracks: signal, supply
 CLR = 0.15
-# the nets per grid point (column -1..1 along x, row 1 / -1 along z); DET beside GND, so the
-# pad board ties them with a short track
-GRID = {(-1, 1): "3V3", (0, 1): "SDA", (1, 1): "SCL",
-        (-1, -1): "GND", (0, -1): "DET", (1, -1): "INT"}
+# the nets per grid point (column -1..1 along x, row 1 / -1 along z); DET under GND, so the
+# pad board ties them with a short track on the back [2026-11-26: the grid chosen so that the
+# wires, drawn one by one (../strands.scad), come from the wire pads into the bores' bundles
+# without crossing, on both boards (searched; ../bass/elec.scad, ../discant/gauge_link.scad);
+# was 3V3 SDA SCL / GND DET INT]
+GRID = {(-1, 1): "3V3", (0, 1): "SCL", (1, 1): "GND",
+        (-1, -1): "INT", (0, -1): "SDA", (1, -1): "DET"}
 # each pad's via: the outer ones beside their pads, the middle ones between the rows, at
 # x +-1.27 (0.64 clear of the four pads round them)
 VIAS = {(-1, 1): (-4.1, 1.5), (0, 1): (-1.27, 0.0), (1, 1): (4.1, 1.5),
@@ -44,7 +47,7 @@ def grid_xz(c, r): return (c * PX, r * PZ / 2)
 def back_xz(c, r): return (c * PX, r * 1.6)    # the wire pads, inside the cavity behind (+/-2.6), clear of the vias
 # the pad board's nets: DET to GND (switches the bass on)
 PAD_NET = {"3V3": "3V3", "GND": "GND", "DET": "GND", "SDA": "SDA", "SCL": "SCL", "INT": "INT"}
-WIRES_DISCANT = {"3V3": (-1, 1), "SDA": (0, 1), "SCL": (1, 1), "GND": (-1, -1), "INT": (1, -1)}
+WIRES_DISCANT = {"3V3": (-1, 1), "SCL": (0, 1), "GND": (1, 1), "INT": (-1, -1), "SDA": (0, -1)}
 
 # the panel: the boards 1 mm apart (GAP, milled), a frame round them (RAIL wide, GAP
 # off), each board held by one tab on either side (x edges, TAB long, its middle TAB_Z
@@ -136,7 +139,7 @@ for name, bd in BOARDS.items():
         if name == "pins" or (c, r) in WIRES_DISCANT.values() and WIRES_DISCANT.get(PAD_NET[g]) == (c, r):
             text(pcbnew.B_SilkS, lbl, (w_[0], w_[1] - BACK[1] / 2 - 0.42), 0.55, mirror=True)
     if name == "pads":
-        seg(pcbnew.B_Cu, uv(*back_xz(0, -1)), uv(*back_xz(-1, -1)), net(pre + "GND"), TW_P)   # DET to GND
+        seg(pcbnew.B_Cu, uv(*back_xz(1, -1)), uv(*back_xz(1, 1)), net(pre + "GND"), TW_P)   # DET to GND, up the +x column
 
 # outline: the frame's outside, and the milled gaps as closed cut-outs: one round each
 # board's outer end (tab to tab), one H between the boards (both boards' split edges and

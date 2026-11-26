@@ -77,7 +77,7 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
 | AO3401A × 2, BAT54C | the system switch (DET, VBUS) and the discant's 3.3 V (DET only) |
 | LTST-S326KGJRKT, DMG1012T × 2 | the red/green charge light; the green switch and the ESP32's low-battery red |
 | TLV320DAC3100IRHB, TLV75518 | I²S DAC with headphone driver; its 1.8 V core supply |
-| 3 solder pads P19–P21 | the earphone jack's wires (tip, ring, sleeve); 2 × 100 µF coupling caps per channel on the board (one cut off at about 140 Hz into 16 Ω, derated by its DC bias; two at about 70 Hz) [2026-11-19, review MINOR 5] |
+| 3 solder pads P19–P21 (1.0 × 1.0, under the jack's lugs) | the earphone jack's wires (tip, ring, sleeve); 2 × 100 µF coupling caps per channel on the board (one cut off at about 140 Hz into 16 Ω, derated by its DC bias; two at about 70 Hz) [2026-11-19, review MINOR 5] |
 | SRV05-4 | ESD on the contacts' SDA, SCL, INT |
 | PTC 1206, 1.5 A hold | in the battery's plus lead |
 | 15 wire pads, plated holes (ring ⌀1.5, hole ⌀0.7) | the wires (§4) |
@@ -87,7 +87,12 @@ Sunlord SWPA252012S2R2MT (2.2 µH, Isat 2.07 A), F1 SMD1206P150TF, FB1 Murata BL
   nut; flange ⌀9.5, body ⌀7.7, 21.3 behind the wall [datasheet: drawing 35PRM3]),
   from inside screwed into a tapped hole in the side wall, the nut unused
   (`../bass/spec.md`), its body over the board 1.0 above it, three
-  wires to P19–P21 under its lugs. Plugging loads the case, not the board. Under the
+  wires to P19–P21 under its lugs [2026-11-26: there, X 18.25–20.1, Y 8.55–10.35, tip at
+  the top, ring in the middle towards the body, sleeve at the bottom, as the lugs; 1.75 mm
+  between the lugs' envelope and the board; 1.0 pads, as F1 below and U8 above leave the
+  rows 1.8 apart; were 1.5 pads under the body at X 15.6–19.8, where the wires ran in its
+  1.0 mm gap; the row of wire pads past the battery's was looked at, but the lowest screw
+  and the antenna's keepout are there]. Plugging loads the case, not the board. Under the
   jack (`JACK_ZONE`) the parts stay low; on its axis the body clears 1.9 mm, the
   flange at the board's edge 1.0 (`gen_pcb.py` lists the parts there, the bass's
   clash check proves them). The on-board SJ-3523-SMT before stood 5.2–5.37 high
@@ -200,8 +205,14 @@ only 0.47 over the front wall. In groups along X from the side wall:
 
 | pads | X | wires |
 |---|---|---|
-| P1–P6 | 1.2–7.45 | the contacts' six: 3.3 V (+3V3_D), GND, SDA, SCL, INT, DET [2026-11-25: were nine, 3.3 V × 2 and GND × 3] |
-| P7–P11 | 8.7–13.7 | the bass key board's five: 3.3 V, GND, SDA, SCL, INT |
+| P1–P6 | 1.2–7.45 | the contacts' six: INT, 3.3 V (+3V3_D), SCL, GND, DET, SDA [2026-11-25: were nine, 3.3 V × 2 and GND × 3; 2026-11-26: the order, was 3.3 V, GND, SDA, SCL, INT, DET] |
+| P7–P11 | 8.7–13.7 | the bass key board's five: 3.3 V, GND, INT, SCL, SDA [2026-11-26: was 3.3 V, GND, SDA, SCL, INT] |
+
+[2026-11-26] The order within the groups is chosen so that the wires, modelled one by one
+(`../strands.scad`), fan into their bundles with the least overlap: searched with the
+contact boards' grid (`../contact_pcb`); left 0.45 mm³ in four pairs at P1–P6 (was 1.2 in
+six) and 0.25 at P7–P11 (was 0.79), 0.70 at the key board's plug (pins 1.0 apart, fixed).
+`../bass/elec.scad` (`c_wpad`, `k_wpad`) follows.
 | P12–P15 | 14.95–18.7 | the battery's tail: − (GND), the NTC's return (GND), the NTC (TS), + (BATP, next to the fuse F1) |
 
 The contacts' bundle comes furthest along the bottom, the battery's tail ends first. The wires and their lengths: `../assembly/spec.md`, Wiring. Test pads for boot, reset and GND at the top; TX and RX
@@ -240,7 +251,10 @@ track, D2 to the regulator.
   anew (DET routed first), again 0 open, no clearance, edge or short errors. The GND wire
   pads P2, P8, P12 and P13 are tied solid to the GND plane on In1 (the outer layers only
   by thermal spokes; the DRC calls P8 and P12 starved there, and U3's pad 4 on top): a
-  hotter iron for them.] In the bass: no clash with case, back cover, battery or
+  hotter iron for them.] [2026-11-26, with the groups' new order and the jack's pads under its
+  lugs: routed anew, 0 open in the first try, no clearance, edge or short errors; the GND wire
+  pads are now P4, P8, P12, P13 (the DRC calls P13 starved, and U3's pad 8 and C4's pad 2);
+  the jack's three 1.0 pads' courtyards overlap one another, their copper 0.8 apart.] In the bass: no clash with case, back cover, battery or
   wires (shifted controls overlap).
 - The DAC's speaker outputs are left open (earphones only).
 - **The DAC's thermal pad** [checked 2026-11-22 against SLAS671C, RHB0032E, pp. 108–110]:

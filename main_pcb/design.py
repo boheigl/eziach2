@@ -226,8 +226,14 @@ Cc("C26", "100u", "HPR", "EAR_R", (15.5, 6.0, 0), "audio", C0805)
 # low: 1.0 mm under the flange at the edge, about 1.9 under the body on its axis.
 JACK_Y = 9.8                                   # its axis [given: elec.scad jack_z]
 JACK_ZONE = (0.0, 21.0, JACK_Y - 4.75, JACK_Y + 4.75)   # X0, X1, Y0, Y1
+# [2026-11-26: under its lugs (X 15.05 .. 20.85), where 1.75 mm stay between their envelope
+# and the board, the wires coming straight down from the lugs; were 1.5 pads under its body at
+# X 15.6 .. 19.8, where the wires had 1.0 mm for their 0.55. 1.0 pads: between F1 and U8 the
+# rows are only 1.8 apart. Tip at the top, ring in the middle (towards the body), sleeve at the
+# bottom, as the lugs: the wires come down uncrossed]
+JACK_PADS = [(20.1, 10.35), (18.25, 9.45), (20.1, 8.55)]   # tip, ring, sleeve
 for i, (net, name) in enumerate((("EAR_L", "jack tip (left)"), ("EAR_R", "jack ring (right)"), ("GND", "jack sleeve"))):
-    part(f"P{19 + i}", name, PAD, {"1": net}, (15.6 + 2.1 * i, JACK_Y, 0), group="audio",
+    part(f"P{19 + i}", name, TP, {"1": net}, JACK_PADS[i] + (0,), group="audio",
          title="Earphones" if i == 0 else None)
 
 # --- I2C: bus 1 to the discant through the contacts, bus 2 in the bass ----------------
@@ -258,10 +264,13 @@ part("U8", "SRV05-4", SOT236, {"1": "SDA1_C", "2": "GND", "3": "SCL1_C", "4": "I
 # key board's five, the battery's four (its tail arrives first; BATP next to the fuse F1)]
 WIRE_PAD = "TestPoint:TestPoint_THTPad_D1.5mm_Drill0.7mm"
 WIRE_X0, WIRE_DX, WIRE_Y = 1.2, 1.25, (1.05, 3.45)  # X of the first, the step, the rows' Y
-WIRES = [("+3V3_D", "contacts 3.3 V"), ("GND", "contacts GND"), ("SDA1_C", "contacts SDA"), ("SCL1_C", "contacts SCL"),
-         ("INT1_C", "contacts INT"), ("DET", "contacts DET"),
-         ("+3V3", "bass keys 3.3 V"), ("GND", "bass keys GND"), ("SDA2", "bass keys SDA"),
-         ("SCL2", "bass keys SCL"), ("INT2", "bass keys INT"),
+# [2026-11-26: the order within a group so that the wires, drawn one by one
+# (../strands.scad), come into their bundles without crossing (searched for the least
+# overlap of the wires' fans; ../bass/elec.scad); was 3.3 V, GND, SDA, SCL, INT(, DET)]
+WIRES = [("INT1_C", "contacts INT"), ("+3V3_D", "contacts 3.3 V"), ("SCL1_C", "contacts SCL"), ("GND", "contacts GND"),
+         ("DET", "contacts DET"), ("SDA1_C", "contacts SDA"),
+         ("+3V3", "bass keys 3.3 V"), ("GND", "bass keys GND"), ("INT2", "bass keys INT"),
+         ("SCL2", "bass keys SCL"), ("SDA2", "bass keys SDA"),
          ("GND", "battery -"), ("GND", "NTC return"), ("TS", "battery NTC"), ("BATP", "battery +")]
 WIRE_GROUPS = {"contacts": range(0, 6), "keys": range(6, 11), "battery": range(11, 15)}
 for i, (net, name) in enumerate(WIRES):

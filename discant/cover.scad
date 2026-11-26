@@ -43,7 +43,8 @@ wall     = case_wall;
 screw_d  = 2.2;      // M2 clearance
 csk_d    = 4.0;      // 90 deg countersink for the flush heads (d3.8)
 bore_lo  = key_bore_lo();   // key.scad: the bushing's way in, run down through the plate
-wire_rec = 0.8;      // over the wire pads' solder joints
+wire_rec = 1.3;      // over the wire pads' solder joints [2026-11-26: 0.8; the wires' ends, drawn one by one,
+                     //   could stand only 0.4 over the board under it, a joint with its wire's end more]
 
 /* [Thumb bar, as before] */
 tb_len = 21.7;  tb_angle = 86.1;  tb_r = 1.2;  tb_R = 20.6;   // thumb_profile()'s parameters

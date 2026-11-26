@@ -210,7 +210,7 @@ soldering the pin board in front of the mount (Bass, order, below).
 | 4 | bass | spring-pin board's back pads → main board's pads, out of the mount's cavity and bore, round the corner at the foot's window, along the bottom at the back | 6: 3V3, GND, SDA, SCL, INT, DET | pads / pads | 114 mm | 180 mm |
 | 5 | bass | bass Hall board J1 → down its shaft, over the strap bar's block, beside the battery, along the bottom beside #4 (in front of it, over its shoulder through the right outer rib's notch) → main board's pads | 5: 3V3, GND, SDA, SCL, INT | SH plug / pads | 297 mm | 350 mm |
 | 6 | bass | battery: its own leads (+, −) and the taped-on NTC's two, out of the cell's compartment through the notch in the rib right of it, to their plugs in the field over the main board; from there a tail down through the rib over the power board and the column left of the main board, along the bottom in front of #5 and #4, up to the pads (+ BATP through the PTC, − GND, the NTC to TS and the spare GND) | 2 + 2 | JST PH 2-pin (the cell's) and JST SH 2-pin (the NTC) / pads | cell to plug 13 mm (its leads looped in the field), tail 81 mm | tail 130 mm |
-| 7 | bass | earphone jack's lugs → P19–P21 | 3: tip, ring, sleeve | lugs / pads | about 15 mm [estimate: the jack lies over the board] | 50 mm |
+| 7 | bass | earphone jack's lugs → P19–P21, straight down (the pads under the lugs) | 3: tip, ring, sleeve | lugs / pads | about 5 mm [model] | 50 mm |
 
 - **Wire** [chosen]: AWG 30 stranded (7 × 0.1), PTFE thin wall, outside ⌀ ≤ 0.55 mm
   [unverified: the supplier's figure]. Five such wires bundle to about ⌀1.4 (2.70 d), six

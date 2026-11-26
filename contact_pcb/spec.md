@@ -38,9 +38,9 @@ pins, so no three at 2.54 in a row), it would need a new grid, e.g. five strips 
 
 ## Pad board (discant)
 
-Six bare pads on the front. On the back DET is tied to GND, its neighbour (switches
-the bass's system on), and five wire pads carry 3V3, GND, SDA, SCL and INT to the Hall
-board's J1.
+Six bare pads on the front. On the back DET is tied to GND, the pad above it in the +x
+column (switches the bass's system on), and five wire pads carry 3V3, GND, SDA, SCL and
+INT to the Hall board's J1.
 
 ## Pin assignment
 
@@ -49,8 +49,14 @@ board, seen from the bass, shows it mirrored.
 
 | z \ x | −2.54 | 0 | +2.54 |
 |---|---|---|---|
-| +1.5 | 3V3 | SDA | SCL |
-| −1.5 | GND | DET | INT |
+| +1.5 | 3V3 | SCL | GND |
+| −1.5 | INT | SDA | DET |
+
+[2026-11-26; was 3V3 SDA SCL / GND DET INT] Chosen so that the wires, modelled one by one
+(`../strands.scad`), come from the wire pads (the same grid, z ±1.6) into the bores'
+bundles without crossing on both boards: searched over the assignments with DET next to
+GND for the least overlap of the wires' fans (none on either board; was 3.4 mm³ in
+eleven pairs). The main board's P1–P6 follow (`../main_pcb/design.py`, WIRES).
 
 ## Open
 

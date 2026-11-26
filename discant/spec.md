@@ -99,7 +99,7 @@ and rim, in the slab frame. Nothing of it goes below the board's top face.
   `tube_body()` / `tube_cut()`): the tube guides the plunger, the shroud hides the spring
   under the cap's skirt, and inside the shroud a level floor is the spring's seat,
   whatever the plate's tilt. A bore under each tube lets the bushing in from below.
-- A 0.8 mm **recess over the wire pads** J1 … J3 for the solder joints (§6).
+- A 1.3 mm **recess over the wire pads** J1 … J3 for the solder joints (§6) [2026-11-26: was 0.8; with the wires modelled one by one their ends could stand only 0.4 over the board under it].
 - **Assembly** (`../switch_hall/spec.md`): the cover lies on a jig whose pins reach into
   the tubes from below; plungers in from below, springs from above, caps pressed on.
   Off the jig the springs hold every plunger against its step, so the cover is one unit
@@ -298,8 +298,12 @@ git history.
   leads could not be threaded round it; then at ∓8 with a chamfer at the turn, still two
   turns out of sight.] Under the
   plates' edges the groove runs behind a 1 mm strip, the plates' stop; elsewhere it
-  is open to the pad's face or the holders. The cover has a 0.8 mm recess over the
-  pad rows for the joints. The NAU7802 (1.75 high) stands 0.4 into the tray's floor
+  is open to the pad's face or the holders. The cover has a 1.3 mm recess over the
+  pad rows for the joints. A gauge's three leads lie flat side by side (0.63 apart) and
+  turn by 67° on their way down the groove: off the plate their row runs along x, into the
+  slanting channel it runs across it, so none cuts across another's bend [2026-11-26: as a
+  ring, then as an untwisted row, they touched where they leave the plate and at the turn].
+  The NAU7802 (1.75 high) stands 0.4 into the tray's floor
   (0.8 left under it; `hall.scad` `deep_parts`).
 - **Contacts** [given: closing as the bass slides on; chosen 2026-11-15: the pad half of
   `../contact_pcb/`]: a boss on the pad between the outer holders (10 × 7 mm, to y = 83.4
@@ -309,7 +313,7 @@ git history.
   pads, 10 × 9]. Five wires (3V3,
   GND, SDA, SCL, INT) are soldered to its back pads, in a 7.2 × 5.2 × 1.5 mm recess of the
   boss, and a ⌀2.2 bore down the boss leads them (a 1.3 mm bundle) into the
-  pad's groove and straight on through the channel at x = 0 to the key board's J1
+  pad's groove and straight on through the channel at x = 0 (which reaches on under the groove to its front, where the wires turn down into it [2026-11-26]) to the key board's J1
   (28 mm). The board is glued onto the boss, its edges flush with the boss's (the same
   outline): that locates it within a few tenths, and the pins' tips stay on the pads up
   to ±0.65 mm [given 2026-11-20: glue only; review/contact_pcb.md MINOR 5].
