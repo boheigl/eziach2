@@ -70,7 +70,7 @@ caption: Der Stift wird 2,7 mm tief in die Kappe geklebt
 
 ### Magnet in den Kragen
 
-Den Magneten von unten in den Kragen drücken. **Alle Tasten mit demselben Pol nach unten**: gegen einen markierten Magneten prüfen.
+Etwas langsames Epoxid in die Tasche des Kragens, den Magneten von unten einsetzen und bis an den Steg schieben, Austritt an seiner Unterseite abwischen. Die Tasche ist etwas weiter als der Magnet (⌀3,1 gemessen); er sitzt nur durch den Kleber. **Alle Tasten mit demselben Pol nach unten**: gegen einen markierten Magneten prüfen, bevor der Kleber anzieht.
 
 ```view
 frame: key

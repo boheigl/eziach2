@@ -12,7 +12,7 @@ themselves are listed. Collected 2026-11-15 from the specs named in each section
 | Compression spring **Misumi UY8-25** (stainless, ⌀8 × 0.45 × 25) | 1 | 64 | stock |
 | Sleeve bearing, sintered bronze, oil-impregnated, d3 × D5 × 4 | 1 | 64 | stock: ordered 2026-11-21 from the Bambu Lab store, "Oil Impregnated Bronze Bushings" ED002 3 × 5 × 4 (packs of 20); else 123kugellager.de BMG03-05-04 (about 5 € each) |
 | Rod: dowel pin ISO 2338 ⌀3 h8 × 14, stainless A1 (bass back row × 24) | 1 | 55 × 14 + 9 × 24 | stock: the 55 × 14 ordered 2026-11-21 from MBO Oßwald (mbo-osswald.de, 3 h8 × 14, 1.4305); **the 9 × 24 for the bass's back row still to order** [open] (3 h8 × 24, the same steel); not m6, not ISO 8734 (hardened, magnetic) |
-| Magnet ⌀3 × **1**, N52, magnetised axially | 1 | 64 | stock: 200 ordered 2026-11-23 from yourmagnets.net; the collar takes ⌀3 × 1 under a 0.5 web [2026-11-23; ⌀3 × 1.5 before, ordered 2026-11-21 from magnethandel.de]; its pocket is ⌀3.05, check the diameter |
+| Magnet ⌀3 × **1**, N52, magnetised axially | 1 | 64 | stock: 200 ordered 2026-11-23 from yourmagnets.net; the collar takes ⌀3 × 1 under a 0.5 web [2026-11-23; ⌀3 × 1.5 before, ordered 2026-11-21 from magnethandel.de]; they measure ⌀3.1; its pocket is ⌀3.25, the magnet glued (slow epoxy) [2026-11-26] |
 | O-ring 4 × 1.5 (silicone about 50 Shore A, or NBR 70) | 1 | 64 | stock |
 | Stop washer ⌀4.5 / ⌀2.5 | 1 | 64 | punched from 1 mm silicone or PU sheet; or a stock O-ring 2.5 × 1 (NBR 70 or silicone) instead [2026-11-23], `switch_hall/spec.md` §2 |
 | Cap, collar | 1 each | 64 + 64 | printed |

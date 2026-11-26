@@ -15,7 +15,7 @@
 // the axis, and still beyond 8 dry (mu 0.25): the cap's edge is at 7.5.
 //
 // ASSEMBLY, before the cover is screwed onto the board: rod pressed and glued into the
-// cap, magnet pressed into the collar; bushing into the tube from below, against the
+// cap, magnet glued into the collar; bushing into the tube from below, against the
 // rim; spring round the tube, O-ring into the cap; rod with cap from above through the
 // bushing; cover turned over onto its caps, stop washer over the rod's end, collar
 // glued on (the spring holds it against the bushing while the glue sets).
@@ -32,7 +32,7 @@
 //
 // SENSING. A ratiometric linear Hall sensor (SOT-23, e.g. DRV5055A3, +-85 mT)
 // sits on the board's underside, exactly on the key's axis, and senses through
-// the board. An axially magnetised magnet is pressed into the collar's lower
+// the board. An axially magnetised magnet is glued into the collar's lower
 // face. Rest and bottom readings are calibrated per key; the actuation point
 // and hysteresis are set as fractions of the stroke in firmware.
 //
@@ -132,7 +132,10 @@ sens_el  = 0.55;     // element below the mounting face [unverified]
 // magnet stays in the collar's lower face, as near the sensor as before, and a printed web
 // mag_web over it takes the half millimetre, so the rod, the cap and every height above
 // stay as they were (mag_seat = 1.5, the old magnet's length)
-mag_d    = 3;
+mag_d    = 3.1;      // nominal 3, the bought ones measure 3.1 [given 2026-11-26]
+mag_c    = 0.15;     // the pocket over it: a slip fit, glued (slow epoxy) [given 2026-11-26: it
+                     // was 0.05 over a nominal 3, a press fit the magnets did not go into]
+mag_pocket = mag_d + mag_c;   // 3.25: the collar's wall 0.58 round it, printed holes come out a little small
 mag_l    = 1;
 mag_web  = 0.5;      // the collar's floor between the magnet's pocket and the rod
 mag_seat = mag_l + mag_web;   // where the rod's end sits, over the collar's lower face
@@ -239,7 +242,7 @@ assert(oring_seat < oring_cs - 0.5, "O-ring hardly stands out of its counterbore
 assert(stop_od <= bore_lo - 0.2, "stop washer rubs in the lower bore");
 assert(stop_id < pin_d && stop_id >= pin_d - 0.5, "stop washer must sit a little tight on the rod (silicone stretches)");
 assert(stop_od > bush_d + 0.8, "stop washer hardly meets the bushing's face");
-assert(mag_d <= collar_d - 1.2 && mag_seat <= collar_h - 1.5, "magnet does not fit the collar, or the rod's glued length is short");
+assert(mag_pocket <= collar_d - 1.1 && mag_seat <= collar_h - 1.5, "magnet does not fit the collar, or the rod's glued length is short");
 assert(mag_web >= 0.4, "the web over the magnet is too thin to print (two layers)");
 assert(b_bot <= sens_range, "field beyond the sensor's range at the lower stop");
 assert(sens_l / 2 < margin_n, "sensor beyond the board's edge");
@@ -271,7 +274,7 @@ module skirt() translate([0, 0, z_cu - skirt_l + dz]) difference() {
 // the printed collar: magnet pocket from below, a web over it, the rod glued in from above
 module collar() translate([0, 0, z_cb + dz]) difference() {
     cylinder(d = collar_d, h = collar_h);
-    translate([0, 0, -0.01]) cylinder(d = mag_d + 0.05, h = mag_l + 0.01);
+    translate([0, 0, -0.01]) cylinder(d = mag_pocket, h = mag_l + 0.01);
     translate([0, 0, mag_seat]) cylinder(d = rod_d, h = collar_h);
 }
 // the steel rod: from the collar's web up into the cap

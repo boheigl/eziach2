@@ -73,8 +73,10 @@ is above the board, and **the board has no key holes**.
    the blind holes: leave the cover on its caps 1–2 days instead of 12 h. Not for the
    contacts' pad board (`../assembly/spec.md`, Contacts): its glue line must stay 0.1 mm
    thin and stiff; there epoxy, or a double-sided tape no thicker than about 0.1 mm.
-3. Press the magnet into the collar from below; every key with the same pole down
-   (check against a marked magnet).
+3. Glue the magnet into the collar from below (a little slow epoxy in the pocket, the
+   magnet pushed up against the web, the excess wiped off its face); every key with the
+   same pole down (check against a marked magnet). [2026-11-26: the magnets measure ⌀3.1,
+   the pocket is ⌀3.25, a slip fit; it was ⌀3.05, a press fit they did not go into.]
 4. Cover upside down: the bushing into the tube from below, up against the rim.
 5. Cover the right way up: the spring round the tube onto its seat, the O-ring into
    the cap's counterbore, the rod with the cap from above through the bushing.
@@ -110,7 +112,7 @@ ends at the steel rod. So the key is pulled apart [estimated, to try on the prot
    seconds only: the rod carries the heat towards the magnet, and N52 loses strength for
    good above about 80 °C. The collar's 0.5 web between the rod's end and the magnet
    [2026-11-23] holds much of it back (PETG conducts heat poorly; not computed); the
-   magnet comes out with the collar and can be replaced. To take the magnet out, pierce
+   magnet comes out with the collar and can be replaced. To take the magnet out (it is glued), pierce
    the web from above (a needle or a ⌀2 pin through the rod's hole) and push it out; the
    collar is then lost. Taken apart normally, collar and magnet stay one unit.
 5. Back together: the rod up through the bushing (from below with its collar, or from
@@ -124,7 +126,7 @@ goes on sideways, but the rod's end never leaves the tube; and it would have to 
 the collar, where the magnet is, with a groove turned into every dowel pin.
 - **Sensor:** a linear ratiometric Hall sensor in SOT-23 (e.g. DRV5055A3,
   ±85 mT) sits on the board's **underside, exactly on the key's axis**, and
-  senses through the board. A magnet magnetised along its axis is pressed into
+  senses through the board. A magnet magnetised along its axis is glued into
   the collar's lower face.
 - **Stops**, both soft, so nothing clicks [given: user chose O-ring below,
   sheet washer above, 2026-11-13]. They replaced felt, which sets over time and

@@ -105,8 +105,8 @@ plate's printer model id empty, which the GUI fills.
 (`plate_x2d.3mf`, not the fit test) with `PRINTING.txt`, the instructions, into `build/key_proto/key_proto_x2d.zip`.
 
 **Fit test first** (`fit_test.3mf`, a few minutes): the press fits are the bushing's seat
-⌀4.95 (bushing D5), the rod's socket in the cap ⌀2.95 (rod ⌀3) and the magnet's pocket
-⌀3.05 (magnet ⌀3); the bushing slides in from below through ⌀5.1, and the rim over the
+⌀4.95 (bushing D5), the rod's socket in the cap ⌀2.95 (rod ⌀3); the magnet's pocket ⌀3.25
+(magnet ⌀3.1 measured) is a slip fit, glued; the bushing slides in from below through ⌀5.1, and the rim over the
 seat (0.8, inward 0.8) prints as a short overhang ring that may sag into the seat. Printed
 holes come out small in PETG: if the bushing or rod does not go in, raise the slicer's
 X-Y hole compensation (0.05 … 0.1 mm) rather than the model, and print the test again; if
